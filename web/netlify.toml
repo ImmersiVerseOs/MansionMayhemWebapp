@@ -1,0 +1,29 @@
+# Netlify configuration for Mansion Mayhem
+
+[build]
+  publish = "."
+  command = ""
+
+[[redirects]]
+  from = "/"
+  to = "/landing.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Enable CORS for Supabase
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Your FaceCast - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-success: #10B981;
+      --color-error: #EF4444;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(192, 78, 99, 0.1) 0%, transparent 40%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-image {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-logo-image:hover {
+      transform: scale(1.1);
+    }
+
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .main-container {
+      min-height: 100vh;
+      padding: 8rem 2rem 4rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .header-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .page-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    /* METHOD SELECTION */
+    .method-selection {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .method-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem 2rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .method-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient-gold);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .method-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
+    }
+    
+    .method-card:hover::before {
+      opacity: 0.05;
+    }
+    
+    .method-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
+    }
+    
+    .method-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--color-gold);
+    }
+    
+    .method-description {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    
+    .method-features {
+      list-style: none;
+      text-align: left;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      display: inline-block;
+    }
+    
+    .method-features li {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+    
+    /* UPLOAD SECTION (Hidden initially) */
+    .upload-section,
+    .cameos-section {
+      display: none;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .upload-section.active,
+    .cameos-section.active {
+      display: block;
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 0.5rem;
+    }
+    
+    .upload-progress {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+    
+    .progress-number {
+      font-size: 2rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .progress-bar-container {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50px;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: var(--gradient-gold);
+      border-radius: 50px;
+      transition: width 0.5s ease;
+    }
+    
+    .upload-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+    }
+    
+    .drop-zone {
+      border: 3px dashed rgba(212, 175, 55, 0.3);
+      border-radius: 20px;
+      padding: 4rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(212, 175, 55, 0.02);
+      transition: all 0.3s;
+    }
+    
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--color-gold);
+      background: rgba(212, 175, 55, 0.05);
+      transform: scale(1.02);
+    }
+    
+    .drop-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .upload-btn {
+      padding: 1rem 2rem;
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .upload-btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .photo-card {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+      animation: scaleIn 0.3s ease-out;
+    }
+    
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .photo-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+    }
+    
+    .photo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.7));
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .photo-card:hover .photo-overlay {
+      opacity: 1;
+    }
+    
+    .remove-btn {
+      background: var(--color-error);
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+    }
+    
+    /* CAMEOS SECTION */
+    .cameos-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+    }
+    
+    .cameos-info {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .cameos-info h3 {
+      color: var(--color-gold);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .consent-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .consent-text {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--color-gold);
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 0.25rem;
+    }
+    
+    .checkbox-group label {
+      cursor: pointer;
+      line-height: 1.6;
+    }
+    
+    /* BUTTONS */
+    .page-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+    
+    .btn {
+      padding: 1rem 2.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      flex: 1;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--color-gold);
+      color: var(--color-gold);
+    }
+    
+    @media (max-width: 768px) {
+      .page-title { font-size: 2rem; }
+      .method-selection { grid-template-columns: 1fr; }
+      .upload-card, .cameos-card { padding: 2rem 1.5rem; }
+      .page-actions { flex-direction: column; }
+      .upload-progress { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <a href="../index.html" class="nav-logo">
+      <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+      <span class="nav-logo-text">MANSION MAYHEM</span>
+    </a>
+    <div style="color: rgba(255,255,255,0.6); font-size: 0.875rem;">FaceCast Setup</div>
+  </nav>
+  
+  <div class="main-container">
+    <div class="page-header">
+      <div class="header-icon">🎭</div>
+      <h1 class="page-title">Create Your FaceCast</h1>
+      <p class="page-subtitle">
+        Choose how you want to create your digital character for AI-generated episodes.
+      </p>
+    </div>
+    
+    <!-- METHOD SELECTION -->
+    <div class="method-selection" id="methodSelection">
+      <div class="method-card" onclick="selectMethod('photos')">
+        <div class="method-icon">📤</div>
+        <h3 class="method-title">Upload Photos</h3>
+        <p class="method-description">Upload 5-20 photos of yourself. We'll create your FaceCast from these images.</p>
+        <ul class="method-features">
+          <li>✓ Full control over source images</li>
+          <li>✓ Upload at your own pace</li>
+          <li>✓ Standard processing (24-48 hours)</li>
+        </ul>
+      </div>
+      
+      <div class="method-card" onclick="selectMethod('cameos')">
+        <div class="method-icon">🎬</div>
+        <h3 class="method-title">Sora Cameos</h3>
+        <p class="method-description">Grant ImmersiVerse OS permission to use your existing Sora Cameos character.</p>
+        <ul class="method-features">
+          <li>✓ Instant setup (if you have Cameos)</li>
+          <li>✓ Professional quality</li>
+          <li>✓ Already trained on your likeness</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- PHOTO UPLOAD SECTION -->
+    <div class="upload-section" id="uploadSection">
+      <div class="section-header">
+        <h2 class="section-title">Upload Your Photos</h2>
+        <p style="color: rgba(255,255,255,0.7);">Upload 5-20 clear photos from different angles</p>
+      </div>
+      
+      <div class="upload-progress">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div class="progress-number" id="photoCount">0</div>
+          <div>
+            <div style="font-weight: 600;">Photos</div>
+            <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Min 5 required</div>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-weight: 600;" id="progressStatus">Getting started</div>
+          <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">More photos = better AI</div>
+        </div>
+      </div>
+      
+      <div class="upload-card">
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-icon">📤</div>
+          <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-gold);">Drag & Drop Photos</h3>
+          <p style="color: rgba(255,255,255,0.6); margin-bottom: 1.5rem;">or</p>
+          <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+            <span>📁</span><span>Browse Files</span>
+          </button>
+          <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
+        </div>
+        
+        <div class="photos-grid" id="photosGrid"></div>
+      </div>
+      
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="goBack()">
+          <span>←</span><span>Back to Options</span>
+        </button>
+        <button class="btn btn-primary" id="photosContinueBtn" disabled onclick="continueFromPhotos()">
+          <span>Continue to Consent</span><span>→</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- SORA CAMEOS SECTION -->
+    <div class="cameos-section" id="cameosSection">
+      <div class="section-header">
+        <h2 class="section-title">Sora Cameos Integration</h2>
+        <p style="color: rgba(255,255,255,0.7);">Connect your existing Sora Cameos character</p>
+      </div>
+      
+      <div class="cameos-card">
+        <div class="cameos-info">
+          <h3>🎬 What is Sora Cameos?</h3>
+          <p style="color: rgba(255,255,255,0.8); line-height: 1.6;">
+            Sora Cameos is OpenAI's feature that lets you create personalized videos using your likeness. 
+            If you've already set up a Cameos character, we can use that instead of uploading new photos.
+          </p>
+        </div>
+        
+        <div class="consent-box">
+          <h3 style="color: var(--color-gold); margin-bottom: 1.5rem;">Connect Your Sora Cameos</h3>
+          
+          <!-- Sora Username Input -->
+          <div style="margin-bottom: 2rem;">
+            <label for="soraUsername" style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: rgba(255,255,255,0.9);">
+              Your Sora Username *
+            </label>
+            <input 
+              type="text" 
+              id="soraUsername" 
+              placeholder="e.g., john.smith or johnsmith123" 
+              style="width: 100%; padding: 1rem; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 1rem; transition: all 0.3s;"
+              oninput="checkCameosConsent()"
+              onfocus="this.style.borderColor='var(--color-gold)'"
+              onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
+            >
+            <p style="font-size: 0.875rem; color: rgba(255,255,255,0.6); margin-top: 0.5rem;">
+              This is your Sora/OpenAI account username
+            </p>
+          </div>
+          
+          <div class="consent-text">
+            By checking the boxes below, you authorize <strong>immersiverseos</strong> (the Sora account for ImmersiVerse OS, operator of Mansion Mayhem) 
+            to access and use your Sora Cameos character for the purpose of generating AI video content within the 
+            Mansion Mayhem platform. This includes:
+            <ul style="margin: 1rem 0; padding-left: 2rem; line-height: 1.8;">
+              <li>Accessing your Cameos character data from OpenAI</li>
+              <li>Using your likeness in AI-generated reality TV episodes</li>
+              <li>Creating video content featuring your character interacting with other cast members</li>
+              <li>Distributing this content on the Mansion Mayhem platform and partner platforms</li>
+            </ul>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="cameosConsent1" onchange="checkCameosConsent()">
+            <label for="cameosConsent1">
+              I confirm that I have an active <strong>Sora Cameos</strong> character associated with the username provided above.
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="cameosConsent2" onchange="checkCameosConsent()">
+            <label for="cameosConsent2">
+              I have <strong>added "immersiverseos" as an authorized caster</strong> in my Sora Cameos settings, 
+              granting permission for this organization to use my character.
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="cameosConsent3" onchange="checkCameosConsent()">
+            <label for="cameosConsent3">
+              I understand that by granting this permission, <strong>immersiverseos</strong> will be able to cast my Cameos character 
+              in AI-generated video scenes as part of the Mansion Mayhem experience.
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="cameosConsent4" onchange="checkCameosConsent()">
+            <label for="cameosConsent4">
+              I am 18 years of age or older and I have the legal right to grant this permission. 
+              I agree to the <a href="terms.html" style="color: var(--color-gold);">Terms of Service</a> and 
+              <a href="consent.html" style="color: var(--color-gold);">Content Rights Agreement</a>.
+            </label>
+          </div>
+        </div>
+        
+        <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <h4 style="color: var(--color-gold); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>ℹ️</span>
+            <span>How to Add immersiverseos as a Caster</span>
+          </h4>
+          <ol style="color: rgba(255,255,255,0.8); line-height: 1.8; padding-left: 1.5rem;">
+            <li>Go to your <strong>Sora Cameos settings</strong> at sora.com/cameos</li>
+            <li>Navigate to <strong>"Authorized Casters"</strong> or <strong>"Permissions"</strong></li>
+            <li>Click <strong>"Add Organization"</strong> or <strong>"Grant Access"</strong></li>
+            <li>Enter exactly: <strong style="color: var(--color-gold); background: rgba(255,255,255,0.1); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace;">immersiverseos</strong> (all lowercase, one word)</li>
+            <li>Confirm and save your settings</li>
+            <li>Return here and check the box above to verify</li>
+          </ol>
+        </div>
+        
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem;">
+          <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+            <strong>✓ You maintain ownership:</strong> You retain all rights to your Cameos character. This is just 
+            permission to use it within Mansion Mayhem. You can revoke access at any time in your account settings.
+          </p>
+        </div>
+      </div>
+      
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="goBack()">
+          <span>←</span><span>Back to Options</span>
+        </button>
+        <button class="btn btn-primary" id="cameosContinueBtn" disabled onclick="continueFromCameos()">
+          <span>Connect & Continue</span><span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let photos = [];
+    let selectedMethod = null;
+    const MIN = 5, MAX = 20, MAX_SIZE = 5 * 1024 * 1024;
+    
+    function selectMethod(method) {
+      selectedMethod = method;
+      document.getElementById('methodSelection').style.display = 'none';
+      
+      if (method === 'photos') {
+        document.getElementById('uploadSection').classList.add('active');
+      } else {
+        document.getElementById('cameosSection').classList.add('active');
+      }
+    }
+    
+    function goBack() {
+      document.getElementById('methodSelection').style.display = 'grid';
+      document.getElementById('uploadSection').classList.remove('active');
+      document.getElementById('cameosSection').classList.remove('active');
+      selectedMethod = null;
+    }
+    
+    // PHOTO UPLOAD LOGIC
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const grid = document.getElementById('photosGrid');
+    
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      handleFiles(Array.from(e.dataTransfer.files));
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(Array.from(e.target.files));
+      fileInput.value = '';
+    });
+    
+    function handleFiles(files) {
+      files.forEach(file => {
+        if (!file.type.match('image.*')) return alert(file.name + ' is not an image');
+        if (file.size > MAX_SIZE) return alert(file.name + ' too large (max 5MB)');
+        if (photos.length >= MAX) return alert('Max 20 photos');
+        
+        const reader = new FileReader();
+        reader.onload = (e) => addPhoto(e.target.result, file.name);
+        reader.readAsDataURL(file);
+      });
+    }
+    
+    function addPhoto(url, name) {
+      const id = Date.now() + Math.random();
+      photos.push({ id, url, name });
+      
+      const card = document.createElement('div');
+      card.className = 'photo-card';
+      card.dataset.id = id;
+      card.innerHTML = `
+        <img src="${url}" alt="${name}">
+        <div class="photo-overlay">
+          <button class="remove-btn" onclick="removePhoto(${id})">🗑️ Remove</button>
+        </div>
+      `;
+      grid.appendChild(card);
+      updateProgress();
+    }
+    
+    function removePhoto(id) {
+      photos = photos.filter(p => p.id !== id);
+      const card = document.querySelector(`[data-id="${id}"]`);
+      if (card) {
+        card.style.opacity = '0';
+        setTimeout(() => {
+          card.remove();
+          updateProgress();
+        }, 300);
+      }
+    }
+    
+    function updateProgress() {
+      const count = photos.length;
+      document.getElementById('photoCount').textContent = count;
+      document.getElementById('progressBar').style.width = Math.min((count/MIN)*100, 100) + '%';
+      document.getElementById('progressStatus').textContent = 
+        count < MIN ? `${MIN-count} more needed` : count < 10 ? 'Good!' : 'Excellent!';
+      document.getElementById('photosContinueBtn').disabled = count < MIN;
+    }
+    
+    function continueFromPhotos() {
+      if (photos.length < MIN) return alert('Upload at least 5 photos');
+      sessionStorage.setItem('faceCastMethod', 'photos');
+      sessionStorage.setItem('facecastPhotos', JSON.stringify(photos));
+      window.location.href = 'facecast-consent.html';
+    }
+    
+    // CAMEOS CONSENT LOGIC
+    function checkCameosConsent() {
+      const soraUsername = document.getElementById('soraUsername').value.trim();
+      const consent1 = document.getElementById('cameosConsent1').checked;
+      const consent2 = document.getElementById('cameosConsent2').checked;
+      const consent3 = document.getElementById('cameosConsent3').checked;
+      const consent4 = document.getElementById('cameosConsent4').checked;
+      
+      // Enable button only if username is provided AND all 4 checkboxes are checked
+      const isValid = soraUsername.length > 0 && consent1 && consent2 && consent3 && consent4;
+      document.getElementById('cameosContinueBtn').disabled = !isValid;
+    }
+    
+    function continueFromCameos() {
+      const soraUsername = document.getElementById('soraUsername').value.trim();
+      
+      if (!soraUsername) {
+        alert('Please enter your Sora username');
+        return;
+      }
+      
+      // Basic validation
+      if (soraUsername.length < 3) {
+        alert('Please enter a valid username (at least 3 characters)');
+        return;
+      }
+      
+      sessionStorage.setItem('faceCastMethod', 'cameos');
+      sessionStorage.setItem('soraUsername', soraUsername);
+      sessionStorage.setItem('cameosConsent', 'granted');
+      sessionStorage.setItem('cameosAuthorizedCaster', 'immersiverseos');
+      
+      // In production, this would:
+      // 1. Verify the Sora username exists via OpenAI API
+      // 2. Confirm "immersiverseos" is listed as authorized caster for this username
+      // 3. Retrieve the Cameos character data
+      // 4. Save the connection to database
+      
+      document.getElementById('cameosContinueBtn').innerHTML = '<span>Verifying Access...</span>';
+      
+      setTimeout(() => {
+        window.location.href = 'facecast-consent.html';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

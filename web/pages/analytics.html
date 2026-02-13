@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics Dashboard - Mansion Mayhem</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+</head>
+<body style="background: var(--color-background);">
+  <div style="max-width: var(--max-width-7xl); margin: 0 auto; padding: var(--space-3xl) var(--space-xl);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3xl);">
+      <div>
+        <h1 style="font-size: var(--font-4xl); font-weight: var(--font-bold); margin-bottom: var(--space-sm);">Platform Analytics</h1>
+        <p style="color: var(--color-text-secondary);">Performance metrics and insights</p>
+      </div>
+      <div style="display: flex; gap: var(--space-md);">
+        <select style="min-width: 150px;">
+          <option>Last 7 Days</option>
+          <option>Last 30 Days</option>
+          <option>Last 90 Days</option>
+          <option>All Time</option>
+        </select>
+        <a href="director-console.html" class="btn btn-ghost">← Back</a>
+      </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-xl); margin-bottom: var(--space-3xl);">
+      <div class="card">
+        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: var(--space-lg);">
+          <div style="flex: 1;">
+            <div style="color: var(--color-text-secondary); font-size: var(--font-sm); margin-bottom: var(--space-sm);">Total Views</div>
+            <div style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-gold);">342K</div>
+            <div style="font-size: var(--font-sm); color: var(--color-success); margin-top: var(--space-xs);">+18.3% vs last week</div>
+          </div>
+          <div style="font-size: 32px;">📊</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-lg);">
+          <div style="flex: 1;">
+            <div style="color: var(--color-text-secondary); font-size: var(--font-sm); margin-bottom: var(--space-sm);">Watch Time</div>
+            <div style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-gold);">128K hrs</div>
+            <div style="font-size: var(--font-sm); color: var(--color-success); margin-top: var(--space-xs);">+22.1% vs last week</div>
+          </div>
+          <div style="font-size: 32px;">⏱️</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-lg);">
+          <div style="flex: 1;">
+            <div style="color: var(--color-text-secondary); font-size: var(--font-sm); margin-bottom: var(--space-sm);">Revenue</div>
+            <div style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-gold);">$24.5K</div>
+            <div style="font-size: var(--font-sm); color: var(--color-success); margin-top: var(--space-xs);">+15.7% vs last week</div>
+          </div>
+          <div style="font-size: 32px;">💰</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-lg);">
+          <div style="flex: 1;">
+            <div style="color: var(--color-text-secondary); font-size: var(--font-sm); margin-bottom: var(--space-sm);">Engagement Rate</div>
+            <div style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-gold);">67%</div>
+            <div style="font-size: var(--font-sm); color: var(--color-success); margin-top: var(--space-xs);">+4.2% vs last week</div>
+          </div>
+          <div style="font-size: 32px;">❤️</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Charts Placeholder -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-xl); margin-bottom: var(--space-3xl);">
+      <div class="card">
+        <h3 style="margin-bottom: var(--space-lg);">Views Over Time</h3>
+        <div style="height: 300px; background: var(--color-background); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--color-text-secondary);">
+          📈 Chart: Daily views for the past 30 days
+        </div>
+      </div>
+      
+      <div class="card">
+        <h3 style="margin-bottom: var(--space-lg);">Traffic Sources</h3>
+        <div style="height: 300px; background: var(--color-background); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--color-text-secondary);">
+          🥧 Chart: Direct, Social, Search, Other
+        </div>
+      </div>
+    </div>
+    
+    <!-- Top Content -->
+    <div class="card" style="margin-bottom: var(--space-3xl);">
+      <h2 style="font-size: var(--font-2xl); font-weight: var(--font-bold); color: var(--color-gold); margin-bottom: var(--space-xl);">Top Performing Episodes</h2>
+      
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--color-border);">
+            <th style="padding: var(--space-lg); text-align: left;">Episode</th>
+            <th style="padding: var(--space-lg); text-align: left;">Views</th>
+            <th style="padding: var(--space-lg); text-align: left;">Watch Time</th>
+            <th style="padding: var(--space-lg); text-align: left;">Engagement</th>
+            <th style="padding: var(--space-lg); text-align: left;">Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--color-border);">
+            <td style="padding: var(--space-lg);">Week 3: The Betrayal</td>
+            <td style="padding: var(--space-lg);">22.3K</td>
+            <td style="padding: var(--space-lg);">8.2K hrs</td>
+            <td style="padding: var(--space-lg);">72%</td>
+            <td style="padding: var(--space-lg); color: var(--color-gold);">$1,847</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--color-border);">
+            <td style="padding: var(--space-lg);">Week 2: First Confrontation</td>
+            <td style="padding: var(--space-lg);">18.7K</td>
+            <td style="padding: var(--space-lg);">6.9K hrs</td>
+            <td style="padding: var(--space-lg);">68%</td>
+            <td style="padding: var(--space-lg); color: var(--color-gold);">$1,542</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--space-lg);">Week 4: Secrets Revealed</td>
+            <td style="padding: var(--space-lg);">19.8K</td>
+            <td style="padding: var(--space-lg);">7.1K hrs</td>
+            <td style="padding: var(--space-lg);">71%</td>
+            <td style="padding: var(--space-lg); color: var(--color-gold);">$1,623</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Top Cast Members -->
+    <div class="card">
+      <h2 style="font-size: var(--font-2xl); font-weight: var(--font-bold); color: var(--color-gold); margin-bottom: var(--space-xl);">Top Performing Cast Members</h2>
+      
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--color-border);">
+            <th style="padding: var(--space-lg); text-align: left;">Cast Member</th>
+            <th style="padding: var(--space-lg); text-align: left;">Screen Time</th>
+            <th style="padding: var(--space-lg); text-align: left;">Episodes</th>
+            <th style="padding: var(--space-lg); text-align: left;">Engagement</th>
+            <th style="padding: var(--space-lg); text-align: left;">Earnings</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--color-border);">
+            <td style="padding: var(--space-lg);">Sarah Chen (The Villain)</td>
+            <td style="padding: var(--space-lg);">28:34</td>
+            <td style="padding: var(--space-lg);">31</td>
+            <td style="padding: var(--space-lg);">8.2K likes</td>
+            <td style="padding: var(--space-lg); color: var(--color-gold);">$2,089</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--color-border);">
+            <td style="padding: var(--space-lg);">Alex Rodriguez (The Queen)</td>
+            <td style="padding: var(--space-lg);">24:12</td>
+            <td style="padding: var(--space-lg);">24</td>
+            <td style="padding: var(--space-lg);">6.8K likes</td>
+            <td style="padding: var(--space-lg); color: var(--color-gold);">$1,742</td>
+          </tr>
+          <tr>
+            <td style="padding: var(--space-lg);">Marcus Thompson (The Strategist)</td>
+            <td style="padding: var(--space-lg);">18:45</td>
+            <td style="padding: var(--space-lg);">18</td>
+            <td style="padding: var(--space-lg);">5.2K likes</td>
+            <td style="padding: var(--space-lg); color: var(--color-gold);">$1,234</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

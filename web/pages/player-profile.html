@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Profile | Mansion Mayhem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111;
+      --bg-elevated: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #fff;
+      --text-dim: #888;
+      --gold: #d4af37;
+      --purple: #8b5cf6;
+      --success: #4caf50;
+      --danger: #e74c3c;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .back-button {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 100;
+      padding: 12px 24px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .back-button:hover {
+      border-color: var(--gold);
+      transform: translateX(-4px);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 80px 20px 40px;
+    }
+
+    .profile-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .profile-avatar-large {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      margin: 0 auto 24px;
+      border: 6px solid var(--border);
+      box-shadow: 0 0 60px rgba(212, 175, 55, 0.4);
+    }
+
+    .profile-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 56px;
+      color: var(--gold);
+      margin-bottom: 12px;
+      text-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+    }
+
+    .profile-archetype {
+      display: inline-block;
+      padding: 8px 20px;
+      background: rgba(212, 175, 55, 0.1);
+      border: 2px solid var(--gold);
+      border-radius: 50px;
+      font-size: 16px;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .profile-bio {
+      font-size: 18px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      max-width: 700px;
+      margin: 0 auto 32px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .badge-active {
+      background: rgba(76, 175, 80, 0.2);
+      color: var(--success);
+      border: 2px solid var(--success);
+    }
+
+    .badge-eliminated {
+      background: rgba(231, 76, 60, 0.2);
+      color: var(--danger);
+      border: 2px solid var(--danger);
+    }
+
+    .stats-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3);
+    }
+
+    .stat-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .stat-value {
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .content-section {
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      color: var(--gold);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 12px 28px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab:hover, .tab.active {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.1);
+      color: var(--gold);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .voice-notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 24px;
+    }
+
+    .voice-note-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+
+    .voice-note-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 4px 24px rgba(212, 175, 55, 0.2);
+    }
+
+    .voice-note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .voice-note-date {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .voice-note-duration {
+      font-size: 13px;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .audio-player {
+      background: var(--bg-elevated);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .play-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #ffd700);
+      border: none;
+      color: var(--bg);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+    }
+
+    .waveform {
+      flex: 1;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .wave-bar {
+      flex: 1;
+      background: rgba(212, 175, 55, 0.3);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .voice-note-caption {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .alliance-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .alliance-badge {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s;
+    }
+
+    .alliance-badge:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+
+    .alliance-icon {
+      font-size: 24px;
+    }
+
+    .alliance-name {
+      font-weight: 600;
+    }
+
+    .relationship-graph {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+    }
+
+    .relationship-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .relationship-item {
+      background: var(--bg-elevated);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s;
+    }
+
+    .relationship-item:hover {
+      border-color: var(--gold);
+    }
+
+    .relationship-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 12px;
+      border: 2px solid var(--border);
+    }
+
+    .relationship-name {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .relationship-type {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .timeline {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .timeline-item {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      margin-left: 40px;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .timeline-item:hover {
+      border-color: var(--gold);
+      transform: translateX(4px);
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 4px solid var(--bg);
+    }
+
+    .timeline-item::after {
+      content: "";
+      position: absolute;
+      left: -32px;
+      top: 0;
+      bottom: -24px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item:last-child::after {
+      display: none;
+    }
+
+    .timeline-date {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .timeline-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .timeline-description {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-icon {
+      font-size: 60px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    @media (max-width: 768px) {
+      .profile-name { font-size: 36px; }
+      .stats-dashboard { grid-template-columns: 1fr; }
+      .voice-notes-grid { grid-template-columns: 1fr; }
+      .relationship-grid { grid-template-columns: 1fr 1fr; }
+      .timeline-item { margin-left: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="cast-roster.html" class="back-button">← Back to Roster</a>
+
+  <div class="container">
+    <!-- Profile Header -->
+    <div class="profile-header" id="profileHeader">
+      <div class="profile-avatar-large">?</div>
+      <h1 class="profile-name">Loading...</h1>
+      <div class="profile-archetype">Loading...</div>
+      <div class="status-badge badge-active">Loading...</div>
+      <p class="profile-bio">Loading player information...</p>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div class="stats-dashboard" id="statsDashboard">
+      <!-- Stats will be loaded here -->
+    </div>
+
+    <!-- Tabs -->
+    <div class="content-section">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('voice-notes')">🎙️ Voice Notes</button>
+        <button class="tab" onclick="switchTab('alliances')">🤝 Alliances</button>
+        <button class="tab" onclick="switchTab('relationships')">💫 Relationships</button>
+        <button class="tab" onclick="switchTab('timeline')">📅 Timeline</button>
+      </div>
+
+      <!-- Voice Notes Tab -->
+      <div class="tab-content active" id="tab-voice-notes">
+        <h2 class="section-title">Voice Notes</h2>
+        <div class="voice-notes-grid" id="voiceNotesGrid">
+          <div class="empty-state">
+            <div class="empty-icon">⏳</div>
+            <div>Loading voice notes...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alliances Tab -->
+      <div class="tab-content" id="tab-alliances">
+        <h2 class="section-title">Alliance Memberships</h2>
+        <div class="alliance-badges" id="allianceBadges">
+          <div class="empty-state">
+            <div class="empty-icon">⏳</div>
+            <div>Loading alliances...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Relationships Tab -->
+      <div class="tab-content" id="tab-relationships">
+        <h2 class="section-title">Relationship Network</h2>
+        <div class="relationship-graph">
+          <div class="relationship-grid" id="relationshipGrid">
+            <div class="empty-state" style="grid-column: 1/-1;">
+              <div class="empty-icon">⏳</div>
+              <div>Loading relationships...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Tab -->
+      <div class="tab-content" id="tab-timeline">
+        <h2 class="section-title">Episode Timeline</h2>
+        <div class="timeline" id="timelineContainer">
+          <div class="empty-state">
+            <div class="empty-icon">⏳</div>
+            <div>Loading timeline...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabaseClient as supabase } from '../js/supabase-module.js'
+    import { requireAuth } from '../js/auth.js'
+
+    let castMember = null
+    let currentAudio = null
+
+    // Get cast member ID from URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const castId = urlParams.get('cast')
+
+    // Initialize
+    async function init() {
+      const user = await requireAuth()
+      if (!user) return
+
+      if (!castId) {
+        alert('No cast member specified')
+        window.location.href = 'cast-roster.html'
+        return
+      }
+
+      await loadProfile()
+      await loadStats()
+      await loadVoiceNotes()
+      await loadAlliances()
+      await loadRelationships()
+      await loadTimeline()
+    }
+
+    // Load profile
+    async function loadProfile() {
+      try {
+        const { data, error } = await supabase
+          .from('cast_members')
+          .select('*')
+          .eq('id', castId)
+          .single()
+
+        if (error) throw error
+        castMember = data
+
+        // Update header
+        const header = document.getElementById('profileHeader')
+        const archetypeEmoji = getArchetypeEmoji(data.archetype)
+
+        header.innerHTML = `
+          <div class="profile-avatar-large">
+            ${data.display_name?.charAt(0).toUpperCase() || '?'}
+          </div>
+          <h1 class="profile-name">${data.display_name || data.full_name || 'Anonymous'}</h1>
+          ${data.archetype ? `<div class="profile-archetype">${archetypeEmoji} ${formatArchetype(data.archetype)}</div>` : ''}
+          <div class="status-badge badge-${data.status === 'active' ? 'active' : 'eliminated'}">
+            ${data.status === 'active' ? '🟢 Active' : '🔴 Eliminated'}
+          </div>
+          ${data.bio ? `<p class="profile-bio">${data.bio}</p>` : ''}
+        `
+
+      } catch (error) {
+        console.error('Error loading profile:', error)
+        alert('Failed to load player profile')
+      }
+    }
+
+    // Load stats
+    async function loadStats() {
+      // Count alliances
+      const { count: allianceCount } = await supabase
+        .from('mm_alliance_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('cast_member_id', castId)
+
+      // Count voice notes
+      const { count: voiceNoteCount } = await supabase
+        .from('voice_notes')
+        .select('*', { count: 'exact', head: true })
+        .eq('cast_member_id', castId)
+        .eq('moderation_status', 'approved')
+
+      // Count scenario responses
+      const { count: responseCount } = await supabase
+        .from('scenario_responses')
+        .select('*', { count: 'exact', head: true })
+        .eq('responder_cast_id', castId)
+
+      const dashboard = document.getElementById('statsDashboard')
+      dashboard.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-value">${castMember.drama_score || 0}</div>
+          <div class="stat-label">Drama Score</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👑</div>
+          <div class="stat-value">${castMember.influence_score || 0}</div>
+          <div class="stat-label">Influence</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📹</div>
+          <div class="stat-value">${castMember.screen_time_score || 'N/A'}</div>
+          <div class="stat-label">Screen Time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎙️</div>
+          <div class="stat-value">${voiceNoteCount || 0}</div>
+          <div class="stat-label">Voice Notes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div class="stat-value">${responseCount || 0}</div>
+          <div class="stat-label">Responses</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🤝</div>
+          <div class="stat-value">${allianceCount || 0}</div>
+          <div class="stat-label">Alliances</div>
+        </div>
+      `
+    }
+
+    // Load voice notes
+    async function loadVoiceNotes() {
+      try {
+        const { data, error } = await supabase
+          .from('voice_notes')
+          .select('*')
+          .eq('cast_member_id', castId)
+          .eq('moderation_status', 'approved')
+          .order('created_at', { ascending: false })
+          .limit(20)
+
+        if (error) throw error
+
+        const grid = document.getElementById('voiceNotesGrid')
+
+        if (!data || data.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1/-1;">
+              <div class="empty-icon">🎙️</div>
+              <div>No voice notes yet</div>
+            </div>
+          `
+          return
+        }
+
+        grid.innerHTML = data.map(note => `
+          <div class="voice-note-card">
+            <div class="voice-note-header">
+              <span class="voice-note-date">${formatDate(note.created_at)}</span>
+              <span class="voice-note-duration">${note.duration || 0}s</span>
+            </div>
+            <div class="audio-player">
+              <button class="play-btn" onclick="playAudio('${note.audio_url}', this)">▶</button>
+              <div class="waveform">
+                ${generateWaveform()}
+              </div>
+            </div>
+            ${note.caption ? `<p class="voice-note-caption">${note.caption}</p>` : ''}
+          </div>
+        `).join('')
+
+      } catch (error) {
+        console.error('Error loading voice notes:', error)
+      }
+    }
+
+    // Load alliances
+    async function loadAlliances() {
+      try {
+        const { data, error } = await supabase
+          .from('mm_alliance_members')
+          .select('*, mm_alliances(alliance_name, status)')
+          .eq('cast_member_id', castId)
+
+        if (error) throw error
+
+        const container = document.getElementById('allianceBadges')
+
+        if (!data || data.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">🤝</div>
+              <div>No alliances yet</div>
+            </div>
+          `
+          return
+        }
+
+        container.innerHTML = data.map(member => `
+          <div class="alliance-badge">
+            <span class="alliance-icon">🤝</span>
+            <span class="alliance-name">${member.mm_alliances?.alliance_name || 'Alliance'}</span>
+          </div>
+        `).join('')
+
+      } catch (error) {
+        console.error('Error loading alliances:', error)
+      }
+    }
+
+    // Load relationships
+    async function loadRelationships() {
+      try {
+        // Get relationships where this cast member is involved
+        const { data, error } = await supabase
+          .from('mm_relationship_edges')
+          .select('*, cast_member_a:cast_members!cast_member_a_id(id, display_name), cast_member_b:cast_members!cast_member_b_id(id, display_name)')
+          .or(`cast_member_a_id.eq.${castId},cast_member_b_id.eq.${castId}`)
+          .limit(12)
+
+        if (error) throw error
+
+        const grid = document.getElementById('relationshipGrid')
+
+        if (!data || data.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1/-1;">
+              <div class="empty-icon">💫</div>
+              <div>No relationships tracked yet</div>
+            </div>
+          `
+          return
+        }
+
+        grid.innerHTML = data.map(rel => {
+          const otherMember = rel.cast_member_a_id === castId ? rel.cast_member_b : rel.cast_member_a
+          return `
+            <div class="relationship-item">
+              <div class="relationship-avatar">
+                ${otherMember.display_name?.charAt(0).toUpperCase() || '?'}
+              </div>
+              <div class="relationship-name">${otherMember.display_name}</div>
+              <div class="relationship-type">${rel.relationship_type || 'Connected'}</div>
+            </div>
+          `
+        }).join('')
+
+      } catch (error) {
+        console.error('Error loading relationships:', error)
+      }
+    }
+
+    // Load timeline
+    async function loadTimeline() {
+      try {
+        // Get episode appearances (simplified - would need episode_cast or similar table)
+        const timeline = [
+          { date: castMember.created_at, title: 'Joined Mansion Mayhem', description: 'Entered the game as a cast member' }
+        ]
+
+        const container = document.getElementById('timelineContainer')
+
+        if (timeline.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📅</div>
+              <div>No timeline events yet</div>
+            </div>
+          `
+          return
+        }
+
+        container.innerHTML = timeline.map(event => `
+          <div class="timeline-item">
+            <div class="timeline-date">${formatDate(event.date)}</div>
+            <div class="timeline-title">${event.title}</div>
+            <div class="timeline-description">${event.description}</div>
+          </div>
+        `).join('')
+
+      } catch (error) {
+        console.error('Error loading timeline:', error)
+      }
+    }
+
+    // Switch tab
+    window.switchTab = function(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active')
+      })
+
+      // Remove active from all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active')
+      })
+
+      // Show selected tab content
+      document.getElementById(`tab-${tabName}`).classList.add('active')
+
+      // Add active to selected tab
+      event.target.classList.add('active')
+    }
+
+    // Play audio
+    window.playAudio = function(audioUrl, button) {
+      if (currentAudio && !currentAudio.paused && currentAudio.src === audioUrl) {
+        currentAudio.pause()
+        button.textContent = '▶'
+        return
+      }
+
+      if (currentAudio) {
+        currentAudio.pause()
+        document.querySelectorAll('.play-btn').forEach(btn => btn.textContent = '▶')
+      }
+
+      currentAudio = new Audio(audioUrl)
+      currentAudio.addEventListener('ended', () => {
+        button.textContent = '▶'
+      })
+
+      button.textContent = '⏸'
+      currentAudio.play().catch(error => {
+        console.error('Playback error:', error)
+        button.textContent = '▶'
+      })
+    }
+
+    // Helper functions
+    function getArchetypeEmoji(archetype) {
+      const emojis = {
+        'queen': '👑',
+        'villain': '😈',
+        'strategist': '🧠',
+        'instigator': '🔥',
+        'peacemaker': '☮️',
+        'wildcard': '🃏'
+      }
+      return emojis[archetype?.toLowerCase()] || '🎭'
+    }
+
+    function formatArchetype(archetype) {
+      if (!archetype) return ''
+      return archetype.charAt(0).toUpperCase() + archetype.slice(1)
+    }
+
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
+    }
+
+    function generateWaveform() {
+      return Array.from({length: 12}, () => {
+        const height = Math.random() * 20 + 10
+        return `<div class="wave-bar" style="height: ${height}px;"></div>`
+      }).join('')
+    }
+
+    init()
+  </script>
+</body>
+</html>

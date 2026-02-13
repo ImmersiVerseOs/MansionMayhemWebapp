@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relationship Graph | Mansion Mayhem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: rgba(26, 26, 46, 0.6);
+      --border: rgba(212, 175, 55, 0.2);
+      --text: #ffffff;
+      --text-dim: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --success: #4caf50;
+      --danger: #f44336;
+      --dark-gray: #1a1a2e;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at top, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(233, 30, 99, 0.1) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--gold), #e91e63);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+    }
+
+    .controls {
+      padding: 1.5rem 2rem;
+      background: rgba(26, 26, 46, 0.8);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      background: var(--dark-gray);
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    .filter-btn.active {
+      background: var(--gold);
+      color: var(--bg);
+      border-color: var(--gold);
+    }
+
+    .back-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-btn:hover {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    .graph-container {
+      position: relative;
+      width: calc(100% - 4rem);
+      height: 600px;
+      margin: 2rem auto;
+      background: var(--dark-gray);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .legend {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 1rem;
+      border-radius: 8px;
+      z-index: 10;
+      border: 1px solid var(--border);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: white;
+    }
+
+    .legend-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .legend-line {
+      width: 30px;
+      height: 3px;
+      border-radius: 2px;
+    }
+
+    .top-lists {
+      padding: 0 2rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .list-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .list-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .list-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+      font-size: 1.125rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 2rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 1024px) {
+      .top-lists {
+        grid-template-columns: 1fr;
+      }
+
+      .graph-container {
+        height: 450px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .title {
+        font-size: 1.75rem;
+      }
+
+      .graph-container {
+        width: calc(100% - 2rem);
+        height: 400px;
+      }
+
+      .controls {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title">🕸️ Relationship Graph</h1>
+    <p class="subtitle">Network visualization of alliances and rivalries</p>
+  </div>
+
+  <div class="controls">
+    <button class="back-btn" onclick="goBack()">
+      <span>←</span>
+      <span>Back to Lobby</span>
+    </button>
+    <button class="filter-btn active" onclick="setFilter('all')">All Relationships</button>
+    <button class="filter-btn" onclick="setFilter('alliances')">Alliances Only</button>
+    <button class="filter-btn" onclick="setFilter('rivalries')">Rivalries Only</button>
+  </div>
+
+  <div id="loadingState" class="loading">
+    <div class="spinner"></div>
+    <p style="color: var(--text-dim);">Loading graph data...</p>
+  </div>
+
+  <div id="graphContent" style="display: none;">
+    <div class="graph-container">
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-line" style="background: var(--success);"></div>
+          <span>Alliance (Positive)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-line" style="background: var(--danger);"></div>
+          <span>Rivalry (Negative)</span>
+        </div>
+        <div class="legend-item">
+          <div style="width: 30px; text-align: center;">━━</div>
+          <span>Stronger = Thicker</span>
+        </div>
+      </div>
+      <div id="graph"></div>
+    </div>
+
+    <div class="top-lists">
+      <div class="list-card">
+        <h3 class="list-title">🤝 Top Alliances</h3>
+        <div id="alliancesList">
+          <div class="empty-state" style="padding: 2rem;">No alliances yet</div>
+        </div>
+      </div>
+
+      <div class="list-card">
+        <h3 class="list-title">⚔️ Top Rivalries</h3>
+        <div id="rivalriesList">
+          <div class="empty-state" style="padding: 2rem;">No rivalries yet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="emptyState" class="empty-state" style="display: none;">
+    No relationship data yet
+    <br /><br />
+    Graph will populate as cast members form alliances and rivalries
+  </div>
+
+  <!-- Force Graph Library -->
+  <script src="https://unpkg.com/force-graph"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module">
+    import { supabaseClient as supabase } from './js/supabase-module.js'
+
+    let currentGameId = null
+    let currentFilter = 'all'
+    let graphData = { nodes: [], links: [] }
+    let allEdges = []
+    let graph = null
+
+    async function init() {
+      const urlParams = new URLSearchParams(window.location.search)
+      currentGameId = urlParams.get('game') || localStorage.getItem('currentGameId')
+
+      if (!currentGameId) {
+        alert('No game specified')
+        window.location.href = '/lobby.html'
+        return
+      }
+
+      await loadGraphData()
+    }
+
+    async function loadGraphData() {
+      try {
+        // Load relationship edges
+        const { data: edges, error: edgesError } = await supabase
+          .from('mm_relationship_edges')
+          .select(`
+            *,
+            cast_member_a:cast_members!mm_relationship_edges_cast_member_a_id_fkey(id, display_name, full_name),
+            cast_member_b:cast_members!mm_relationship_edges_cast_member_b_id_fkey(id, display_name, full_name)
+          `)
+          .eq('game_id', currentGameId)
+
+        if (edgesError) throw edgesError
+
+        allEdges = edges || []
+
+        // Build graph data
+        buildGraph()
+
+        // Load top lists
+        await loadTopLists()
+
+        // Hide loading, show content
+        document.getElementById('loadingState').style.display = 'none'
+
+        if (graphData.nodes.length === 0) {
+          document.getElementById('emptyState').style.display = 'block'
+        } else {
+          document.getElementById('graphContent').style.display = 'block'
+          renderGraph()
+        }
+
+      } catch (error) {
+        console.error('Error loading graph data:', error)
+        alert('Failed to load graph data')
+      }
+    }
+
+    function buildGraph() {
+      // Build nodes from edges
+      const nodesMap = new Map()
+
+      allEdges.forEach(edge => {
+        if (!nodesMap.has(edge.cast_member_a_id)) {
+          nodesMap.set(edge.cast_member_a_id, {
+            id: edge.cast_member_a_id,
+            name: edge.cast_member_a?.display_name || edge.cast_member_a?.full_name || 'Unknown',
+          })
+        }
+        if (!nodesMap.has(edge.cast_member_b_id)) {
+          nodesMap.set(edge.cast_member_b_id, {
+            id: edge.cast_member_b_id,
+            name: edge.cast_member_b?.display_name || edge.cast_member_b?.full_name || 'Unknown',
+          })
+        }
+      })
+
+      graphData.nodes = Array.from(nodesMap.values())
+
+      // Build links based on filter
+      graphData.links = []
+      allEdges.forEach(edge => {
+        const strength = edge.strength_score || 0
+
+        // Apply filter
+        if (currentFilter === 'alliances' && strength <= 0) return
+        if (currentFilter === 'rivalries' && strength >= 0) return
+
+        graphData.links.push({
+          source: edge.cast_member_a_id,
+          target: edge.cast_member_b_id,
+          strength: Math.abs(strength),
+          type: strength > 0 ? 'alliance' : 'rivalry',
+          value: Math.max(1, Math.abs(strength) / 10), // Scale for thickness, min 1
+        })
+      })
+    }
+
+    function renderGraph() {
+      const container = document.getElementById('graph')
+      container.innerHTML = '' // Clear previous
+
+      graph = ForceGraph()
+        (container)
+        .graphData(graphData)
+        .nodeLabel('name')
+        .nodeColor(node => '#d4af37')
+        .nodeRelSize(6)
+        .linkColor(link => link.type === 'alliance' ? '#4caf50' : '#f44336')
+        .linkWidth(link => link.value)
+        .linkDirectionalParticles(2)
+        .linkDirectionalParticleWidth(link => link.value)
+        .backgroundColor('#1a1a2e')
+        .width(container.clientWidth)
+        .height(600)
+        .d3VelocityDecay(0.3)
+    }
+
+    async function loadTopLists() {
+      // Top Alliances (positive strength)
+      const alliances = allEdges
+        .filter(e => e.strength_score > 0)
+        .sort((a, b) => b.strength_score - a.strength_score)
+        .slice(0, 10)
+
+      const alliancesList = document.getElementById('alliancesList')
+      if (alliances.length === 0) {
+        alliancesList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem; font-size: 0.875rem;">No alliances yet</div>'
+      } else {
+        alliancesList.innerHTML = alliances.map(a => `
+          <div class="list-item">
+            <span>${a.cast_member_a?.display_name || 'Unknown'} ↔️ ${a.cast_member_b?.display_name || 'Unknown'}</span>
+            <span style="color: var(--success); font-weight: 700;">+${a.strength_score}</span>
+          </div>
+        `).join('')
+      }
+
+      // Top Rivalries (negative strength)
+      const rivalries = allEdges
+        .filter(e => e.strength_score < 0)
+        .sort((a, b) => a.strength_score - b.strength_score)
+        .slice(0, 10)
+
+      const rivalriesList = document.getElementById('rivalriesList')
+      if (rivalries.length === 0) {
+        rivalriesList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem; font-size: 0.875rem;">No rivalries yet</div>'
+      } else {
+        rivalriesList.innerHTML = rivalries.map(r => `
+          <div class="list-item">
+            <span>${r.cast_member_a?.display_name || 'Unknown'} ⚡ ${r.cast_member_b?.display_name || 'Unknown'}</span>
+            <span style="color: var(--danger); font-weight: 700;">${r.strength_score}</span>
+          </div>
+        `).join('')
+      }
+    }
+
+    window.setFilter = function(filter) {
+      currentFilter = filter
+
+      // Update button states
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active')
+      })
+      event.target.classList.add('active')
+
+      // Rebuild and re-render
+      buildGraph()
+      if (graphData.nodes.length > 0 && graph) {
+        renderGraph()
+      }
+    }
+
+    window.goBack = function() {
+      window.location.href = `/lobby.html?game=${currentGameId}`
+    }
+
+    // Initialize on load
+    init()
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (graph) {
+        const container = document.getElementById('graph')
+        graph.width(container.clientWidth)
+      }
+    })
+  </script>
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alliance Rooms | Mansion Mayhem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/navigation.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111;
+      --bg-elevated: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #fff;
+      --text-dim: #888;
+      --text-muted: #555;
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --purple: #8b5cf6;
+      --cyan: #06b6d4;
+      --success: #4caf50;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+    .page-header {
+      margin-bottom: 32px;
+    }
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .page-subtitle {
+      color: var(--text-dim);
+      font-size: 16px;
+    }
+    .section {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 20px;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--bg-elevated);
+      border: 2px solid var(--border);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+    }
+    .room-card {
+      background: linear-gradient(135deg, rgba(212,175,55,0.05), rgba(139,92,246,0.05));
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .room-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(212,175,55,0.3);
+    }
+    .room-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold), var(--purple), var(--rose));
+    }
+    .room-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+    .room-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .room-type-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-alliance {
+      background: linear-gradient(135deg, var(--gold), var(--rose));
+      color: white;
+    }
+    .badge-duo {
+      background: var(--purple);
+      color: white;
+    }
+    .badge-trio {
+      background: var(--cyan);
+      color: white;
+    }
+    .badge-group {
+      background: var(--rose);
+      color: white;
+    }
+    .room-members {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .member-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 2px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .member-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .room-stats {
+      display: flex;
+      gap: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .room-stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    .room-stat-icon {
+      font-size: 16px;
+    }
+    .activity-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .activity-indicator.inactive {
+      background: var(--text-muted);
+      animation: none;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 14px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--purple));
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px rgba(212,175,55,0.4);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+    .empty-icon {
+      font-size: 80px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    .cast-selector {
+      background: var(--bg-card);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .back-btn {
+      display: inline-block;
+      color: var(--gold);
+      text-decoration: none;
+      margin-bottom: 24px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    .back-btn:hover {
+      transform: translateX(-4px);
+    }
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation (loaded from include) -->
+  <div id="globalNavPlaceholder"></div>
+  <script>
+    fetch('/includes/global-nav.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('globalNavPlaceholder').innerHTML = data;
+      });
+  </script>
+
+  <div class="container">
+    <a href="/lobby-dashboard.html" class="back-btn">← Back to Lobby</a>
+
+    <div class="page-header">
+      <h1 class="page-title">💬 Alliance Rooms</h1>
+      <p class="page-subtitle">Private spaces for strategic conversations and alliances</p>
+    </div>
+
+    <!-- Cast Member Info (auto-detected) -->
+    <div id="cast-info" class="cast-selector" style="display: none;">
+      <h3 style="color: var(--gold); margin-bottom: 8px;">👤 Viewing as:</h3>
+      <div style="font-size: 18px; color: var(--text); font-weight: 600;" id="current-cast-name">
+        Loading...
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="total-rooms">0</div>
+        <div class="stat-label">Your Rooms</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="active-rooms">0</div>
+        <div class="stat-label">Active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="total-messages">0</div>
+        <div class="stat-label">Total Messages</div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="loading" style="display: none;">
+      <div class="loading-spinner"></div>
+      <p style="color: var(--text-dim);">Loading alliance rooms...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state" style="display: none;">
+      <div class="empty-icon">💬</div>
+      <h3 style="color: var(--text); margin-bottom: 8px;">No Alliance Rooms Yet</h3>
+      <p>Form alliances through link-up requests to create private rooms</p>
+      <a href="/link-up-requests.html" class="btn btn-primary" style="margin-top: 24px; display: inline-block; text-decoration: none;">
+        🤝 Send Link-Up Request
+      </a>
+    </div>
+
+    <!-- Rooms Grid -->
+    <div id="rooms-container" style="display: none;">
+      <div class="section">
+        <h2 class="section-title">Your Alliance Rooms</h2>
+        <div class="rooms-grid" id="rooms-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="/js/supabase-client.js"></script>
+  <script src="/js/navigation.js"></script>
+
+  <script>
+    const gameId = new URLSearchParams(window.location.search).get('gameId') ||
+                   localStorage.getItem('currentGameId') ||
+                   '7ca5f4eb-4443-4167-b6e0-a9fe1be00ac1';
+
+    let currentCastMemberId = null;
+    let rooms = [];
+    let members = [];
+    let channel = null;
+
+    // Load current user's cast member (SECURE - auth-based)
+    async function loadCurrentCastMember() {
+      try {
+        // Get authenticated user
+        const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
+
+        if (authError || !user) {
+          alert('You must be signed in to view alliance rooms');
+          window.location.href = '/pages/sign-in.html';
+          return;
+        }
+
+        // Get user's cast member record
+        const { data: castMember, error } = await window.supabaseClient
+          .from('cast_members')
+          .select('id, full_name, display_name, status')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error || !castMember) {
+          alert('Cast member profile not found. Please join a game first.');
+          setTimeout(() => {
+            window.location.href = '/pages/browse-games.html';
+          }, 2000);
+          return;
+        }
+
+        // Set current cast member (secure - from auth)
+        currentCastMemberId = castMember.id;
+
+        // Display cast member name
+        const castInfo = document.getElementById('cast-info');
+        const castName = document.getElementById('current-cast-name');
+        castName.textContent = castMember.display_name;
+        castInfo.style.display = 'block';
+
+        console.log('✅ Loaded cast member securely:', castMember.display_name);
+
+        // Load rooms
+        await loadRooms();
+
+      } catch (error) {
+        console.error('Error loading cast member:', error);
+        alert('Failed to load your profile: ' + error.message);
+      }
+    }
+
+    // Load rooms
+    async function loadRooms() {
+      if (!currentCastMemberId) return;
+
+      try {
+        document.getElementById('loading-state').style.display = 'block';
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('rooms-container').style.display = 'none';
+
+        // Load rooms where current user is a member
+        const { data: roomsData, error: roomsError } = await window.supabaseClient
+          .from('mm_alliance_rooms')
+          .select('*')
+          .contains('member_cast_ids', [currentCastMemberId])
+          .eq('is_active', true)
+          .order('last_activity_at', { ascending: false });
+
+        if (roomsError) throw roomsError;
+
+        rooms = roomsData || [];
+
+        // Load all cast members for avatars
+        const { data: membersData, error: membersError } = await window.supabaseClient
+          .from('cast_members')
+          .select('id, full_name, display_name, avatar_url')
+          .eq('status', 'active');
+
+        if (!membersError) {
+          members = membersData || [];
+        }
+
+        document.getElementById('loading-state').style.display = 'none';
+
+        if (rooms.length === 0) {
+          document.getElementById('empty-state').style.display = 'block';
+        } else {
+          document.getElementById('rooms-container').style.display = 'block';
+          renderRooms();
+          updateStats();
+        }
+
+        subscribeToRooms();
+
+      } catch (error) {
+        console.error('Error loading rooms:', error);
+        document.getElementById('loading-state').style.display = 'none';
+      }
+    }
+
+    // Render rooms
+    function renderRooms() {
+      const grid = document.getElementById('rooms-grid');
+
+      grid.innerHTML = rooms.map(room => {
+        const roomMembers = members.filter(m => room.member_cast_ids.includes(m.id));
+        const isRecentlyActive = new Date(room.last_activity_at) > new Date(Date.now() - 60 * 60 * 1000); // 1 hour
+
+        const typeBadgeClass = {
+          'alliance': 'badge-alliance',
+          'duo': 'badge-duo',
+          'trio': 'badge-trio',
+          'group': 'badge-group'
+        }[room.room_type] || 'badge-alliance';
+
+        return `
+          <div class="room-card" onclick="enterRoom('${room.id}')">
+            <div class="room-header">
+              <div>
+                <div class="room-name">${room.room_name}</div>
+                <span class="room-type-badge ${typeBadgeClass}">${room.room_type}</span>
+              </div>
+              <div class="activity-indicator ${isRecentlyActive ? '' : 'inactive'}"></div>
+            </div>
+
+            <div class="room-members">
+              ${roomMembers.map(member => `
+                <div class="member-avatar" title="${member.display_name}">
+                  ${member.avatar_url
+                    ? `<img src="${member.avatar_url}" alt="${member.display_name}">`
+                    : member.display_name.charAt(0)
+                  }
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="room-stats">
+              <div class="room-stat">
+                <span class="room-stat-icon">💬</span>
+                <span>${room.message_count || 0} messages</span>
+              </div>
+              <div class="room-stat">
+                <span class="room-stat-icon">🎤</span>
+                <span>${room.voice_note_count || 0} voice</span>
+              </div>
+              <div class="room-stat">
+                <span class="room-stat-icon">⏰</span>
+                <span>${getTimeAgo(room.last_activity_at)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update stats
+    function updateStats() {
+      document.getElementById('total-rooms').textContent = rooms.length;
+
+      const activeRooms = rooms.filter(r =>
+        new Date(r.last_activity_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+      ).length;
+      document.getElementById('active-rooms').textContent = activeRooms;
+
+      const totalMessages = rooms.reduce((sum, r) => sum + (r.message_count || 0), 0);
+      document.getElementById('total-messages').textContent = totalMessages;
+    }
+
+    // Enter room
+    function enterRoom(roomId) {
+      window.location.href = `/alliance-chat.html?roomId=${roomId}&castMemberId=${currentCastMemberId}`;
+    }
+
+    // Subscribe to room changes
+    function subscribeToRooms() {
+      channel = window.supabaseClient
+        .channel('alliance-rooms-lobby')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'mm_alliance_rooms',
+          filter: `is_active=eq.true`
+        }, (payload) => {
+          loadRooms();
+        })
+        .subscribe();
+    }
+
+    // Get time ago
+    function getTimeAgo(timestamp) {
+      const now = new Date();
+      const past = new Date(timestamp);
+      const diffMs = now - past;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return `${diffDays}d ago`;
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', loadCurrentCastMember);
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      if (channel) channel.unsubscribe();
+    });
+  </script>
+</body>
+</html>

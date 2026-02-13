@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon { font-size: 2rem; filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5)); }
+    .nav-logo-text { background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover { color: var(--color-gold); }
+    
+    .hero {
+      padding: 8rem 2rem 4rem;
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+    }
+    
+    .content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+    
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+      background: rgba(212, 175, 55, 0.1);
+      border-color: var(--color-gold);
+      color: var(--color-gold);
+    }
+    
+    .episodes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+    
+    .episode-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .episode-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(212, 175, 55, 0.2);
+    }
+    
+    .episode-thumbnail {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.1) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+    }
+    
+    .play-button {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: rgba(212, 175, 55, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--color-dark);
+      transition: all 0.3s;
+    }
+    
+    .episode-card:hover .play-button {
+      background: var(--color-gold);
+      transform: scale(1.1);
+    }
+    
+    .episode-duration {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+    
+    .episode-info {
+      padding: 1.5rem;
+    }
+    
+    .episode-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 0.5rem;
+    }
+    
+    .episode-meta {
+      display: flex;
+      gap: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+    
+    .episode-stats {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.875rem;
+    }
+    
+    @media (max-width: 768px) {
+      .hero-title { font-size: 2rem; }
+      .episodes-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="player-dashboard.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <div class="nav-right" style="display: flex; gap: 1.5rem; align-items: center;">
+        <a href="player-dashboard.html" class="nav-link">Dashboard</a>
+        <a href="tea-room.html" class="nav-link">The Tea Room</a>
+        <a href="record-voice.html" class="nav-link">Record</a>
+        <a href="gallery.html" class="nav-link" style="color: var(--color-gold);">Gallery</a>
+        <a href="settings.html" class="nav-link">Settings</a>
+        <a href="how-to-play.html" class="nav-link">Help</a>
+        <button id="signOutBtn" style="padding: 0.5rem 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #EF4444; cursor: pointer; transition: all 0.3s;">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="hero">
+    <h1 class="hero-title">🎬 Episode Gallery</h1>
+    <p class="hero-subtitle">
+      Watch all episodes of Mansion Mayhem. Drama, alliances, and unforgettable moments.
+    </p>
+  </div>
+  
+  <div class="content">
+    <div class="filters">
+      <button class="filter-btn active">All Episodes</button>
+      <button class="filter-btn">Latest</button>
+      <button class="filter-btn">Most Viewed</button>
+      <button class="filter-btn">Trending</button>
+    </div>
+    
+    <div class="episodes-grid" id="episodesGrid">
+      <!-- Episodes will be loaded here dynamically -->
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem 1rem; color: rgba(255,255,255,0.5);">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🎬</div>
+        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">Loading episodes...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabaseClient as supabase, getCurrentUser, signOut } from '../js/supabase-module.js'
+    import { requireAuth } from '../js/auth.js'
+
+    // Sign out handler
+    document.getElementById('signOutBtn').addEventListener('click', async () => {
+      await signOut()
+    })
+
+    // Format date
+    function formatDate(dateString) {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    }
+
+    // Format duration
+    function formatDuration(seconds) {
+      const mins = Math.floor(seconds / 60)
+      const secs = seconds % 60
+      return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    // Format views
+    function formatViews(count) {
+      if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
+      if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
+      return count.toString()
+    }
+
+    // Load episodes
+    async function loadEpisodes() {
+      const episodesGrid = document.getElementById('episodesGrid')
+
+      try {
+        // Fetch published episodes
+        const { data: episodes, error } = await supabase
+          .from('episodes')
+          .select('*')
+          .eq('status', 'approved')
+          .not('published_at', 'is', null)
+          .order('episode_number', { ascending: false })
+
+        if (error) throw error
+
+        if (!episodes || episodes.length === 0) {
+          episodesGrid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem 1rem;">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">🎬</div>
+              <div style="font-size: 1.2rem; margin-bottom: 0.5rem; color: rgba(255,255,255,0.8);">No Episodes Yet</div>
+              <div style="color: rgba(255,255,255,0.5); margin-bottom: 2rem;">Episodes will appear here once they're published</div>
+            </div>
+          `
+          return
+        }
+
+        // Render episodes
+        episodesGrid.innerHTML = episodes.map(episode => {
+          const thumbnail = episode.thumbnail_url || ''
+          const duration = formatDuration(episode.duration || 0)
+          const views = formatViews(episode.view_count || 0)
+          const rating = (episode.rating || 0).toFixed(1)
+
+          return `
+            <div class="episode-card" onclick="window.location.href='episode-player.html?id=${episode.id}'">
+              <div class="episode-thumbnail" style="${thumbnail ? `background-image: url('${thumbnail}'); background-size: cover; background-position: center;` : ''}">
+                ${!thumbnail ? '🎬' : ''}
+                <div class="play-button">▶</div>
+                <div class="episode-duration">${duration}</div>
+              </div>
+              <div class="episode-info">
+                <h3 class="episode-title">Episode ${episode.episode_number}: ${episode.title}</h3>
+                <div class="episode-meta">
+                  <span>${formatDate(episode.published_at)}</span>
+                  ${episode.cast_count ? `
+                    <span>•</span>
+                    <span>${episode.cast_count} Cast Members</span>
+                  ` : ''}
+                </div>
+                <div class="episode-stats">
+                  <div class="stat-item">
+                    <span>👁️</span>
+                    <span>${views} views</span>
+                  </div>
+                  ${rating > 0 ? `
+                    <div class="stat-item">
+                      <span>⭐</span>
+                      <span>${rating}</span>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `
+        }).join('')
+
+      } catch (error) {
+        console.error('Error loading episodes:', error)
+        episodesGrid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 3rem 1rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+            <div style="font-size: 1.2rem; margin-bottom: 0.5rem; color: rgba(255,255,255,0.8);">Failed to Load Episodes</div>
+            <div style="color: rgba(255,255,255,0.5);">${error.message}</div>
+          </div>
+        `
+      }
+    }
+
+    // Filter tabs functionality
+    const filterBtns = document.querySelectorAll('.filter-btn')
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+
+        // TODO: Implement filtering logic
+        const filter = btn.textContent.trim()
+        console.log('Filter selected:', filter)
+      })
+    })
+
+    // Initialize
+    async function init() {
+      const user = await requireAuth()
+      if (!user) return
+
+      await loadEpisodes()
+    }
+
+    init()
+  </script>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

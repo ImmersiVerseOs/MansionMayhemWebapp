@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Mansion Mayhem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/navigation.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111;
+      --bg-elevated: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #fff;
+      --text-dim: #888;
+      --text-muted: #555;
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --purple: #9c27b0;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --info: #2196f3;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at top, rgba(233, 30, 99, .12) 0%, transparent 50%),
+                  radial-gradient(ellipse at bottom right, rgba(212, 175, 55, .08) 0%, transparent 50%),
+                  var(--bg);
+      z-index: -1;
+    }
+
+    .main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Welcome Header */
+    .welcome-section {
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    .welcome-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-subtitle {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+    }
+
+    .user-role-badge {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1.5rem;
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Quick Stats Bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Quick Actions Grid */
+    .quick-actions {
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .action-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: var(--text);
+      display: block;
+    }
+
+    .action-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(212, 175, 55, 0.2);
+    }
+
+    .action-card.primary {
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      border-color: transparent;
+    }
+
+    .action-card.primary:hover {
+      box-shadow: 0 8px 30px rgba(233, 30, 99, 0.4);
+    }
+
+    .action-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .action-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .action-description {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    .action-card.primary .action-description {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Recent Activity */
+    .recent-activity {
+      margin-bottom: 3rem;
+    }
+
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .activity-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item:hover {
+      border-color: var(--gold);
+    }
+
+    .activity-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .activity-meta {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .activity-time {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-dim);
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-dim);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .welcome-title {
+        font-size: 2rem;
+      }
+
+      .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <!-- Navigation loaded - displays role-based links, notifications, and user menu -->
+  <!-- Navigation (loaded from include) -->
+  <div id="globalNavPlaceholder"></div>
+  <script>
+    fetch('/includes/global-nav.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('globalNavPlaceholder').innerHTML = data;
+      });
+  </script>
+
+  <main class="main">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <h1 class="welcome-title" id="welcomeTitle">Welcome to Mansion Mayhem</h1>
+      <p class="welcome-subtitle" id="welcomeSubtitle">Loading your dashboard...</p>
+      <div class="user-role-badge" id="userRoleBadge" style="display: none;">Loading...</div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card">
+        <div class="stat-icon">🎮</div>
+        <div class="stat-value" id="statGames">-</div>
+        <div class="stat-label">My Games</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📢</div>
+        <div class="stat-value" id="statScenarios">-</div>
+        <div class="stat-label">Active Scenarios</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="statResponses">-</div>
+        <div class="stat-label">Responses</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎙️</div>
+        <div class="stat-value" id="statVoiceNotes">-</div>
+        <div class="stat-label">Voice Notes</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <section class="quick-actions">
+      <h2 class="section-title">⚡ Quick Actions</h2>
+      <div class="action-grid" id="actionGrid">
+        <!-- Data loaded via JavaScript from Supabase -->
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading actions...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Activity -->
+    <section class="recent-activity">
+      <h2 class="section-title">📊 Recent Activity</h2>
+      <div class="activity-list" id="activityList">
+        <!-- Data loaded via JavaScript from Supabase -->
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading activity...</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/navigation.js"></script>
+  <script>
+    // Initialize Supabase
+    const { createClient } = supabase
+    const supabaseUrl = 'https://YOUR_SUPABASE_URL.supabase.co'
+    const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    let currentUser = null
+    let currentProfile = null
+
+    // Require authentication
+    async function requireAuth() {
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error || !user) {
+        window.location.href = '/index.html'
+        return null
+      }
+      return user
+    }
+
+    async function loadDashboard() {
+      try {
+        // Get current user
+        currentUser = await requireAuth()
+        if (!currentUser) return
+
+        // Get profile
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single()
+
+        if (profileError) throw profileError
+
+        currentProfile = profile
+
+        // Update welcome message
+        document.getElementById('welcomeTitle').textContent = `Welcome back, ${profile.full_name || 'User'}!`
+        document.getElementById('welcomeSubtitle').textContent = 'Your personalized dashboard'
+
+        // Show role badge
+        const roleBadge = document.getElementById('userRoleBadge')
+        roleBadge.textContent = formatRole(profile.role)
+        roleBadge.style.display = 'inline-block'
+
+        // Load role-specific content
+        if (profile.role === 'admin') {
+          await loadAdminDashboard()
+        } else if (profile.subscription_tier === 'premium' || profile.subscription_tier === 'admin') {
+          await loadDirectorDashboard()
+        } else {
+          await loadCastMemberDashboard()
+        }
+
+        // Load recent activity
+        await loadRecentActivity()
+
+      } catch (error) {
+        console.error('Error loading dashboard:', error)
+        document.getElementById('welcomeSubtitle').textContent = 'Error loading dashboard'
+      }
+    }
+
+    async function loadCastMemberDashboard() {
+      // Get cast member info
+      const { data: castMember } = await supabase
+        .from('cast_members')
+        .select('*, games(name)')
+        .eq('user_id', currentUser.id)
+        .maybeSingle()
+
+      if (!castMember) {
+        // Not a cast member yet - show onboarding actions
+        showOnboardingActions()
+        return
+      }
+
+      // Load stats
+      await loadCastMemberStats(castMember.id)
+
+      // Show cast member actions
+      const actionGrid = document.getElementById('actionGrid')
+      actionGrid.innerHTML = `
+        <a href="/cast-portal.html" class="action-card primary">
+          <div class="action-icon">📱</div>
+          <div class="action-title">My Cast Portal</div>
+          <div class="action-description">View active scenarios and respond</div>
+        </a>
+        <a href="/pages/browse-games.html" class="action-card">
+          <div class="action-icon">🎮</div>
+          <div class="action-title">Browse Games</div>
+          <div class="action-description">Discover and join new games</div>
+        </a>
+        <a href="/leaderboard.html" class="action-card">
+          <div class="action-icon">🏆</div>
+          <div class="action-title">Leaderboard</div>
+          <div class="action-description">See how you rank against other cast members</div>
+        </a>
+        <a href="/pages/tea-room.html" class="action-card">
+          <div class="action-icon">🎙️</div>
+          <div class="action-title">Voice Library</div>
+          <div class="action-description">Listen to your voice notes</div>
+        </a>
+        <a href="/pages/gallery.html" class="action-card">
+          <div class="action-icon">🎬</div>
+          <div class="action-title">Episode Gallery</div>
+          <div class="action-description">Watch published episodes</div>
+        </a>
+      `
+    }
+
+    async function loadCastMemberStats(castMemberId) {
+      // Count games
+      const { count: gamesCount } = await supabase
+        .from('cast_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('id', castMemberId)
+
+      document.getElementById('statGames').textContent = gamesCount || 1
+
+      // Count active scenarios
+      const { count: scenariosCount } = await supabase
+        .from('scenario_targets')
+        .select('scenarios!inner(*)', { count: 'exact', head: true })
+        .eq('cast_member_id', castMemberId)
+        .eq('scenarios.status', 'active')
+
+      document.getElementById('statScenarios').textContent = scenariosCount || 0
+
+      // Count responses
+      const { count: responsesCount } = await supabase
+        .from('scenario_responses')
+        .select('*', { count: 'exact', head: true })
+        .eq('cast_member_id', castMemberId)
+
+      document.getElementById('statResponses').textContent = responsesCount || 0
+
+      // Count voice notes
+      const { count: voiceNotesCount } = await supabase
+        .from('scenario_responses')
+        .select('*', { count: 'exact', head: true })
+        .eq('cast_member_id', castMemberId)
+        .not('voice_note_url', 'is', null)
+
+      document.getElementById('statVoiceNotes').textContent = voiceNotesCount || 0
+    }
+
+    async function loadDirectorDashboard() {
+      // Load director stats
+      const { count: gamesCount } = await supabase
+        .from('games')
+        .select('*', { count: 'exact', head: true })
+        .eq('director_id', currentUser.id)
+
+      document.getElementById('statGames').textContent = gamesCount || 0
+
+      // Show director actions
+      const actionGrid = document.getElementById('actionGrid')
+      actionGrid.innerHTML = `
+        <a href="/my-director-console.html" class="action-card primary">
+          <div class="action-icon">🎮</div>
+          <div class="action-title">Director Console</div>
+          <div class="action-description">Manage your games and scenarios</div>
+        </a>
+        <a href="/pages/scenario-builder.html" class="action-card">
+          <div class="action-icon">📝</div>
+          <div class="action-title">Create Scenario</div>
+          <div class="action-description">Build a new scenario for your cast</div>
+        </a>
+        <a href="/episode-editor.html" class="action-card">
+          <div class="action-icon">✂️</div>
+          <div class="action-title">Episode Editor</div>
+          <div class="action-description">Edit and publish episodes</div>
+        </a>
+        <a href="/browse-cast.html" class="action-card">
+          <div class="action-icon">👥</div>
+          <div class="action-title">Browse Cast</div>
+          <div class="action-description">Find cast members for your game</div>
+        </a>
+      `
+    }
+
+    async function loadAdminDashboard() {
+      // Load platform stats
+      const { count: gamesCount } = await supabase
+        .from('games')
+        .select('*', { count: 'exact', head: true })
+
+      document.getElementById('statGames').textContent = gamesCount || 0
+
+      const { count: usersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+
+      document.getElementById('statScenarios').textContent = usersCount || 0
+
+      // Show admin actions
+      const actionGrid = document.getElementById('actionGrid')
+      actionGrid.innerHTML = `
+        <a href="/director-console.html" class="action-card primary">
+          <div class="action-icon">⚡</div>
+          <div class="action-title">Admin Console</div>
+          <div class="action-description">Full platform administration</div>
+        </a>
+        <a href="/pages/admin-dashboard.html" class="action-card">
+          <div class="action-icon">📊</div>
+          <div class="action-title">Analytics</div>
+          <div class="action-description">Platform metrics and insights</div>
+        </a>
+        <a href="/pages/admin-moderation.html" class="action-card">
+          <div class="action-icon">🛡️</div>
+          <div class="action-title">Moderation</div>
+          <div class="action-description">Review content and users</div>
+        </a>
+        <a href="/applications-admin.html" class="action-card">
+          <div class="action-icon">📋</div>
+          <div class="action-title">Applications</div>
+          <div class="action-description">Review cast applications</div>
+        </a>
+      `
+    }
+
+    function showOnboardingActions() {
+      const actionGrid = document.getElementById('actionGrid')
+      actionGrid.innerHTML = `
+        <a href="/pages/browse-games.html" class="action-card primary">
+          <div class="action-icon">🎮</div>
+          <div class="action-title">Browse Games</div>
+          <div class="action-description">Discover and join open casting calls</div>
+        </a>
+        <a href="/pages/casting-call.html" class="action-card">
+          <div class="action-icon">🌟</div>
+          <div class="action-title">Apply Directly</div>
+          <div class="action-description">Join with a game code or invite</div>
+        </a>
+        <a href="/pages/gallery.html" class="action-card">
+          <div class="action-icon">🎬</div>
+          <div class="action-title">Watch Episodes</div>
+          <div class="action-description">Browse published episodes</div>
+        </a>
+        <a href="/leaderboard.html" class="action-card">
+          <div class="action-icon">🏆</div>
+          <div class="action-title">View Leaderboard</div>
+          <div class="action-description">See top cast members</div>
+        </a>
+      `
+
+      // Clear stats
+      document.getElementById('statGames').textContent = '0'
+      document.getElementById('statScenarios').textContent = '0'
+      document.getElementById('statResponses').textContent = '0'
+      document.getElementById('statVoiceNotes').textContent = '0'
+    }
+
+    async function loadRecentActivity() {
+      const activityList = document.getElementById('activityList')
+
+      try {
+        // Load recent notifications
+        const { data: notifications, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5)
+
+        if (error) throw error
+
+        if (!notifications || notifications.length === 0) {
+          activityList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📭</div>
+              <p>No recent activity</p>
+            </div>
+          `
+          return
+        }
+
+        activityList.innerHTML = notifications.map(notif => `
+          <div class="activity-item">
+            <div class="activity-icon">${getNotificationIcon(notif.type)}</div>
+            <div class="activity-content">
+              <div class="activity-title">${notif.title}</div>
+              <div class="activity-meta">${notif.message}</div>
+            </div>
+            <div class="activity-time">${formatTimeAgo(notif.created_at)}</div>
+          </div>
+        `).join('')
+
+      } catch (error) {
+        console.error('Error loading activity:', error)
+        activityList.innerHTML = `
+          <div class="empty-state">
+            <p>Error loading activity</p>
+          </div>
+        `
+      }
+    }
+
+    function getNotificationIcon(type) {
+      const icons = {
+        new_scenario: '📢',
+        scenario_deadline: '⏰',
+        elimination: '❌',
+        episode_published: '🎬',
+        vote_opened: '🗳️',
+        game_update: '🎮',
+        system: 'ℹ️'
+      }
+      return icons[type] || '📬'
+    }
+
+    function formatTimeAgo(timestamp) {
+      const now = new Date()
+      const time = new Date(timestamp)
+      const seconds = Math.floor((now - time) / 1000)
+
+      if (seconds < 60) return 'Just now'
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
+      if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`
+      return time.toLocaleDateString()
+    }
+
+    function formatRole(role) {
+      const roles = {
+        admin: 'Platform Administrator',
+        director: 'Game Director',
+        cast: 'Cast Member',
+        viewer: 'Viewer'
+      }
+      return roles[role] || 'User'
+    }
+
+    // Initialize dashboard
+    window.addEventListener('DOMContentLoaded', loadDashboard)
+  </script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+/**
+ * MANSION MAYHEM - Design System
+ * Extracted from mobile app (Mansion_Mayhem_App)
+ * Luxury Reality TV Aesthetic
+ */
+
+:root {
+  /* ===== PRIMARY COLORS ===== */
+  --mm-gold: #D4AF37;
+  --mm-gold-light: #E8D090;
+  --mm-gold-dark: #B8941F;
+
+  --mm-rose: #E91E63;
+  --mm-rose-light: #F48FB1;
+  --mm-rose-dark: #C2185B;
+
+  /* ===== NEUTRALS ===== */
+  --mm-dark: #0A0A0A;
+  --mm-dark-gray: #1A1A1A;
+  --mm-medium-gray: #2A2A2A;
+  --mm-light-gray: #3A3A3A;
+  --mm-text-gray: #A0A0A0;
+
+  /* ===== STATUS COLORS ===== */
+  --mm-success: #4CAF50;
+  --mm-warning: #FF9800;
+  --mm-danger: #F44336;
+  --mm-info: #2196F3;
+
+  /* ===== SEMANTIC COLORS ===== */
+  --mm-background: #0A0A0A;
+  --mm-surface: #1A1A1A;
+  --mm-surface-elevated: #2A2A2A;
+
+  --mm-text-primary: #FFFFFF;
+  --mm-text-secondary: #A0A0A0;
+  --mm-text-disabled: #666666;
+
+  /* ===== ACCENTS ===== */
+  --mm-fire: #FF6B35;
+  --mm-timer-urgent: #FF3B30;
+  --mm-premium-badge: #FFD700;
+
+  /* ===== GRADIENTS ===== */
+  --mm-gradient-gold-rose: linear-gradient(135deg, #D4AF37 0%, #E91E63 100%);
+  --mm-gradient-dark-gold: linear-gradient(180deg, #1A1A1A 0%, #2A2A2A 100%);
+  --mm-gradient-rose-dark: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
+
+  /* ===== TYPOGRAPHY ===== */
+  --mm-font-heading: 'Playfair Display', serif;
+  --mm-font-body: 'Montserrat', sans-serif;
+  --mm-font-mono: 'Roboto Mono', monospace;
+
+  --mm-font-xs: 12px;
+  --mm-font-sm: 14px;
+  --mm-font-base: 16px;
+  --mm-font-lg: 18px;
+  --mm-font-xl: 20px;
+  --mm-font-2xl: 24px;
+  --mm-font-3xl: 30px;
+  --mm-font-4xl: 36px;
+  --mm-font-5xl: 48px;
+
+  --mm-weight-normal: 400;
+  --mm-weight-medium: 500;
+  --mm-weight-semibold: 600;
+  --mm-weight-bold: 700;
+
+  --mm-line-tight: 1.2;
+  --mm-line-normal: 1.5;
+  --mm-line-relaxed: 1.75;
+
+  /* ===== SPACING ===== */
+  --mm-space-xs: 4px;
+  --mm-space-sm: 8px;
+  --mm-space-md: 16px;
+  --mm-space-lg: 24px;
+  --mm-space-xl: 32px;
+  --mm-space-2xl: 48px;
+  --mm-space-3xl: 64px;
+
+  /* ===== BORDER RADIUS ===== */
+  --mm-radius-sm: 4px;
+  --mm-radius-md: 8px;
+  --mm-radius-lg: 12px;
+  --mm-radius-xl: 16px;
+  --mm-radius-full: 9999px;
+
+  /* ===== SHADOWS ===== */
+  --mm-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --mm-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --mm-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --mm-shadow-glow: 0 0 20px rgba(212, 175, 55, 0.3);
+
+  /* ===== ANIMATIONS ===== */
+  --mm-duration-fast: 150ms;
+  --mm-duration-normal: 300ms;
+  --mm-duration-slow: 500ms;
+
+  --mm-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --mm-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --mm-ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* ===== GLOBAL BASE STYLES ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--mm-font-body);
+  background: var(--mm-background);
+  color: var(--mm-text-primary);
+  line-height: var(--mm-line-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== TYPOGRAPHY UTILITIES ===== */
+.mm-heading {
+  font-family: var(--mm-font-heading);
+  font-weight: var(--mm-weight-bold);
+  line-height: var(--mm-line-tight);
+}
+
+.mm-mono {
+  font-family: var(--mm-font-mono);
+}
+
+.mm-gradient-text {
+  background: var(--mm-gradient-gold-rose);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== CONTAINER UTILITIES ===== */
+.mm-container {
+  max-width: 428px; /* iPhone 14 Pro Max width */
+  margin: 0 auto;
+  background: var(--mm-background);
+  min-height: 100vh;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.mm-container-wide {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--mm-space-lg);
+}
+
+/* ===== LAYOUT UTILITIES ===== */
+.mm-section {
+  padding: var(--mm-space-lg);
+}
+
+.mm-section-xl {
+  padding: var(--mm-space-2xl) var(--mm-space-lg);
+}
+
+/* ===== ANIMATION UTILITIES ===== */
+@keyframes mm-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mm-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes mm-glow {
+  0%, 100% {
+    box-shadow: var(--mm-shadow-glow);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+  }
+}
+
+.mm-fade-in {
+  animation: mm-fade-in var(--mm-duration-normal) var(--mm-ease-default);
+}
+
+.mm-pulse {
+  animation: mm-pulse 2s var(--mm-ease-default) infinite;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+@media (max-width: 428px) {
+  :root {
+    --mm-space-lg: 16px;
+    --mm-space-xl: 24px;
+    --mm-space-2xl: 32px;
+  }
+}

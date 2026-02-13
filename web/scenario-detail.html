@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scenario Response | MANSION MAYHEM</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Mansion Mayhem Styles -->
+  <link rel="stylesheet" href="css/mansion-mayhem-theme.css">
+  <link rel="stylesheet" href="css/mansion-mayhem-components.css">
+  <link rel="stylesheet" href="/css/navigation.css">
+</head>
+<body>
+  <!-- MANSION MAYHEM - Persistent Navigation Bar -->
+  <!-- Navigation (loaded from include) -->
+  <div id="globalNavPlaceholder"></div>
+  <script>
+    fetch('/includes/global-nav.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('globalNavPlaceholder').innerHTML = data;
+      });
+  </script>
+  <!-- Navigation loaded - displays role-based links, notifications, and user menu -->
+
+
+  <div class="mm-container">
+
+    <!-- Loading State -->
+    <div id="loadingState" class="mm-section" style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+      <div class="mm-card mm-text-center">
+        <div class="mm-spinner mm-spinner-large" style="margin: 0 auto var(--mm-space-lg);"></div>
+        <p style="color: var(--mm-text-secondary);">Loading scenario...</p>
+      </div>
+    </div>
+
+    <!-- Scenario Detail -->
+    <div id="scenarioDetail" class="mm-hidden">
+
+      <!-- Header -->
+      <div class="mm-header" style="display: flex; align-items: center; justify-content: space-between;">
+        <button onclick="goBack()" class="mm-button mm-button-ghost" style="padding: var(--mm-space-sm);">
+          ← Back
+        </button>
+        <div style="text-align: center; flex: 1;">
+          <h1 class="mm-header-title" style="font-size: var(--mm-font-xl);" id="scenarioTitle">Scenario</h1>
+        </div>
+        <div style="width: 60px;"></div>
+      </div>
+
+      <!-- Timer -->
+      <div class="mm-section" style="text-align: center;">
+        <p style="font-size: var(--mm-font-xs); text-transform: uppercase; letter-spacing: 1px; color: var(--mm-text-secondary); margin-bottom: var(--mm-space-sm);">
+          Time Remaining
+        </p>
+        <div id="countdownTimer"></div>
+      </div>
+
+      <!-- Scenario Prompt -->
+      <div class="mm-section">
+        <div class="mm-card mm-card-gradient" style="padding: var(--mm-space-2xl);">
+          <p style="font-family: var(--mm-font-heading); font-size: var(--mm-font-2xl); line-height: var(--mm-line-relaxed); text-align: center;" id="promptText">
+            Loading prompt...
+          </p>
+        </div>
+      </div>
+
+      <!-- Context Notes -->
+      <div id="contextSection" class="mm-section mm-hidden">
+        <div style="background: var(--mm-surface-elevated); padding: var(--mm-space-md); border-radius: var(--mm-radius-md); border-left: 4px solid var(--mm-rose);">
+          <p style="font-size: var(--mm-font-sm); color: var(--mm-text-secondary); font-style: italic;" id="contextNotes"></p>
+        </div>
+      </div>
+
+      <!-- Response Form -->
+      <form id="responseForm" class="mm-section" style="padding-bottom: 120px;">
+
+        <!-- Multiple Choice Options -->
+        <div id="responseOptionsSection" class="mm-hidden">
+          <label style="display: block; font-size: var(--mm-font-sm); font-weight: var(--mm-weight-semibold); letter-spacing: 1px; text-transform: uppercase; color: var(--mm-text-secondary); margin-bottom: var(--mm-space-md);">
+            Choose Your Response
+          </label>
+          <div class="mm-radio-group" id="responseOptions">
+            <!-- Options will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Custom Response -->
+        <div id="customResponseSection" class="mm-hidden mm-mt-lg">
+          <label style="display: block; font-size: var(--mm-font-sm); font-weight: var(--mm-weight-semibold); letter-spacing: 1px; text-transform: uppercase; color: var(--mm-text-secondary); margin-bottom: var(--mm-space-md);">
+            Or Write Your Own
+          </label>
+          <textarea
+            id="customResponse"
+            class="mm-textarea"
+            placeholder="Describe your response in your own words..."
+            maxlength="500"
+          ></textarea>
+          <p style="font-size: var(--mm-font-xs); color: var(--mm-text-secondary); margin-top: var(--mm-space-xs); text-align: right;">
+            <span id="charCount">0</span>/500 characters
+          </p>
+        </div>
+
+        <!-- Voice Note Section -->
+        <div id="voiceNoteSection" class="mm-mt-xl mm-hidden">
+          <label style="display: block; font-size: var(--mm-font-sm); font-weight: var(--mm-weight-semibold); letter-spacing: 1px; text-transform: uppercase; color: var(--mm-text-secondary); margin-bottom: var(--mm-space-md);">
+            🎤 Optional Voice Note
+          </label>
+          <div class="mm-card mm-card-elevated mm-text-center">
+            <p style="font-size: var(--mm-font-sm); color: var(--mm-text-secondary); margin-bottom: var(--mm-space-md);">
+              Add a voice note to explain your thinking
+            </p>
+            <button type="button" id="recordButton" class="mm-button mm-button-secondary">
+              🎙️ Start Recording
+            </button>
+            <div id="recordingIndicator" class="mm-hidden mm-mt-md">
+              <div style="font-size: var(--mm-font-3xl); margin-bottom: var(--mm-space-sm); animation: mm-pulse 1s infinite;">🔴</div>
+              <p style="font-size: var(--mm-font-sm); color: var(--mm-rose);">Recording... <span id="recordingTime">0:00</span></p>
+            </div>
+            <div id="recordedAudio" class="mm-hidden mm-mt-md">
+              <p style="font-size: var(--mm-font-sm); color: var(--mm-success); margin-bottom: var(--mm-space-sm);">
+                ✓ Voice note recorded
+              </p>
+              <audio id="audioPlayer" controls style="width: 100%; max-width: 300px;"></audio>
+              <button type="button" onclick="clearVoiceNote()" class="mm-button mm-button-ghost mm-button-small mm-mt-sm">
+                Delete Recording
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- Sticky Submit Button -->
+      <div style="position: fixed; bottom: 0; left: 0; right: 0; background: var(--mm-background); border-top: 1px solid var(--mm-light-gray); padding: var(--mm-space-md); z-index: 100;">
+        <div class="mm-container">
+          <button type="submit" form="responseForm" class="mm-button mm-button-primary mm-button-large mm-button-full" id="submitButton">
+            ✨ Submit Response
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/mansion-mayhem-components.js"></script>
+  <script>
+    // Initialize Supabase
+    const SUPABASE_URL = 'https://dhqwxamggghewbslfdej.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocXd4YW1nZ2doZXdic2xmZGVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM0MjI1MzYsImV4cCI6MjA0ODk5ODUzNn0.6xR8L8wSgCvxnZn_TWhUe-L2h9yWE95BWh-yAuSyqwM';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentScenario = null;
+    let currentCastMember = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingInterval = null;
+    let recordingSeconds = 0;
+
+    // Initialize
+    async function init() {
+      // Get scenario ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const scenarioId = urlParams.get('id');
+
+      if (!scenarioId) {
+        toast.error('No scenario specified');
+        setTimeout(() => goBack(), 2000);
+        return;
+      }
+
+      // Get current cast member
+      const castMemberData = localStorage.getItem('mm_cast_member');
+      if (!castMemberData) {
+        toast.error('Please log in first');
+        setTimeout(() => window.location.href = '/mansion-mayhem/join.html', 2000);
+        return;
+      }
+
+      currentCastMember = JSON.parse(castMemberData);
+
+      await loadScenario(scenarioId);
+
+      // Setup form handlers
+      document.getElementById('responseForm').addEventListener('submit', handleSubmit);
+      document.getElementById('customResponse').addEventListener('input', updateCharCount);
+      document.getElementById('recordButton').addEventListener('click', toggleRecording);
+    }
+
+    // Load scenario
+    async function loadScenario(scenarioId) {
+      try {
+        const { data: scenario, error } = await supabase
+          .from('scenarios')
+          .select('*')
+          .eq('id', scenarioId)
+          .single();
+
+        if (error || !scenario) {
+          toast.error('Scenario not found');
+          setTimeout(() => goBack(), 2000);
+          return;
+        }
+
+        // Check if already responded
+        const { data: existingResponse } = await supabase
+          .from('scenario_responses')
+          .select('id')
+          .eq('scenario_id', scenarioId)
+          .eq('cast_member_id', currentCastMember.id)
+          .single();
+
+        if (existingResponse) {
+          toast.warning('You have already responded to this scenario');
+          setTimeout(() => goBack(), 2000);
+          return;
+        }
+
+        currentScenario = scenario;
+
+        // Update UI
+        document.getElementById('scenarioTitle').textContent = scenario.title;
+        document.getElementById('promptText').textContent = scenario.prompt_text;
+
+        // Context notes
+        if (scenario.context_notes) {
+          document.getElementById('contextNotes').textContent = scenario.context_notes;
+          document.getElementById('contextSection').classList.remove('mm-hidden');
+        }
+
+        // Load response options
+        if (scenario.response_options && Array.isArray(scenario.response_options)) {
+          loadResponseOptions(scenario.response_options);
+        } else {
+          document.getElementById('customResponseSection').classList.remove('mm-hidden');
+        }
+
+        // Show voice note section if enabled
+        if (scenario.voice_note_required || scenario.allow_voice_notes) {
+          document.getElementById('voiceNoteSection').classList.remove('mm-hidden');
+        }
+
+        // Setup timer
+        if (scenario.deadline_at) {
+          new CountdownTimer(scenario.deadline_at, document.getElementById('countdownTimer'), {
+            size: 'large',
+            showLabels: true,
+            onExpire: () => {
+              toast.error('Time has expired for this scenario');
+              setTimeout(() => goBack(), 2000);
+            }
+          });
+        }
+
+        // Show content
+        document.getElementById('loadingState').classList.add('mm-hidden');
+        document.getElementById('scenarioDetail').classList.remove('mm-hidden');
+
+      } catch (error) {
+        console.error('Error loading scenario:', error);
+        toast.error('Failed to load scenario');
+      }
+    }
+
+    // Load response options
+    function loadResponseOptions(options) {
+      const container = document.getElementById('responseOptions');
+
+      container.innerHTML = options.map((option, index) => `
+        <label class="mm-radio-option">
+          <input type="radio" name="response" value="${option.text || option}" required>
+          <span style="flex: 1;">${option.text || option}</span>
+        </label>
+      `).join('');
+
+      document.getElementById('responseOptionsSection').classList.remove('mm-hidden');
+      document.getElementById('customResponseSection').classList.remove('mm-hidden');
+    }
+
+    // Update character count
+    function updateCharCount() {
+      const textarea = document.getElementById('customResponse');
+      document.getElementById('charCount').textContent = textarea.value.length;
+    }
+
+    // Toggle recording
+    async function toggleRecording() {
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+        await startRecording();
+      } else {
+        stopRecording();
+      }
+    }
+
+    // Start recording
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        recordingSeconds = 0;
+
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          document.getElementById('audioPlayer').src = audioUrl;
+          document.getElementById('recordingIndicator').classList.add('mm-hidden');
+          document.getElementById('recordedAudio').classList.remove('mm-hidden');
+
+          // Stop all tracks
+          stream.getTracks().forEach(track => track.stop());
+        };
+
+        mediaRecorder.start();
+        document.getElementById('recordButton').textContent = '⏹️ Stop Recording';
+        document.getElementById('recordingIndicator').classList.remove('mm-hidden');
+
+        // Update recording time
+        recordingInterval = setInterval(() => {
+          recordingSeconds++;
+          const mins = Math.floor(recordingSeconds / 60);
+          const secs = recordingSeconds % 60;
+          document.getElementById('recordingTime').textContent =
+            `${mins}:${secs.toString().padStart(2, '0')}`;
+        }, 1000);
+
+      } catch (error) {
+        console.error('Error starting recording:', error);
+        toast.error('Could not access microphone');
+      }
+    }
+
+    // Stop recording
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        clearInterval(recordingInterval);
+        document.getElementById('recordButton').textContent = '🎙️ Start Recording';
+      }
+    }
+
+    // Clear voice note
+    function clearVoiceNote() {
+      audioChunks = [];
+      document.getElementById('recordedAudio').classList.add('mm-hidden');
+      document.getElementById('audioPlayer').src = '';
+      toast.success('Voice note deleted');
+    }
+
+    // Handle form submit
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      const submitButton = document.getElementById('submitButton');
+      setButtonLoading(submitButton, true);
+
+      try {
+        // Get selected response or custom response
+        const selectedRadio = document.querySelector('input[name="response"]:checked');
+        const customResponse = document.getElementById('customResponse').value.trim();
+
+        let responseText = '';
+        if (selectedRadio) {
+          responseText = selectedRadio.value;
+        } else if (customResponse) {
+          responseText = customResponse;
+        } else {
+          toast.error('Please select or write a response');
+          setButtonLoading(submitButton, false);
+          return;
+        }
+
+        // Prepare response data
+        const responseData = {
+          scenario_id: currentScenario.id,
+          cast_member_id: currentCastMember.id,
+          response_text: responseText,
+          submitted_at: new Date().toISOString()
+        };
+
+        // Handle voice note upload if exists
+        if (audioChunks.length > 0) {
+          // In production, upload to Supabase Storage
+          // For now, just mark that voice note exists
+          responseData.voice_note_url = 'pending_upload';
+        }
+
+        // Submit response
+        const { error } = await supabase
+          .from('scenario_responses')
+          .insert([responseData]);
+
+        if (error) throw error;
+
+        toast.success('Response submitted successfully!');
+        setTimeout(() => {
+          window.location.href = '/mansion-mayhem/cast-portal.html';
+        }, 1500);
+
+      } catch (error) {
+        console.error('Error submitting response:', error);
+        toast.error('Failed to submit response');
+        setButtonLoading(submitButton, false);
+      }
+    }
+
+    // Go back
+    function goBack() {
+      window.history.back();
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', init);
+
+    // Cleanup on unload
+    window.addEventListener('beforeunload', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+    });
+  </script>
+  <script type="module" src="js/invite-gate.js"></script>
+  <script src="/js/navigation.js"></script>
+</body>
+</html>

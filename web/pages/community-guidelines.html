@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Guidelines - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-success: #10B981;
+      --color-error: #EF4444;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover {
+      color: var(--color-gold);
+    }
+    
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 6rem 2rem 4rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.125rem;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    .intro-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+    
+    .intro-text {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.8;
+      font-size: 1rem;
+    }
+    
+    .section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .section-content {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.8;
+    }
+    
+    .section-content p {
+      margin-bottom: 1rem;
+    }
+    
+    .section-content ul {
+      margin: 1rem 0;
+      padding-left: 2rem;
+    }
+    
+    .section-content li {
+      margin-bottom: 0.75rem;
+    }
+    
+    .do-dont-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .do-box,
+    .dont-box {
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    
+    .do-box {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .dont-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .box-title {
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.125rem;
+    }
+    
+    .do-title {
+      color: var(--color-success);
+    }
+    
+    .dont-title {
+      color: var(--color-error);
+    }
+    
+    .box-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    .box-content ul {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+    
+    .box-content li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .warning-box {
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .warning-title {
+      color: #F59E0B;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .report-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    
+    .report-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1rem;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4);
+    }
+    
+    @media (max-width: 768px) {
+      .title { font-size: 2rem; }
+      .do-dont-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="../index.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <a href="../index.html" class="nav-link">← Back to Home</a>
+    </div>
+  </nav>
+  
+  <div class="content">
+    <div class="header">
+      <h1 class="title">Community Guidelines</h1>
+      <p class="subtitle">
+        Creating a fun, dramatic, and respectful environment for all cast members and viewers
+      </p>
+    </div>
+    
+    <div class="intro-box">
+      <p class="intro-text">
+        <strong>Welcome to Mansion Mayhem!</strong> We're all about drama, conflict, and entertainment, 
+        but there are lines we don't cross. These guidelines help everyone have fun while staying safe 
+        and respectful. Think of this as the rulebook for reality TV—drama is encouraged, but cruelty is not.
+      </p>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>🎭</span>
+        <span>The Spirit of the Game</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          Mansion Mayhem is reality TV at its finest. We want conflict, alliances, betrayals, and 
+          memorable moments. Your goal is to create engaging content that keeps viewers hooked.
+        </p>
+        
+        <div class="do-dont-grid">
+          <div class="do-box">
+            <div class="box-title do-title">
+              <span>✓</span>
+              <span>Drama We Love</span>
+            </div>
+            <div class="box-content">
+              <ul>
+                <li>Calling out strategic gameplay</li>
+                <li>Forming and breaking alliances</li>
+                <li>Heated arguments about game moves</li>
+                <li>Confronting others about their actions</li>
+                <li>Playing a villain or hero role</li>
+                <li>Strategic manipulation</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="dont-box">
+            <div class="box-title dont-title">
+              <span>✗</span>
+              <span>Lines We Don't Cross</span>
+            </div>
+            <div class="box-content">
+              <ul>
+                <li>Personal attacks on appearance</li>
+                <li>Threats of real-world harm</li>
+                <li>Racist, sexist, or hateful remarks</li>
+                <li>Exposing private information</li>
+                <li>Sexual harassment</li>
+                <li>Bullying vulnerable cast members</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>🤝</span>
+        <span>Respect & Safety</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          While your character can be confrontational, remember there are real people behind every FaceCast. 
+          We maintain zero tolerance for:
+        </p>
+        <ul>
+          <li><strong>Hate Speech:</strong> Any content targeting race, religion, gender, sexuality, or disability</li>
+          <li><strong>Harassment:</strong> Sustained targeting of individuals with intent to harm</li>
+          <li><strong>Doxxing:</strong> Sharing personal information without consent</li>
+          <li><strong>Threats:</strong> Any threat of violence, including "joking" threats</li>
+          <li><strong>Sexual Content:</strong> Explicit sexual content or unwanted advances</li>
+        </ul>
+        
+        <div class="warning-box">
+          <div class="warning-title">
+            <span>⚠️</span>
+            <span>Immediate Removal</span>
+          </div>
+          <p>
+            Violations of these safety rules result in immediate account termination and 
+            forfeiture of earnings. We report serious violations to law enforcement when appropriate.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>✍️</span>
+        <span>Content Standards</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          Your responses shape the show. Here's what makes great content:
+        </p>
+        
+        <h3 style="color: var(--color-gold); margin: 1.5rem 0 0.75rem;">Original & Authentic</h3>
+        <ul>
+          <li>Write responses in your own words</li>
+          <li>Don't copy from other cast members</li>
+          <li>Be authentic to your character's personality</li>
+          <li>Avoid repetitive or lazy responses</li>
+        </ul>
+        
+        <h3 style="color: var(--color-gold); margin: 1.5rem 0 0.75rem;">Appropriate Content</h3>
+        <ul>
+          <li><strong>Language:</strong> Strong language is fine, but avoid excessive profanity</li>
+          <li><strong>Violence:</strong> Dramatic threats are okay ("I'm coming for you!"), real threats are not</li>
+          <li><strong>Sexual Content:</strong> Flirtation is fine, explicit content is prohibited</li>
+          <li><strong>Substances:</strong> References to alcohol are okay, illegal drugs are not</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>⚖️</span>
+        <span>Fair Play</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          Gaming the system ruins the experience for everyone. Don't:
+        </p>
+        <ul>
+          <li><strong>Coordinate Off-Platform:</strong> No external coordination with other cast members to manipulate storylines</li>
+          <li><strong>Multi-Account:</strong> One person, one account</li>
+          <li><strong>Engagement Fraud:</strong> Don't artificially inflate views or engagement</li>
+          <li><strong>Revenue Manipulation:</strong> Don't create fake tips or try to game payment systems</li>
+          <li><strong>AI Abuse:</strong> Don't try to manipulate AI decision-making in bad faith</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>🎯</span>
+        <span>Conflict Resolution</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          If you have issues with another cast member:
+        </p>
+        
+        <div class="do-dont-grid">
+          <div class="do-box">
+            <div class="box-title do-title">
+              <span>✓</span>
+              <span>Good Approaches</span>
+            </div>
+            <div class="box-content">
+              <ul>
+                <li>Address issues in-character on the platform</li>
+                <li>Use the report feature for serious violations</li>
+                <li>Contact support for guidance</li>
+                <li>Keep drama in the game</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="dont-box">
+            <div class="box-title dont-title">
+              <span>✗</span>
+              <span>Bad Approaches</span>
+            </div>
+            <div class="box-content">
+              <ul>
+                <li>Harassing via social media</li>
+                <li>Sharing private messages publicly</li>
+                <li>Rallying viewers against someone</li>
+                <li>Making real-world threats</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>📱</span>
+        <span>Social Media & External Content</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          You're welcome to promote your participation and share episodes, but:
+        </p>
+        <ul>
+          <li><strong>Credit the Platform:</strong> Tag @MansionMayhem and include proper attribution</li>
+          <li><strong>Don't Spoil:</strong> Avoid revealing unaired content or behind-the-scenes information</li>
+          <li><strong>Respect Others:</strong> Don't share other cast members' private information</li>
+          <li><strong>Brand Guidelines:</strong> Don't alter platform branding or logos</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>⚠️</span>
+        <span>Consequences</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          Violations are handled based on severity:
+        </p>
+        
+        <h3 style="color: var(--color-gold); margin: 1.5rem 0 0.75rem;">Minor Violations</h3>
+        <ul>
+          <li><strong>First Offense:</strong> Warning and content removal</li>
+          <li><strong>Second Offense:</strong> Temporary suspension (3-7 days)</li>
+          <li><strong>Third Offense:</strong> Permanent ban</li>
+        </ul>
+        
+        <h3 style="color: var(--color-gold); margin: 1.5rem 0 0.75rem;">Serious Violations</h3>
+        <ul>
+          <li><strong>Hate speech, threats, harassment:</strong> Immediate permanent ban</li>
+          <li><strong>Illegal content:</strong> Ban + law enforcement notification</li>
+          <li><strong>Doxxing or privacy violations:</strong> Immediate ban + potential legal action</li>
+        </ul>
+        
+        <div class="warning-box">
+          <div class="warning-title">
+            <span>💰</span>
+            <span>Earnings Impact</span>
+          </div>
+          <p>
+            Banned users forfeit all unpaid earnings. Temporary suspensions pause earnings 
+            during the suspension period.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="report-section">
+      <h2 class="report-title">Report Violations</h2>
+      <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1.5rem;">
+        If you witness behavior that violates these guidelines, please report it immediately.
+      </p>
+      <a href="mailto:support@immersiverseos.com" class="btn">
+        <span>📧</span>
+        <span>Report an Issue</span>
+      </a>
+      <p style="color: rgba(255, 255, 255, 0.6); margin-top: 1rem; font-size: 0.9rem;">
+        All reports are reviewed within 24 hours. Your identity remains confidential.
+      </p>
+    </div>
+  </div>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

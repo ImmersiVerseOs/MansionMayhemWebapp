@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apply to Join - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-rose: #C04E63;
+      --color-purple: #8B5CF6;
+      --color-success: #10B981;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+      --shadow-glow: 0 0 30px rgba(212, 175, 55, 0.3);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    /* ===== ANIMATED BACKGROUND ===== */
+    .animated-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(192, 78, 99, 0.1) 0%, transparent 40%),
+                  radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+    
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-image {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-logo-image:hover {
+      transform: scale(1.1);
+    }
+
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-back {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+    
+    .nav-back:hover {
+      color: var(--color-gold);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    /* ===== MAIN CONTAINER ===== */
+    .wizard-container {
+      min-height: 100vh;
+      padding: 8rem 2rem 4rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    /* ===== PROGRESS BAR ===== */
+    .progress-section {
+      margin-bottom: 3rem;
+    }
+    
+    .progress-bar-container {
+      background: rgba(255, 255, 255, 0.05);
+      height: 8px;
+      border-radius: 50px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: var(--gradient-gold);
+      border-radius: 50px;
+      transition: width 0.5s ease;
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    
+    .progress-step {
+      flex: 1;
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.4);
+      transition: all 0.3s;
+    }
+    
+    .progress-step.active {
+      color: var(--color-gold);
+      font-weight: 600;
+    }
+    
+    .progress-step.completed {
+      color: var(--color-success);
+    }
+    
+    /* ===== WIZARD CARD ===== */
+    .wizard-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      animation: fadeInUp 0.6s ease-out;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .wizard-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .wizard-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .wizard-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .wizard-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* ===== FORM ELEMENTS ===== */
+    .form-group {
+      margin-bottom: 2rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.75rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-gold);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    }
+    
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .form-select {
+      cursor: pointer;
+    }
+    
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    /* ===== RADIO CARDS ===== */
+    .radio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .radio-card {
+      position: relative;
+    }
+    
+    .radio-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .radio-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .radio-label:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+    }
+    
+    .radio-card input[type="radio"]:checked + .radio-label {
+      background: rgba(212, 175, 55, 0.1);
+      border-color: var(--color-gold);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+    }
+    
+    .radio-icon {
+      font-size: 3rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+    }
+    
+    .radio-title {
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+    
+    .radio-description {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* ===== BUTTONS ===== */
+    .wizard-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 3rem;
+      justify-content: space-between;
+    }
+    
+    .btn {
+      padding: 1rem 2.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+      flex: 1;
+      justify-content: center;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(212, 175, 55, 0.6);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      padding: 1rem 2rem;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--color-gold);
+      color: var(--color-gold);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    /* ===== STEP CONTENT ===== */
+    .step-content {
+      display: none;
+    }
+    
+    .step-content.active {
+      display: block;
+      animation: fadeInUp 0.5s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* ===== INFO BOX ===== */
+    .info-box {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .info-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    .info-text {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .wizard-card {
+        padding: 2rem 1.5rem;
+      }
+      
+      .wizard-title {
+        font-size: 2rem;
+      }
+      
+      .radio-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .wizard-actions {
+        flex-direction: column-reverse;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .progress-steps {
+        font-size: 0.65rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <!-- Navigation -->
+  <nav class="nav">
+    <a href="../index.html" class="nav-logo">
+      <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+      <span class="nav-logo-text">MANSION MAYHEM</span>
+    </a>
+    <a href="../index.html" class="nav-back">
+      <span>←</span>
+      <span>Back to Home</span>
+    </a>
+  </nav>
+  
+  <!-- Main Container -->
+  <div class="wizard-container">
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar" style="width: 16.67%"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="progress-step active" id="step1Label">Basic Info</div>
+        <div class="progress-step" id="step2Label">Character</div>
+        <div class="progress-step" id="step3Label">Archetype</div>
+        <div class="progress-step" id="step4Label">About You</div>
+        <div class="progress-step" id="step5Label">Social</div>
+        <div class="progress-step" id="step6Label">Review</div>
+      </div>
+    </div>
+    
+    <!-- Wizard Card -->
+    <div class="wizard-card">
+      <form id="applicationForm">
+        
+        <!-- STEP 1: Basic Information -->
+        <div class="step-content active" id="step1">
+          <div class="wizard-header">
+            <div class="wizard-icon">👤</div>
+            <h1 class="wizard-title">Let's Get Started</h1>
+            <p class="wizard-subtitle">Tell us about yourself. This information helps us create your profile.</p>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" class="form-input" id="fullName" placeholder="Enter your full name" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" class="form-input" id="email" placeholder="you@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Create Password *</label>
+            <input type="password" class="form-input" id="password" placeholder="Minimum 6 characters" required minlength="6">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirm Password *</label>
+            <input type="password" class="form-input" id="confirmPassword" placeholder="Re-enter password" required minlength="6">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone Number (Optional)</label>
+            <input type="tel" class="form-input" id="phone" placeholder="+1 (555) 000-0000">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Age Range *</label>
+            <select class="form-select" id="ageRange" required>
+              <option value="">Select your age range</option>
+              <option value="18-25">18-25</option>
+              <option value="26-35">26-35</option>
+              <option value="36-45">36-45</option>
+              <option value="46-55">46-55</option>
+              <option value="56+">56+</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Location (City, State/Country) *</label>
+            <input type="text" class="form-input" id="location" placeholder="Los Angeles, CA" required>
+          </div>
+        </div>
+        
+        <!-- STEP 2: Character Type -->
+        <div class="step-content" id="step2">
+          <div class="wizard-header">
+            <div class="wizard-icon">🎭</div>
+            <h1 class="wizard-title">Choose Your Character</h1>
+            <p class="wizard-subtitle">How do you want to appear in episodes?</p>
+          </div>
+          
+          <div class="radio-grid">
+            <div class="radio-card">
+              <input type="radio" name="characterType" id="facecast" value="facecast" required>
+              <label for="facecast" class="radio-label">
+                <div class="radio-icon">📸</div>
+                <div class="radio-title">Personal FaceCast</div>
+                <div class="radio-description">Use your real face and voice in AI-generated videos</div>
+              </label>
+            </div>
+            
+            <div class="radio-card">
+              <input type="radio" name="characterType" id="generic" value="generic">
+              <label for="generic" class="radio-label">
+                <div class="radio-icon">🤖</div>
+                <div class="radio-title">AI Character</div>
+                <div class="radio-description">Create a custom AI-generated character</div>
+              </label>
+            </div>
+          </div>
+          
+          <div class="info-box">
+            <div class="info-icon">💡</div>
+            <div class="info-text">
+              <strong>FaceCast</strong> requires photo and voice uploads (next step). 
+              <strong>AI Character</strong> is faster but you won't use your real face. 
+              Both options earn the same money!
+            </div>
+          </div>
+        </div>
+        
+        <!-- STEP 3: Archetype -->
+        <div class="step-content" id="step3">
+          <div class="wizard-header">
+            <div class="wizard-icon">👑</div>
+            <h1 class="wizard-title">Choose Your Archetype</h1>
+            <p class="wizard-subtitle">What kind of character will you play?</p>
+          </div>
+          
+          <div class="radio-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+            <div class="radio-card">
+              <input type="radio" name="archetype" id="queen" value="queen" required>
+              <label for="queen" class="radio-label">
+                <div class="radio-icon">👑</div>
+                <div class="radio-title">The Queen</div>
+                <div class="radio-description">Confident leader</div>
+              </label>
+            </div>
+            
+            <div class="radio-card">
+              <input type="radio" name="archetype" id="villain" value="villain">
+              <label for="villain" class="radio-label">
+                <div class="radio-icon">😈</div>
+                <div class="radio-title">The Villain</div>
+                <div class="radio-description">Loves drama</div>
+              </label>
+            </div>
+            
+            <div class="radio-card">
+              <input type="radio" name="archetype" id="strategist" value="strategist">
+              <label for="strategist" class="radio-label">
+                <div class="radio-icon">🦁</div>
+                <div class="radio-title">The Strategist</div>
+                <div class="radio-description">Mastermind</div>
+              </label>
+            </div>
+            
+            <div class="radio-card">
+              <input type="radio" name="archetype" id="instigator" value="instigator">
+              <label for="instigator" class="radio-label">
+                <div class="radio-icon">🔥</div>
+                <div class="radio-title">The Instigator</div>
+                <div class="radio-description">Stirs the pot</div>
+              </label>
+            </div>
+            
+            <div class="radio-card">
+              <input type="radio" name="archetype" id="peacemaker" value="peacemaker">
+              <label for="peacemaker" class="radio-label">
+                <div class="radio-icon">🕊️</div>
+                <div class="radio-title">The Peacemaker</div>
+                <div class="radio-description">Mediates conflicts</div>
+              </label>
+            </div>
+            
+            <div class="radio-card">
+              <input type="radio" name="archetype" id="wildcard" value="wildcard">
+              <label for="wildcard" class="radio-label">
+                <div class="radio-icon">🎲</div>
+                <div class="radio-title">The Wildcard</div>
+                <div class="radio-description">Unpredictable</div>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- STEP 4: About You -->
+        <div class="step-content" id="step4">
+          <div class="wizard-header">
+            <div class="wizard-icon">✍️</div>
+            <h1 class="wizard-title">Tell Us About Yourself</h1>
+            <p class="wizard-subtitle">Help us understand your personality and experience</p>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Why do you want to join Mansion Mayhem? *</label>
+            <textarea class="form-textarea" id="motivation" placeholder="Tell us what excites you about becoming a cast member..." required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Do you have any reality TV or performance experience?</label>
+            <textarea class="form-textarea" id="experience" placeholder="Tell us about any relevant experience (optional)"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">What makes you interesting or unique? *</label>
+            <textarea class="form-textarea" id="unique" placeholder="Share what makes you stand out..." required></textarea>
+          </div>
+        </div>
+        
+        <!-- STEP 5: Social & Availability -->
+        <div class="step-content" id="step5">
+          <div class="wizard-header">
+            <div class="wizard-icon">📱</div>
+            <h1 class="wizard-title">Social & Availability</h1>
+            <p class="wizard-subtitle">Help us understand your online presence and time commitment</p>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Instagram Handle (Optional)</label>
+            <input type="text" class="form-input" id="instagram" placeholder="@yourusername">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">TikTok Handle (Optional)</label>
+            <input type="text" class="form-input" id="tiktok" placeholder="@yourusername">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">How much time can you commit per week? *</label>
+            <select class="form-select" id="timeCommitment" required>
+              <option value="">Select time commitment</option>
+              <option value="1-5">1-5 hours (Casual)</option>
+              <option value="5-10">5-10 hours (Active)</option>
+              <option value="10-20">10-20 hours (Very Active)</option>
+              <option value="20+">20+ hours (Dedicated)</option>
+            </select>
+          </div>
+          
+          <div class="info-box">
+            <div class="info-icon">⏱️</div>
+            <div class="info-text">
+              Don't worry! Our Hybrid Mode means you can participate even when busy. 
+              AI will respond for you based on your personality when you can't.
+            </div>
+          </div>
+        </div>
+        
+        <!-- STEP 6: Review & Submit -->
+        <div class="step-content" id="step6">
+          <div class="wizard-header">
+            <div class="wizard-icon">✨</div>
+            <h1 class="wizard-title">Almost There!</h1>
+            <p class="wizard-subtitle">Review your application and submit</p>
+          </div>
+          
+          <div class="info-box" style="background: rgba(212, 175, 55, 0.1); border-color: var(--color-gold);">
+            <div class="info-icon">🎉</div>
+            <div class="info-text">
+              <strong>What happens next?</strong><br>
+              • We'll review your application within 24 hours<br>
+              • If approved, you'll receive an email with next steps<br>
+              • You'll set up your FaceCast or AI character<br>
+              • Start responding to scenarios and earning money!
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label style="display: flex; align-items: start; gap: 1rem; cursor: pointer;">
+              <input type="checkbox" id="terms" required style="width: 20px; height: 20px; accent-color: var(--color-gold); cursor: pointer;">
+              <span style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                I agree to the <a href="terms.html" style="color: var(--color-gold);">Terms of Service</a>, 
+                <a href="privacy.html" style="color: var(--color-gold);">Privacy Policy</a>, and 
+                <a href="community-guidelines.html" style="color: var(--color-gold);">Community Guidelines</a>. 
+                I am 18 years or older.
+              </span>
+            </label>
+          </div>
+        </div>
+        
+      </form>
+      
+      <!-- Navigation Buttons -->
+      <div class="wizard-actions">
+        <button type="button" class="btn btn-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
+          <span>←</span>
+          <span>Back</span>
+        </button>
+        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)">
+          <span>Next</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let currentStep = 1;
+    const totalSteps = 6;
+    
+    function updateUI() {
+      // Hide all steps
+      document.querySelectorAll('.step-content').forEach(step => {
+        step.classList.remove('active');
+      });
+      
+      // Show current step
+      document.getElementById(`step${currentStep}`).classList.add('active');
+      
+      // Update progress bar
+      const progress = (currentStep / totalSteps) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+      
+      // Update step labels
+      for (let i = 1; i <= totalSteps; i++) {
+        const label = document.getElementById(`step${i}Label`);
+        label.classList.remove('active', 'completed');
+        if (i < currentStep) {
+          label.classList.add('completed');
+        } else if (i === currentStep) {
+          label.classList.add('active');
+        }
+      }
+      
+      // Update buttons
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      
+      if (currentStep === 1) {
+        prevBtn.style.display = 'none';
+      } else {
+        prevBtn.style.display = 'flex';
+      }
+      
+      if (currentStep === totalSteps) {
+        nextBtn.innerHTML = '<span>Submit Application</span><span>🚀</span>';
+      } else {
+        nextBtn.innerHTML = '<span>Next</span><span>→</span>';
+      }
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function validateStep(step) {
+      const currentStepElement = document.getElementById(`step${step}`);
+      const inputs = currentStepElement.querySelectorAll('input[required], select[required], textarea[required]');
+      
+      for (let input of inputs) {
+        if (!input.value || (input.type === 'radio' && !document.querySelector(`input[name="${input.name}"]:checked`))) {
+          input.focus();
+          alert('Please fill in all required fields');
+          return false;
+        }
+      }
+      
+      return true;
+    }
+    
+    function changeStep(direction) {
+      if (direction === 1) {
+        // Going forward - validate current step
+        if (!validateStep(currentStep)) {
+          return;
+        }
+        
+        // If last step, submit
+        if (currentStep === totalSteps) {
+          submitApplication();
+          return;
+        }
+      }
+      
+      currentStep += direction;
+      
+      if (currentStep < 1) currentStep = 1;
+      if (currentStep > totalSteps) currentStep = totalSteps;
+      
+      updateUI();
+    }
+    
+    async function submitApplication() {
+      const termsCheckbox = document.getElementById('terms');
+
+      if (!termsCheckbox.checked) {
+        alert('Please agree to the terms and conditions');
+        return;
+      }
+
+      // Validate passwords match
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+      }
+
+      // Get all form data
+      const fullName = document.getElementById('fullName').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const ageRange = document.getElementById('ageRange').value;
+      const location = document.getElementById('location').value;
+      const characterType = document.querySelector('input[name="characterType"]:checked').value;
+      const archetype = document.querySelector('input[name="archetype"]:checked').value;
+      const motivation = document.getElementById('motivation').value;
+      const experience = document.getElementById('experience').value;
+      const unique = document.getElementById('unique').value;
+      const instagram = document.getElementById('instagram').value;
+      const tiktok = document.getElementById('tiktok').value;
+      const timeCommitment = document.getElementById('timeCommitment').value;
+
+      // Show loading
+      const nextBtn = document.getElementById('nextBtn');
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = '<span class="spinner"></span><span>Creating your account...</span>';
+
+      try {
+        // Initialize Supabase
+        const { createClient } = window.supabase;
+        const supabase = createClient(
+          'https://mllqzeaxqusoryteaxzg.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sbHF6ZWF4cXVzb3J5dGVheHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODA1NzAsImV4cCI6MjA4NjA1NjU3MH0.s9CAe91gUG8uZ7Nrjd1pIX9YYvpNKa2lOrt6HDUarec'
+        );
+
+        // Create Supabase auth account
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            emailRedirectTo: window.location.origin + '/pages/player-dashboard.html',
+            data: {
+              full_name: fullName,
+              display_name: fullName
+            }
+          }
+        });
+
+        if (signUpError) {
+          console.error('Sign up error:', signUpError);
+          alert('Error creating account: ' + signUpError.message);
+          nextBtn.disabled = false;
+          nextBtn.innerHTML = '<span>Submit Application</span><span>🚀</span>';
+          return;
+        }
+
+        console.log('✅ Account created:', signUpData);
+
+        // Update profile with data that exists in profiles table
+        if (signUpData.user) {
+          await supabase
+            .from('profiles')
+            .update({
+              full_name: fullName,
+              display_name: fullName,
+              location: location,
+              age_range: ageRange,
+              archetype: archetype
+            })
+            .eq('id', signUpData.user.id);
+
+          // CRITICAL: Create cast_member record so user can participate in games
+          console.log('📝 Creating cast member profile...');
+
+          // Build rich backstory from all collected data
+          const backstoryParts = [];
+          backstoryParts.push(`📍 ${location} | 🎂 ${ageRange} | ⏱️ ${timeCommitment}/week`);
+          if (phone) backstoryParts.push(`📱 ${phone}`);
+          if (instagram) backstoryParts.push(`📸 Instagram: ${instagram}`);
+          if (tiktok) backstoryParts.push(`🎵 TikTok: ${tiktok}`);
+          backstoryParts.push(`\n🎭 Character Type: ${characterType}`);
+          backstoryParts.push(`\n💭 Why join? ${motivation}`);
+          if (experience) backstoryParts.push(`\n🎬 Experience: ${experience}`);
+          backstoryParts.push(`\n✨ What makes them unique: ${unique}`);
+
+          const { data: castMemberData, error: castMemberError } = await supabase
+            .from('cast_members')
+            .insert({
+              user_id: signUpData.user.id,
+              full_name: fullName,
+              display_name: fullName,
+              archetype: archetype,
+              screen_time_score: 'medium', // Default to medium
+              status: 'active',
+              backstory: backstoryParts.join('\n')
+            })
+            .select()
+            .single();
+
+          if (castMemberError) {
+            console.error('❌ Error creating cast member:', castMemberError);
+            // Don't fail the whole process, but log it
+          } else {
+            console.log('✅ Cast member created:', castMemberData);
+          }
+        }
+
+        // Now sign in to establish session
+        console.log('🔐 Signing in after account creation...');
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (signInError) {
+          console.error('Auto sign-in error:', signInError);
+          alert('Account created! Please sign in manually.');
+          window.location.href = '/pages/sign-in.html';
+          return;
+        }
+
+        console.log('✅ Signed in successfully:', signInData);
+
+        // Success! User is now authenticated
+        alert('✅ Welcome to Mansion Mayhem! Taking you to your dashboard...');
+
+        // Small delay to ensure session is established
+        setTimeout(() => {
+          window.location.href = '/pages/player-dashboard.html';
+        }, 500);
+
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        alert('An unexpected error occurred. Please try again.');
+        nextBtn.disabled = false;
+        nextBtn.innerHTML = '<span>Submit Application</span><span>🚀</span>';
+      }
+    }
+    
+    // Add spinner style dynamically
+    const style = document.createElement('style');
+    style.textContent = `
+      .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(10, 10, 10, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--color-dark);
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Initialize
+    updateUI();
+  </script>
+</body>
+</html>

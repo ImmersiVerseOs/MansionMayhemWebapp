@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-success: #10B981;
+      --color-warning: #F59E0B;
+      --color-error: #EF4444;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .admin-badge {
+      padding: 0.25rem 0.75rem;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-error);
+    }
+    
+    .main-container {
+      padding: 6rem 2rem 4rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    .page-header {
+      margin-bottom: 3rem;
+    }
+    
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+    
+    .stat-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+    }
+    
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+      font-size: 2rem;
+    }
+    
+    .stat-trend {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    
+    .trend-up {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--color-success);
+    }
+    
+    .trend-down {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--color-error);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .tab {
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s;
+    }
+    
+    .tab:hover {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .tab.active {
+      color: var(--color-gold);
+      border-bottom-color: var(--color-gold);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .data-table {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    
+    .table-header {
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .table-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-gold);
+    }
+    
+    .search-box {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      min-width: 200px;
+    }
+    
+    .search-box:focus {
+      outline: none;
+      border-color: var(--color-gold);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    th {
+      background: rgba(255, 255, 255, 0.02);
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.875rem;
+    }
+    
+    td {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .status-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--color-success);
+    }
+    
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: var(--color-warning);
+    }
+    
+    .status-suspended {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--color-error);
+    }
+    
+    .action-btn {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.3s;
+      margin-right: 0.5rem;
+    }
+    
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--color-gold);
+    }
+    
+    .action-btn-danger {
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--color-error);
+    }
+    
+    .action-btn-danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--color-error);
+    }
+    
+    @media (max-width: 968px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .tabs { overflow-x: auto; }
+      .table-header { flex-direction: column; gap: 1rem; align-items: start; }
+      .search-box { width: 100%; }
+      table { font-size: 0.875rem; }
+      th, td { padding: 0.75rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="../index.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <span class="admin-badge">👨‍💼 ADMIN</span>
+        <a href="player-dashboard.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">Exit Admin</a>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="main-container">
+    <div class="page-header">
+      <h1 class="page-title">👨‍💼 Admin Dashboard</h1>
+      <p class="page-subtitle">Platform management and moderation</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="margin-bottom: 2rem;">
+      <a href="voice-moderation-simple.html" style="display: inline-block; padding: 1rem 2rem; background: linear-gradient(135deg, #D4AF37, #FFD700); color: #000; text-decoration: none; border-radius: 12px; font-weight: 700; box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);">
+        🛡️ Moderate Voice Notes
+      </a>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon">👥</span>
+        </div>
+        <div class="stat-value">-</div>
+        <div class="stat-label">Total Cast Members</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon">🎬</span>
+        </div>
+        <div class="stat-value">-</div>
+        <div class="stat-label">Total Scenarios</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon">🎮</span>
+        </div>
+        <div class="stat-value">-</div>
+        <div class="stat-label">Total Games</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon">👤</span>
+        </div>
+        <div class="stat-value">-</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('users')">Users</button>
+      <button class="tab" onclick="switchTab('content')">Content</button>
+      <button class="tab" onclick="switchTab('reports')">Reports</button>
+      <button class="tab" onclick="switchTab('payments')">Payments</button>
+      <button class="tab" onclick="switchTab('analytics')">Analytics</button>
+    </div>
+    
+    <!-- Users Tab -->
+    <div id="users" class="tab-content active">
+      <div class="data-table">
+        <div class="table-header">
+          <h2 class="table-title">Cast Members</h2>
+          <input type="text" class="search-box" placeholder="Search users...">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Joined</th>
+              <th>Status</th>
+              <th>Episodes</th>
+              <th>Earnings</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 2rem;">Loading users...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Content Tab -->
+    <div id="content" class="tab-content">
+      <div class="data-table">
+        <div class="table-header">
+          <h2 class="table-title">Recent Episodes</h2>
+          <input type="text" class="search-box" placeholder="Search episodes...">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Episode</th>
+              <th>Published</th>
+              <th>Views</th>
+              <th>Cast</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Episode 15: Pool Party Drama</strong></td>
+              <td>Feb 6, 2026</td>
+              <td>24.5K</td>
+              <td>12</td>
+              <td><span class="status-badge status-active">Live</span></td>
+              <td>
+                <button class="action-btn">View</button>
+                <button class="action-btn action-btn-danger">Unpublish</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Episode 14: Secret Alliances</strong></td>
+              <td>Feb 5, 2026</td>
+              <td>31.2K</td>
+              <td>15</td>
+              <td><span class="status-badge status-active">Live</span></td>
+              <td>
+                <button class="action-btn">View</button>
+                <button class="action-btn action-btn-danger">Unpublish</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Episode 13: Confrontation</strong></td>
+              <td>Feb 4, 2026</td>
+              <td>28.7K</td>
+              <td>14</td>
+              <td><span class="status-badge status-active">Live</span></td>
+              <td>
+                <button class="action-btn">View</button>
+                <button class="action-btn action-btn-danger">Unpublish</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports Tab -->
+    <div id="reports" class="tab-content">
+      <div class="data-table">
+        <div class="table-header">
+          <h2 class="table-title">User Reports</h2>
+          <input type="text" class="search-box" placeholder="Search reports...">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Reporter</th>
+              <th>Reported User</th>
+              <th>Reason</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Sarah Chen</td>
+              <td><strong>Marcus Thompson</strong></td>
+              <td>Harassment</td>
+              <td>Feb 6, 2026</td>
+              <td><span class="status-badge status-pending">Pending</span></td>
+              <td>
+                <button class="action-btn">Review</button>
+                <button class="action-btn action-btn-danger">Dismiss</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Alex Rodriguez</td>
+              <td><strong>Jessica Park</strong></td>
+              <td>Inappropriate Content</td>
+              <td>Feb 5, 2026</td>
+              <td><span class="status-badge status-pending">Pending</span></td>
+              <td>
+                <button class="action-btn">Review</button>
+                <button class="action-btn action-btn-danger">Dismiss</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Payments Tab -->
+    <div id="payments" class="tab-content">
+      <div class="data-table">
+        <div class="table-header">
+          <h2 class="table-title">Recent Payouts</h2>
+          <input type="text" class="search-box" placeholder="Search payments...">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Sarah Chen</strong></td>
+              <td>$2,104.00</td>
+              <td>Stripe</td>
+              <td>Feb 1, 2026</td>
+              <td><span class="status-badge status-active">Completed</span></td>
+              <td>
+                <button class="action-btn">View Details</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Jessica Park</strong></td>
+              <td>$1,892.00</td>
+              <td>Stripe</td>
+              <td>Feb 1, 2026</td>
+              <td><span class="status-badge status-active">Completed</span></td>
+              <td>
+                <button class="action-btn">View Details</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Alex Rodriguez</strong></td>
+              <td>$1,247.00</td>
+              <td>Stripe</td>
+              <td>Feb 1, 2026</td>
+              <td><span class="status-badge status-pending">Processing</span></td>
+              <td>
+                <button class="action-btn">View Details</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Analytics Tab -->
+    <div id="analytics" class="tab-content">
+      <div class="data-table">
+        <div class="table-header">
+          <h2 class="table-title">Platform Analytics</h2>
+        </div>
+        <div style="padding: 3rem; text-align: center; color: rgba(255,255,255,0.6);">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+          <p>Detailed analytics charts coming soon...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Remove active from all tab buttons
+      document.querySelectorAll('.tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabName).classList.add('active');
+
+      // Set button active
+      event.target.classList.add('active');
+    }
+  </script>
+
+  <!-- Supabase Integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Initialize Supabase Client (global scope)
+    var supabase = window.supabase.createClient(
+      'https://mllqzeaxqusoryteaxzg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sbHF6ZWF4cXVzb3J5dGVheHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODA1NzAsImV4cCI6MjA4NjA1NjU3MH0.s9CAe91gUG8uZ7Nrjd1pIX9YYvpNKa2lOrt6HDUarec'
+    );
+
+    let currentUser = null;
+
+    // Load admin analytics
+    async function loadStats() {
+      try {
+        // Get total cast members
+        const { count: totalCast, error: castError } = await supabase
+          .from('cast_members')
+          .select('*', { count: 'exact', head: true });
+
+        // Get total scenarios (as episodes proxy)
+        const { count: totalScenarios, error: scenariosError } = await supabase
+          .from('scenarios')
+          .select('*', { count: 'exact', head: true });
+
+        // Get total games
+        const { count: totalGames, error: gamesError } = await supabase
+          .from('mm_games')
+          .select('*', { count: 'exact', head: true });
+
+        // Get total users
+        const { count: totalUsers, error: usersError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+
+        // Update stat cards
+        const statCards = document.querySelectorAll('.stat-card');
+        if (statCards[0]) statCards[0].querySelector('.stat-value').textContent = totalCast || 0;
+        if (statCards[1]) statCards[1].querySelector('.stat-value').textContent = totalScenarios || 0;
+        if (statCards[2]) statCards[2].querySelector('.stat-value').textContent = totalGames || 0;
+        if (statCards[3]) statCards[3].querySelector('.stat-value').textContent = totalUsers || 0;
+
+        // Update labels too
+        if (statCards[2]) statCards[2].querySelector('.stat-label').textContent = 'Total Games';
+        if (statCards[3]) statCards[3].querySelector('.stat-label').textContent = 'Total Users';
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    // Load users
+    async function loadUsers() {
+      try {
+        const { data: users, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        if (error) throw error;
+
+        const tbody = document.querySelector('#users tbody');
+        if (!tbody) return;
+
+        if (!users || users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No users yet</td></tr>';
+          return;
+        }
+
+        // Get cast member counts and scenario responses for each user
+        tbody.innerHTML = await Promise.all(users.map(async user => {
+          // Check if user is a cast member
+          const { count: scenarioCount } = await supabase
+            .from('scenario_responses')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
+
+          const statusClass = user.role === 'admin' ? 'active' : (user.role === 'director' ? 'pending' : 'active');
+          const statusText = user.role || 'cast';
+
+          return `
+            <tr>
+              <td><strong>${user.display_name || user.email?.split('@')[0] || 'Unknown'}</strong></td>
+              <td>${user.email || 'N/A'}</td>
+              <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</td>
+              <td><span class="status-badge status-${statusClass}">${statusText}</span></td>
+              <td>${scenarioCount || 0}</td>
+              <td>$${Math.floor((scenarioCount || 0) * 25)}</td>
+              <td>
+                <button class="action-btn" onclick="viewUser('${user.id}')">View</button>
+              </td>
+            </tr>
+          `;
+        })).then(rows => rows.join(''));
+      } catch (error) {
+        console.error('Error loading users:', error);
+        const tbody = document.querySelector('#users tbody');
+        if (tbody) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--color-error);">Error loading users: ' + error.message + '</td></tr>';
+        }
+      }
+    }
+
+    // View user details
+    function viewUser(userId) {
+      alert('User details view coming soon for user: ' + userId);
+      // TODO: Implement user details modal
+    }
+
+    // Initialize
+    async function init() {
+      try {
+        // Check authentication
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+          alert('Please sign in to access admin dashboard');
+          window.location.href = '../index.html';
+          return;
+        }
+
+        currentUser = user;
+
+        // Check if admin
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError || profile?.role !== 'admin') {
+          alert('Access denied. Admin only.');
+          window.location.href = '../index.html';
+          return;
+        }
+
+        // Load data
+        await loadStats();
+        await loadUsers();
+      } catch (error) {
+        console.error('Error initializing admin dashboard:', error);
+        alert('Error loading admin dashboard: ' + error.message);
+      }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

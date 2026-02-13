@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-purple: #8B5CF6;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+      padding-top: 80px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.125rem;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .section h2 {
+      font-size: 1.75rem;
+      color: var(--color-gold);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section h3 {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 1.5rem 0 0.75rem;
+    }
+
+    .section p {
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 1rem;
+    }
+
+    .section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .section li {
+      padding: 0.5rem 0 0.5rem 1.5rem;
+      position: relative;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .section li:before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--color-gold);
+    }
+
+    .faq-item {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .faq-question {
+      font-weight: 600;
+      color: var(--color-gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .faq-answer {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+    }
+
+    .contact-section {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(212, 175, 55, 0.1));
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 16px;
+    }
+
+    .contact-section h2 {
+      color: var(--color-gold);
+      margin-bottom: 1rem;
+    }
+
+    .contact-section a {
+      color: var(--color-purple);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .contact-section a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Include global nav -->
+  <div id="globalNavContainer"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1>🏰 Help Center</h1>
+      <p>Everything you need to know about Mansion Mayhem</p>
+    </div>
+
+    <!-- Getting Started -->
+    <div class="section">
+      <h2>🚀 Getting Started</h2>
+      <p>Welcome to Mansion Mayhem! Here's how to join the drama:</p>
+
+      <h3>Joining a Game</h3>
+      <ul>
+        <li><strong>Browse Games:</strong> Click "Games" → "Browse Games" to see all available games</li>
+        <li><strong>Invite Link:</strong> If you have an invite link, click it to join directly</li>
+        <li><strong>Public vs Private:</strong> Public games appear in browse, private games require invite links</li>
+        <li><strong>Game Status:</strong> Look for "Lobby" or "Active" status to join games still accepting players</li>
+      </ul>
+
+      <h3>Creating a Game (Premium Only)</h3>
+      <ul>
+        <li>Click "Games" → "Start Game"</li>
+        <li>Choose your recruitment method (Public Browse or Invite Only)</li>
+        <li>Set cast limit and game settings</li>
+        <li>Share invite link with friends for private games</li>
+      </ul>
+    </div>
+
+    <!-- Gameplay Flow -->
+    <div class="section">
+      <h2>🎮 Gameplay Flow</h2>
+
+      <h3>1. Lobby Phase</h3>
+      <p>Before the game starts, you can:</p>
+      <ul>
+        <li><strong>Voice Introduction:</strong> Record an intro to introduce yourself to other players</li>
+        <li><strong>Link-Up Requests:</strong> Send alliance proposals to other players</li>
+        <li><strong>Alliance Rooms:</strong> See who's forming alliances</li>
+        <li><strong>Alliance Chat:</strong> Private strategy discussions with alliance members</li>
+      </ul>
+
+      <h3>2. Active Scenarios</h3>
+      <p>Once the game starts:</p>
+      <ul>
+        <li><strong>Respond Now:</strong> Click the "Respond Now" button on your dashboard</li>
+        <li><strong>Scenario Types:</strong> Confrontations, confessions, alliances, and challenges</li>
+        <li><strong>Voice Responses:</strong> Record your voice to respond dramatically</li>
+        <li><strong>Deadlines:</strong> Watch the timer - late responses may not count!</li>
+      </ul>
+
+      <h3>3. Voting & Elimination</h3>
+      <ul>
+        <li><strong>Queen Ceremony:</strong> The Queen nominates players for the hot seat</li>
+        <li><strong>Hot Seat Voting:</strong> Players vote to eliminate one nominee</li>
+        <li><strong>Public Voting:</strong> Fans can also vote (if enabled)</li>
+      </ul>
+
+      <h3>4. Results & Episodes</h3>
+      <ul>
+        <li>Watch AI-generated episodes in the Gallery</li>
+        <li>See vote breakdowns and eliminations</li>
+        <li>Track your stats and earnings</li>
+      </ul>
+    </div>
+
+    <!-- The Tea Room -->
+    <div class="section">
+      <h2>☕ The Tea Room</h2>
+      <p>The Tea Room is where you spill the hottest drama through voice notes:</p>
+
+      <h3>Recording Tips</h3>
+      <ul>
+        <li>Click "SPILL TEA" to start recording</li>
+        <li>Keep it under 2 minutes for maximum engagement</li>
+        <li>Be dramatic, be real, be yourself!</li>
+        <li>Quality matters - find a quiet space</li>
+      </ul>
+
+      <h3>Filters</h3>
+      <ul>
+        <li><strong>Hot Tea:</strong> Drama score 70+ (most controversial)</li>
+        <li><strong>Fresh Brew:</strong> Posted in last 24 hours</li>
+        <li><strong>Trending:</strong> 10+ reactions</li>
+        <li><strong>All Tea:</strong> Everything</li>
+      </ul>
+
+      <h3>Reactions</h3>
+      <ul>
+        <li>☕ Sip - You're here for it</li>
+        <li>💧 Spill - Keeping the tea flowing</li>
+        <li>🔥 Hot - This is fire!</li>
+      </ul>
+    </div>
+
+    <!-- FAQ -->
+    <div class="section">
+      <h2>❓ Frequently Asked Questions</h2>
+
+      <div class="faq-item">
+        <div class="faq-question">Q: How do I get Premium access?</div>
+        <div class="faq-answer">A: Visit Settings → Subscription to upgrade. Premium users can create games and access exclusive features.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Q: Can I join multiple games at once?</div>
+        <div class="faq-answer">A: Yes! You can be a cast member in multiple active games simultaneously.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Q: What happens if I miss a scenario deadline?</div>
+        <div class="faq-answer">A: You may receive a penalty or your response won't be included in the episode. Always check deadlines!</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Q: How do I leave a game?</div>
+        <div class="faq-answer">A: Contact the game director or use the "Leave Game" option in game settings. Note: This may affect your stats.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Q: Are voice notes moderated?</div>
+        <div class="faq-answer">A: Yes, all voice notes go through moderation to ensure community guidelines are followed.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Q: How do I report inappropriate content?</div>
+        <div class="faq-answer">A: Click the report button on any content. Our moderation team reviews all reports within 24 hours.</div>
+      </div>
+    </div>
+
+    <!-- Contact Support -->
+    <div class="contact-section">
+      <h2>💬 Need More Help?</h2>
+      <p>Our support team is here for you!</p>
+      <p style="margin-top: 1rem;">
+        <a href="mailto:support@mansionmayhem.com">support@mansionmayhem.com</a>
+      </p>
+      <p style="margin-top: 0.5rem; color: rgba(255,255,255,0.6);">
+        We typically respond within 24 hours
+      </p>
+    </div>
+  </div>
+
+  <!-- Load global nav -->
+  <script type="module">
+    import { supabaseClient as supabase } from './js/supabase-module.js'
+
+    // Load global nav
+    fetch('/includes/global-nav.html')
+      .then(res => res.text())
+      .then(html => {
+        const container = document.getElementById('globalNavContainer')
+        container.innerHTML = html
+
+        // Execute scripts manually since innerHTML doesn't run them
+        const scripts = container.querySelectorAll('script')
+        scripts.forEach(script => {
+          const newScript = document.createElement('script')
+          if (script.type) newScript.type = script.type
+          if (script.src) {
+            newScript.src = script.src
+          } else {
+            newScript.textContent = script.textContent
+          }
+          document.body.appendChild(newScript)
+          script.remove()
+        })
+      })
+      .catch(err => console.error('Failed to load navigation:', err))
+  </script>
+</body>
+</html>

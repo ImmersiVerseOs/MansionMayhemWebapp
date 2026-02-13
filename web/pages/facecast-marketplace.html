@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceCast Marketplace - Mansion Mayhem</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+</head>
+<body style="background: var(--color-background);">
+  <div style="max-width: var(--max-width-7xl); margin: 0 auto; padding: var(--space-3xl) var(--space-xl);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3xl);">
+      <div>
+        <h1 style="font-size: var(--font-4xl); font-weight: var(--font-bold); margin-bottom: var(--space-sm);">FaceCast Marketplace</h1>
+        <p style="color: var(--color-text-secondary);">Manage all FaceCasts and consent records</p>
+      </div>
+      <a href="director-console.html" class="btn btn-ghost">← Back to Console</a>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card" style="margin-bottom: var(--space-2xl); padding: var(--space-xl);">
+      <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+        <input type="text" placeholder="Search by name or ID..." style="flex: 1; min-width: 300px;">
+        <select style="min-width: 150px;">
+          <option>All Status</option>
+          <option>Active</option>
+          <option>Pending</option>
+          <option>Revoked</option>
+        </select>
+        <select style="min-width: 150px;">
+          <option>All Types</option>
+          <option>FaceCast</option>
+          <option>Generic</option>
+        </select>
+        <button class="btn btn-primary">Search</button>
+      </div>
+    </div>
+    
+    <!-- Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-3xl);">
+      <div class="card">
+        <div style="color: var(--color-text-secondary); font-size: var(--font-sm); margin-bottom: var(--space-sm);">Total FaceCasts</div>
+        <div style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-gold);">89</div>
+      </div>
+      <div class="card">
+        <div style="color: var(--color-text-secondary); font-size: var(--font-sm); margin-bottom: var(--space-sm);">Generic Characters</div>
+        <div style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-gold);">38</div>
+      </div>
+      <div class="card">
+        <div style="color: var(--color-text-secondary); font-size: var(--font-sm); margin-bottom: var(--space-sm);">Pending Approval</div>
+        <div style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-warning);">5</div>
+      </div>
+      <div class="card">
+        <div style="color: var(--color-text-secondary); font-size: var(--font-sm); margin-bottom: var(--space-sm);">Total Usage (This Month)</div>
+        <div style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-gold);">1,247</div>
+      </div>
+    </div>
+    
+    <!-- FaceCast List -->
+    <div class="card">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--color-border);">
+            <th style="padding: var(--space-lg); text-align: left; color: var(--color-gold);">Cast Member</th>
+            <th style="padding: var(--space-lg); text-align: left; color: var(--color-gold);">Type</th>
+            <th style="padding: var(--space-lg); text-align: left; color: var(--color-gold);">Created</th>
+            <th style="padding: var(--space-lg); text-align: left; color: var(--color-gold);">Archetype</th>
+            <th style="padding: var(--space-lg); text-align: left; color: var(--color-gold);">Status</th>
+            <th style="padding: var(--space-lg); text-align: left; color: var(--color-gold);">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="facecastTableBody">
+          <tr>
+            <td colspan="6" style="padding: var(--space-3xl); text-align: center; color: var(--color-text-secondary);">
+              Loading FaceCasts...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabaseClient as supabase, getCurrentUser } from '../js/supabase-module.js'
+    import { requireAuth } from '../js/auth.js'
+
+    let currentUser = null
+
+    // Initialize
+    async function init() {
+      currentUser = await requireAuth()
+      if (!currentUser) return
+
+      // Check if admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', currentUser.id)
+        .single()
+
+      if (profile?.role !== 'admin') {
+        alert('Access denied. Admin only.')
+        window.location.href = 'player-dashboard.html'
+        return
+      }
+
+      await loadStats()
+      await loadFaceCasts()
+    }
+
+    // Load stats
+    async function loadStats() {
+      try {
+        // Get facecasts data
+        const { data: facecasts, error } = await supabase
+          .from('facecasts')
+          .select('*')
+
+        if (error) throw error
+
+        // Calculate stats
+        const totalFaceCasts = facecasts?.filter(f => f.method === 'photos' || f.method === 'cameos').length || 0
+        const genericCharacters = facecasts?.filter(f => f.method === 'generic').length || 0
+        const totalCharacters = facecasts?.length || 0
+
+        // Update UI
+        const statCards = document.querySelectorAll('.card')
+        statCards[1].querySelector('div:nth-child(2)').textContent = totalFaceCasts
+        statCards[2].querySelector('div:nth-child(2)').textContent = genericCharacters
+        statCards[4].querySelector('div:nth-child(2)').textContent = totalCharacters
+
+        console.log('Stats loaded:', { totalFaceCasts, genericCharacters, totalCharacters })
+      } catch (error) {
+        console.error('Error loading stats:', error)
+      }
+    }
+
+    // Load FaceCasts
+    async function loadFaceCasts() {
+      try {
+        const { data: facecasts, error } = await supabase
+          .from('facecasts')
+          .select(`
+            *,
+            profiles(display_name, email, full_name, archetype)
+          `)
+          .order('created_at', { ascending: false })
+          .limit(50)
+
+        if (error) throw error
+
+        const tbody = document.getElementById('facecastTableBody')
+
+        if (!facecasts || facecasts.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="padding: var(--space-3xl); text-align: center; color: var(--color-text-secondary);">
+                No FaceCasts found. Cast members will appear here after character setup.
+              </td>
+            </tr>
+          `
+          return
+        }
+
+        tbody.innerHTML = facecasts.map(facecast => {
+          const name = facecast.character_name || facecast.profiles?.display_name || facecast.profiles?.full_name || facecast.profiles?.email?.split('@')[0] || 'Anonymous'
+          const type = facecast.method === 'generic' ? 'Generic' : facecast.method === 'photos' ? 'Photos' : 'Cameos'
+          const typeClass = facecast.method === 'generic' ? 'badge-secondary' : 'badge-info'
+          const createdDate = new Date(facecast.created_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          })
+          const archetype = facecast.profiles?.archetype || 'N/A'
+          const status = facecast.model_status === 'ready' ? 'Active' : facecast.model_status === 'training' ? 'Training' : 'Pending'
+          const statusClass = facecast.model_status === 'ready' ? 'badge-success' : facecast.model_status === 'training' ? 'badge-warning' : 'badge-secondary'
+
+          return `
+            <tr style="border-bottom: 1px solid var(--color-border);">
+              <td style="padding: var(--space-lg);">
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                  <div style="width: 40px; height: 40px; background: var(--gradient-gold-rose); border-radius: 50%; display: flex; align-items: center; justify-content: center;">👤</div>
+                  <div>
+                    <div style="font-weight: var(--font-semibold);">${name}</div>
+                    <div style="font-size: var(--font-sm); color: var(--color-text-secondary);">ID: ${facecast.id.substring(0, 8)}...</div>
+                  </div>
+                </div>
+              </td>
+              <td style="padding: var(--space-lg);">
+                <span class="badge ${typeClass}">${type}</span>
+              </td>
+              <td style="padding: var(--space-lg); color: var(--color-text-secondary);">${createdDate}</td>
+              <td style="padding: var(--space-lg);">${archetype}</td>
+              <td style="padding: var(--space-lg);">
+                <span class="badge ${statusClass}">${status}</span>
+              </td>
+              <td style="padding: var(--space-lg);">
+                <button class="btn btn-ghost btn-sm" onclick="alert('FaceCast: ${name}\\nType: ${type}\\nArchetype: ${archetype}\\nMethod: ${facecast.method}\\nStatus: ${status}')">View</button>
+              </td>
+            </tr>
+          `
+        }).join('')
+
+        console.log(`Loaded ${facecasts.length} FaceCasts`)
+      } catch (error) {
+        console.error('Error loading FaceCasts:', error)
+        document.getElementById('facecastTableBody').innerHTML = `
+          <tr>
+            <td colspan="6" style="padding: var(--space-3xl); text-align: center;">
+              <div style="color: var(--color-error); margin-bottom: var(--space-md);">Error loading FaceCasts</div>
+              <div style="color: var(--color-text-secondary); font-size: var(--font-sm);">${error.message}</div>
+            </td>
+          </tr>
+        `
+      }
+    }
+
+    // Initialize on load
+    init()
+  </script>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

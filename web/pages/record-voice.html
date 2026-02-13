@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Record Voice Note - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-error: #EF4444;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    
+    .nav-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-gold);
+    }
+    
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6rem 2rem 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    
+    .recorder-container {
+      width: 100%;
+      text-align: center;
+    }
+    
+    .recording-status {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .recording-status.active {
+      color: var(--color-error);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .record-button {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: var(--gradient-gold);
+      border: 4px solid rgba(212, 175, 55, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 0 auto 2rem;
+      box-shadow: 0 10px 40px rgba(212, 175, 55, 0.3);
+    }
+    
+    .record-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 50px rgba(212, 175, 55, 0.5);
+    }
+    
+    .record-button.recording {
+      background: var(--color-error);
+      border-color: rgba(239, 68, 68, 0.5);
+      animation: recordPulse 1.5s infinite;
+    }
+    
+    @keyframes recordPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+    
+    .timer {
+      font-size: 3rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .waveform-display {
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      margin-bottom: 2rem;
+      padding: 0 2rem;
+    }
+    
+    .wave-bar {
+      width: 4px;
+      background: rgba(212, 175, 55, 0.3);
+      border-radius: 2px;
+      transition: all 0.1s;
+    }
+    
+    .wave-bar.active {
+      background: var(--gradient-gold);
+    }
+    
+    .type-selector {
+      margin-bottom: 2rem;
+    }
+    
+    .type-label {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 1rem;
+      display: block;
+    }
+    
+    .type-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    
+    .type-option {
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .type-option:hover,
+    .type-option.selected {
+      background: rgba(212, 175, 55, 0.1);
+      border-color: var(--color-gold);
+    }
+    
+    .type-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .type-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .caption-input {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      font-family: inherit;
+      margin-bottom: 2rem;
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    .caption-input:focus {
+      outline: none;
+      border-color: var(--color-gold);
+    }
+    
+    .caption-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      width: 100%;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 1rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .instructions {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 2rem;
+      text-align: left;
+    }
+    
+    .instructions strong {
+      color: var(--color-gold);
+    }
+    
+    .instructions ul {
+      margin-top: 0.5rem;
+      padding-left: 1.5rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.875rem;
+    }
+    
+    .instructions li {
+      margin-bottom: 0.25rem;
+    }
+
+    /* Audio Quality Meter Styles */
+    .audio-quality-meter {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: none;
+    }
+
+    .audio-quality-meter.active {
+      display: block;
+    }
+
+    .quality-indicator {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .traffic-light {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .traffic-light-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      opacity: 0.2;
+      transition: all 0.3s;
+    }
+
+    .traffic-light-circle.red {
+      background: #EF4444;
+    }
+
+    .traffic-light-circle.yellow {
+      background: #F59E0B;
+    }
+
+    .traffic-light-circle.green {
+      background: #10B981;
+    }
+
+    .traffic-light-circle.active {
+      opacity: 1;
+      box-shadow: 0 0 20px currentColor;
+    }
+
+    .quality-info {
+      flex: 1;
+    }
+
+    .quality-status {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+
+    .quality-score {
+      font-size: 2rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .volume-level {
+      margin-bottom: 1.5rem;
+    }
+
+    .volume-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 0.5rem;
+    }
+
+    .volume-db {
+      font-weight: 600;
+      color: var(--color-gold);
+    }
+
+    .volume-meter {
+      height: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .meter-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10B981 0%, #F59E0B 50%, #EF4444 100%);
+      transition: width 0.1s ease-out;
+      border-radius: 15px;
+    }
+
+    .volume-warning {
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .volume-warning.show {
+      display: block;
+    }
+
+    .volume-warning.too-quiet {
+      background: rgba(239, 68, 68, 0.1);
+      color: #EF4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .volume-warning.too-loud {
+      background: rgba(245, 158, 11, 0.1);
+      color: #F59E0B;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .volume-warning.perfect {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .audio-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .metric-name {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .metric-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .metric-status.excellent {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10B981;
+    }
+
+    .metric-status.good {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22C55E;
+    }
+
+    .metric-status.fair {
+      background: rgba(245, 158, 11, 0.2);
+      color: #F59E0B;
+    }
+
+    .metric-status.poor {
+      background: rgba(239, 68, 68, 0.2);
+      color: #EF4444;
+    }
+
+    .suggestions-panel {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      display: none;
+    }
+
+    .suggestions-panel.show {
+      display: block;
+    }
+
+    .suggestions-title {
+      font-weight: 600;
+      color: var(--color-gold);
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .suggestions-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .suggestions-list li {
+      font-size: 0.813rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 0.5rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .suggestions-list li:before {
+      content: "💡";
+      position: absolute;
+      left: 0;
+    }
+
+    @media (max-width: 768px) {
+      .type-options {
+        grid-template-columns: 1fr;
+      }
+
+      .audio-quality-meter {
+        padding: 1rem;
+      }
+
+      .quality-indicator {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .traffic-light {
+        flex-direction: row;
+      }
+
+      .audio-metrics {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <div class="nav" style="backdrop-filter: blur(10px); background: rgba(10, 10, 10, 0.9); border-bottom: 1px solid rgba(212, 175, 55, 0.2); position: fixed; top: 0; left: 0; right: 0; z-index: 1000;">
+    <button class="nav-btn" onclick="window.location.href='tea-room.html'">← Cancel</button>
+    <div class="nav-title">Record Voice Note</div>
+    <button class="nav-btn" id="signOutBtnTop" style="color: #EF4444;">Sign Out</button>
+  </div>
+  
+  <div class="content">
+    <div class="recorder-container">
+      <div class="recording-status" id="status">TAP TO RECORD</div>
+      
+      <button class="record-button" id="recordBtn" onclick="toggleRecording()">
+        🎙️
+      </button>
+      
+      <div class="timer" id="timer">00:00</div>
+      
+      <div class="waveform-display" id="waveform">
+        <div class="wave-bar" style="height: 20px;"></div>
+        <div class="wave-bar" style="height: 35px;"></div>
+        <div class="wave-bar" style="height: 25px;"></div>
+        <div class="wave-bar" style="height: 40px;"></div>
+        <div class="wave-bar" style="height: 30px;"></div>
+        <div class="wave-bar" style="height: 45px;"></div>
+        <div class="wave-bar" style="height: 35px;"></div>
+        <div class="wave-bar" style="height: 28px;"></div>
+        <div class="wave-bar" style="height: 38px;"></div>
+        <div class="wave-bar" style="height: 42px;"></div>
+      </div>
+
+      <!-- Audio Quality Meter -->
+      <div class="audio-quality-meter" id="qualityMeter">
+        <div class="quality-indicator">
+          <div class="traffic-light">
+            <div class="traffic-light-circle green" id="greenLight"></div>
+            <div class="traffic-light-circle yellow" id="yellowLight"></div>
+            <div class="traffic-light-circle red" id="redLight"></div>
+          </div>
+          <div class="quality-info">
+            <div class="quality-status" id="qualityStatus">Excellent Quality</div>
+            <div class="quality-score"><span id="qualityScore">100</span>/100</div>
+          </div>
+        </div>
+
+        <div class="volume-level">
+          <div class="volume-label">
+            <span>Volume Level</span>
+            <span class="volume-db" id="volumeDb">0 dB</span>
+          </div>
+          <div class="volume-meter">
+            <div class="meter-fill" id="meterFill" style="width: 0%;"></div>
+          </div>
+          <div class="volume-warning" id="volumeWarning"></div>
+        </div>
+
+        <div class="audio-metrics">
+          <div class="metric-card">
+            <div class="metric-name">Volume</div>
+            <div class="metric-value">
+              <span class="metric-status excellent" id="volumeStatus">Excellent</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Background Noise</div>
+            <div class="metric-value">
+              <span class="metric-status excellent" id="noiseStatus">Excellent</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Signal Quality</div>
+            <div class="metric-value">
+              <span class="metric-status excellent" id="signalStatus">Excellent</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-name">Dynamic Range</div>
+            <div class="metric-value">
+              <span class="metric-status excellent" id="rangeStatus">Excellent</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="suggestions-panel" id="suggestionsPanel">
+          <div class="suggestions-title">💡 Suggestions for Better Quality</div>
+          <ul class="suggestions-list" id="suggestionsList"></ul>
+        </div>
+      </div>
+
+      <div class="type-selector" id="typeSelector" style="display: none;">
+        <label class="type-label">What type of voice note is this?</label>
+        <div class="type-options">
+          <div class="type-option" onclick="selectType('confession')">
+            <div class="type-icon">🎭</div>
+            <div class="type-name">Confession</div>
+          </div>
+          <div class="type-option" onclick="selectType('response')">
+            <div class="type-icon">💬</div>
+            <div class="type-name">Response</div>
+          </div>
+          <div class="type-option" onclick="selectType('drama')">
+            <div class="type-icon">⚡</div>
+            <div class="type-name">Drama</div>
+          </div>
+          <div class="type-option" onclick="selectType('update')">
+            <div class="type-icon">📢</div>
+            <div class="type-name">Update</div>
+          </div>
+        </div>
+      </div>
+      
+      <textarea 
+        class="caption-input" 
+        id="caption" 
+        placeholder="Add a caption (optional)..."
+        style="display: none;"
+      ></textarea>
+      
+      <div class="action-buttons" id="actions" style="display: none;">
+        <button class="btn btn-secondary" onclick="discardRecording()">Discard</button>
+        <button class="btn btn-primary" onclick="postRecording(event)">Post</button>
+      </div>
+      
+      <div class="instructions">
+        <strong>💡 Tips for Great Voice Notes:</strong>
+        <ul>
+          <li>Keep it under 2 minutes for max engagement</li>
+          <li>Be authentic - drama is encouraged!</li>
+          <li>React to other cast members' notes</li>
+          <li>Share your real feelings and strategies</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    console.log('🎯 Script loading...');
+
+    import { supabaseClient as supabase, getCurrentUser, signOut } from '../js/supabase-module.js'
+    import { requireAuth } from '../js/auth.js'
+
+    console.log('✅ Imports successful');
+
+    let isRecording = false;
+    let seconds = 0;
+    let timerInterval = null;
+    let selectedType = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let audioBlob = null;
+    let mediaStream = null;
+    let audioContext = null;
+    let analyser = null;
+    let animationId = null;
+    let currentUser = null;
+    let recordedMimeType = 'audio/webm'; // Store the actual format used for recording
+    let qualityAnalyzer = null;
+    let qualityMonitoringInterval = null;
+
+    // AudioQualityAnalyzer class for professional audio analysis
+    class AudioQualityAnalyzer {
+      constructor(audioContext, analyser) {
+        this.audioContext = audioContext;
+        this.analyser = analyser;
+        this.analyser.fftSize = 2048;
+        this.bufferLength = this.analyser.frequencyBinCount;
+        this.dataArray = new Uint8Array(this.bufferLength);
+        this.timeDomainArray = new Uint8Array(this.bufferLength);
+        this.volumeHistory = [];
+        this.maxHistoryLength = 50;
+      }
+
+      analyze() {
+        // Get frequency and time domain data
+        this.analyser.getByteFrequencyData(this.dataArray);
+        this.analyser.getByteTimeDomainData(this.timeDomainArray);
+
+        // Calculate volume (RMS)
+        let sum = 0;
+        for (let i = 0; i < this.timeDomainArray.length; i++) {
+          const normalized = (this.timeDomainArray[i] - 128) / 128;
+          sum += normalized * normalized;
+        }
+        const rms = Math.sqrt(sum / this.timeDomainArray.length);
+
+        // Track volume history
+        this.volumeHistory.push(rms);
+        if (this.volumeHistory.length > this.maxHistoryLength) {
+          this.volumeHistory.shift();
+        }
+
+        // Calculate background noise (average of lowest frequency bins)
+        let noiseSum = 0;
+        for (let i = 0; i < 10; i++) {
+          noiseSum += this.dataArray[i];
+        }
+        const backgroundNoise = (noiseSum / 10) / 255;
+
+        // Calculate signal-to-noise ratio
+        const snr = rms / (backgroundNoise + 0.01);
+
+        // Detect clipping
+        let clippingCount = 0;
+        for (let i = 0; i < this.timeDomainArray.length; i++) {
+          if (this.timeDomainArray[i] >= 252 || this.timeDomainArray[i] <= 3) {
+            clippingCount++;
+          }
+        }
+        const clipping = clippingCount / this.timeDomainArray.length;
+
+        // Calculate dynamic range
+        const maxVolume = Math.max(...this.volumeHistory);
+        const minVolume = Math.min(...this.volumeHistory);
+        const dynamicRange = maxVolume / (minVolume + 0.01);
+
+        // Calculate peak in dB
+        const peak = Math.max(...Array.from(this.timeDomainArray).map(v => Math.abs(v - 128) / 128));
+        const peakDb = 20 * Math.log10(peak + 0.001);
+
+        return {
+          volume: rms,
+          backgroundNoise,
+          snr,
+          clipping,
+          dynamicRange,
+          peak,
+          peakDb
+        };
+      }
+
+      getQualityScore(metrics) {
+        let score = 100;
+
+        // Volume scoring (30 points)
+        if (metrics.volume < 0.2) {
+          score -= 30; // Too quiet
+        } else if (metrics.volume > 0.8) {
+          score -= 25; // Too loud
+        } else if (metrics.volume < 0.3 || metrics.volume > 0.7) {
+          score -= 10; // Acceptable but not perfect
+        }
+
+        // Background noise scoring (20 points)
+        if (metrics.backgroundNoise > 0.15) {
+          score -= 20; // High noise
+        } else if (metrics.backgroundNoise > 0.1) {
+          score -= 10; // Moderate noise
+        } else if (metrics.backgroundNoise > 0.05) {
+          score -= 5; // Low noise
+        }
+
+        // Signal-to-noise ratio (15 points)
+        if (metrics.snr < 3) {
+          score -= 15; // Poor SNR
+        } else if (metrics.snr < 5) {
+          score -= 10; // Fair SNR
+        } else if (metrics.snr < 10) {
+          score -= 5; // Good SNR
+        }
+
+        // Clipping detection (20 points)
+        if (metrics.clipping > 0.01) {
+          score -= 20; // Any significant clipping is bad
+        }
+
+        // Dynamic range (15 points)
+        if (metrics.dynamicRange < 2) {
+          score -= 10; // Too flat
+        } else if (metrics.dynamicRange > 20) {
+          score -= 15; // Too varied
+        } else if (metrics.dynamicRange > 15) {
+          score -= 5; // Slightly high
+        }
+
+        return Math.max(0, Math.min(100, Math.round(score)));
+      }
+
+      getSuggestions(metrics, score) {
+        const suggestions = [];
+
+        if (metrics.volume < 0.2) {
+          suggestions.push("Speak louder or move closer to the microphone");
+        } else if (metrics.volume > 0.8) {
+          suggestions.push("Speak softer or move away from the microphone");
+        }
+
+        if (metrics.backgroundNoise > 0.1) {
+          suggestions.push("Find a quieter location to record");
+          suggestions.push("Turn off fans, AC, or other noise sources");
+        }
+
+        if (metrics.clipping > 0.01) {
+          suggestions.push("Reduce your microphone input volume");
+          suggestions.push("Move further from the microphone");
+        }
+
+        if (metrics.snr < 5) {
+          suggestions.push("Improve room acoustics with soft materials");
+        }
+
+        if (metrics.dynamicRange > 15) {
+          suggestions.push("Try to maintain a consistent speaking volume");
+        }
+
+        if (suggestions.length === 0 && score < 80) {
+          suggestions.push("Try recording in a different location");
+          suggestions.push("Check your microphone settings");
+        }
+
+        return suggestions;
+      }
+    }
+
+    // Initialize
+    async function init() {
+      console.log('🚀 Init function called');
+      currentUser = await requireAuth()
+      console.log('👤 Current user:', currentUser);
+      if (!currentUser) return
+
+      // Sign out handler
+      document.getElementById('signOutBtnTop').addEventListener('click', async () => {
+        await signOut()
+      })
+    }
+
+    window.toggleRecording = async function() {
+      console.log('🎙️ Toggle recording called. isRecording:', isRecording);
+      if (!isRecording) {
+        await startRecording();
+      } else {
+        stopRecording();
+      }
+    }
+
+    async function startRecording() {
+      try {
+        // Request microphone access with professional constraints
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            channelCount: 1,
+            sampleRate: 48000,
+            sampleSize: 16,
+            googEchoCancellation: true,
+            googAutoGainControl: true,
+            googNoiseSuppression: true,
+            googHighpassFilter: true,
+            googTypingNoiseDetection: true
+          }
+        });
+
+        // Create MediaRecorder
+        const options = { mimeType: 'audio/webm' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+          options.mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            options.mimeType = '';
+          }
+        }
+
+        // Store the actual mimeType being used
+        recordedMimeType = options.mimeType || 'audio/webm';
+        console.log('Recording with format:', recordedMimeType);
+
+        mediaRecorder = new MediaRecorder(mediaStream, options);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          // Use the actual recorded format for the Blob
+          audioBlob = new Blob(audioChunks, { type: recordedMimeType });
+          console.log('Recording saved, format:', recordedMimeType, 'size:', audioBlob.size, 'bytes');
+        };
+
+        // Start recording
+        mediaRecorder.start();
+        isRecording = true;
+        seconds = 0;
+
+        // Setup audio visualization
+        setupAudioVisualization();
+
+        // Start quality monitoring
+        startQualityMonitoring();
+
+        // Update UI
+        document.getElementById('recordBtn').classList.add('recording');
+        document.getElementById('recordBtn').textContent = '⏹️';
+        document.getElementById('status').textContent = 'RECORDING';
+        document.getElementById('status').classList.add('active');
+
+        // Start timer
+        timerInterval = setInterval(() => {
+          seconds++;
+          updateTimer();
+        }, 1000);
+
+        console.log('Recording started...');
+
+      } catch (error) {
+        console.error('Error accessing microphone:', error);
+        alert('Could not access microphone. Please grant permission and try again.');
+      }
+    }
+
+    function setupAudioVisualization() {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(mediaStream);
+      source.connect(analyser);
+      analyser.fftSize = 256;
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function animate() {
+        if (!isRecording) return;
+
+        animationId = requestAnimationFrame(animate);
+        analyser.getByteFrequencyData(dataArray);
+
+        // Update waveform bars based on actual audio levels
+        const bars = document.querySelectorAll('.wave-bar');
+        bars.forEach((bar, index) => {
+          const step = Math.floor(bufferLength / bars.length);
+          const value = dataArray[index * step];
+          const height = (value / 255) * 60 + 10; // Scale to 10-70px
+          bar.style.height = height + 'px';
+
+          if (value > 50) {
+            bar.classList.add('active');
+          } else {
+            bar.classList.remove('active');
+          }
+        });
+      }
+
+      animate();
+    }
+
+    function stopRecording() {
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+
+      isRecording = false;
+      clearInterval(timerInterval);
+
+      // Stop quality monitoring
+      stopQualityMonitoring();
+
+      // Stop recording
+      mediaRecorder.stop();
+
+      // Stop media stream
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+
+      // Stop audio context
+      if (audioContext && audioContext.state !== 'closed') {
+        audioContext.close();
+      }
+
+      // Cancel animation
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+
+      // Update UI
+      document.getElementById('recordBtn').classList.remove('recording');
+      document.getElementById('recordBtn').textContent = '🎙️';
+      document.getElementById('status').textContent = 'RECORDING COMPLETE';
+      document.getElementById('status').classList.remove('active');
+
+      // Show editing options
+      document.getElementById('typeSelector').style.display = 'block';
+      document.getElementById('caption').style.display = 'block';
+      document.getElementById('actions').style.display = 'flex';
+
+      console.log('Recording stopped. Duration:', seconds, 'seconds');
+    }
+
+    function updateTimer() {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      document.getElementById('timer').textContent =
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    window.selectType = function(type) {
+      selectedType = type;
+      document.querySelectorAll('.type-option').forEach(opt => {
+        opt.classList.remove('selected');
+      });
+      event.target.closest('.type-option').classList.add('selected');
+    }
+
+    window.discardRecording = function() {
+      if (confirm('Are you sure you want to discard this recording?')) {
+        // Clean up
+        audioBlob = null;
+        audioChunks = [];
+        window.location.href = 'tea-room.html';
+      }
+    }
+
+    // Helper function to get file extension from mimeType
+    function getFileExtension(mimeType) {
+      if (mimeType.includes('webm')) return 'webm';
+      if (mimeType.includes('mp4')) return 'mp4';
+      if (mimeType.includes('ogg')) return 'ogg';
+      if (mimeType.includes('wav')) return 'wav';
+      return 'webm'; // Default fallback
+    }
+
+    window.postRecording = async function(event) {
+      if (!selectedType) {
+        alert('Please select a voice note type');
+        return;
+      }
+
+      if (!audioBlob) {
+        alert('No recording found. Please record again.');
+        return;
+      }
+
+      const caption = document.getElementById('caption').value.trim();
+
+      // Get the post button
+      const postBtn = event?.target || document.querySelector('.btn-primary');
+
+      try {
+        // Disable post button
+        if (postBtn) {
+          postBtn.disabled = true;
+          postBtn.textContent = 'Uploading...';
+        }
+
+        // Get the correct file extension based on recorded format
+        const fileExtension = getFileExtension(recordedMimeType);
+        const fileName = `${currentUser.id}/${Date.now()}.${fileExtension}`;
+
+        console.log('Uploading audio:', { fileName, contentType: recordedMimeType, size: audioBlob.size });
+
+        // Upload audio to Supabase Storage with correct content type
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('voice-notes')
+          .upload(fileName, audioBlob, {
+            contentType: recordedMimeType,
+            cacheControl: '3600'
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('voice-notes')
+          .getPublicUrl(fileName);
+
+        // Create voice note record using RPC function
+        const { data: voiceNoteId, error: createError } = await supabase.rpc('create_voice_note', {
+          p_user_id: currentUser.id,
+          p_note_type: selectedType,
+          p_audio_url: publicUrl,
+          p_duration: seconds,
+          p_caption: caption || null
+        });
+
+        if (createError) throw createError;
+
+        console.log('Voice note created:', voiceNoteId);
+
+        // Show success and redirect
+        alert('Voice note posted successfully! It will appear after moderation approval.');
+        window.location.href = 'tea-room.html';
+
+      } catch (error) {
+        console.error('Error posting voice note:', error);
+        alert('Failed to post voice note: ' + error.message);
+
+        // Re-enable button
+        if (postBtn) {
+          postBtn.disabled = false;
+          postBtn.textContent = 'Post';
+        }
+      }
+    }
+
+    // Quality Monitoring Functions
+    function startQualityMonitoring() {
+      if (!audioContext || !analyser) return;
+
+      // Create quality analyzer
+      qualityAnalyzer = new AudioQualityAnalyzer(audioContext, analyser);
+
+      // Show quality meter
+      document.getElementById('qualityMeter').classList.add('active');
+
+      // Start monitoring loop
+      qualityMonitoringInterval = setInterval(updateQualityMeter, 100);
+    }
+
+    function stopQualityMonitoring() {
+      if (qualityMonitoringInterval) {
+        clearInterval(qualityMonitoringInterval);
+        qualityMonitoringInterval = null;
+      }
+
+      // Hide quality meter
+      document.getElementById('qualityMeter').classList.remove('active');
+
+      qualityAnalyzer = null;
+    }
+
+    function updateQualityMeter() {
+      if (!qualityAnalyzer) return;
+
+      const metrics = qualityAnalyzer.analyze();
+      const score = qualityAnalyzer.getQualityScore(metrics);
+      const suggestions = qualityAnalyzer.getSuggestions(metrics, score);
+
+      // Update score
+      document.getElementById('qualityScore').textContent = score;
+
+      // Update traffic light
+      updateTrafficLight(score);
+
+      // Update quality status text
+      let statusText = 'Poor Quality';
+      if (score >= 80) statusText = 'Excellent Quality';
+      else if (score >= 60) statusText = 'Good Quality';
+      document.getElementById('qualityStatus').textContent = statusText;
+
+      // Update volume meter
+      updateVolumeMeter(metrics.volume, metrics.peak, metrics.peakDb);
+
+      // Update detailed metrics
+      updateDetailedMetrics(metrics);
+
+      // Update suggestions
+      updateSuggestions(suggestions);
+    }
+
+    function updateTrafficLight(score) {
+      const greenLight = document.getElementById('greenLight');
+      const yellowLight = document.getElementById('yellowLight');
+      const redLight = document.getElementById('redLight');
+
+      greenLight.classList.remove('active');
+      yellowLight.classList.remove('active');
+      redLight.classList.remove('active');
+
+      if (score >= 80) {
+        greenLight.classList.add('active');
+      } else if (score >= 60) {
+        yellowLight.classList.add('active');
+      } else {
+        redLight.classList.add('active');
+      }
+    }
+
+    function updateVolumeMeter(volume, peak, peakDb) {
+      const meterFill = document.getElementById('meterFill');
+      const volumeDb = document.getElementById('volumeDb');
+      const volumeWarning = document.getElementById('volumeWarning');
+
+      // Update meter fill (0-100%)
+      const percentage = Math.min(100, volume * 100);
+      meterFill.style.width = percentage + '%';
+
+      // Update dB display
+      volumeDb.textContent = peakDb.toFixed(1) + ' dB';
+
+      // Update warning
+      volumeWarning.className = 'volume-warning';
+      if (volume < 0.2) {
+        volumeWarning.classList.add('show', 'too-quiet');
+        volumeWarning.textContent = '⚠️ Too quiet - speak louder or move closer';
+      } else if (volume > 0.8) {
+        volumeWarning.classList.add('show', 'too-loud');
+        volumeWarning.textContent = '⚠️ Too loud - speak softer or move away';
+      } else if (volume >= 0.3 && volume <= 0.7) {
+        volumeWarning.classList.add('show', 'perfect');
+        volumeWarning.textContent = '✓ Perfect volume level';
+      }
+    }
+
+    function updateDetailedMetrics(metrics) {
+      // Volume status
+      const volumeStatus = document.getElementById('volumeStatus');
+      if (metrics.volume >= 0.3 && metrics.volume <= 0.7) {
+        volumeStatus.textContent = 'Excellent';
+        volumeStatus.className = 'metric-status excellent';
+      } else if (metrics.volume >= 0.2 && metrics.volume <= 0.8) {
+        volumeStatus.textContent = 'Good';
+        volumeStatus.className = 'metric-status good';
+      } else {
+        volumeStatus.textContent = 'Poor';
+        volumeStatus.className = 'metric-status poor';
+      }
+
+      // Background noise status
+      const noiseStatus = document.getElementById('noiseStatus');
+      if (metrics.backgroundNoise < 0.05) {
+        noiseStatus.textContent = 'Excellent';
+        noiseStatus.className = 'metric-status excellent';
+      } else if (metrics.backgroundNoise < 0.1) {
+        noiseStatus.textContent = 'Good';
+        noiseStatus.className = 'metric-status good';
+      } else if (metrics.backgroundNoise < 0.15) {
+        noiseStatus.textContent = 'Fair';
+        noiseStatus.className = 'metric-status fair';
+      } else {
+        noiseStatus.textContent = 'Poor';
+        noiseStatus.className = 'metric-status poor';
+      }
+
+      // Signal quality status (SNR)
+      const signalStatus = document.getElementById('signalStatus');
+      if (metrics.snr > 10) {
+        signalStatus.textContent = 'Excellent';
+        signalStatus.className = 'metric-status excellent';
+      } else if (metrics.snr > 5) {
+        signalStatus.textContent = 'Good';
+        signalStatus.className = 'metric-status good';
+      } else if (metrics.snr > 3) {
+        signalStatus.textContent = 'Fair';
+        signalStatus.className = 'metric-status fair';
+      } else {
+        signalStatus.textContent = 'Poor';
+        signalStatus.className = 'metric-status poor';
+      }
+
+      // Dynamic range status
+      const rangeStatus = document.getElementById('rangeStatus');
+      if (metrics.dynamicRange >= 3 && metrics.dynamicRange <= 15) {
+        rangeStatus.textContent = 'Excellent';
+        rangeStatus.className = 'metric-status excellent';
+      } else if (metrics.dynamicRange >= 2 && metrics.dynamicRange <= 20) {
+        rangeStatus.textContent = 'Good';
+        rangeStatus.className = 'metric-status good';
+      } else {
+        rangeStatus.textContent = 'Fair';
+        rangeStatus.className = 'metric-status fair';
+      }
+    }
+
+    function updateSuggestions(suggestions) {
+      const panel = document.getElementById('suggestionsPanel');
+      const list = document.getElementById('suggestionsList');
+
+      if (suggestions.length === 0) {
+        panel.classList.remove('show');
+        return;
+      }
+
+      panel.classList.add('show');
+      list.innerHTML = suggestions.map(s => `<li>${s}</li>`).join('');
+    }
+
+    // Initialize on load
+    console.log('✨ All functions loaded. Calling init()...');
+    init();
+    console.log('🎉 Script fully loaded!');
+  </script>
+
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

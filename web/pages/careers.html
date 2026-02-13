@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Careers - Mansion Mayhem</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    .careers-hero {
+      background: var(--gradient-dark);
+      padding: var(--space-3xl) var(--space-xl);
+      text-align: center;
+      border-bottom: 2px solid var(--color-gold);
+    }
+    
+    .careers-content {
+      max-width: var(--max-width-5xl);
+      margin: 0 auto;
+      padding: var(--space-3xl) var(--space-xl);
+    }
+    
+    .job-card {
+      background: var(--color-surface);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2xl);
+      margin-bottom: var(--space-xl);
+      transition: all 0.3s;
+    }
+    
+    .job-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-4px);
+    }
+    
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-lg);
+      gap: var(--space-lg);
+    }
+    
+    .job-title {
+      font-size: var(--font-2xl);
+      font-weight: var(--font-bold);
+      color: var(--color-gold);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .job-meta {
+      display: flex;
+      gap: var(--space-lg);
+      color: var(--color-text-secondary);
+      font-size: var(--font-sm);
+      margin-bottom: var(--space-md);
+    }
+    
+    .perk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-xl);
+      margin: var(--space-3xl) 0;
+    }
+    
+    .perk-card {
+      text-align: center;
+      padding: var(--space-xl);
+      background: var(--color-surface);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg);
+    }
+    
+    .perk-icon {
+      font-size: 48px;
+      margin-bottom: var(--space-md);
+    }
+  </style>
+</head>
+<body>
+  <div style="min-height: 100vh; background: var(--color-background);">
+    <div class="careers-hero">
+      <h1 style="font-size: var(--font-4xl); font-weight: var(--font-bold); margin-bottom: var(--space-lg);">
+        Join Our Team
+      </h1>
+      <p style="font-size: var(--font-xl); color: var(--color-text-secondary); max-width: 800px; margin: 0 auto;">
+        Help us build the future of entertainment
+      </p>
+    </div>
+    
+    <div class="careers-content">
+      <!-- Why Join -->
+      <div style="margin: var(--space-3xl) 0;">
+        <h2 style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-gold); margin-bottom: var(--space-xl);">
+          Why Work at Mansion Mayhem?
+        </h2>
+        <p style="font-size: var(--font-lg); color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-xl);">
+          We're a small, ambitious team building the world's first AI-native entertainment platform. You'll work on cutting-edge technology (AI video generation, personality-based decision engines, real-time content creation) while shaping an entirely new category of interactive media.
+        </p>
+      </div>
+      
+      <!-- Perks -->
+      <div class="perk-grid">
+        <div class="perk-card">
+          <div class="perk-icon">💰</div>
+          <h3 style="margin-bottom: var(--space-sm);">Competitive Salary</h3>
+          <p style="color: var(--color-text-secondary); font-size: var(--font-sm);">Market rate + equity</p>
+        </div>
+        
+        <div class="perk-card">
+          <div class="perk-icon">🌍</div>
+          <h3 style="margin-bottom: var(--space-sm);">Remote First</h3>
+          <p style="color: var(--color-text-secondary); font-size: var(--font-sm);">Work from anywhere</p>
+        </div>
+        
+        <div class="perk-card">
+          <div class="perk-icon">🚀</div>
+          <h3 style="margin-bottom: var(--space-sm);">Cutting Edge Tech</h3>
+          <p style="color: var(--color-text-secondary); font-size: var(--font-sm);">AI, Sora, GPT-4</p>
+        </div>
+        
+        <div class="perk-card">
+          <div class="perk-icon">📈</div>
+          <h3 style="margin-bottom: var(--space-sm);">Growth Opportunity</h3>
+          <p style="color: var(--color-text-secondary); font-size: var(--font-sm);">Early-stage startup</p>
+        </div>
+      </div>
+      
+      <!-- Open Positions -->
+      <h2 style="font-size: var(--font-3xl); font-weight: var(--font-bold); color: var(--color-gold); margin: var(--space-3xl) 0 var(--space-xl);">
+        Open Positions
+      </h2>
+      
+      <!-- Job 1 -->
+      <div class="job-card">
+        <div class="job-header">
+          <div style="flex: 1;">
+            <h3 class="job-title">Senior Full Stack Engineer</h3>
+            <div class="job-meta">
+              <span>💼 Full-time</span>
+              <span>📍 Remote</span>
+              <span>💰 $120k-$180k + equity</span>
+            </div>
+          </div>
+          <button class="btn btn-primary">Apply</button>
+        </div>
+        
+        <p style="color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-lg);">
+          Build the core platform infrastructure for AI-powered content generation. Work with React, Node.js, Supabase, and cutting-edge AI APIs (Sora, GPT-4).
+        </p>
+        
+        <h4 style="color: var(--color-gold); margin-bottom: var(--space-sm);">What you'll do:</h4>
+        <ul style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-lg);">
+          <li>Build automated content generation pipelines</li>
+          <li>Integrate AI video generation APIs (Sora, Runway)</li>
+          <li>Design scalable database schemas for personality profiles and scenarios</li>
+          <li>Create real-time notification systems</li>
+        </ul>
+        
+        <h4 style="color: var(--color-gold); margin-bottom: var(--space-sm);">Requirements:</h4>
+        <ul style="color: var(--color-text-secondary); line-height: 1.8;">
+          <li>5+ years full-stack development experience</li>
+          <li>Expert in React, TypeScript, Node.js</li>
+          <li>Experience with AI/ML integration</li>
+          <li>Comfortable with rapid prototyping and iteration</li>
+        </ul>
+      </div>
+      
+      <!-- Job 2 -->
+      <div class="job-card">
+        <div class="job-header">
+          <div style="flex: 1;">
+            <h3 class="job-title">AI/ML Engineer</h3>
+            <div class="job-meta">
+              <span>💼 Full-time</span>
+              <span>📍 Remote</span>
+              <span>💰 $130k-$200k + equity</span>
+            </div>
+          </div>
+          <button class="btn btn-primary">Apply</button>
+        </div>
+        
+        <p style="color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-lg);">
+          Build personality-based decision algorithms and optimize AI video generation workflows. Work directly with OpenAI's Sora, GPT-4, and ElevenLabs APIs.
+        </p>
+        
+        <h4 style="color: var(--color-gold); margin-bottom: var(--space-sm);">What you'll do:</h4>
+        <ul style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-lg);">
+          <li>Design personality scoring algorithms for AI decision-making</li>
+          <li>Optimize prompt engineering for video and script generation</li>
+          <li>Build machine learning models to improve AI accuracy</li>
+          <li>Research and integrate new AI capabilities as they emerge</li>
+        </ul>
+        
+        <h4 style="color: var(--color-gold); margin-bottom: var(--space-sm);">Requirements:</h4>
+        <ul style="color: var(--color-text-secondary); line-height: 1.8;">
+          <li>3+ years ML/AI experience</li>
+          <li>Strong Python, PyTorch/TensorFlow</li>
+          <li>Experience with LLM APIs (GPT, Claude, etc.)</li>
+          <li>Prompt engineering expertise a plus</li>
+        </ul>
+      </div>
+      
+      <!-- Job 3 -->
+      <div class="job-card">
+        <div class="job-header">
+          <div style="flex: 1;">
+            <h3 class="job-title">Content & Scenario Designer</h3>
+            <div class="job-meta">
+              <span>💼 Full-time</span>
+              <span>📍 Remote</span>
+              <span>💰 $80k-$120k + equity</span>
+            </div>
+          </div>
+          <button class="btn btn-primary">Apply</button>
+        </div>
+        
+        <p style="color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-lg);">
+          Create compelling scenarios, story arcs, and narrative experiences. You understand reality TV drama and know how to create moments that viewers can't stop talking about.
+        </p>
+        
+        <h4 style="color: var(--color-gold); margin-bottom: var(--space-sm);">What you'll do:</h4>
+        <ul style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-lg);">
+          <li>Design daily scenarios with dramatic tension and character dynamics</li>
+          <li>Create response options that drive storylines forward</li>
+          <li>Balance multiple character arcs and relationship dynamics</li>
+          <li>Analyze viewer engagement and iterate on content strategy</li>
+        </ul>
+        
+        <h4 style="color: var(--color-gold); margin-bottom: var(--space-sm);">Requirements:</h4>
+        <ul style="color: var(--color-text-secondary); line-height: 1.8;">
+          <li>Experience in reality TV, game design, or interactive storytelling</li>
+          <li>Strong understanding of character archetypes and narrative structure</li>
+          <li>Excellent writing skills</li>
+          <li>Data-driven approach to content optimization</li>
+        </ul>
+      </div>
+      
+      <!-- Job 4 -->
+      <div class="job-card">
+        <div class="job-header">
+          <div style="flex: 1;">
+            <h3 class="job-title">Product Designer (UI/UX)</h3>
+            <div class="job-meta">
+              <span>💼 Full-time</span>
+              <span>📍 Remote</span>
+              <span>💰 $90k-$140k + equity</span>
+            </div>
+          </div>
+          <button class="btn btn-primary">Apply</button>
+        </div>
+        
+        <p style="color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-lg);">
+          Design delightful user experiences for an entirely new category of entertainment. From onboarding flows to gameplay interfaces to video viewing experiences.
+        </p>
+        
+        <h4 style="color: var(--color-gold); margin-bottom: var(--space-sm);">What you'll do:</h4>
+        <ul style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-lg);">
+          <li>Design web and mobile interfaces for cast members and viewers</li>
+          <li>Create intuitive onboarding flows (FaceCast setup, personality profiles)</li>
+          <li>Design scenario response interfaces and drama feed experiences</li>
+          <li>Build and maintain design system</li>
+        </ul>
+        
+        <h4 style="color: var(--color-gold); margin-bottom: var(--space-sm);">Requirements:</h4>
+        <ul style="color: var(--color-text-secondary); line-height: 1.8;">
+          <li>4+ years product design experience</li>
+          <li>Portfolio showing consumer app design</li>
+          <li>Proficient in Figma</li>
+          <li>Experience with entertainment or social apps a plus</li>
+        </ul>
+      </div>
+      
+      <!-- No Position? -->
+      <div class="card" style="text-align: center; padding: var(--space-3xl); margin-top: var(--space-3xl);">
+        <h3 style="font-size: var(--font-2xl); margin-bottom: var(--space-lg);">Don't see your role?</h3>
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-xl);">
+          We're always looking for exceptional people. Send us your resume and tell us why you want to join!
+        </p>
+        <button class="btn btn-primary" onclick="window.location.href='contact.html'">Get in Touch</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

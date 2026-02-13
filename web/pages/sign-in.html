@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-rose: #C04E63;
+      --color-purple: #8B5CF6;
+      --color-success: #10B981;
+      --color-error: #EF4444;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+      --gradient-hero: linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.85) 100%);
+      --shadow-glow: 0 0 30px rgba(212, 175, 55, 0.3);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      overflow-x: hidden;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    /* ===== ANIMATED BACKGROUND ===== */
+    .animated-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(192, 78, 99, 0.1) 0%, transparent 40%),
+                  radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+    
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-image {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-logo-image:hover {
+      transform: scale(1.1);
+    }
+
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-back {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+    
+    .nav-back:hover {
+      color: var(--color-gold);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    /* ===== MAIN CONTAINER ===== */
+    .main-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .auth-wrapper {
+      max-width: 480px;
+      width: 100%;
+    }
+    
+    /* ===== LEFT SIDE - BRANDING ===== */
+    .auth-branding {
+      animation: fadeInLeft 0.8s ease-out;
+    }
+    
+    .brand-icon {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 2rem;
+      animation: float 3s ease-in-out infinite;
+      object-fit: contain;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .brand-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .brand-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    
+    .brand-features {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      transition: all 0.3s;
+    }
+    
+    .feature-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--color-gold);
+      transform: translateX(10px);
+    }
+    
+    .feature-icon {
+      font-size: 2rem;
+    }
+    
+    /* ===== RIGHT SIDE - FORM ===== */
+    .auth-form-container {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      animation: fadeInRight 0.8s ease-out;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .form-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .form-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--color-gold);
+    }
+    
+    .form-subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+    }
+    
+    /* ===== FORM ELEMENTS ===== */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s;
+      outline: none;
+    }
+    
+    .form-input:focus {
+      border-color: var(--color-gold);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    }
+    
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .input-with-icon {
+      position: relative;
+    }
+    
+    .input-icon {
+      position: absolute;
+      right: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.5);
+      transition: color 0.3s;
+    }
+    
+    .input-icon:hover {
+      color: var(--color-gold);
+    }
+    
+    /* ===== CHECKBOX ===== */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+    }
+    
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--color-gold);
+    }
+    
+    .checkbox-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    
+    /* ===== BUTTONS ===== */
+    .btn {
+      width: 100%;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(212, 175, 55, 0.6);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-primary.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    
+    /* ===== OAUTH BUTTONS ===== */
+    .oauth-section {
+      margin: 2rem 0;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 2rem 0;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.875rem;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .oauth-buttons {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .btn-oauth {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    
+    .btn-oauth:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--color-gold);
+      transform: translateY(-2px);
+    }
+    
+    .oauth-icon {
+      font-size: 1.25rem;
+    }
+    
+    /* ===== LINKS ===== */
+    .form-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-link {
+      color: var(--color-gold);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .form-link:hover {
+      text-decoration: underline;
+      opacity: 0.8;
+    }
+    
+    .signup-prompt {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+    }
+    
+    /* ===== LOADING SPINNER ===== */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(10, 10, 10, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--color-dark);
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ===== ALERT ===== */
+    .alert {
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #EF4444;
+    }
+    
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10B981;
+    }
+    
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 968px) {
+      .auth-wrapper {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+      
+      .auth-branding {
+        text-align: center;
+      }
+      
+      .brand-title {
+        font-size: 2.5rem;
+      }
+      
+      .feature-item {
+        justify-content: center;
+      }
+      
+      .feature-item:hover {
+        transform: translateY(-5px);
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .auth-form-container {
+        padding: 2rem 1.5rem;
+      }
+      
+      .brand-icon {
+        width: 80px;
+        height: 80px;
+      }
+      
+      .brand-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="auth-wrapper">
+      <div class="auth-form-container">
+        <div class="form-header">
+          <h2 class="form-title">Sign In</h2>
+          <p class="form-subtitle">Continue your journey to stardom</p>
+        </div>
+        
+        <form id="signInForm" onsubmit="handleSignInSubmit(event)">
+          <!-- Alert placeholder -->
+          <div id="alertContainer"></div>
+          
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input 
+              type="email" 
+              id="email" 
+              class="form-input" 
+              placeholder="you@example.com"
+              required
+            >
+          </div>
+          
+          <!-- Password -->
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-with-icon">
+              <input 
+                type="password" 
+                id="password" 
+                class="form-input" 
+                placeholder="Enter your password"
+                required
+              >
+              <span class="input-icon" onclick="togglePassword()">👁️</span>
+            </div>
+          </div>
+          
+          <!-- Remember Me & Forgot Password -->
+          <div class="form-links">
+            <div class="checkbox-group">
+              <input type="checkbox" id="remember" class="checkbox">
+              <label for="remember" class="checkbox-label">Remember me</label>
+            </div>
+            <a href="#" class="form-link" onclick="showForgotPassword(event)">Forgot password?</a>
+          </div>
+          
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <span id="btnText">Sign In</span>
+          </button>
+        </form>
+        
+        <!-- OAuth -->
+        <div class="oauth-section">
+          <div class="divider">Or continue with</div>
+          
+          <div class="oauth-buttons">
+            <button class="btn-oauth" onclick="signInWithGoogle()">
+              <span class="oauth-icon">🔵</span>
+              <span>Continue with Google</span>
+            </button>
+            
+            <button class="btn-oauth" onclick="signInWithApple()">
+              <span class="oauth-icon">🍎</span>
+              <span>Continue with Apple</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Sign Up Link -->
+        <div class="signup-prompt">
+          Don't have an account? 
+          <a href="casting-call.html" class="form-link">Apply to join the cast →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    import { handleSignIn, handleGoogleSignIn, handlePasswordReset } from '../js/auth-handler.js'
+
+    // Toggle password visibility
+    window.togglePassword = function() {
+      const passwordInput = document.getElementById('password');
+      const icon = event.target;
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.textContent = '🙈';
+      } else {
+        passwordInput.type = 'password';
+        icon.textContent = '👁️';
+      }
+    }
+
+    // Show alert
+    function showAlert(message, type = 'error') {
+      const container = document.getElementById('alertContainer');
+      container.innerHTML = `
+        <div class="alert alert-${type}">
+          <span>${type === 'error' ? '⚠️' : '✅'}</span>
+          <span>${message}</span>
+        </div>
+      `;
+
+      setTimeout(() => {
+        container.innerHTML = '';
+      }, 5000);
+    }
+
+    // Handle sign in form submission
+    window.handleSignInSubmit = async function(event) {
+      event.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+
+      // Get form values
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      // Validate
+      if (!email || !password) {
+        showAlert('Please fill in all fields', 'error');
+        return;
+      }
+
+      // Show loading
+      submitBtn.classList.add('loading');
+      btnText.innerHTML = '<span class="spinner"></span> Signing in...';
+
+      try {
+        const result = await handleSignIn(email, password);
+
+        if (result.success) {
+          showAlert('Welcome back! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = 'player-dashboard.html';
+          }, 1000);
+        } else {
+          showAlert(result.error || 'Invalid email or password', 'error');
+          submitBtn.classList.remove('loading');
+          btnText.textContent = 'Sign In';
+        }
+
+      } catch (error) {
+        showAlert('Sign in failed. Please try again.', 'error');
+        submitBtn.classList.remove('loading');
+        btnText.textContent = 'Sign In';
+      }
+    }
+
+    // Forgot password
+    window.showForgotPassword = async function(event) {
+      event.preventDefault();
+      const email = prompt('Enter your email address:');
+      if (email) {
+        const result = await handlePasswordReset(email);
+        if (result.success) {
+          showAlert('Password reset link sent! Check your email.', 'success');
+        } else {
+          showAlert(result.error || 'Failed to send reset email', 'error');
+        }
+      }
+    }
+
+    // OAuth handlers
+    window.signInWithGoogle = async function() {
+      showAlert('Redirecting to Google...', 'success');
+      await handleGoogleSignIn();
+    }
+
+    window.signInWithApple = function() {
+      showAlert('Apple sign-in not configured yet', 'error');
+    }
+
+    // Add floating animation to brand icon
+    document.addEventListener('DOMContentLoaded', () => {
+      const icon = document.querySelector('.brand-icon');
+      if (icon) {
+        icon.style.animation = 'float 3s ease-in-out infinite';
+      }
+    });
+  </script>
+</body>
+</html>

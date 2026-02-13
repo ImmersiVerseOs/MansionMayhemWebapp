@@ -1,0 +1,679 @@
+<!-- Global Navigation Component -->
+<!-- Include this in pages that need consistent navigation -->
+<style>
+  .global-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+    padding: 0.75rem 2rem;
+  }
+
+  .global-nav-container {
+    max-width: 1800px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: #d4af37;
+    font-size: 1.25rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .nav-logo-icon {
+    font-size: 1.75rem;
+  }
+
+  .nav-logo-image {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-logo-image:hover {
+    transform: scale(1.1);
+  }
+
+  .nav-center {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.3s;
+    white-space: nowrap;
+  }
+
+  .nav-link:hover {
+    color: #d4af37;
+  }
+
+  .nav-link.active {
+    color: #d4af37;
+  }
+
+  .nav-right {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .notifications-btn {
+    position: relative;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.25rem;
+    color: white;
+  }
+
+  .notifications-btn:hover {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.1);
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .user-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: transparent;
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .user-menu-btn:hover {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.1);
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #d4af37);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .user-menu-dropdown {
+    position: relative;
+  }
+
+  .user-menu-content {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    background: #111;
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 16px;
+    min-width: 220px;
+    padding: 0.75rem 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  .user-menu-dropdown.active .user-menu-content {
+    display: block;
+  }
+
+  .btn-sign-in {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    padding: 0.625rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #000;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-sign-in:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .user-menu-link {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+  }
+
+  .user-menu-link:hover {
+    background: rgba(212, 175, 55, 0.1);
+    color: #d4af37;
+  }
+
+  .user-menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0.5rem 0;
+  }
+
+  /* Games Dropdown */
+  .nav-dropdown {
+    position: relative;
+  }
+
+  .nav-dropdown-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .nav-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 0;
+    background: #111;
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 12px;
+    min-width: 200px;
+    padding: 0.5rem 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+  }
+
+  .nav-dropdown-item {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .nav-dropdown-item:hover {
+    background: rgba(212, 175, 55, 0.1);
+    color: #d4af37;
+  }
+
+  .premium-only {
+    opacity: 0.6;
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 968px) {
+    .global-nav {
+      padding: 0.75rem 1rem;
+    }
+
+    .nav-center {
+      display: none;
+    }
+
+    .nav-logo {
+      font-size: 1rem;
+    }
+
+    .nav-logo-icon {
+      font-size: 1.5rem;
+    }
+
+    .nav-link {
+      font-size: 0.85rem;
+    }
+  }
+
+  /* Page content padding to account for fixed nav */
+  body {
+    padding-top: 80px;
+  }
+</style>
+
+<nav class="global-nav" id="globalNav">
+  <div class="global-nav-container">
+    <!-- Logo -->
+    <a href="/index.html" class="nav-logo">
+      <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+      <span>MANSION MAYHEM</span>
+    </a>
+
+    <!-- Center Navigation -->
+    <div class="nav-center">
+      <!-- Start Game Button -->
+      <button class="nav-link" onclick="handleStartGame()" id="startGameBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 0.5rem 1.5rem; border-radius: 8px; border: 2px solid #d4af37; font-weight: 700;">
+        🎬 Start Game
+      </button>
+
+      <a href="/pages/tea-room.html" class="nav-link">
+        The Tea Room
+      </a>
+      <a href="/pages/the-drama-show.html" class="nav-link">
+        The Drama Show
+      </a>
+      <a href="/pages/leaderboard.html" class="nav-link">
+        Leaderboard
+      </a>
+      <a href="/pages/cast-roster.html" class="nav-link">
+        Cast
+      </a>
+      <a href="/help.html" class="nav-link">
+        Help
+      </a>
+      <a href="/pages/voice-moderation-simple.html" class="nav-link admin-only" style="display: none;">
+        Admin Dashboard
+      </a>
+      <a href="/director-console.html" class="nav-link admin-only" style="display: none;">
+        Director Console
+      </a>
+    </div>
+
+    <!-- Right Side -->
+    <div class="nav-right">
+      <!-- Sign In Button (shown when logged out) -->
+      <button class="btn btn-sign-in" id="signInBtn" onclick="window.location.href='/landing.html'" style="display: none;">
+        <span>Sign In</span>
+      </button>
+
+      <!-- Notifications (shown when logged in) -->
+      <button class="notifications-btn" id="notificationsBtn" onclick="window.location.href='/pages/notifications.html'" title="Notifications" style="display: none;">
+        🔔
+        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+      </button>
+
+      <!-- User Menu (shown when logged in) -->
+      <div class="user-menu-dropdown" id="userMenuDropdown" style="display: none;">
+        <button class="user-menu-btn" onclick="toggleUserMenu()">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userName">User</span>
+        </button>
+        <div class="user-menu-content">
+          <a href="/pages/player-dashboard.html" class="user-menu-link">Dashboard</a>
+          <a href="/pages/settings.html" class="user-menu-link">Settings</a>
+          <div class="user-menu-divider"></div>
+          <a href="#" onclick="handleSignOut(event)" class="user-menu-link">Sign Out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script type="module">
+  import { supabaseClient as supabase } from '../js/supabase-module.js'
+
+  // Make supabase available globally for handleSignOut
+  window.supabaseClient = supabase
+
+  // Handle Start Game
+  window.handleStartGame = async function() {
+    const btn = document.getElementById('startGameBtn')
+    if (!btn) return
+
+    try {
+      btn.textContent = '⏳ Starting...'
+      btn.disabled = true
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        alert('Please sign in to start a game')
+        window.location.href = '/landing.html'
+        return
+      }
+
+      // Get cast member ID
+      const { data: castMember } = await supabase
+        .from('cast_members')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+
+      if (!castMember) {
+        alert('Cast member profile not found')
+        btn.textContent = '🎬 Start Game'
+        btn.disabled = false
+        return
+      }
+
+      // Check if already in an active game
+      const { data: existingGame } = await supabase
+        .from('mm_game_cast')
+        .select('game_id, mm_games!inner(status)')
+        .eq('cast_member_id', castMember.id)
+        .in('mm_games.status', ['lobby', 'scenarios', 'episodes'])
+        .limit(1)
+
+      if (existingGame && existingGame.length > 0) {
+        const foundGameId = existingGame[0].game_id
+        console.log('Found existing game membership:', foundGameId)
+
+        // Check if this game's lobby timer has expired
+        const { data: gameStage } = await supabase
+          .from('mm_game_stages')
+          .select('*')
+          .eq('game_id', foundGameId)
+          .eq('current_stage', 'lobby')
+          .single()
+
+        if (gameStage) {
+          const timerEnd = new Date(gameStage.stage_ends_at)
+          const now = new Date()
+
+          if (timerEnd <= now) {
+            // Timer expired - remove from this old game and create new one
+            console.log('⚠️ Old game timer expired - removing you and creating new game')
+            await supabase
+              .from('mm_game_cast')
+              .delete()
+              .eq('game_id', foundGameId)
+              .eq('cast_member_id', castMember.id)
+            // Continue to create new game below
+          } else {
+            // Timer still valid - rejoin this game
+            console.log('✅ Rejoining existing game with valid timer')
+            window.location.href = `/lobby.html?game=${foundGameId}`
+            return
+          }
+        } else {
+          // No lobby timer - must be in active game, rejoin it
+          console.log('✅ Rejoining active game')
+          window.location.href = `/lobby.html?game=${foundGameId}`
+          return
+        }
+      }
+
+      // Look for open lobby
+      const { data: openLobby } = await supabase
+        .from('mm_games')
+        .select('*')
+        .eq('status', 'lobby')
+        .limit(1)
+        .single()
+
+      let gameId
+
+      if (openLobby) {
+        console.log('Found existing lobby:', openLobby.id)
+
+        // Check if timer has expired
+        const { data: gameStage } = await supabase
+          .from('mm_game_stages')
+          .select('*')
+          .eq('game_id', openLobby.id)
+          .eq('current_stage', 'lobby')
+          .single()
+
+        if (gameStage) {
+          const timerEnd = new Date(gameStage.stage_ends_at)
+          const now = new Date()
+
+          if (timerEnd <= now) {
+            // Timer expired - don't use this lobby, create a new one instead
+            console.log('⚠️ Timer expired on existing lobby - creating new lobby instead')
+            // Set openLobby to null so we create a new one below
+            gameId = null
+          } else {
+            console.log('✅ Timer is valid - joining existing lobby')
+            gameId = openLobby.id
+          }
+        } else {
+          // No timer found - use this lobby anyway
+          gameId = openLobby.id
+        }
+      }
+
+      // Create new lobby if we don't have a valid one
+      if (!gameId) {
+        // Create new lobby
+        const timestamp = Date.now()
+        const gameCode = `MM-${timestamp.toString().slice(-6)}`
+
+        const { data: newGame, error: createError } = await supabase
+          .from('mm_games')
+          .insert({
+            game_code: gameCode,
+            title: `Game ${new Date().toLocaleDateString()}`,
+            description: 'Quick match lobby',
+            game_type: 'beta_test',
+            status: 'lobby',
+            max_cast_members: 20,
+            created_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+
+        if (createError) throw createError
+
+        gameId = newGame.id
+
+        // Create game stage with 60-minute timer
+        const timerEnd = new Date(Date.now() + 60 * 60 * 1000)
+
+        const { error: stageError } = await supabase
+          .from('mm_game_stages')
+          .insert({
+            game_id: gameId,
+            current_stage: 'lobby',
+            stage_ends_at: timerEnd.toISOString(),
+          })
+
+        if (stageError) {
+          console.error('Error creating timer:', stageError)
+        } else {
+          console.log('✅ 60-minute lobby timer started:', timerEnd.toISOString())
+        }
+      }
+
+      // Check if user is already in this game's cast
+      const { data: existingCast } = await supabase
+        .from('mm_game_cast')
+        .select('*')
+        .eq('game_id', gameId)
+        .eq('cast_member_id', castMember.id)
+        .single()
+
+      if (!existingCast) {
+        // Not in game yet - add them
+        const { error: insertError } = await supabase
+          .from('mm_game_cast')
+          .insert({
+            game_id: gameId,
+            cast_member_id: castMember.id,
+            status: 'joined',
+            joined_at: new Date().toISOString(),
+          })
+
+        if (insertError) {
+          console.error('Error adding to game:', insertError)
+          alert(`Failed to join game: ${insertError.message}`)
+          btn.textContent = '🎬 Start Game'
+          btn.disabled = false
+          return
+        }
+      }
+
+      console.log('✅ Successfully joined game:', gameId)
+
+      // Navigate to lobby
+      window.location.href = `/lobby.html?game=${gameId}`
+
+    } catch (error) {
+      console.error('Error starting game:', error)
+      console.error('Error details:', error.message, error.details, error.hint)
+      alert(`Failed to start game: ${error.message || 'Unknown error'}. Check console for details.`)
+      btn.textContent = '🎬 Start Game'
+      btn.disabled = false
+    }
+  }
+
+  // Toggle user menu
+  window.toggleUserMenu = function() {
+    const dropdown = document.getElementById('userMenuDropdown')
+    dropdown.classList.toggle('active')
+  }
+
+  // Close menus when clicking outside
+  document.addEventListener('click', (e) => {
+    // Close user menu
+    const dropdown = document.getElementById('userMenuDropdown')
+    if (dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('active')
+    }
+  })
+
+  // Handle sign out
+  window.handleSignOut = async function(event) {
+    if (event) event.preventDefault()
+    if (confirm('Are you sure you want to sign out?')) {
+      try {
+        // Use window.supabaseClient or the imported supabase
+        const client = window.supabaseClient || supabase
+        await client.auth.signOut()
+        window.location.href = '/index.html'
+      } catch (error) {
+        console.error('Sign out error:', error)
+        // Force redirect even if sign out fails
+        window.location.href = '/index.html'
+      }
+    }
+  }
+
+  // Initialize navigation
+  async function initGlobalNav() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      const signInBtn = document.getElementById('signInBtn')
+      const notificationsBtn = document.getElementById('notificationsBtn')
+      const userMenuDropdown = document.getElementById('userMenuDropdown')
+
+      if (!user) {
+        // User is logged out - show Sign In button
+        if (signInBtn) signInBtn.style.display = 'flex'
+        if (notificationsBtn) notificationsBtn.style.display = 'none'
+        if (userMenuDropdown) userMenuDropdown.style.display = 'none'
+        return
+      }
+
+      // User is logged in - show user menu and notifications
+      if (signInBtn) signInBtn.style.display = 'none'
+      if (notificationsBtn) notificationsBtn.style.display = 'flex'
+      if (userMenuDropdown) userMenuDropdown.style.display = 'flex'
+
+      // Update user display
+      const userName = document.getElementById('userName')
+      const userAvatar = document.getElementById('userAvatar')
+
+      // Get profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, role')
+        .eq('id', user.id)
+        .single()
+
+      if (profile) {
+        const displayName = profile.full_name || user.email?.split('@')[0] || 'User'
+        userName.textContent = displayName
+        userAvatar.textContent = displayName.charAt(0).toUpperCase()
+
+        // Show admin links if admin
+        if (profile.role === 'admin') {
+          document.querySelectorAll('.admin-only').forEach(el => {
+            el.style.display = ''
+          })
+        }
+      }
+
+      // Load notification count
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false)
+
+      if (count > 0) {
+        const badge = document.getElementById('notificationBadge')
+        badge.textContent = count
+        badge.style.display = 'flex'
+      }
+
+      // Highlight current page
+      const currentPath = window.location.pathname
+      document.querySelectorAll('.nav-link').forEach(link => {
+        try {
+          // Skip links with invalid hrefs like "#"
+          if (!link.href || link.href === '#' || link.href.startsWith('javascript:')) {
+            return
+          }
+          const linkPath = new URL(link.href).pathname
+          if (currentPath === linkPath) {
+            link.classList.add('active')
+          }
+        } catch (e) {
+          // Skip invalid URLs
+          console.debug('Skipping invalid nav link:', link.href)
+        }
+      })
+
+    } catch (error) {
+      console.error('Error initializing global nav:', error)
+    }
+  }
+
+  initGlobalNav()
+</script>

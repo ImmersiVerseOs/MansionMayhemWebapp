@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Form | MANSION MAYHEM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111111;
+      --bg-elevated: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #ffffff;
+      --text-dim: #888888;
+      --text-muted: #555555;
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --rose-dark: #ad1457;
+      --purple: #9c27b0;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at top right, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom left, rgba(233, 30, 99, 0.05) 0%, transparent 50%),
+        var(--bg);
+      z-index: -1;
+    }
+
+    .header {
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .form-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .form-header p {
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 40px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--rose));
+      width: 33%;
+      transition: width 0.3s;
+    }
+
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 6px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .archetype-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .archetype-option {
+      padding: 16px;
+      background: var(--bg-elevated);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .archetype-option:hover {
+      border-color: var(--gold);
+    }
+
+    .archetype-option.selected {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    .archetype-option .emoji {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .archetype-option .name {
+      font-weight: 600;
+      font-size: 14px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .archetype-option .desc {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(255, 152, 0, 0.1);
+      border: 1px solid rgba(255, 152, 0, 0.3);
+      border-radius: 8px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      margin-top: 4px;
+    }
+
+    .checkbox-group label {
+      margin-bottom: 0;
+      font-weight: 400;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--bg);
+      font-weight: 700;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      color: var(--text-dim);
+      font-weight: 600;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 12px;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    @media (max-width: 768px) {
+      .form-card { padding: 24px; }
+      .archetype-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <header class="header">
+    <div class="logo">MANSION MAYHEM</div>
+  </header>
+
+  <div class="container">
+    <div class="form-header">
+      <h1>Cast Member Application</h1>
+      <p>Complete all sections to be considered for Mansion Mayhem</p>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="form-card">
+      <form id="applicationForm">
+        <!-- Step 1: Basic Info -->
+        <div class="form-step" id="step1">
+          <h2 style="font-size: 20px; margin-bottom: 24px; font-weight: 700;">Basic Information</h2>
+
+          <div class="form-group">
+            <label for="fullName">Full Name *</label>
+            <input type="text" id="fullName" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" required>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" required>
+          </div>
+
+          <div class="form-group">
+            <label for="age">Age *</label>
+            <input type="number" id="age" min="18" max="99" required>
+            <small>Must be 18+ to apply</small>
+          </div>
+
+          <div class="form-group">
+            <label for="location">Location (City, State/Country) *</label>
+            <input type="text" id="location" required>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+
+        <!-- Step 2: Social & Archetype -->
+        <div class="form-step" id="step2" style="display: none;">
+          <h2 style="font-size: 20px; margin-bottom: 24px; font-weight: 700;">Social Media & Archetype</h2>
+
+          <div class="form-group">
+            <label for="instagram">Instagram Handle</label>
+            <input type="text" id="instagram" placeholder="@yourusername">
+          </div>
+
+          <div class="form-group">
+            <label for="tiktok">TikTok Handle</label>
+            <input type="text" id="tiktok" placeholder="@yourusername">
+          </div>
+
+          <div class="form-group">
+            <label for="twitter">Twitter/X Handle</label>
+            <input type="text" id="twitter" placeholder="@yourusername">
+          </div>
+
+          <div class="form-group">
+            <label>Choose Your Archetype *</label>
+            <small style="margin-bottom: 12px; display: block;">Which personality type best represents you?</small>
+            <div class="archetype-grid">
+              <div class="archetype-option" data-archetype="queen">
+                <span class="emoji">👑</span>
+                <span class="name">Queen</span>
+                <span class="desc">Natural leader</span>
+              </div>
+              <div class="archetype-option" data-archetype="villain">
+                <span class="emoji">😈</span>
+                <span class="name">Villain</span>
+                <span class="desc">Unapologetic</span>
+              </div>
+              <div class="archetype-option" data-archetype="wildcard">
+                <span class="emoji">🎲</span>
+                <span class="name">Wildcard</span>
+                <span class="desc">Unpredictable</span>
+              </div>
+              <div class="archetype-option" data-archetype="loyalist">
+                <span class="emoji">🤝</span>
+                <span class="name">Loyalist</span>
+                <span class="desc">Fierce defender</span>
+              </div>
+              <div class="archetype-option" data-archetype="socialite">
+                <span class="emoji">💅</span>
+                <span class="name">Socialite</span>
+                <span class="desc">Social butterfly</span>
+              </div>
+              <div class="archetype-option" data-archetype="observer">
+                <span class="emoji">👁️</span>
+                <span class="name">Observer</span>
+                <span class="desc">Quiet strategist</span>
+              </div>
+              <div class="archetype-option" data-archetype="competitor">
+                <span class="emoji">🏆</span>
+                <span class="name">Competitor</span>
+                <span class="desc">Here to win</span>
+              </div>
+              <div class="archetype-option" data-archetype="peacemaker">
+                <span class="emoji">🕊️</span>
+                <span class="name">Peacemaker</span>
+                <span class="desc">Mediator</span>
+              </div>
+              <div class="archetype-option" data-archetype="newcomer">
+                <span class="emoji">✨</span>
+                <span class="name">Newcomer</span>
+                <span class="desc">Fresh energy</span>
+              </div>
+              <div class="archetype-option" data-archetype="icon">
+                <span class="emoji">⭐</span>
+                <span class="name">Icon</span>
+                <span class="desc">Main character</span>
+              </div>
+            </div>
+            <input type="hidden" id="archetype" required>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="nextStep()">Continue</button>
+          <button type="button" class="btn-secondary" onclick="prevStep()">Back</button>
+        </div>
+
+        <!-- Step 3: About You & Consent -->
+        <div class="form-step" id="step3" style="display: none;">
+          <h2 style="font-size: 20px; margin-bottom: 24px; font-weight: 700;">Tell Us About You</h2>
+
+          <div class="form-group">
+            <label for="bio">Why do you want to be on Mansion Mayhem? *</label>
+            <textarea id="bio" required placeholder="Share your motivation, what makes you interesting, and why you'd be great for the show..."></textarea>
+            <small>Minimum 100 characters</small>
+          </div>
+
+          <div class="form-group">
+            <label for="experience">Do you have any experience in entertainment, content creation, or reality TV?</label>
+            <textarea id="experience" placeholder="Share any relevant experience..."></textarea>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="unpaidConsent" required>
+            <label for="unpaidConsent">
+              <strong>I understand this is an UNPAID pilot season.</strong><br>
+              I will receive portfolio content, exposure, and credits, but no monetary compensation, base fees, episode bonuses, or prize money.
+            </label>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="faceCastConsent" required>
+            <label for="faceCastConsent">
+              <strong>I consent to providing my likeness for AI-generated content (FaceCast).</strong><br>
+              I understand this requires a separate legal agreement and photo/video submission for AI training.
+            </label>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="availability" required>
+            <label for="availability">
+              <strong>I am available April-June 2026 for production.</strong><br>
+              I can respond to scenarios within 24 hours and maintain an 80% minimum response rate.
+            </label>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="submitApplication(event)">Submit Application</button>
+          <button type="button" class="btn-secondary" onclick="prevStep()">Back</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Wait for Supabase library and create client directly
+    let mmSupabase = null;
+
+    function initSupabase() {
+      const supabaseUrl = 'https://mllqzeaxqusoryteaxzg.supabase.co';
+      const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sbHF6ZWF4cXVzb3J5dGVheHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODA1NzAsImV4cCI6MjA4NjA1NjU3MH0.s9CAe91gUG8uZ7Nrjd1pIX9YYvpNKa2lOrt6HDUarec';
+
+      if (window.supabase && window.supabase.createClient) {
+        mmSupabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        console.log('✅ Mansion Mayhem Supabase client initialized');
+      }
+    }
+
+    // Initialize immediately if library is loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSupabase);
+    } else {
+      initSupabase();
+    }
+
+    let currentStep = 1;
+    const totalSteps = 3;
+    let selectedArchetype = null;
+
+    // Archetype selection
+    document.querySelectorAll('.archetype-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.archetype-option').forEach(opt => opt.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedArchetype = this.dataset.archetype;
+        document.getElementById('archetype').value = selectedArchetype;
+      });
+    });
+
+    function updateProgress() {
+      const progress = (currentStep / totalSteps) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+    }
+
+    function nextStep() {
+      const currentStepElement = document.getElementById('step' + currentStep);
+      const inputs = currentStepElement.querySelectorAll('input[required], textarea[required]');
+
+      let valid = true;
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.style.borderColor = '#f44336';
+          valid = false;
+        } else {
+          input.style.borderColor = '';
+        }
+      });
+
+      if (currentStep === 2 && !selectedArchetype) {
+        alert('Please select an archetype');
+        return;
+      }
+
+      if (!valid) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      if (currentStep < totalSteps) {
+        currentStepElement.style.display = 'none';
+        currentStep++;
+        document.getElementById('step' + currentStep).style.display = 'block';
+        updateProgress();
+        window.scrollTo(0, 0);
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        document.getElementById('step' + currentStep).style.display = 'none';
+        currentStep--;
+        document.getElementById('step' + currentStep).style.display = 'block';
+        updateProgress();
+        window.scrollTo(0, 0);
+      }
+    }
+
+    async function submitApplication(event) {
+      event.preventDefault();
+      const form = document.getElementById('applicationForm');
+      const inputs = document.querySelectorAll('input[required], textarea[required]');
+
+      let valid = true;
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.style.borderColor = '#f44336';
+          valid = false;
+        }
+      });
+
+      if (!valid) {
+        alert('Please fill in all required fields and check all consent boxes');
+        return;
+      }
+
+      const bio = document.getElementById('bio').value;
+      if (bio.length < 100) {
+        alert('Your "Why do you want to be on Mansion Mayhem?" response must be at least 100 characters');
+        return;
+      }
+
+      if (!selectedArchetype) {
+        alert('Please select an archetype in Step 2');
+        return;
+      }
+
+      // Collect all form data
+      const fullName = document.getElementById('fullName').value;
+      const applicationData = {
+        full_name: fullName,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value || null,
+        age: parseInt(document.getElementById('age').value),
+        location: document.getElementById('location').value,
+        instagram_handle: document.getElementById('instagram')?.value || null,
+        tiktok_handle: document.getElementById('tiktok')?.value || null,
+        archetype: selectedArchetype,
+        bio: bio,
+        facecast_consent: document.getElementById('faceCastConsent')?.checked || false,
+        participation_agreement: document.getElementById('unpaidConsent')?.checked || false,
+        status: 'pending',
+        application_submitted_at: new Date().toISOString()
+      };
+
+      // DEBUG: Log the data being sent
+      console.log('📝 Application data being sent:', applicationData);
+      console.log('🎭 Selected archetype:', selectedArchetype);
+
+      // Disable submit button during processing
+      const submitBtn = event.target;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        // Ensure Supabase is initialized
+        if (!mmSupabase) {
+          initSupabase();
+          if (!mmSupabase) {
+            throw new Error('Supabase client not initialized');
+          }
+        }
+
+        // Insert into cast_members table
+        const { data, error } = await mmSupabase
+          .from('cast_members')
+          .insert([applicationData])
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        // Send email notification
+        try {
+          console.log('📧 Sending confirmation email...');
+          const emailResponse = await fetch('/.netlify/functions/send-application-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              applicant_name: applicationData.full_name,
+              applicant_email: applicationData.email,
+              application_type: 'Cast Member'
+            })
+          });
+
+          const emailResult = await emailResponse.json();
+
+          if (!emailResponse.ok) {
+            console.warn('⚠️ Email notification failed:', emailResult);
+            // Continue anyway - don't block submission
+          } else {
+            console.log('✅ Confirmation email sent successfully');
+          }
+        } catch (emailError) {
+          console.warn('⚠️ Email notification error:', emailError);
+          // Continue anyway - don't block submission
+        }
+
+        // Redirect to photo upload with cast_member_id
+        window.location.href = `photo-upload.html?id=${data.id}`;
+
+      } catch (error) {
+        console.error('Application submission error:', error);
+        alert('Application submission failed: ' + error.message + '. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Application';
+      }
+    }
+
+    // Expose functions globally for onclick handlers
+    window.nextStep = nextStep;
+    window.prevStep = prevStep;
+    window.submitApplication = submitApplication;
+
+    updateProgress();
+  </script>
+  <script type="module" src="js/invite-gate.js"></script>
+</body>
+</html>

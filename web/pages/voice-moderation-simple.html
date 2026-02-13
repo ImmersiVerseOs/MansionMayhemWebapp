@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Moderation</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { background: #0a0a0a; color: white; padding: 2rem; font-family: system-ui; max-width: 1200px; margin: 0 auto; }
+    h1 { color: #D4AF37; }
+    .item { background: rgba(255,255,255,0.05); padding: 1.5rem; margin: 1rem 0; border-radius: 8px; }
+    .item h3 { color: #D4AF37; margin-bottom: 1rem; }
+    .item audio { width: 100%; margin: 1rem 0; }
+    .item button { padding: 0.75rem 1.5rem; margin-right: 0.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .approve { background: #10B981; color: white; }
+    .reject { background: #EF4444; color: white; }
+  </style>
+</head>
+<body>
+  <h1>🛡️ Voice Moderation</h1>
+  <div id="app"></div>
+
+<script>
+(function() {
+  const app = document.getElementById('app')
+  const sb = window.supabase.createClient(
+    'https://mllqzeaxqusoryteaxzg.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sbHF6ZWF4cXVzb3J5dGVheHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODA1NzAsImV4cCI6MjA4NjA1NjU3MH0.s9CAe91gUG8uZ7Nrjd1pIX9YYvpNKa2lOrt6HDUarec'
+  )
+
+  async function load() {
+    const { data: { user } } = await sb.auth.getUser()
+    if (!user) {
+      app.innerHTML = '<p>Please sign in first</p>'
+      return
+    }
+
+    const { data: items } = await sb
+      .from('voice_moderation_queue')
+      .select('*')
+      .eq('status', 'pending')
+      .limit(50)
+
+    if (!items || items.length === 0) {
+      app.innerHTML = '<p>No pending items</p>'
+      return
+    }
+
+    app.innerHTML = items.map((item, i) => `
+      <div class="item">
+        <h3>${item.source_type}</h3>
+        <p>Submitted: ${new Date(item.submitted_at).toLocaleString()}</p>
+        ${item.caption ? `<p>${item.caption}</p>` : ''}
+        <div style="background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+          <audio id="audio${i}" controls preload="auto" style="width: 100%; margin-bottom: 0.5rem;">
+            <source src="${item.audio_url}" type="audio/webm">
+          </audio>
+          <div style="display: flex; gap: 0.5rem;">
+            <button onclick="document.getElementById('audio${i}').play()" style="padding: 0.5rem 1rem; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">▶️ Play</button>
+            <button onclick="document.getElementById('audio${i}').pause()" style="padding: 0.5rem 1rem; background: #FF9800; color: white; border: none; border-radius: 4px; cursor: pointer;">⏸️ Pause</button>
+            <a href="${item.audio_url}" target="_blank" style="padding: 0.5rem 1rem; background: #2196F3; color: white; text-decoration: none; border-radius: 4px;">🔗 Open</a>
+          </div>
+        </div>
+        <button class="approve" data-id="${item.id}">✅ Approve</button>
+        <button class="reject" data-id="${item.id}">❌ Reject</button>
+      </div>
+    `).join('')
+
+    document.querySelectorAll('.approve').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.dataset.id
+        await sb.rpc('approve_voice_submission', { p_queue_id: id, p_admin_id: user.id })
+        alert('Approved')
+        location.reload()
+      }
+    })
+
+    document.querySelectorAll('.reject').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.dataset.id
+        const reason = prompt('Rejection reason:')
+        if (!reason) return
+        await sb.rpc('reject_voice_submission', { p_queue_id: id, p_admin_id: user.id, p_rejection_reason: reason })
+        alert('Rejected')
+        location.reload()
+      }
+    })
+  }
+
+  load()
+})()
+</script>
+</body>
+</html>

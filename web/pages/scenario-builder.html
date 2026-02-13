@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scenario Builder - Mansion Mayhem</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+</head>
+<body style="background: var(--color-background);">
+  <div style="max-width: var(--max-width-5xl); margin: 0 auto; padding: var(--space-3xl) var(--space-xl);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3xl);">
+      <div>
+        <h1 style="font-size: var(--font-4xl); font-weight: var(--font-bold); margin-bottom: var(--space-sm);">Create Scenario</h1>
+        <p style="color: var(--color-text-secondary);">Design a new scenario for cast members</p>
+      </div>
+      <a href="director-console.html" class="btn btn-ghost">← Back to Console</a>
+    </div>
+    
+    <form id="scenarioForm" onsubmit="handleSubmit(event)">
+      <!-- Basic Info -->
+      <div class="card" style="margin-bottom: var(--space-xl);">
+        <h2 style="font-size: var(--font-2xl); font-weight: var(--font-bold); color: var(--color-gold); margin-bottom: var(--space-xl);">1. Basic Information</h2>
+        
+        <div class="form-group">
+          <label for="title">Scenario Title *</label>
+          <input type="text" id="title" required placeholder="e.g., Pool Party Confrontation">
+        </div>
+        
+        <div class="form-group">
+          <label for="type">Scenario Type *</label>
+          <select id="type" required>
+            <option value="">Select type</option>
+            <option value="drama">Drama / Confrontation</option>
+            <option value="alliance">Alliance / Strategy</option>
+            <option value="social">Social Event</option>
+            <option value="challenge">Challenge / Competition</option>
+            <option value="private">Private Conversation</option>
+            <option value="group">Group Activity</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Scenario Description *</label>
+          <textarea id="description" rows="4" required placeholder="Describe the situation that cast members will respond to..."></textarea>
+        </div>
+      </div>
+      
+      <!-- Participants -->
+      <div class="card" style="margin-bottom: var(--space-xl);">
+        <h2 style="font-size: var(--font-2xl); font-weight: var(--font-bold); color: var(--color-gold); margin-bottom: var(--space-xl);">2. Participants</h2>
+        
+        <div class="form-group">
+          <label for="participants">Select Participants *</label>
+          <select id="participants" multiple style="height: 200px;">
+            <option value="">Loading cast members...</option>
+          </select>
+          <small style="color: var(--color-text-secondary); display: block; margin-top: var(--space-sm);">Hold Ctrl/Cmd to select multiple</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="participantCount">Number of Participants</label>
+          <input type="number" id="participantCount" min="2" max="20" placeholder="Auto-detected from selection">
+        </div>
+      </div>
+      
+      <!-- Response Options -->
+      <div class="card" style="margin-bottom: var(--space-xl);">
+        <h2 style="font-size: var(--font-2xl); font-weight: var(--font-bold); color: var(--color-gold); margin-bottom: var(--space-xl);">3. Response Options</h2>
+        
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-xl);">Create 2-5 response options for cast members to choose from.</p>
+        
+        <div id="responseOptions">
+          <!-- Option 1 -->
+          <div class="form-group" style="background: var(--color-surface); padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-md);">
+            <label>Option A *</label>
+            <textarea rows="2" required placeholder="Response option text..."></textarea>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-top: var(--space-md);">
+              <input type="number" placeholder="Aggression (1-10)" min="1" max="10">
+              <input type="number" placeholder="Drama Level (1-10)" min="1" max="10">
+            </div>
+          </div>
+          
+          <!-- Option 2 -->
+          <div class="form-group" style="background: var(--color-surface); padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-md);">
+            <label>Option B *</label>
+            <textarea rows="2" required placeholder="Response option text..."></textarea>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-top: var(--space-md);">
+              <input type="number" placeholder="Aggression (1-10)" min="1" max="10">
+              <input type="number" placeholder="Drama Level (1-10)" min="1" max="10">
+            </div>
+          </div>
+          
+          <!-- Option 3 -->
+          <div class="form-group" style="background: var(--color-surface); padding: var(--space-lg); border-radius: var(--radius-md);">
+            <label>Option C *</label>
+            <textarea rows="2" required placeholder="Response option text..."></textarea>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-top: var(--space-md);">
+              <input type="number" placeholder="Aggression (1-10)" min="1" max="10">
+              <input type="number" placeholder="Drama Level (1-10)" min="1" max="10">
+            </div>
+          </div>
+        </div>
+        
+        <button type="button" class="btn btn-ghost" style="margin-top: var(--space-lg);" onclick="alert('Add option D...')">+ Add Another Option</button>
+      </div>
+      
+      <!-- Timing -->
+      <div class="card" style="margin-bottom: var(--space-xl);">
+        <h2 style="font-size: var(--font-2xl); font-weight: var(--font-bold); color: var(--color-gold); margin-bottom: var(--space-xl);">4. Timing & Deadline</h2>
+        
+        <div class="form-group">
+          <label for="deadline">Response Deadline (Hours) *</label>
+          <input type="number" id="deadline" required value="24" min="1" max="168">
+          <small style="color: var(--color-text-secondary); display: block; margin-top: var(--space-sm);">Default: 24 hours</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="gracePeriod">Grace Period (Hours) *</label>
+          <input type="number" id="gracePeriod" required value="4" min="1" max="24">
+          <small style="color: var(--color-text-secondary); display: block; margin-top: var(--space-sm);">For Hybrid Mode users. Default: 4 hours</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="launchTime">Launch Time</label>
+          <select id="launchTime">
+            <option value="now">Launch Immediately</option>
+            <option value="schedule">Schedule for Later</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Preview & Launch -->
+      <div class="card" style="background: var(--gradient-dark); text-align: center; padding: var(--space-2xl);">
+        <h2 style="margin-bottom: var(--space-lg);">Ready to Launch?</h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-xl);">
+          Participants will be notified immediately and have 24 hours to respond.
+        </p>
+        <div style="display: flex; gap: var(--space-md); justify-content: center;">
+          <button type="button" class="btn btn-secondary" onclick="alert('Preview scenario...')">Preview Scenario</button>
+          <button type="submit" class="btn btn-primary btn-lg">Launch Scenario 🚀</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <script type="module">
+    import { supabaseClient as supabase, getCurrentUser } from '../js/supabase-module.js'
+    import { requireAuth } from '../js/auth.js'
+
+    let currentUser = null
+
+    // Initialize
+    async function init() {
+      currentUser = await requireAuth()
+      if (!currentUser) return
+
+      // Check if admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', currentUser.id)
+        .single()
+
+      if (profile?.role !== 'admin') {
+        alert('Access denied. Admin only.')
+        window.location.href = 'player-dashboard.html'
+        return
+      }
+
+      await loadCastMembers()
+    }
+
+    // Load cast members from profiles
+    async function loadCastMembers() {
+      try {
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('id, display_name, email, status')
+          .eq('status', 'active')
+          .order('display_name', { ascending: true })
+
+        if (error) throw error
+
+        const participantsSelect = document.getElementById('participants')
+
+        if (!profiles || profiles.length === 0) {
+          participantsSelect.innerHTML = '<option value="">No active cast members found</option>'
+          return
+        }
+
+        participantsSelect.innerHTML = profiles.map(profile => {
+          const name = profile.display_name || profile.email?.split('@')[0] || 'Anonymous'
+          return `<option value="${profile.id}">${name}</option>`
+        }).join('')
+
+        console.log(`Loaded ${profiles.length} cast members`)
+      } catch (error) {
+        console.error('Error loading cast members:', error)
+        document.getElementById('participants').innerHTML = '<option value="">Error loading cast members</option>'
+      }
+    }
+
+    // Handle form submission
+    window.handleSubmit = async function(event) {
+      event.preventDefault()
+
+      const submitBtn = event.target.querySelector('button[type="submit"]')
+      submitBtn.disabled = true
+      submitBtn.textContent = 'Launching...'
+
+      try {
+        // Get form values
+        const title = document.getElementById('title').value
+        const type = document.getElementById('type').value
+        const description = document.getElementById('description').value
+        const deadlineHours = parseInt(document.getElementById('deadline').value) || 24
+        const gracePeriod = parseInt(document.getElementById('gracePeriod').value) || 0
+
+        // Get selected participants
+        const participantsSelect = document.getElementById('participants')
+        const selectedParticipants = Array.from(participantsSelect.selectedOptions).map(opt => opt.value)
+
+        if (selectedParticipants.length === 0) {
+          alert('Please select at least one participant')
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Launch Scenario 🚀'
+          return
+        }
+
+        // Calculate deadline
+        const deadline = new Date()
+        deadline.setHours(deadline.getHours() + deadlineHours)
+
+        // Create scenario
+        const { data: scenario, error: createError } = await supabase
+          .from('scenarios')
+          .insert({
+            title: title,
+            description: description,
+            scenario_type: type,
+            deadline_at: deadline.toISOString(),
+            status: 'active'
+          })
+          .select()
+          .single()
+
+        if (createError) throw createError
+
+        console.log('Scenario created:', scenario)
+
+        alert(`Scenario "${title}" launched successfully! ${selectedParticipants.length} participants notified.`)
+        window.location.href = 'director-console.html'
+
+      } catch (error) {
+        console.error('Error creating scenario:', error)
+        alert('Failed to create scenario: ' + error.message)
+        submitBtn.disabled = false
+        submitBtn.textContent = 'Launch Scenario 🚀'
+      }
+    }
+
+    // Initialize on load
+    init()
+  </script>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

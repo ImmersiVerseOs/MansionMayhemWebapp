@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Play - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover {
+      color: var(--color-gold);
+    }
+    
+    .hero {
+      padding: 8rem 2rem 4rem;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+    }
+    
+    .content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+    
+    .section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .steps-grid {
+      display: grid;
+      gap: 2rem;
+    }
+    
+    .step {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 2rem;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+    }
+    
+    .step:hover {
+      border-color: var(--color-gold);
+      transform: translateX(10px);
+    }
+    
+    .step-number {
+      width: 80px;
+      height: 80px;
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    
+    .step-content h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .step-content p {
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .step-example {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      font-style: italic;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+    
+    .video-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    
+    .video-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+    }
+    
+    .video-thumbnail {
+      aspect-ratio: 16/9;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .play-button {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: var(--gradient-gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-dark);
+      font-size: 1.5rem;
+    }
+    
+    .video-info {
+      padding: 1.5rem;
+    }
+    
+    .video-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .video-duration {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+    }
+    
+    .faq-list {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .faq-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .faq-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--color-gold);
+    }
+    
+    .faq-question {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .faq-answer {
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+    }
+    
+    .cta-section {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: rgba(212, 175, 55, 0.05);
+      border-radius: 24px;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .cta-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--color-gold);
+    }
+    
+    .cta-text {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 2rem;
+    }
+    
+    .btn {
+      padding: 1rem 2.5rem;
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+    }
+    
+    @media (max-width: 968px) {
+      .hero-title { font-size: 2rem; }
+      .section { padding: 2rem 1.5rem; }
+      .step { grid-template-columns: 1fr; }
+      .video-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="../index.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <a href="player-dashboard.html" class="nav-link">← Back to Dashboard</a>
+    </div>
+  </nav>
+  
+  <div class="hero">
+    <div class="hero-icon">📚</div>
+    <h1 class="hero-title">How to Play</h1>
+    <p class="hero-subtitle">
+      Learn everything you need to know about becoming a Mansion Mayhem cast member and earning money from AI-generated reality TV.
+    </p>
+  </div>
+  
+  <div class="content">
+    <!-- Getting Started -->
+    <div class="section">
+      <h2 class="section-title">
+        <span>🚀</span>
+        <span>Getting Started</span>
+      </h2>
+      
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Respond to Scenarios</h3>
+            <p>
+              You'll receive scenarios throughout the week—think of them as prompts for your character. 
+              These could be conversations, confrontations, confessions, or group events. You choose how your character responds.
+            </p>
+            <div class="step-example">
+              💬 Example: "At the pool party, Sarah makes a comment about your alliance. How do you respond?"
+            </div>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>AI Generates Episodes</h3>
+            <p>
+              Based on everyone's responses, our AI generates video episodes showing all the drama, alliances, 
+              and conflicts. Your FaceCast appears in scenes where your character is involved.
+            </p>
+            <div class="step-example">
+              🎬 Episodes publish weekly and feature the best moments from all scenarios.
+            </div>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Earn Money</h3>
+            <p>
+              Get paid based on screen time, viewer engagement, tips, and ad revenue. 
+              The more interesting and authentic your responses, the more you earn!
+            </p>
+            <div class="step-example">
+              💰 Average cast members earn $500-$2,000/month depending on activity level.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Gameplay Modes -->
+    <div class="section">
+      <h2 class="section-title">
+        <span>🎮</span>
+        <span>Understanding Gameplay Modes</span>
+      </h2>
+      
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-number">🎯</div>
+          <div class="step-content">
+            <h3>Manual Control</h3>
+            <p>
+              You respond to every single scenario yourself. Full control, high involvement. 
+              Great if you have lots of time and want complete creative control.
+            </p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">⚡</div>
+          <div class="step-content">
+            <h3>Hybrid Mode (Recommended)</h3>
+            <p>
+              AI responds when you're unavailable, using your personality profile. You take over whenever 
+              you're active. Perfect balance of involvement and passive income.
+            </p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">🤖</div>
+          <div class="step-content">
+            <h3>Full Control (AI)</h3>
+            <p>
+              AI handles all responses 24/7 based on your personality. You just watch episodes and collect 
+              earnings. Lowest time commitment, passive income.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Video Tutorials -->
+    <div class="section">
+      <h2 class="section-title">
+        <span>🎥</span>
+        <span>Video Tutorials</span>
+      </h2>
+      
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-thumbnail">
+            <span>🎬</span>
+            <div class="play-button">▶</div>
+          </div>
+          <div class="video-info">
+            <div class="video-title">Platform Overview (3:45)</div>
+            <div class="video-duration">Introduction to Mansion Mayhem</div>
+          </div>
+        </div>
+        
+        <div class="video-card">
+          <div class="video-thumbnail">
+            <span>💬</span>
+            <div class="play-button">▶</div>
+          </div>
+          <div class="video-info">
+            <div class="video-title">Responding to Scenarios (5:12)</div>
+            <div class="video-duration">How to craft great responses</div>
+          </div>
+        </div>
+        
+        <div class="video-card">
+          <div class="video-thumbnail">
+            <span>💰</span>
+            <div class="play-button">▶</div>
+          </div>
+          <div class="video-info">
+            <div class="video-title">Maximizing Earnings (4:30)</div>
+            <div class="video-duration">Tips for more screen time & money</div>
+          </div>
+        </div>
+        
+        <div class="video-card">
+          <div class="video-thumbnail">
+            <span>🎭</span>
+            <div class="play-button">▶</div>
+          </div>
+          <div class="video-info">
+            <div class="video-title">Personality & Strategy (6:18)</div>
+            <div class="video-duration">Building your character arc</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FAQ -->
+    <div class="section">
+      <h2 class="section-title">
+        <span>❓</span>
+        <span>Frequently Asked Questions</span>
+      </h2>
+      
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>💵</span>
+            <span>How much money can I make?</span>
+          </div>
+          <div class="faq-answer">
+            It varies based on activity level and engagement. Most cast members earn $500-$2,000/month. 
+            Top performers with high drama and screen time can earn $3,000-$5,000+. You're paid monthly via Stripe.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>⏱️</span>
+            <span>How much time do I need to commit?</span>
+          </div>
+          <div class="faq-answer">
+            Depends on your gameplay mode! Manual: 5-10 hours/week. Hybrid: 2-5 hours/week. Full Control: 
+            30 minutes/week just to watch episodes. You can always adjust your mode in settings.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>📅</span>
+            <span>How often are scenarios posted?</span>
+          </div>
+          <div class="faq-answer">
+            Typically 3-5 scenarios per week. Some are urgent (2-4 hour deadline), others give you 12-24 hours 
+            to respond. In Hybrid/Full Control mode, AI can handle urgent ones while you're offline.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>🎬</span>
+            <span>When do episodes come out?</span>
+          </div>
+          <div class="faq-answer">
+            New episodes publish every week, usually on Fridays. Each episode is 15-30 minutes and features 
+            the best drama from that week's scenarios. You'll get notified when you're featured.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>👥</span>
+            <span>Can I form alliances with other cast members?</span>
+          </div>
+          <div class="faq-answer">
+            Absolutely! Alliances, friendships, and rivalries make the show interesting. You can coordinate 
+            responses with allies, though keep in mind that betrayals make for great TV (and more screen time!).
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>🚪</span>
+            <span>Can I quit anytime?</span>
+          </div>
+          <div class="faq-answer">
+            Yes! There's no long-term commitment. You can pause or leave at any time. If you leave, you'll 
+            continue earning from episodes you're already in, but won't receive new scenarios.
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CTA -->
+    <div class="cta-section">
+      <h2 class="cta-title">Ready to Start Playing?</h2>
+      <p class="cta-text">Jump into your dashboard and respond to your first scenario!</p>
+      <a href="player-dashboard.html" class="btn">
+        <span>Go to Dashboard</span>
+        <span>→</span>
+      </a>
+    </div>
+  </div>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

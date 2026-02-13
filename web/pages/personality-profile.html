@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personality Profile - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-rose: #C04E63;
+      --color-purple: #8B5CF6;
+      --color-cyan: #06B6D4;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(192, 78, 99, 0.1) 0%, transparent 40%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-image {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-logo-image:hover {
+      transform: scale(1.1);
+    }
+
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .main-container {
+      min-height: 100vh;
+      padding: 8rem 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .header-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .page-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+    
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .traits-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .trait-group {
+      margin-bottom: 2.5rem;
+    }
+    
+    .trait-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .trait-name {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .trait-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      min-width: 60px;
+      text-align: right;
+    }
+    
+    .trait-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .slider-container {
+      position: relative;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      overflow: visible;
+    }
+    
+    .slider-fill {
+      position: absolute;
+      height: 100%;
+      background: var(--gradient-gold);
+      border-radius: 50px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    }
+    
+    .slider {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      margin-top: -20px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+      z-index: 10;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: var(--gradient-gold);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.5);
+      transition: all 0.3s;
+    }
+    
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.7);
+    }
+    
+    .slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: var(--gradient-gold);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.5);
+      transition: all 0.3s;
+    }
+    
+    .slider::-moz-range-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.7);
+    }
+    
+    .trait-description {
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.5;
+    }
+    
+    /* PREVIEW SIDEBAR */
+    .preview-sidebar {
+      position: sticky;
+      top: 8rem;
+      height: fit-content;
+    }
+    
+    .preview-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 2rem;
+      animation: fadeInUp 1s ease-out;
+    }
+    
+    .preview-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .character-preview {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .character-icon {
+      font-size: 6rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
+    }
+    
+    .archetype-badge {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 50px;
+      font-weight: 600;
+      color: var(--color-gold);
+      font-size: 0.875rem;
+    }
+    
+    .personality-summary {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .summary-title {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .summary-text {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+    }
+    
+    .trait-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .mini-trait {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .mini-trait-name {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+      min-width: 80px;
+    }
+    
+    .mini-trait-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      overflow: hidden;
+    }
+    
+    .mini-trait-fill {
+      height: 100%;
+      background: var(--gradient-gold);
+      border-radius: 50px;
+      transition: width 0.3s ease;
+    }
+    
+    .mini-trait-value {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-gold);
+      min-width: 30px;
+      text-align: right;
+    }
+    
+    .page-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+    
+    .btn {
+      padding: 1rem 2.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      flex: 1;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--color-gold);
+      color: var(--color-gold);
+    }
+    
+    @media (max-width: 968px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .preview-sidebar {
+        position: relative;
+        top: 0;
+      }
+      
+      .page-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <a href="../index.html" class="nav-logo">
+      <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+      <span class="nav-logo-text">MANSION MAYHEM</span>
+    </a>
+    <div style="color: rgba(255,255,255,0.6); font-size: 0.875rem;">Step 3 of 3</div>
+  </nav>
+  
+  <div class="main-container">
+    <div class="page-header">
+      <div class="header-icon">🎭</div>
+      <h1 class="page-title">Build Your Personality</h1>
+      <p class="page-subtitle">
+        Define your character's personality traits. These determine how your AI responds to scenarios 
+        when you're in Hybrid or Full Control mode. Be authentic—there's no "wrong" personality!
+      </p>
+      <div class="info-badge">
+        <span>💡</span>
+        <span>Tip: Adjust sliders based on how you'd naturally react in dramatic situations</span>
+      </div>
+    </div>
+    
+    <div class="content-grid">
+      <!-- Traits Section -->
+      <div class="traits-section">
+        <div class="section-title">
+          <span>🎚️</span>
+          <span>Personality Traits</span>
+        </div>
+        
+        <!-- Trait 1: Confidence -->
+        <div class="trait-group">
+          <div class="trait-header">
+            <div class="trait-name">
+              <span>💪</span>
+              <span>Confidence</span>
+            </div>
+            <div class="trait-value" id="confidenceValue">50</div>
+          </div>
+          <div class="trait-labels">
+            <span>Shy & Reserved</span>
+            <span>Bold & Assertive</span>
+          </div>
+          <div class="slider-container">
+            <div class="slider-fill" id="confidenceFill" style="width: 50%"></div>
+            <input type="range" class="slider" id="confidence" min="0" max="100" value="50" oninput="updateTrait('confidence', this.value)">
+          </div>
+          <div class="trait-description">
+            How assertive and self-assured are you in confrontations and group settings?
+          </div>
+        </div>
+        
+        <!-- Trait 2: Drama -->
+        <div class="trait-group">
+          <div class="trait-header">
+            <div class="trait-name">
+              <span>🎭</span>
+              <span>Drama Level</span>
+            </div>
+            <div class="trait-value" id="dramaValue">50</div>
+          </div>
+          <div class="trait-labels">
+            <span>Chill & Calm</span>
+            <span>Dramatic & Intense</span>
+          </div>
+          <div class="slider-container">
+            <div class="slider-fill" id="dramaFill" style="width: 50%"></div>
+            <input type="range" class="slider" id="drama" min="0" max="100" value="50" oninput="updateTrait('drama', this.value)">
+          </div>
+          <div class="trait-description">
+            How much do you amplify situations and create memorable moments?
+          </div>
+        </div>
+        
+        <!-- Trait 3: Loyalty -->
+        <div class="trait-group">
+          <div class="trait-header">
+            <div class="trait-name">
+              <span>🤝</span>
+              <span>Loyalty</span>
+            </div>
+            <div class="trait-value" id="loyaltyValue">50</div>
+          </div>
+          <div class="trait-labels">
+            <span>Solo Player</span>
+            <span>Ride or Die</span>
+          </div>
+          <div class="slider-container">
+            <div class="slider-fill" id="loyaltyFill" style="width: 50%"></div>
+            <input type="range" class="slider" id="loyalty" min="0" max="100" value="50" oninput="updateTrait('loyalty', this.value)">
+          </div>
+          <div class="trait-description">
+            How committed are you to alliances and friendships vs. playing independently?
+          </div>
+        </div>
+        
+        <!-- Trait 4: Aggression -->
+        <div class="trait-group">
+          <div class="trait-header">
+            <div class="trait-name">
+              <span>🔥</span>
+              <span>Aggression</span>
+            </div>
+            <div class="trait-value" id="aggressionValue">50</div>
+          </div>
+          <div class="trait-labels">
+            <span>Passive & Avoiding</span>
+            <span>Direct & Confrontational</span>
+          </div>
+          <div class="slider-container">
+            <div class="slider-fill" id="aggressionFill" style="width: 50%"></div>
+            <input type="range" class="slider" id="aggression" min="0" max="100" value="50" oninput="updateTrait('aggression', this.value)">
+          </div>
+          <div class="trait-description">
+            How directly do you address conflicts and confrontations?
+          </div>
+        </div>
+        
+        <!-- Trait 5: Strategic -->
+        <div class="trait-group">
+          <div class="trait-header">
+            <div class="trait-name">
+              <span>🧠</span>
+              <span>Strategic Thinking</span>
+            </div>
+            <div class="trait-value" id="strategicValue">50</div>
+          </div>
+          <div class="trait-labels">
+            <span>Spontaneous & Reactive</span>
+            <span>Calculated & Planning</span>
+          </div>
+          <div class="slider-container">
+            <div class="slider-fill" id="strategicFill" style="width: 50%"></div>
+            <input type="range" class="slider" id="strategic" min="0" max="100" value="50" oninput="updateTrait('strategic', this.value)">
+          </div>
+          <div class="trait-description">
+            Do you think long-term and plan moves, or react in the moment?
+          </div>
+        </div>
+        
+        <!-- Trait 6: Humor -->
+        <div class="trait-group">
+          <div class="trait-header">
+            <div class="trait-name">
+              <span>😂</span>
+              <span>Humor</span>
+            </div>
+            <div class="trait-value" id="humorValue">50</div>
+          </div>
+          <div class="trait-labels">
+            <span>Serious & Focused</span>
+            <span>Funny & Lighthearted</span>
+          </div>
+          <div class="slider-container">
+            <div class="slider-fill" id="humorFill" style="width: 50%"></div>
+            <input type="range" class="slider" id="humor" min="0" max="100" value="50" oninput="updateTrait('humor', this.value)">
+          </div>
+          <div class="trait-description">
+            How often do you use humor and levity in tense situations?
+          </div>
+        </div>
+        
+        <!-- Trait 7: Empathy -->
+        <div class="trait-group">
+          <div class="trait-header">
+            <div class="trait-name">
+              <span>💖</span>
+              <span>Empathy</span>
+            </div>
+            <div class="trait-value" id="empathyValue">50</div>
+          </div>
+          <div class="trait-labels">
+            <span>Self-Focused</span>
+            <span>Deeply Caring</span>
+          </div>
+          <div class="slider-container">
+            <div class="slider-fill" id="empathyFill" style="width: 50%"></div>
+            <input type="range" class="slider" id="empathy" min="0" max="100" value="50" oninput="updateTrait('empathy', this.value)">
+          </div>
+          <div class="trait-description">
+            How much do you consider others' feelings and perspectives?
+          </div>
+        </div>
+        
+        <!-- Trait 8: Authenticity -->
+        <div class="trait-group">
+          <div class="trait-header">
+            <div class="trait-name">
+              <span>✨</span>
+              <span>Authenticity</span>
+            </div>
+            <div class="trait-value" id="authenticityValue">50</div>
+          </div>
+          <div class="trait-labels">
+            <span>Strategic Persona</span>
+            <span>Raw & Genuine</span>
+          </div>
+          <div class="slider-container">
+            <div class="slider-fill" id="authenticityFill" style="width: 50%"></div>
+            <input type="range" class="slider" id="authenticity" min="0" max="100" value="50" oninput="updateTrait('authenticity', this.value)">
+          </div>
+          <div class="trait-description">
+            Do you play a character for the cameras, or show your true self?
+          </div>
+        </div>
+      </div>
+      
+      <!-- Preview Sidebar -->
+      <div class="preview-sidebar">
+        <div class="preview-card">
+          <div class="preview-title">Your Character Preview</div>
+          
+          <div class="character-preview">
+            <div class="character-icon">🎭</div>
+            <div class="archetype-badge" id="archetypeBadge">The Strategist</div>
+          </div>
+          
+          <div class="personality-summary">
+            <div class="summary-title">AI Behavior Profile</div>
+            <div class="summary-text" id="summaryText">
+              Adjust the sliders to see how your character will behave when AI takes control in Hybrid Mode.
+            </div>
+          </div>
+          
+          <div class="trait-bars">
+            <div class="mini-trait">
+              <div class="mini-trait-name">Confidence</div>
+              <div class="mini-trait-bar">
+                <div class="mini-trait-fill" id="miniConfidence" style="width: 50%"></div>
+              </div>
+              <div class="mini-trait-value" id="miniConfidenceValue">50</div>
+            </div>
+            
+            <div class="mini-trait">
+              <div class="mini-trait-name">Drama</div>
+              <div class="mini-trait-bar">
+                <div class="mini-trait-fill" id="miniDrama" style="width: 50%"></div>
+              </div>
+              <div class="mini-trait-value" id="miniDramaValue">50</div>
+            </div>
+            
+            <div class="mini-trait">
+              <div class="mini-trait-name">Loyalty</div>
+              <div class="mini-trait-bar">
+                <div class="mini-trait-fill" id="miniLoyalty" style="width: 50%"></div>
+              </div>
+              <div class="mini-trait-value" id="miniLoyaltyValue">50</div>
+            </div>
+            
+            <div class="mini-trait">
+              <div class="mini-trait-name">Aggression</div>
+              <div class="mini-trait-bar">
+                <div class="mini-trait-fill" id="miniAggression" style="width: 50%"></div>
+              </div>
+              <div class="mini-trait-value" id="miniAggressionValue">50</div>
+            </div>
+            
+            <div class="mini-trait">
+              <div class="mini-trait-name">Strategic</div>
+              <div class="mini-trait-bar">
+                <div class="mini-trait-fill" id="miniStrategic" style="width: 50%"></div>
+              </div>
+              <div class="mini-trait-value" id="miniStrategicValue">50</div>
+            </div>
+            
+            <div class="mini-trait">
+              <div class="mini-trait-name">Humor</div>
+              <div class="mini-trait-bar">
+                <div class="mini-trait-fill" id="miniHumor" style="width: 50%"></div>
+              </div>
+              <div class="mini-trait-value" id="miniHumorValue">50</div>
+            </div>
+            
+            <div class="mini-trait">
+              <div class="mini-trait-name">Empathy</div>
+              <div class="mini-trait-bar">
+                <div class="mini-trait-fill" id="miniEmpathy" style="width: 50%"></div>
+              </div>
+              <div class="mini-trait-value" id="miniEmpathyValue">50</div>
+            </div>
+            
+            <div class="mini-trait">
+              <div class="mini-trait-name">Authenticity</div>
+              <div class="mini-trait-bar">
+                <div class="mini-trait-fill" id="miniAuthenticity" style="width: 50%"></div>
+              </div>
+              <div class="mini-trait-value" id="miniAuthenticityValue">50</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="page-actions">
+      <button class="btn btn-secondary" onclick="window.location.href='facecast-consent.html'">
+        <span>←</span>
+        <span>Back</span>
+      </button>
+      <button class="btn btn-primary" onclick="saveProfile()">
+        <span>Complete Setup</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    const traits = {
+      confidence: 50,
+      drama: 50,
+      loyalty: 50,
+      aggression: 50,
+      strategic: 50,
+      humor: 50,
+      empathy: 50,
+      authenticity: 50
+    };
+    
+    function updateTrait(trait, value) {
+      traits[trait] = parseInt(value);
+      
+      // Update main slider display
+      document.getElementById(trait + 'Value').textContent = value;
+      document.getElementById(trait + 'Fill').style.width = value + '%';
+      
+      // Update mini preview
+      document.getElementById('mini' + trait.charAt(0).toUpperCase() + trait.slice(1)).style.width = value + '%';
+      document.getElementById('mini' + trait.charAt(0).toUpperCase() + trait.slice(1) + 'Value').textContent = value;
+      
+      // Update summary
+      updateSummary();
+    }
+    
+    function updateSummary() {
+      let description = '';
+      
+      // Determine personality type based on traits
+      if (traits.drama > 70 && traits.aggression > 60) {
+        description = 'Your character is intense and confrontational, bringing high energy and dramatic moments to every scenario. Perfect for creating memorable conflicts.';
+      } else if (traits.strategic > 70 && traits.aggression < 40) {
+        description = 'Your character is a calculated mastermind, preferring to manipulate situations from behind the scenes rather than direct confrontation.';
+      } else if (traits.loyalty > 70 && traits.empathy > 60) {
+        description = 'Your character is a loyal friend and peacemaker, building strong alliances and caring deeply about others in the house.';
+      } else if (traits.humor > 70 && traits.confidence > 60) {
+        description = 'Your character is the life of the party, using wit and charm to navigate conflicts and keep the mood light.';
+      } else if (traits.authenticity > 70) {
+        description = 'Your character keeps it real, showing genuine emotions and reactions without playing games or putting on a persona.';
+      } else if (traits.confidence < 30 && traits.aggression < 30) {
+        description = 'Your character is more reserved and observant, avoiding direct conflict and playing a quieter strategic game.';
+      } else {
+        description = 'Your character is well-balanced, adapting to different situations with a mix of strategy, emotion, and authentic reactions.';
+      }
+      
+      document.getElementById('summaryText').textContent = description;
+    }
+    
+    function saveProfile() {
+      // Store personality profile
+      const profile = {
+        traits: traits,
+        timestamp: new Date().toISOString(),
+        archetype: sessionStorage.getItem('archetype') || 'strategist'
+      };
+      
+      sessionStorage.setItem('personalityProfile', JSON.stringify(profile));
+      
+      // Show loading
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span>Saving Profile...</span>';
+      
+      // In production: Save to database via API
+      setTimeout(() => {
+        window.location.href = 'gameplay-mode.html';
+      }, 1500);
+    }
+    
+    // Load archetype from session if exists
+    window.onload = function() {
+      const archetype = sessionStorage.getItem('archetype');
+      if (archetype) {
+        const archetypeNames = {
+          'queen': 'The Queen',
+          'villain': 'The Villain',
+          'strategist': 'The Strategist',
+          'instigator': 'The Instigator',
+          'peacemaker': 'The Peacemaker',
+          'wildcard': 'The Wildcard'
+        };
+        document.getElementById('archetypeBadge').textContent = archetypeNames[archetype] || 'The Strategist';
+      }
+      updateSummary();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceCast Consent - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-success: #10B981;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(192, 78, 99, 0.1) 0%, transparent 40%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .main-container {
+      min-height: 100vh;
+      padding: 8rem 2rem 4rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .header-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .page-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    .method-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-gold);
+      margin-bottom: 2rem;
+    }
+    
+    .consent-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .consent-section {
+      margin-bottom: 2.5rem;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .section-content {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+    
+    .section-content ul {
+      margin: 1rem 0;
+      padding-left: 2rem;
+    }
+    
+    .section-content li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .highlight-box {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .warning-box {
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .success-box {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .signature-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+    
+    .signature-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .signature-canvas-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    
+    .signature-canvas {
+      width: 100%;
+      height: 200px;
+      border: 2px dashed rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    
+    .signature-placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(0, 0, 0, 0.3);
+      font-style: italic;
+      pointer-events: none;
+    }
+    
+    .signature-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: start;
+      gap: 1rem;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--color-gold);
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 0.25rem;
+    }
+    
+    .checkbox-group label {
+      cursor: pointer;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .page-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+    
+    .btn {
+      padding: 1rem 2.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      flex: 1;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--color-gold);
+      color: var(--color-gold);
+    }
+    
+    .btn-ghost {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      border: none;
+      padding: 0.5rem 1rem;
+    }
+    
+    .btn-ghost:hover {
+      color: var(--color-gold);
+    }
+    
+    @media (max-width: 768px) {
+      .page-title { font-size: 2rem; }
+      .consent-card { padding: 2rem 1.5rem; }
+      .page-actions { flex-direction: column; }
+      .signature-canvas { height: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <a href="../index.html" class="nav-logo">
+      <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+      <span class="nav-logo-text">MANSION MAYHEM</span>
+    </a>
+    <div style="color: rgba(255,255,255,0.6); font-size: 0.875rem;">Step 2 of 3</div>
+  </nav>
+  
+  <div class="main-container">
+    <div class="page-header">
+      <div class="header-icon">✍️</div>
+      <h1 class="page-title">FaceCast Consent Agreement</h1>
+      <p class="page-subtitle">
+        Please review and sign this agreement to authorize use of your likeness in AI-generated content.
+      </p>
+      <div class="method-badge" id="methodBadge">
+        <span id="methodIcon">📸</span>
+        <span id="methodText">Photo Upload Method</span>
+      </div>
+    </div>
+    
+    <div class="consent-card">
+      <!-- Introduction -->
+      <div class="consent-section">
+        <div class="section-title">
+          <span>📋</span>
+          <span>Agreement Overview</span>
+        </div>
+        <div class="section-content">
+          <p>
+            By signing this agreement, you grant <strong>ImmersiVerse OS</strong> (operator of Mansion Mayhem) 
+            the right to use your likeness for creating AI-generated video content. This agreement covers 
+            your rights, our rights, and how your content will be used and monetized.
+          </p>
+        </div>
+      </div>
+      
+      <!-- Method-Specific Content -->
+      <div class="consent-section" id="photoContent" style="display: none;">
+        <div class="section-title">
+          <span>📸</span>
+          <span>Photo Upload Rights</span>
+        </div>
+        <div class="section-content">
+          <p>You grant ImmersiVerse OS permission to:</p>
+          <ul>
+            <li>Process and analyze the <strong><span id="photoCount">0</span> photos</strong> you uploaded</li>
+            <li>Create a digital FaceCast model based on your facial features</li>
+            <li>Use this FaceCast to generate AI videos featuring your likeness</li>
+            <li>Store your photos securely in encrypted cloud storage</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>✓ You retain ownership</strong> of your original photos. We only have a license to use them for creating your FaceCast.
+          </div>
+        </div>
+      </div>
+      
+      <div class="consent-section" id="cameosContent" style="display: none;">
+        <div class="section-title">
+          <span>🎬</span>
+          <span>Sora Cameos Integration</span>
+        </div>
+        <div class="section-content">
+          <p>You have authorized ImmersiVerse OS to:</p>
+          <ul>
+            <li>Access your Sora Cameos character via username: <strong id="soraUsername">loading...</strong></li>
+            <li>Cast your Cameos character in Mansion Mayhem video content</li>
+            <li>Generate videos using your existing Cameos likeness</li>
+            <li>Integrate your Cameos character with our platform</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>✓ Sora Integration:</strong> You've confirmed that <strong style="font-family: monospace; background: rgba(255,255,255,0.1); padding: 0.25rem 0.5rem; border-radius: 4px;">immersiverseos</strong> is listed as an authorized caster in your Sora Cameos settings.
+          </div>
+        </div>
+      </div>
+      
+      <!-- Usage Rights -->
+      <div class="consent-section">
+        <div class="section-title">
+          <span>🎥</span>
+          <span>Content Usage Rights</span>
+        </div>
+        <div class="section-content">
+          <p>ImmersiVerse OS may use your FaceCast to:</p>
+          <ul>
+            <li>Generate AI video content for Mansion Mayhem episodes</li>
+            <li>Create scenes with your character interacting with other cast members</li>
+            <li>Distribute content on the Mansion Mayhem platform and partner platforms</li>
+            <li>Use in promotional materials and marketing (with your character)</li>
+            <li>Create derivative works based on scenarios and interactions</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Revenue Sharing -->
+      <div class="consent-section">
+        <div class="section-title">
+          <span>💰</span>
+          <span>Revenue Sharing</span>
+        </div>
+        <div class="section-content">
+          <p>You will earn money from your participation:</p>
+          <ul>
+            <li><strong>Screen Time:</strong> Paid based on appearance duration in episodes</li>
+            <li><strong>Ad Revenue:</strong> 60% platform / 40% you (from ads on your content)</li>
+            <li><strong>Tips:</strong> 85% you / 15% platform (direct viewer tips)</li>
+            <li><strong>Subscriptions:</strong> Revenue share on subscriber views</li>
+            <li><strong>Brand Deals:</strong> Negotiated rates for sponsored content</li>
+          </ul>
+          <div class="success-box">
+            <strong>💵 Payments:</strong> Monthly via Stripe. Minimum $50 payout. You're responsible for taxes.
+          </div>
+        </div>
+      </div>
+      
+      <!-- Your Rights -->
+      <div class="consent-section">
+        <div class="section-title">
+          <span>✅</span>
+          <span>Your Rights</span>
+        </div>
+        <div class="section-content">
+          <p>You maintain the following rights:</p>
+          <ul>
+            <li><strong>Ownership:</strong> You own your original photos/Cameos character</li>
+            <li><strong>Revenue:</strong> You receive payment for all content featuring you</li>
+            <li><strong>Removal:</strong> Request content removal for violations or misrepresentation</li>
+            <li><strong>Revocation:</strong> Terminate this agreement with 30 days notice</li>
+            <li><strong>Data Access:</strong> Request your data under GDPR/CCPA</li>
+          </ul>
+          <div class="warning-box">
+            <strong>⚠️ Note:</strong> Existing published content may remain after revocation, but you continue earning from it.
+          </div>
+        </div>
+      </div>
+      
+      <!-- Warranties -->
+      <div class="consent-section">
+        <div class="section-title">
+          <span>⚖️</span>
+          <span>Your Warranties</span>
+        </div>
+        <div class="section-content">
+          <p>By signing, you confirm that:</p>
+          <div class="checkbox-group">
+            <input type="checkbox" id="warranty1" onchange="checkConsent()">
+            <label for="warranty1">
+              I am <strong>18 years of age or older</strong> and have the legal right to enter this agreement.
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="warranty2" onchange="checkConsent()">
+            <label for="warranty2" id="warranty2Label">
+              The photos/content I provided are of <strong>me</strong> and I have the right to grant these licenses.
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="warranty3" onchange="checkConsent()">
+            <label for="warranty3">
+              I do not infringe on any <strong>third-party rights</strong> by granting these permissions.
+            </label>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="warranty4" onchange="checkConsent()">
+            <label for="warranty4">
+              I agree to the <a href="terms.html" style="color: var(--color-gold);">Terms of Service</a>, 
+              <a href="privacy.html" style="color: var(--color-gold);">Privacy Policy</a>, and 
+              <a href="community-guidelines.html" style="color: var(--color-gold);">Community Guidelines</a>.
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <!-- E-Signature -->
+      <div class="signature-section">
+        <div class="signature-title">Electronic Signature</div>
+        <p style="text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; font-size: 0.95rem;">
+          Sign below to indicate your agreement. Your signature is legally binding.
+        </p>
+        
+        <div class="signature-canvas-container">
+          <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+          <div class="signature-placeholder" id="signaturePlaceholder">Sign here with your mouse or finger</div>
+        </div>
+        
+        <div class="signature-controls">
+          <button class="btn btn-ghost" onclick="clearSignature()">
+            <span>🗑️</span>
+            <span>Clear</span>
+          </button>
+        </div>
+        
+        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; font-size: 0.875rem; color: rgba(255,255,255,0.6); text-align: center;">
+          <strong>Date:</strong> <span id="currentDate"></span> | 
+          <strong>IP:</strong> <span id="ipAddress">Recording...</span> |
+          <strong>Time:</strong> <span id="currentTime"></span>
+        </div>
+      </div>
+      
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="window.location.href='facecast-onboarding.html'">
+          <span>←</span>
+          <span>Back</span>
+        </button>
+        <button class="btn btn-primary" id="submitBtn" disabled onclick="submitConsent()">
+          <span>I Agree & Continue</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let canvas, ctx, isDrawing = false, hasSignature = false;
+    const method = sessionStorage.getItem('faceCastMethod') || 'photos';
+    
+    // Initialize
+    window.onload = function() {
+      setupSignature();
+      displayMethod();
+      updateDateTime();
+      getIPAddress();
+      setInterval(updateDateTime, 1000);
+    };
+    
+    function displayMethod() {
+      const photoContent = document.getElementById('photoContent');
+      const cameosContent = document.getElementById('cameosContent');
+      const methodIcon = document.getElementById('methodIcon');
+      const methodText = document.getElementById('methodText');
+      const warranty2Label = document.getElementById('warranty2Label');
+      
+      if (method === 'cameos') {
+        // Sora Cameos mode
+        methodIcon.textContent = '🎬';
+        methodText.textContent = 'Sora Cameos Method';
+        cameosContent.style.display = 'block';
+        photoContent.style.display = 'none';
+        
+        const username = sessionStorage.getItem('soraUsername');
+        document.getElementById('soraUsername').textContent = username || 'Not provided';
+        
+        warranty2Label.innerHTML = 'I have authorized <strong>immersiverseos</strong> to access my Sora Cameos character and I have the right to grant these licenses.';
+      } else {
+        // Photo upload mode
+        methodIcon.textContent = '📸';
+        methodText.textContent = 'Photo Upload Method';
+        photoContent.style.display = 'block';
+        cameosContent.style.display = 'none';
+        
+        const photos = JSON.parse(sessionStorage.getItem('facecastPhotos') || '[]');
+        document.getElementById('photoCount').textContent = photos.length;
+      }
+    }
+    
+    function setupSignature() {
+      canvas = document.getElementById('signatureCanvas');
+      ctx = canvas.getContext('2d');
+      
+      // Set canvas size
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      
+      // Drawing settings
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      
+      // Mouse events
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+      
+      // Touch events
+      canvas.addEventListener('touchstart', handleTouch);
+      canvas.addEventListener('touchmove', handleTouch);
+      canvas.addEventListener('touchend', stopDrawing);
+    }
+    
+    function startDrawing(e) {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      document.getElementById('signaturePlaceholder').style.display = 'none';
+    }
+    
+    function draw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.stroke();
+      hasSignature = true;
+      checkConsent();
+    }
+    
+    function stopDrawing() {
+      isDrawing = false;
+    }
+    
+    function handleTouch(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 'mousemove', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+    }
+    
+    function clearSignature() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasSignature = false;
+      document.getElementById('signaturePlaceholder').style.display = 'block';
+      checkConsent();
+    }
+    
+    function checkConsent() {
+      const w1 = document.getElementById('warranty1').checked;
+      const w2 = document.getElementById('warranty2').checked;
+      const w3 = document.getElementById('warranty3').checked;
+      const w4 = document.getElementById('warranty4').checked;
+      
+      const allChecked = w1 && w2 && w3 && w4;
+      document.getElementById('submitBtn').disabled = !(allChecked && hasSignature);
+    }
+    
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US');
+    }
+    
+    async function getIPAddress() {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        document.getElementById('ipAddress').textContent = data.ip;
+      } catch (error) {
+        document.getElementById('ipAddress').textContent = 'Unable to detect';
+      }
+    }
+    
+    function submitConsent() {
+      // Get signature as base64
+      const signatureData = canvas.toDataURL();
+      
+      // Collect all consent data
+      const consentData = {
+        method: method,
+        signature: signatureData,
+        timestamp: new Date().toISOString(),
+        ipAddress: document.getElementById('ipAddress').textContent,
+        warranties: {
+          age18: true,
+          ownership: true,
+          noInfringement: true,
+          agreesToTerms: true
+        }
+      };
+      
+      if (method === 'cameos') {
+        consentData.soraUsername = sessionStorage.getItem('soraUsername');
+        consentData.authorizedCaster = 'immersiverseos';
+      } else {
+        consentData.photoCount = JSON.parse(sessionStorage.getItem('facecastPhotos') || '[]').length;
+      }
+      
+      // Store consent
+      sessionStorage.setItem('faceCastConsent', JSON.stringify(consentData));
+      
+      // Show loading
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>Processing...</span>';
+      
+      // In production: Upload signature and consent to database
+      setTimeout(() => {
+        window.location.href = 'personality-profile.html';
+      }, 2000);
+    }
+  </script>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

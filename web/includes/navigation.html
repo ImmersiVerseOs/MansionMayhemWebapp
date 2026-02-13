@@ -1,0 +1,63 @@
+<!-- MANSION MAYHEM - Persistent Navigation Bar -->
+<!-- Include this snippet in all pages after opening <body> tag -->
+<!-- Also include: <link rel="stylesheet" href="/css/navigation.css"> in <head> -->
+<!-- Also include: <script src="/js/navigation.js"></script> before closing </body> -->
+
+<nav class="mm-main-nav">
+  <div class="nav-container">
+    <a href="/index.html" class="nav-logo">
+      <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+      <span class="logo-text">MANSION MAYHEM</span>
+    </a>
+
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+      ☰
+    </button>
+
+    <div class="nav-links">
+      <!-- For Cast Members -->
+      <a href="/leaderboard.html" class="nav-link">
+        <span class="nav-icon">🏆</span>
+        <span>Leaderboard</span>
+      </a>
+      <a href="/pages/gallery.html" class="nav-link">
+        <span class="nav-icon">🎬</span>
+        <span>Episodes</span>
+      </a>
+      <a href="/pages/tea-room.html" class="nav-link cast-only">
+        <span class="nav-icon">☕</span>
+        <span>The Tea Room</span>
+      </a>
+
+      <!-- For Directors (show if has premium/admin tier) -->
+      <a href="/my-director-console.html" class="nav-link director-only">
+        <span class="nav-icon">🎮</span>
+        <span>My Console</span>
+      </a>
+
+      <!-- For Admins -->
+      <a href="/pages/admin-dashboard.html" class="nav-link admin-only">
+        <span class="nav-icon">⚡</span>
+        <span>Admin Console</span>
+      </a>
+
+      <!-- Notifications -->
+      <div class="nav-notifications">
+        <button id="notificationsBtn" class="notification-btn" aria-label="Notifications">
+          <span class="nav-icon">🔔</span>
+          <span class="notification-badge" id="notifCount">0</span>
+        </button>
+      </div>
+
+      <!-- User Menu -->
+      <div class="nav-user">
+        <button id="userMenuBtn" class="user-menu-btn" aria-label="User menu">
+          <img id="userAvatar" class="user-avatar" src="/assets/default-avatar.png" alt="User avatar">
+          <span id="userName">User</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Data loaded via JavaScript from Supabase (navigation.js) -->

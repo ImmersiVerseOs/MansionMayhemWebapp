@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Cast Members | MANSION MAYHEM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/navigation.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111111;
+      --bg-elevated: #1a1a1a;
+      --bg-sidebar: #0d0d0d;
+      --border: #2a2a2a;
+      --text: #ffffff;
+      --text-dim: #888888;
+      --text-muted: #555555;
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --purple: #9c27b0;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .back-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .back-link:hover {
+      transform: translateX(-4px);
+    }
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .page-subtitle {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .filters {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .filters-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 16px;
+      align-items: end;
+    }
+    .filter-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .filter-input, .filter-select {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .filter-input:focus, .filter-select:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--bg);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+    }
+    .btn-secondary {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      border-color: var(--gold);
+    }
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+    .cast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .cast-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    .cast-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold);
+      box-shadow: 0 8px 24px rgba(212, 175, 55, 0.2);
+    }
+    .cast-card.already-invited {
+      opacity: 0.6;
+      background: var(--bg-elevated);
+    }
+    .cast-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0 auto 16px;
+    }
+    .cast-name {
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .cast-display-name {
+      font-size: 13px;
+      color: var(--text-dim);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .cast-archetype {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .archetype-queen { background: rgba(212, 175, 55, 0.2); color: var(--gold); }
+    .archetype-villain { background: rgba(233, 30, 99, 0.2); color: var(--rose); }
+    .archetype-wildcard { background: rgba(156, 39, 176, 0.2); color: var(--purple); }
+    .archetype-sweetheart { background: rgba(76, 175, 80, 0.2); color: var(--success); }
+    .archetype-strategist { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
+    .archetype-comedian { background: rgba(255, 152, 0, 0.2); color: var(--warning); }
+    .cast-status {
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .status-active { color: var(--success); }
+    .status-eliminated { color: var(--danger); }
+    .status-pending { color: var(--warning); }
+    .cast-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .cast-actions button {
+      flex: 1;
+    }
+    .already-invited-badge {
+      background: var(--success);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-dim);
+    }
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+    .empty-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 24px;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .modal-close:hover {
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .modal-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    @media (max-width: 992px) {
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+      .cast-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- MANSION MAYHEM - Persistent Navigation Bar -->
+  <!-- Navigation (loaded from include) -->
+  <div id="globalNavPlaceholder"></div>
+  <script>
+    fetch('/includes/global-nav.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('globalNavPlaceholder').innerHTML = data;
+      });
+  </script>
+  <!-- Navigation loaded - displays role-based links, notifications, and user menu -->
+
+  <div class="container">
+    <div class="header">
+      <div>
+        <a href="my-director-console.html" class="back-link">← Back to My Games</a>
+        <h1 class="page-title">Browse Cast Members</h1>
+        <p class="page-subtitle">Invite existing users to join your game</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Search by Name</label>
+          <input type="text" class="filter-input" id="searchInput" placeholder="Type to search...">
+        </div>
+        <div class="filter-group">
+          <label>Archetype</label>
+          <select class="filter-select" id="archetypeFilter">
+            <option value="">All Archetypes</option>
+            <option value="queen">Queen</option>
+            <option value="villain">Villain</option>
+            <option value="wildcard">Wildcard</option>
+            <option value="sweetheart">Sweetheart</option>
+            <option value="strategist">Strategist</option>
+            <option value="comedian">Comedian</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Status</label>
+          <select class="filter-select" id="statusFilter">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="eliminated">Eliminated</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>&nbsp;</label>
+          <button class="btn btn-secondary" onclick="resetFilters()">Clear Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cast Grid -->
+    <div class="cast-grid" id="castGrid">
+      <!-- Cast members loaded dynamically -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <div class="empty-icon">👥</div>
+      <div class="empty-title">No cast members found</div>
+      <p>Try adjusting your filters or search terms.</p>
+    </div>
+  </div>
+
+  <!-- Invite Modal -->
+  <div class="modal" id="inviteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Invite Cast Member</div>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="inviteModalContent">
+          <!-- Dynamic content -->
+        </div>
+        <form id="inviteForm">
+          <div class="form-group">
+            <label class="form-label">Select Game</label>
+            <select class="form-select" id="inviteGameSelect" required>
+              <option value="">Select a game...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Personal Message (Optional)</label>
+            <textarea class="form-textarea" id="inviteMessage" placeholder="Add a personal message to the invitation..."></textarea>
+          </div>
+          <div class="form-group">
+            <div class="checkbox-group" onclick="toggleCheckbox('sendEmailNow')">
+              <input type="checkbox" id="sendEmailNow" checked>
+              <label style="flex: 1; cursor: pointer;">
+                <strong>Send email invitation immediately</strong><br>
+                <small style="color: var(--text-dim);">Cast member will receive an email with the invite link</small>
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="sendInvite()">Send Invitation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    var supabase = window.supabase.createClient(
+      'https://mllqzeaxqusoryteaxzg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sbHF6ZWF4cXVzb3J5dGVheHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODA1NzAsImV4cCI6MjA4NjA1NjU3MH0.s9CAe91gUG8uZ7Nrjd1pIX9YYvpNKa2lOrt6HDUarec'
+    );
+
+    let currentUser = null;
+    let allCastMembers = [];
+    let filteredCastMembers = [];
+    let userGames = [];
+    let selectedCastMember = null;
+    let alreadyInvited = new Set();
+
+    // Get current game from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentGameId = urlParams.get('game');
+
+    async function init() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Please sign in first');
+        window.location.href = '/auth';
+        return;
+      }
+      currentUser = session.user;
+
+      await Promise.all([
+        loadUserGames(),
+        loadCastMembers(),
+        loadExistingInvites()
+      ]);
+    }
+
+    async function loadUserGames() {
+      const { data, error } = await supabase
+        .from('mm_games')
+        .select('id, title, game_code, status')
+        .eq('creator_id', currentUser.id)
+        .in('status', ['setup', 'lobby', 'active'])
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        userGames = data;
+      }
+    }
+
+    async function loadCastMembers() {
+      const { data, error } = await supabase
+        .from('cast_members')
+        .select('*')
+        .order('full_name', { ascending: true });
+
+      if (error) {
+        console.error('Error loading cast:', error);
+        return;
+      }
+
+      allCastMembers = data || [];
+      filteredCastMembers = [...allCastMembers];
+      renderCastGrid();
+    }
+
+    async function loadExistingInvites() {
+      if (!currentGameId) return;
+
+      const { data } = await supabase
+        .from('mm_game_cast')
+        .select('cast_member_id')
+        .eq('game_id', currentGameId);
+
+      if (data) {
+        alreadyInvited = new Set(data.map(gc => gc.cast_member_id));
+      }
+    }
+
+    function renderCastGrid() {
+      const grid = document.getElementById('castGrid');
+      const emptyState = document.getElementById('emptyState');
+
+      if (filteredCastMembers.length === 0) {
+        grid.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      grid.style.display = 'grid';
+      emptyState.style.display = 'none';
+
+      grid.innerHTML = filteredCastMembers.map(member => {
+        const isInvited = alreadyInvited.has(member.id);
+        const initials = getInitials(member.full_name || member.display_name);
+        const archetype = member.archetype || 'wildcard';
+
+        return `
+          <div class="cast-card ${isInvited ? 'already-invited' : ''}">
+            <div class="cast-avatar">${initials}</div>
+            <div class="cast-name">${member.full_name || member.display_name}</div>
+            <div class="cast-display-name">@${member.display_name?.toLowerCase().replace(/\s+/g, '')}</div>
+            <div style="text-align: center; margin-bottom: 12px;">
+              <span class="cast-archetype archetype-${archetype}">${archetype}</span>
+            </div>
+            <div class="cast-status status-${member.status}">
+              ${member.status === 'active' ? '✓ Available' : member.status}
+            </div>
+            ${isInvited ?
+              `<div class="already-invited-badge">✓ Already in Game</div>` :
+              `<div class="cast-actions">
+                <button class="btn btn-primary btn-small" onclick="openInviteModal('${member.id}')">
+                  📧 Invite
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="viewProfile('${member.id}')">
+                  👁️ View
+                </button>
+              </div>`
+            }
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getInitials(name) {
+      if (!name) return '??';
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function openInviteModal(castMemberId) {
+      selectedCastMember = allCastMembers.find(m => m.id === castMemberId);
+      if (!selectedCastMember) return;
+
+      const gameSelect = document.getElementById('inviteGameSelect');
+      gameSelect.innerHTML = '<option value="">Select a game...</option>' +
+        userGames.map(game =>
+          `<option value="${game.id}" ${game.id === currentGameId ? 'selected' : ''}>
+            ${game.game_code} - ${game.title}
+          </option>`
+        ).join('');
+
+      document.getElementById('inviteModalContent').innerHTML = `
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div class="cast-avatar" style="width: 60px; height: 60px; font-size: 24px;">
+            ${getInitials(selectedCastMember.full_name)}
+          </div>
+          <h3 style="margin-top: 12px;">${selectedCastMember.full_name}</h3>
+          <p style="color: var(--text-dim); font-size: 13px;">${selectedCastMember.archetype || 'Cast Member'}</p>
+        </div>
+      `;
+
+      document.getElementById('inviteModal').classList.add('active');
+    }
+
+    async function sendInvite() {
+      const gameId = document.getElementById('inviteGameSelect').value;
+      const message = document.getElementById('inviteMessage').value;
+      const sendEmail = document.getElementById('sendEmailNow').checked;
+
+      if (!gameId) {
+        alert('Please select a game');
+        return;
+      }
+
+      try {
+        // Create invite in director_invites table
+        const { data: invite, error: inviteError } = await supabase
+          .from('director_invites')
+          .insert({
+            created_by: currentUser.id,
+            for_game_id: gameId,
+            invite_code: generateInviteCode(),
+            max_uses: 1,
+            role_granted: 'cast',
+            invite_message: message,
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          })
+          .select()
+          .single();
+
+        if (inviteError) throw inviteError;
+
+        // Add to mm_game_cast table
+        const { error: castError } = await supabase
+          .from('mm_game_cast')
+          .insert({
+            game_id: gameId,
+            cast_member_id: selectedCastMember.id,
+            status: 'invited',
+            invited_at: new Date().toISOString()
+          });
+
+        if (castError && castError.code !== '23505') { // Ignore if already exists
+          throw castError;
+        }
+
+        // Send email if requested
+        if (sendEmail && selectedCastMember.user_id) {
+          await sendInviteEmail({
+            castMemberId: selectedCastMember.id,
+            gameId: gameId,
+            inviteCode: invite.invite_code,
+            message: message
+          });
+        }
+
+        alert('✅ Invitation sent successfully!');
+        closeModal();
+
+        // Reload to show updated status
+        alreadyInvited.add(selectedCastMember.id);
+        renderCastGrid();
+
+      } catch (error) {
+        console.error('Error sending invite:', error);
+        alert('Failed to send invitation: ' + error.message);
+      }
+    }
+
+    async function sendInviteEmail(inviteData) {
+      // Call SendGrid edge function
+      const { error } = await supabase.functions.invoke('send-invite-email', {
+        body: inviteData
+      });
+
+      if (error) {
+        console.error('Email error:', error);
+      }
+    }
+
+    function generateInviteCode() {
+      return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+
+    function closeModal() {
+      document.getElementById('inviteModal').classList.remove('active');
+      document.getElementById('inviteForm').reset();
+    }
+
+    function toggleCheckbox(id) {
+      const checkbox = document.getElementById(id);
+      checkbox.checked = !checkbox.checked;
+    }
+
+    function viewProfile(castMemberId) {
+      alert('View profile feature coming soon!');
+    }
+
+    // Filters
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('archetypeFilter').addEventListener('change', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const archetype = document.getElementById('archetypeFilter').value;
+      const status = document.getElementById('statusFilter').value;
+
+      filteredCastMembers = allCastMembers.filter(member => {
+        const matchesSearch = !search ||
+          member.full_name?.toLowerCase().includes(search) ||
+          member.display_name?.toLowerCase().includes(search);
+        const matchesArchetype = !archetype || member.archetype === archetype;
+        const matchesStatus = !status || member.status === status;
+
+        return matchesSearch && matchesArchetype && matchesStatus;
+      });
+
+      renderCastGrid();
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('archetypeFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+      applyFilters();
+    }
+
+    // Initialize
+    init();
+  </script>
+  <script src="/js/navigation.js"></script>
+</body>
+</html>

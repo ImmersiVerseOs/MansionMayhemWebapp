@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Games | Mansion Mayhem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: rgba(26, 26, 46, 0.6);
+      --bg-elevated: rgba(30, 30, 50, 0.8);
+      --border: rgba(212, 175, 55, 0.2);
+      --text: #ffffff;
+      --text-dim: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --purple: #9c27b0;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --cyan: #06b6d4;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at top, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(233, 30, 99, 0.1) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Navigation */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover {
+      color: var(--gold);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--bg);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    /* Hero Header */
+    .hero-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem 0;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--rose));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-dim);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Search & Filter Bar */
+    .filter-bar {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 0.875rem 1rem 0.875rem 3rem;
+      color: var(--text);
+      font-size: 0.9375rem;
+      transition: all 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--gold);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.25rem;
+      opacity: 0.5;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      padding: 0.5rem;
+    }
+
+    .filter-tab {
+      padding: 0.625rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.875rem;
+    }
+
+    .filter-tab:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    .filter-tab.active {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--bg);
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .stat-pill-value {
+      font-weight: 700;
+      color: var(--gold);
+      font-size: 1.125rem;
+    }
+
+    /* Games Grid */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .game-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.75rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold), var(--rose), var(--purple));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .game-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(212, 175, 55, 0.2);
+    }
+
+    .game-card:hover::before {
+      opacity: 1;
+    }
+
+    .game-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+
+    .game-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .game-code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .game-status-badge {
+      padding: 0.375rem 0.875rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .game-status-badge.recruiting {
+      background: rgba(76, 175, 80, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .game-status-badge.in-progress {
+      background: rgba(255, 152, 0, 0.2);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+
+    .game-status-badge.completed {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      border: 1px solid var(--text-muted);
+    }
+
+    .game-director {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+    }
+
+    .game-description {
+      color: var(--text-dim);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .game-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .meta-item {
+      text-align: center;
+    }
+
+    .meta-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gold);
+      display: block;
+    }
+
+    .meta-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .game-tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .game-tag {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .game-card-footer {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-join {
+      flex: 1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--bg);
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9375rem;
+    }
+
+    .btn-join:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+    }
+
+    .btn-join:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-view {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text);
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-view:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--gold);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .empty-icon {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-description {
+      color: var(--text-muted);
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        min-width: 100%;
+      }
+
+      .filter-tabs {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .games-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .game-meta {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-container">
+      <a href="/index.html" class="nav-logo">🏰 MANSION MAYHEM</a>
+      <div class="nav-links">
+        <a href="/dashboard.html" class="nav-link">Dashboard</a>
+        <a href="/cast-portal.html" class="nav-link">My Portal</a>
+        <a href="/pages/gallery.html" class="nav-link">Episodes</a>
+        <a href="/pages/browse-games.html" class="nav-link">Browse Games</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Hero Header -->
+    <div class="hero-header">
+      <h1 class="hero-title">Browse Games</h1>
+      <p class="hero-subtitle">Join an open casting call and become a reality TV star</p>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-pill">
+        <span class="stat-pill-value" id="totalGamesCount">0</span>
+        <span>Total Games</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-pill-value" id="openGamesCount">0</span>
+        <span>Open Casting</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-pill-value" id="activeGamesCount">0</span>
+        <span>In Progress</span>
+      </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="Search by game name or director..."
+        >
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All Games</button>
+        <button class="filter-tab" data-filter="recruiting">Open Casting</button>
+        <button class="filter-tab" data-filter="in-progress">In Progress</button>
+        <button class="filter-tab" data-filter="completed">Completed</button>
+      </div>
+    </div>
+
+    <!-- Games Grid -->
+    <div class="games-grid" id="gamesGrid">
+      <!-- Loading state -->
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading games...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { supabaseClient as supabase } from '../js/supabase-module.js'
+
+    let allGames = []
+    let currentFilter = 'all'
+    let searchQuery = ''
+    let currentUser = null
+    let currentProfile = null
+
+    // Initialize
+    async function init() {
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser()
+        currentUser = user
+
+        // Get user profile if logged in
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, display_name, role, subscription_tier')
+            .eq('id', user.id)
+            .single()
+          currentProfile = profile
+        }
+
+        // Load games
+        await loadGames()
+
+        // Setup event listeners
+        setupEventListeners()
+
+      } catch (error) {
+        console.error('Initialization error:', error)
+        showError('Failed to load games. Please refresh the page.')
+      }
+    }
+
+    // Load games from database
+    async function loadGames() {
+      try {
+        // Fetch games (only public games)
+        const { data: games, error } = await supabase
+          .from('mm_games')
+          .select(`
+            id,
+            game_code,
+            title,
+            description,
+            max_cast_members,
+            status,
+            created_at,
+            created_by_admin_id
+          `)
+          .eq('visibility', 'public')
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+
+        // Fetch admin/director profiles separately
+        const adminIds = [...new Set(games.map(g => g.created_by_admin_id).filter(Boolean))]
+
+        let adminProfiles = {}
+        if (adminIds.length > 0) {
+          // Try admin_users table first
+          const { data: admins } = await supabase
+            .from('admin_users')
+            .select('id, user_id')
+            .in('id', adminIds)
+
+          if (admins) {
+            const userIds = admins.map(a => a.user_id).filter(Boolean)
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('id, full_name, email')
+              .in('id', userIds)
+
+            if (profiles) {
+              // Map profiles back to admin IDs
+              admins.forEach(admin => {
+                const profile = profiles.find(p => p.id === admin.user_id)
+                if (profile) {
+                  adminProfiles[admin.id] = profile
+                }
+              })
+            }
+          }
+        }
+
+        // Fetch cast member counts for each game from mm_game_cast junction table
+        const gameIds = games.map(g => g.id)
+        let castCounts = {}
+
+        if (gameIds.length > 0) {
+          const { data: gameCast } = await supabase
+            .from('mm_game_cast')
+            .select('game_id, status')
+            .in('game_id', gameIds)
+            .in('status', ['joined', 'active']) // Only count active/joined cast members
+
+          if (gameCast) {
+            // Count cast members per game
+            gameCast.forEach(gc => {
+              castCounts[gc.game_id] = (castCounts[gc.game_id] || 0) + 1
+            })
+          }
+        }
+
+        // Process games data
+        allGames = games.map(game => {
+          const admin = adminProfiles[game.created_by_admin_id]
+          const cast_count = castCounts[game.id] || 0
+          return {
+            ...game,
+            name: game.title, // Map title to name for compatibility
+            cast_count,
+            slots_available: (game.max_cast_members || 0) - cast_count,
+            director_name: admin?.full_name || 'Unknown Director',
+            current_stage: game.status // Map status to current_stage for compatibility
+          }
+        })
+
+        console.log('Loaded games:', allGames)
+
+        // Update stats
+        updateStats()
+
+        // Render games
+        renderGames()
+
+      } catch (error) {
+        console.error('Error loading games:', error)
+        showError('Failed to load games')
+      }
+    }
+
+    // Update stats bar
+    function updateStats() {
+      const totalGames = allGames.length
+      const openGames = allGames.filter(g => g.status === 'lobby' || g.status === 'setup').length
+      const activeGames = allGames.filter(g => g.status === 'active').length
+
+      document.getElementById('totalGamesCount').textContent = totalGames
+      document.getElementById('openGamesCount').textContent = openGames
+      document.getElementById('activeGamesCount').textContent = activeGames
+    }
+
+    // Render games grid
+    function renderGames() {
+      const grid = document.getElementById('gamesGrid')
+
+      // Filter games
+      let filteredGames = allGames
+
+      // Apply status filter
+      if (currentFilter !== 'all') {
+        if (currentFilter === 'recruiting') {
+          filteredGames = filteredGames.filter(g => g.status === 'lobby' || g.status === 'setup')
+        } else if (currentFilter === 'in-progress') {
+          filteredGames = filteredGames.filter(g => g.status === 'active')
+        } else if (currentFilter === 'completed') {
+          filteredGames = filteredGames.filter(g => g.status === 'completed')
+        }
+      }
+
+      // Apply search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        filteredGames = filteredGames.filter(g =>
+          g.name?.toLowerCase().includes(query) ||
+          g.director_name?.toLowerCase().includes(query) ||
+          g.game_code?.toLowerCase().includes(query)
+        )
+      }
+
+      // Render
+      if (filteredGames.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1/-1;">
+            <div class="empty-icon">🎭</div>
+            <h3 class="empty-title">No games found</h3>
+            <p class="empty-description">
+              ${currentFilter === 'recruiting'
+                ? 'No games are currently recruiting. Check back soon!'
+                : 'Try adjusting your filters or search query.'}
+            </p>
+          </div>
+        `
+        return
+      }
+
+      grid.innerHTML = filteredGames.map(game => createGameCard(game)).join('')
+    }
+
+    // Create game card HTML
+    function createGameCard(game) {
+      const isRecruiting = game.status === 'lobby' || game.status === 'setup'
+      const isFull = game.slots_available <= 0
+      const canJoin = isRecruiting && !isFull
+
+      // Determine status
+      let statusClass = 'recruiting'
+      let statusText = 'OPEN CASTING'
+      if (game.status === 'active') {
+        statusClass = 'in-progress'
+        statusText = 'IN PROGRESS'
+      } else if (game.status === 'completed') {
+        statusClass = 'completed'
+        statusText = 'COMPLETED'
+      } else if (game.status === 'setup') {
+        statusClass = 'recruiting'
+        statusText = 'SETUP'
+      }
+
+      return `
+        <div class="game-card" data-game-id="${game.id}">
+          <div class="game-card-header">
+            <div>
+              <h3 class="game-name">${game.name || 'Untitled Game'}</h3>
+              <div class="game-code">${game.game_code}</div>
+            </div>
+            <span class="game-status-badge ${statusClass}">${statusText}</span>
+          </div>
+
+          <div class="game-director">
+            <span>🎬</span>
+            <span>Directed by ${game.director_name}</span>
+          </div>
+
+          <p class="game-description">
+            ${game.description || 'No description available. Join to find out more about this exciting game!'}
+          </p>
+
+          <div class="game-meta">
+            <div class="meta-item">
+              <span class="meta-value">${game.cast_count}</span>
+              <span class="meta-label">Cast</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-value">${game.max_cast_size || '∞'}</span>
+              <span class="meta-label">Max Cast</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-value">${game.slots_available > 0 ? game.slots_available : '0'}</span>
+              <span class="meta-label">Spots Left</span>
+            </div>
+          </div>
+
+          <div class="game-tags">
+            <span class="game-tag">🎭 Reality TV</span>
+            <span class="game-tag">🎙️ Voice Enabled</span>
+            ${isRecruiting ? '<span class="game-tag" style="color: var(--success);">✨ Recruiting</span>' : ''}
+          </div>
+
+          <div class="game-card-footer">
+            ${canJoin
+              ? `<button class="btn-join" onclick="joinGame('${game.id}', '${game.name}')">
+                   Join Game
+                 </button>`
+              : `<button class="btn-join" disabled>
+                   ${isFull ? 'Game Full' : 'Closed'}
+                 </button>`
+            }
+            <a href="/lobby.html?game=${game.id}" class="btn-view">View Details</a>
+          </div>
+        </div>
+      `
+    }
+
+    // Join game function
+    window.joinGame = async function(gameId, gameName) {
+      if (!currentUser) {
+        alert('Please sign in to join a game')
+        window.location.href = '/pages/sign-in.html?redirect=/pages/browse-games.html'
+        return
+      }
+
+      if (!confirm(`Join "${gameName}"?\n\nYou'll join the game lobby as a cast member.`)) {
+        return
+      }
+
+      try {
+        // Check if user already has a cast member profile
+        const { data: castMember, error: castError } = await supabase
+          .from('cast_members')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .maybeSingle()
+
+        if (castError) throw castError
+
+        let castMemberId = castMember?.id
+
+        // If they don't have a cast member profile, create one
+        if (!castMember) {
+          const { data: newCastMember, error: createError } = await supabase
+            .from('cast_members')
+            .insert({
+              user_id: currentUser.id,
+              full_name: currentProfile?.full_name || currentUser.email.split('@')[0],
+              display_name: currentProfile?.display_name || currentProfile?.full_name || currentUser.email.split('@')[0],
+              status: 'active'
+            })
+            .select()
+            .single()
+
+          if (createError) throw createError
+          castMemberId = newCastMember.id
+        }
+
+        // Check if already in this specific game
+        const { data: existingGameCast, error: checkError } = await supabase
+          .from('mm_game_cast')
+          .select('id')
+          .eq('cast_member_id', castMemberId)
+          .eq('game_id', gameId)
+          .maybeSingle()
+
+        if (checkError) throw checkError
+
+        if (existingGameCast) {
+          alert('You are already a cast member in this game!')
+          window.location.href = `/lobby.html?game=${gameId}`
+          return
+        }
+
+        // Link cast member to game
+        const { error: gameCastError } = await supabase
+          .from('mm_game_cast')
+          .insert({
+            game_id: gameId,
+            cast_member_id: castMemberId,
+            status: 'joined',
+            joined_at: new Date().toISOString()
+          })
+
+        if (gameCastError) throw gameCastError
+
+        // Success! Redirect to lobby
+        alert('✅ Successfully joined ' + gameName + '! Welcome to the cast!')
+        window.location.href = `/lobby.html?game=${gameId}`
+
+      } catch (error) {
+        console.error('Error joining game:', error)
+        alert('Failed to join game: ' + error.message)
+      }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Search input
+      const searchInput = document.getElementById('searchInput')
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value
+        renderGames()
+      })
+
+      // Filter tabs
+      const filterTabs = document.querySelectorAll('.filter-tab')
+      filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Update active state
+          filterTabs.forEach(t => t.classList.remove('active'))
+          tab.classList.add('active')
+
+          // Update filter
+          currentFilter = tab.dataset.filter
+          renderGames()
+        })
+      })
+    }
+
+    // Show error message
+    function showError(message) {
+      const grid = document.getElementById('gamesGrid')
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-icon">⚠️</div>
+          <h3 class="empty-title">Error</h3>
+          <p class="empty-description">${message}</p>
+        </div>
+      `
+    }
+
+    // Initialize on load
+    init()
+  </script>
+</body>
+</html>

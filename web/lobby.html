@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Lobby | Mansion Mayhem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: rgba(26, 26, 46, 0.6);
+      --bg-elevated: rgba(30, 30, 50, 0.8);
+      --border: rgba(212, 175, 55, 0.2);
+      --text: #ffffff;
+      --text-dim: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --purple: #9c27b0;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at top, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(233, 30, 99, 0.1) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Navigation */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    /* Hero Header */
+    .hero-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-icon {
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.5));
+      animation: float 3s ease-in-out infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--rose));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-code {
+      font-family: 'Courier New', monospace;
+      font-size: 1.125rem;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      display: inline-block;
+      border: 1px solid var(--border);
+    }
+
+    /* Two Column Layout */
+    .lobby-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    /* Progress Card */
+    .progress-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold), var(--rose), var(--purple));
+    }
+
+    .progress-label {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-circle {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 2rem;
+    }
+
+    .progress-svg {
+      transform: rotate(-90deg);
+    }
+
+    .progress-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.1);
+      stroke-width: 12;
+    }
+
+    .progress-fill {
+      fill: none;
+      stroke: url(#progressGradient);
+      stroke-width: 12;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .progress-text-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .progress-count {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .progress-percentage {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+    }
+
+    .status-message {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(233, 30, 99, 0.1));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .status-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+
+    .status-text {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* Cast Members Section */
+    .cast-section {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      height: fit-content;
+      position: sticky;
+      top: 100px;
+    }
+
+    .cast-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cast-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .cast-count {
+      background: rgba(212, 175, 55, 0.2);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 0.375rem 0.875rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 700;
+    }
+
+    .cast-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .cast-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .cast-list::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    .cast-list::-webkit-scrollbar-thumb {
+      background: var(--gold);
+      border-radius: 10px;
+    }
+
+    .cast-member {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.3s;
+    }
+
+    .cast-member:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--gold);
+      transform: translateX(4px);
+    }
+
+    .cast-member.you {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(233, 30, 99, 0.1));
+      border-color: var(--gold);
+    }
+
+    .cast-member.joined {
+      background: rgba(76, 175, 80, 0.1);
+      border-color: var(--success);
+    }
+
+    .cast-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--rose));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .cast-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cast-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cast-badge {
+      background: var(--gold);
+      color: var(--bg);
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.625rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .cast-meta {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+    }
+
+    .cast-status {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    /* Actions Section */
+    .actions-section {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--gold);
+    }
+
+    .btn-danger {
+      background: rgba(244, 67, 54, 0.2);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 67, 54, 0.3);
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 2rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .lobby-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cast-section {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .progress-circle {
+        width: 150px;
+        height: 150px;
+      }
+
+      .progress-count {
+        font-size: 2rem;
+      }
+
+      .actions-section {
+        flex-direction: column;
+      }
+
+      .cast-member {
+        padding: 1rem;
+      }
+    }
+
+    /* Hidden State */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-container">
+      <a href="/index.html" class="nav-logo">🏰 MANSION MAYHEM</a>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Loading State -->
+    <div id="loadingState" class="loading">
+      <div class="spinner"></div>
+      <p style="color: var(--text-dim);">Loading lobby...</p>
+    </div>
+
+    <!-- Lobby Content -->
+    <div id="lobbyContent" class="hidden">
+      <!-- Hero Header -->
+      <div class="hero-header">
+        <div class="hero-icon">
+          <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" style="width: 120px; height: 120px; object-fit: contain;">
+        </div>
+        <h1 class="hero-title" id="gameTitle">Loading...</h1>
+        <div class="hero-code" id="gameCode">Code: ---</div>
+      </div>
+
+      <!-- Two Column Layout -->
+      <div class="lobby-grid">
+        <!-- Left Column: Progress & Status -->
+        <div>
+          <!-- Progress Card -->
+          <div class="progress-card">
+            <div class="progress-label">Cast Assembled</div>
+
+            <div class="progress-circle">
+              <svg class="progress-svg" width="200" height="200" viewBox="0 0 200 200">
+                <defs>
+                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#d4af37;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#e91e63;stop-opacity:1" />
+                  </linearGradient>
+                </defs>
+                <circle class="progress-bg" cx="100" cy="100" r="85" />
+                <circle id="progressCircle" class="progress-fill" cx="100" cy="100" r="85"
+                  stroke-dasharray="534.07" stroke-dashoffset="534.07" />
+              </svg>
+              <div class="progress-text-container">
+                <div class="progress-count" id="progressCount">0/0</div>
+                <div class="progress-percentage" id="progressPercentage">0% ready</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pre-Game Activities -->
+          <div style="margin-top: 2rem;">
+            <h3 style="color: var(--gold); margin-bottom: 1rem; font-size: 1.25rem;">🎭 Lobby Activities</h3>
+            <div style="display: grid; gap: 0.75rem;">
+              <button class="btn btn-primary" onclick="window.location.href='/voice-introduction.html?game=' + currentGameId" style="justify-content: flex-start;">
+                <span>🎙️</span>
+                <span>Record Voice Introduction</span>
+              </button>
+              <button class="btn btn-secondary" onclick="window.location.href='/link-up-requests.html?game=' + currentGameId" style="justify-content: flex-start;">
+                <span>🤝</span>
+                <span>Form Alliances</span>
+              </button>
+              <button class="btn btn-secondary" onclick="window.location.href='/alliance-rooms.html?game=' + currentGameId" style="justify-content: flex-start;">
+                <span>👥</span>
+                <span>Alliance Rooms & Chat</span>
+              </button>
+              <button class="btn btn-secondary" onclick="window.location.href='/pages/tea-room.html?game=' + currentGameId" style="justify-content: flex-start;">
+                <span>☕</span>
+                <span>The Tea Room</span>
+              </button>
+              <button class="btn btn-secondary" onclick="window.location.href='/graph-visualization.html?game=' + currentGameId" style="justify-content: flex-start;">
+                <span>🕸️</span>
+                <span>Relationship Graph</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Lobby Timer -->
+          <div id="lobbyTimer" class="lobby-timer" style="margin-top: 2rem; display: none;">
+            <div style="text-align: center;">
+              <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">GAME STARTS IN</div>
+              <div id="timerDisplay" style="font-size: 2.5rem; font-weight: 900; color: var(--gold); font-family: 'Playfair Display', serif; margin-bottom: 0.5rem;">
+                --:--:--
+              </div>
+              <div style="font-size: 0.875rem; color: var(--text-dim);">
+                Use this time to record your intro, listen to others, and form alliances!
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Message (fallback if no timer) -->
+          <div id="statusMessage" class="status-message" style="margin-top: 2rem;">
+            <div class="status-icon">⏰</div>
+            <p class="status-text">
+              Waiting for the director to start the game...<br>
+              <span style="color: var(--text-muted); font-size: 0.9375rem;">All cast members will be notified</span>
+            </p>
+          </div>
+
+          <!-- Actions -->
+          <div class="actions-section">
+            <button class="btn btn-primary" onclick="copyInviteLink()">
+              <span>📋</span>
+              <span>Copy Invite Link</span>
+            </button>
+            <button class="btn btn-secondary" onclick="shareGame()">
+              <span>📤</span>
+              <span>Share</span>
+            </button>
+            <button class="btn btn-danger" onclick="leaveGame()">
+              <span>🚪</span>
+              <span>Leave</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Cast Members -->
+        <div class="cast-section">
+          <div class="cast-header">
+            <h2 class="cast-title">Cast Members</h2>
+            <div class="cast-count" id="castCountBadge">0</div>
+          </div>
+          <div class="cast-list" id="castList">
+            <!-- Cast members will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module">
+    import { supabaseClient as supabase } from './js/supabase-module.js'
+
+    let currentGameId = null
+    let currentCastMemberId = null
+    let lobbyChannel = null
+
+    // Make currentGameId globally accessible for onclick handlers
+    window.currentGameId = null
+
+    // Initialize
+    async function init() {
+      // Get game ID from URL or localStorage
+      const urlParams = new URLSearchParams(window.location.search)
+      currentGameId = urlParams.get('game') || localStorage.getItem('currentGameId')
+      window.currentGameId = currentGameId // Make globally accessible
+
+      if (!currentGameId) {
+        console.log('No game ID found in URL or localStorage')
+        alert('No game specified. Please select a game to join.')
+        window.location.href = '/pages/browse-games.html'
+        return
+      }
+
+      // Save to localStorage for future use
+      localStorage.setItem('currentGameId', currentGameId)
+
+      // Auto-detect current user's cast member from auth
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          alert('Please sign in to access the lobby')
+          window.location.href = '/landing.html'
+          return
+        }
+
+        // Get user's cast member profile
+        const { data: castMember, error } = await supabase
+          .from('cast_members')
+          .select('id, full_name, display_name')
+          .eq('user_id', user.id)
+          .single()
+
+        if (error || !castMember) {
+          console.error('Cast member not found:', error)
+          alert('Cast member profile not found. Please contact support.')
+          return
+        }
+
+        currentCastMemberId = castMember.id
+        console.log('✅ Auto-detected cast member:', castMember.display_name)
+      } catch (error) {
+        console.error('Error detecting cast member:', error)
+        alert('Error loading your profile. Please try again.')
+        return
+      }
+
+      await loadLobby()
+      setupRealtimeSubscription()
+    }
+
+    // Load lobby data
+    async function loadLobby() {
+      try {
+        console.log('🔍 Loading lobby for game:', currentGameId)
+
+        // Load game details
+        const { data: game, error: gameError } = await supabase
+          .from('mm_games')
+          .select('*')
+          .eq('id', currentGameId)
+          .single()
+
+        console.log('🎮 Game query result:', { game, error: gameError })
+
+        if (gameError) {
+          console.error('Error loading game:', gameError)
+          console.error('Error details:', gameError.message, gameError.details, gameError.hint)
+          alert(`Error loading game: ${gameError.message}. Please check console for details.`)
+          // Don't redirect immediately - let user see the error
+          return
+        }
+
+        if (!game) {
+          console.error('No game data returned for game ID:', currentGameId)
+          alert('Game not found. The game may have been deleted.')
+          // Don't redirect immediately
+          return
+        }
+
+        console.log('✅ Game loaded successfully:', game)
+        console.log('📊 Game status:', game.status)
+
+        // Check if game has started
+        if (game.status === 'active') {
+          console.log('⚠️ Game is active - redirecting to player dashboard')
+          window.location.href = `/pages/player-dashboard.html?game=${currentGameId}`
+          return
+        }
+
+        if (game.status !== 'lobby' && game.status !== 'setup') {
+          console.log('⚠️ Game status invalid for joining:', game.status)
+          alert('This game is not accepting players')
+          // Don't redirect - let user see the error
+          return
+        }
+
+        console.log('✅ Game status is valid for lobby:', game.status)
+
+        // Update header
+        document.getElementById('gameTitle').textContent = game.title
+        document.getElementById('gameCode').textContent = `CODE: ${game.game_code}`
+
+        // Load lobby timer from mm_game_stages
+        const { data: gameStage } = await supabase
+          .from('mm_game_stages')
+          .select('stage_ends_at, current_stage')
+          .eq('game_id', currentGameId)
+          .eq('current_stage', 'lobby')
+          .single()
+
+        // Start lobby timer if available
+        if (gameStage && gameStage.stage_ends_at) {
+          startLobbyTimer(gameStage.stage_ends_at)
+        }
+
+        // Load cast list
+        await loadCastList()
+
+        // Show lobby content
+        document.getElementById('loadingState').classList.add('hidden')
+        document.getElementById('lobbyContent').classList.remove('hidden')
+
+      } catch (error) {
+        console.error('Error loading lobby:', error)
+        alert('Failed to load lobby')
+      }
+    }
+
+    // Load cast list
+    async function loadCastList() {
+      const { data: gameCast, error } = await supabase
+        .from('mm_game_cast')
+        .select(`
+          *,
+          cast_members (
+            id,
+            full_name,
+            display_name,
+            archetype,
+            avatar_url
+          )
+        `)
+        .eq('game_id', currentGameId)
+        .order('joined_at', { ascending: false, nullsFirst: false })
+
+      if (error) {
+        console.error('Error loading cast:', error)
+        return
+      }
+
+      const joinedMembers = gameCast.filter(m => m.status === 'joined' || m.status === 'active')
+      const joinedCount = joinedMembers.length
+      const totalCount = gameCast.length
+      const percentage = totalCount > 0 ? Math.round((joinedCount / totalCount) * 100) : 0
+
+      // Update progress circle
+      const circumference = 2 * Math.PI * 85
+      const offset = circumference - (percentage / 100) * circumference
+      document.getElementById('progressCircle').style.strokeDashoffset = offset
+
+      document.getElementById('progressCount').textContent = `${joinedCount}/${totalCount}`
+      document.getElementById('progressPercentage').textContent = `${percentage}% ready`
+      document.getElementById('castCountBadge').textContent = totalCount
+
+      // Render cast list
+      const castList = document.getElementById('castList')
+      castList.innerHTML = gameCast.map(member => {
+        const cast = member.cast_members
+        if (!cast) return ''
+
+        const isJoined = member.status === 'joined' || member.status === 'active'
+        const isYou = member.cast_member_id === currentCastMemberId
+        const statusIcon = isJoined ? '✓' : '⏳'
+
+        let memberClass = 'cast-member'
+        if (isYou) memberClass += ' you'
+        else if (isJoined) memberClass += ' joined'
+
+        // Get first letter for avatar
+        const initial = (cast.display_name || cast.full_name || '?')[0].toUpperCase()
+
+        const statusText = isJoined
+          ? (member.joined_at ? `Joined ${formatRelativeTime(member.joined_at)}` : 'Just joined')
+          : 'Waiting to join'
+
+        return `
+          <div class="${memberClass}">
+            <div class="cast-avatar">${initial}</div>
+            <div class="cast-info">
+              <div class="cast-name">
+                ${cast.display_name || cast.full_name}
+                ${isYou ? '<span class="cast-badge">YOU</span>' : ''}
+              </div>
+              <div class="cast-meta">
+                ${cast.archetype || 'Cast Member'} • ${statusText}
+              </div>
+            </div>
+            <div class="cast-status" style="color: ${isJoined ? 'var(--success)' : 'var(--text-muted)'};">
+              ${statusIcon}
+            </div>
+          </div>
+        `
+      }).join('')
+    }
+
+    // Format relative time
+    function formatRelativeTime(timestamp) {
+      const now = new Date()
+      const past = new Date(timestamp)
+      const diffMs = now - past
+      const diffMins = Math.floor(diffMs / 60000)
+
+      if (diffMins < 1) return 'just now'
+      if (diffMins < 60) return `${diffMins}m ago`
+      const diffHours = Math.floor(diffMins / 60)
+      if (diffHours < 24) return `${diffHours}h ago`
+      const diffDays = Math.floor(diffHours / 24)
+      return `${diffDays}d ago`
+    }
+
+    // Setup realtime subscription
+    function setupRealtimeSubscription() {
+      lobbyChannel = supabase
+        .channel(`lobby:${currentGameId}`)
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'mm_game_cast',
+          filter: `game_id=eq.${currentGameId}`
+        }, (payload) => {
+          console.log('Cast update:', payload)
+          loadCastList()
+
+          // If someone left (DELETE event), reload the page to get updated timer
+          if (payload.eventType === 'DELETE') {
+            console.log('Player left - reloading to refresh timer')
+            setTimeout(() => window.location.reload(), 1000)
+          }
+        })
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'mm_games',
+          filter: `id=eq.${currentGameId}`
+        }, (payload) => {
+          console.log('Game update:', payload)
+          if (payload.new.status === 'active') {
+            window.location.href = `/pages/player-dashboard.html?game=${currentGameId}`
+          }
+        })
+        .subscribe()
+    }
+
+    // Copy invite link
+    window.copyInviteLink = async function() {
+      const inviteUrl = `${window.location.origin}/join.html?game=${currentGameId}`
+      try {
+        await navigator.clipboard.writeText(inviteUrl)
+        alert('Invite link copied to clipboard!')
+      } catch (err) {
+        prompt('Copy this invite link:', inviteUrl)
+      }
+    }
+
+    // Share game
+    window.shareGame = async function() {
+      const inviteUrl = `${window.location.origin}/join.html?game=${currentGameId}`
+      const gameTitle = document.getElementById('gameTitle').textContent
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Join ${gameTitle} on Mansion Mayhem`,
+            text: 'Join my Mansion Mayhem game!',
+            url: inviteUrl
+          })
+        } catch (err) {
+          console.log('Share cancelled')
+        }
+      } else {
+        copyInviteLink()
+      }
+    }
+
+    // Leave game
+    window.leaveGame = async function() {
+      if (!confirm('Are you sure you want to leave this game?')) {
+        return
+      }
+
+      try {
+        // Remove from mm_game_cast
+        const { error } = await supabase
+          .from('mm_game_cast')
+          .delete()
+          .eq('game_id', currentGameId)
+          .eq('cast_member_id', currentCastMemberId)
+
+        if (error) throw error
+
+        // Reset the lobby timer to 60 minutes from now
+        const newTimerEnd = new Date(Date.now() + 60 * 60 * 1000)
+        const { error: timerError } = await supabase
+          .from('mm_game_stages')
+          .update({ stage_ends_at: newTimerEnd.toISOString() })
+          .eq('game_id', currentGameId)
+          .eq('current_stage', 'lobby')
+
+        if (timerError) {
+          console.error('Error resetting timer:', timerError)
+        } else {
+          console.log('✅ Lobby timer reset to 60 minutes')
+        }
+
+        alert('You have left the game')
+        window.location.href = '/pages/browse-games.html'
+      } catch (error) {
+        console.error('Error leaving game:', error)
+        alert('Failed to leave game')
+      }
+    }
+
+    // Lobby countdown timer
+    let timerInterval = null
+
+    function startLobbyTimer(lobbyEndsAt) {
+      console.log('⏱️ Starting lobby timer. Ends at:', lobbyEndsAt)
+      const timerDisplay = document.getElementById('timerDisplay')
+      const lobbyTimerEl = document.getElementById('lobbyTimer')
+      const statusMessageEl = document.getElementById('statusMessage')
+
+      // Show timer, hide status message
+      if (lobbyTimerEl) lobbyTimerEl.style.display = 'block'
+      if (statusMessageEl) statusMessageEl.style.display = 'none'
+
+      function updateTimer() {
+        const now = new Date()
+        const end = new Date(lobbyEndsAt)
+        const diff = end - now
+
+        if (diff <= 0) {
+          // Timer expired - start the game
+          console.log('⏰ TIMER EXPIRED - Game is starting!')
+          if (timerDisplay) timerDisplay.textContent = 'STARTING NOW!'
+          if (timerInterval) clearInterval(timerInterval)
+
+          // Redirect to player dashboard with game ID
+          console.log('➡️ Redirecting to player dashboard in 2 seconds...')
+          setTimeout(() => {
+            window.location.href = `/pages/player-dashboard.html?game=${currentGameId}`
+          }, 2000)
+          return
+        }
+
+        // Calculate time remaining
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+        // Format display
+        let timeText = ''
+        if (days > 0) {
+          timeText = `${days}d ${hours}h ${minutes}m`
+        } else if (hours > 0) {
+          timeText = `${hours}h ${minutes}m ${seconds}s`
+        } else {
+          timeText = `${minutes}:${seconds.toString().padStart(2, '0')}`
+        }
+
+        if (timerDisplay) timerDisplay.textContent = timeText
+      }
+
+      // Update immediately and then every second
+      updateTimer()
+      timerInterval = setInterval(updateTimer, 1000)
+    }
+
+    // Initialize on load
+    init()
+  </script>
+</body>
+</html>

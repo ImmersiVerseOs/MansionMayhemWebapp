@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mansion Mayhem - Exclusive Access</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --text: #ffffff;
+      --text-dim: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.5);
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      overflow-y: auto;
+      position: relative;
+      background-image:
+        radial-gradient(ellipse at top, rgba(212, 175, 55, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(233, 30, 99, 0.15) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Animated background particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--gold);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float 15s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.3;
+      }
+      90% {
+        opacity: 0.3;
+      }
+      100% {
+        transform: translateY(-100vh) translateX(50px);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      width: 100%;
+      text-align: center;
+      animation: fadeInUp 1s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo-container {
+      margin-bottom: 2rem;
+      animation: float-logo 3s ease-in-out infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    @keyframes float-logo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo {
+      width: 720px;
+      height: 720px;
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      filter: drop-shadow(0 0 60px rgba(212, 175, 55, 0.8));
+      display: block;
+      margin: 0 auto;
+    }
+
+    .title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 10vw, 5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--rose));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      letter-spacing: 3px;
+      text-shadow: 0 0 40px rgba(212, 175, 55, 0.5);
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: clamp(1.125rem, 4vw, 1.5rem);
+      color: var(--text);
+      margin-bottom: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 1.5px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .exclusive-badge {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(233, 30, 99, 0.2));
+      border: 2px solid var(--gold);
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 2rem;
+      animation: pulse-border 2s ease-in-out infinite;
+      text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+    @keyframes pulse-border {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+      }
+    }
+
+    .gate-card {
+      background: rgba(26, 26, 46, 0.8);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .gate-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5));
+    }
+
+    .gate-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .gate-description {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .code-input {
+      width: 100%;
+      padding: 1.25rem 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 12px;
+      color: var(--text);
+      outline: none;
+      transition: all 0.3s;
+      font-family: 'Courier New', monospace;
+    }
+
+    .code-input:focus {
+      border-color: var(--gold);
+      background: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+    }
+
+    .code-input::placeholder {
+      color: var(--text-muted);
+      letter-spacing: 4px;
+      font-weight: 400;
+    }
+
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.875rem;
+      margin-top: 0.75rem;
+      display: none;
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1.25rem 2rem;
+      font-size: 1.125rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #000;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Montserrat', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .submit-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .submit-btn:hover:not(:disabled)::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .footer-note {
+      margin-top: 2rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .footer-note a {
+      color: var(--gold);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-note a:hover {
+      color: var(--gold-light);
+      text-decoration: underline;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 640px) {
+      .gate-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .logo {
+        width: 560px;
+        height: 560px;
+        max-width: 85vw;
+      }
+
+      .gate-icon {
+        display: none;
+      }
+
+      .code-input {
+        font-size: 1rem;
+        letter-spacing: 4px;
+      }
+
+      .submit-btn {
+        font-size: 1rem;
+        letter-spacing: 2px;
+      }
+    }
+
+    /* Success animation */
+    @keyframes successPulse {
+      0%, 100% {
+        border-color: #4caf50;
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+      }
+      50% {
+        border-color: #4caf50;
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+      }
+    }
+
+    .code-input.success {
+      border-color: #4caf50;
+      animation: successPulse 1s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated background particles -->
+  <div class="particles" id="particles"></div>
+
+  <div class="container">
+    <!-- Logo -->
+    <div class="logo-container">
+      <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem Logo" class="logo">
+    </div>
+
+    <!-- Title -->
+    <h1 class="title">MANSION MAYHEM</h1>
+    <p class="subtitle">The Ultimate Reality Competition</p>
+    <div class="exclusive-badge">🔐 Exclusive Access</div>
+
+    <!-- Gate Card -->
+    <div class="gate-card">
+      <h2 class="gate-title">Enter Your Invite Code</h2>
+      <p class="gate-description">
+        Access to the mansion is by invitation only. Enter your exclusive code below to begin your journey.
+      </p>
+
+      <form onsubmit="validateCode(event)">
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="codeInput"
+            class="code-input"
+            placeholder="ENTER CODE"
+            maxlength="20"
+            autocomplete="off"
+            required
+            autofocus
+          />
+          <div class="error-message" id="errorMessage">
+            ❌ Invalid code. Please try again.
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span>Unlock Access</span>
+        </button>
+      </form>
+
+      <div class="footer-note">
+        Don't have a code? <a href="mailto:access@mansionofmayhem.com">Request Access</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate floating particles
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.animationDelay = `${Math.random() * 15}s`;
+      particle.style.animationDuration = `${10 + Math.random() * 10}s`;
+      particlesContainer.appendChild(particle);
+    }
+
+    // Valid invite codes (you can add more here)
+    const VALID_CODES = [
+      'MX7K-BETA-9QR3',
+      'GOLD-VIP-8X2L',
+      'DRAMA-7KM4-CAST',
+      'QUEEN-9XP7-LIVE',
+      'RIVAL-4KX8-SHOW',
+      'VOTE-6PM9-ELITE',
+      'SCENE-3XK5-PLAY',
+      'TWIST-8QM2-WILD',
+      'CROWN-5LX9-CREW',
+      'MANSION-4X7K-PRO'
+    ];
+
+    // Check if user already has access
+    if (localStorage.getItem('mansionAccess') === 'granted') {
+      window.location.href = '/intro.html';
+    }
+
+    function validateCode(event) {
+      event.preventDefault();
+
+      const input = document.getElementById('codeInput');
+      const errorMessage = document.getElementById('errorMessage');
+      const submitBtn = document.getElementById('submitBtn');
+      const code = input.value.trim().toUpperCase();
+
+      // Disable button during validation
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Validating...</span>';
+
+      // Simulate API delay for better UX
+      setTimeout(() => {
+        if (VALID_CODES.includes(code)) {
+          // Success!
+          input.classList.add('success');
+          errorMessage.classList.remove('show');
+          submitBtn.innerHTML = '<span>✅ Access Granted!</span>';
+
+          // Store access in localStorage
+          localStorage.setItem('mansionAccess', 'granted');
+          localStorage.setItem('inviteCode', code);
+
+          // Redirect to intro video
+          setTimeout(() => {
+            document.body.style.transition = 'opacity 0.5s ease';
+            document.body.style.opacity = '0';
+
+            setTimeout(() => {
+              window.location.href = '/intro.html';
+            }, 500);
+          }, 1000);
+
+        } else {
+          // Invalid code
+          input.classList.remove('success');
+          errorMessage.classList.add('show');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Unlock Access</span>';
+
+          // Shake animation
+          input.style.animation = 'shake 0.5s';
+          setTimeout(() => {
+            input.style.animation = '';
+          }, 500);
+        }
+      }, 800);
+    }
+
+    // Clear error on input
+    document.getElementById('codeInput').addEventListener('input', () => {
+      document.getElementById('errorMessage').classList.remove('show');
+    });
+
+    // Convert input to uppercase as user types
+    document.getElementById('codeInput').addEventListener('input', (e) => {
+      e.target.value = e.target.value.toUpperCase();
+    });
+  </script>
+</body>
+</html>

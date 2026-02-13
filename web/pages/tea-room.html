@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>☕ The Tea Room - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --color-gold: #D4AF37;
+      --color-dark: #0a0a0a;
+      --color-red: #DC143C;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--color-dark);
+      color: #fff;
+      overflow-x: hidden;
+      padding-top: 80px;
+    }
+
+    /* Background with steam effect */
+    .tea-room-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse at 50% 100%, rgba(212, 175, 55, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+        linear-gradient(180deg, #0a0a0a 0%, #0a0a0a 50%, #000 100%);
+      z-index: 0;
+    }
+
+    /* Steam particles */
+    #steamCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.4;
+    }
+
+    /* Container */
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header */
+    .tea-room-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInDown 0.8s ease;
+    }
+
+    .tea-cup-icon {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+      animation: steamRise 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.6));
+    }
+
+    @keyframes steamRise {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.05); }
+    }
+
+    .tea-room-title {
+      font-size: 4rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      letter-spacing: 8px;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 40px rgba(212, 175, 55, 0.5);
+    }
+
+    .tea-room-tagline {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Spill Tea Button */
+    .spill-tea-section {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(0, 0, 0, 0.9) 100%);
+      border: 3px solid rgba(212, 175, 55, 0.5);
+      border-radius: 16px;
+      padding: 3rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+    .spill-tea-btn {
+      position: relative;
+      padding: 2rem 4rem;
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      color: #000;
+      border: 4px solid #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+      font-family: 'Impact', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .spill-tea-btn:hover {
+      transform: scale(1.05) translateY(-5px);
+      box-shadow: 0 0 60px rgba(212, 175, 55, 0.9);
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s ease 0.3s both;
+    }
+
+    .filter-tab {
+      flex: 1;
+      min-width: 150px;
+      padding: 1.5rem;
+      background: rgba(212, 175, 55, 0.1);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.9rem;
+    }
+
+    .filter-tab:hover {
+      background: rgba(212, 175, 55, 0.2);
+      border-color: rgba(212, 175, 55, 0.6);
+      transform: translateY(-3px);
+    }
+
+    .filter-tab.active {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(255, 215, 0, 0.3) 100%);
+      border-color: var(--color-gold);
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+    }
+
+    .filter-tab .count {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--color-gold);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Tea Feed */
+    .tea-feed {
+      display: grid;
+      gap: 2rem;
+      animation: fadeInUp 0.8s ease 0.4s both;
+    }
+
+    .tea-card {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(0, 0, 0, 0.9) 100%);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .tea-card:hover {
+      border-color: var(--color-gold);
+      box-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+      transform: translateY(-5px);
+    }
+
+    .tea-card-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--gradient-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      border: 3px solid var(--color-gold);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .tea-time {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tea-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      background: rgba(212, 175, 55, 0.3);
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tea-badge.hot {
+      background: rgba(220, 20, 60, 0.3);
+      border-color: var(--color-red);
+      color: var(--color-red);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Audio Player */
+    .tea-audio-player {
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .play-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--gradient-gold);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+    }
+
+    .audio-waveform {
+      flex: 1;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .wave-bar {
+      flex: 1;
+      background: var(--gradient-gold);
+      border-radius: 2px;
+      height: 20px;
+      transition: height 0.1s ease;
+    }
+
+    .wave-bar.active {
+      animation: waveAnimation 0.5s ease-in-out infinite;
+    }
+
+    @keyframes waveAnimation {
+      0%, 100% { height: 20px; }
+      50% { height: 35px; }
+    }
+
+    .audio-duration {
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      color: var(--color-gold);
+    }
+
+    /* Tea Caption */
+    .tea-caption {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 1rem;
+      font-style: italic;
+    }
+
+    /* Note Type Badges */
+    .note-type-badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    .note-type-badge.confession {
+      background: rgba(212, 175, 55, 0.2);
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      color: #FFD700;
+    }
+
+    .note-type-badge.response {
+      background: rgba(138, 43, 226, 0.2);
+      border: 1px solid rgba(138, 43, 226, 0.5);
+      color: #DA70D6;
+    }
+
+    .note-type-badge.drama {
+      background: rgba(220, 20, 60, 0.2);
+      border: 1px solid rgba(220, 20, 60, 0.5);
+      color: #FF6B9D;
+    }
+
+    .note-type-badge.update {
+      background: rgba(30, 144, 255, 0.2);
+      border: 1px solid rgba(30, 144, 255, 0.5);
+      color: #87CEEB;
+    }
+
+    .note-type-badge.general {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Reactions */
+    .tea-reactions {
+      display: flex;
+      gap: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .reaction-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(212, 175, 55, 0.1);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 700;
+    }
+
+    .reaction-btn:hover {
+      background: rgba(212, 175, 55, 0.2);
+      border-color: var(--color-gold);
+      transform: scale(1.05);
+    }
+
+    .reaction-btn.active {
+      background: rgba(212, 175, 55, 0.3);
+      border-color: var(--color-gold);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .reaction-icon {
+      font-size: 1.5rem;
+    }
+
+    .reaction-count {
+      font-size: 1rem;
+      color: var(--color-gold);
+    }
+
+    /* Recording Modal */
+    .recording-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .recording-modal.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .recording-content {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(0, 0, 0, 0.95) 100%);
+      border: 4px solid var(--color-gold);
+      border-radius: 24px;
+      padding: 4rem;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 80px rgba(212, 175, 55, 0.6);
+    }
+
+    .recording-icon {
+      font-size: 8rem;
+      margin-bottom: 2rem;
+    }
+
+    .recording-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 1rem;
+    }
+
+    .recording-subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 3rem;
+    }
+
+    .mic-button {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: var(--gradient-gold);
+      border: 6px solid #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      margin: 0 auto 2rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+    }
+
+    .mic-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 60px rgba(212, 175, 55, 0.9);
+    }
+
+    .mic-button.recording {
+      animation: micPulse 1s ease-in-out infinite;
+      background: linear-gradient(135deg, var(--color-red) 0%, var(--color-gold) 100%);
+    }
+
+    @keyframes micPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .recording-timer {
+      font-size: 3rem;
+      font-weight: 900;
+      font-family: 'Courier New', monospace;
+      color: var(--color-red);
+      margin-bottom: 2rem;
+    }
+
+    .recording-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: 2px solid;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .modal-btn-primary {
+      background: var(--gradient-gold);
+      border-color: #fff;
+      color: #000;
+    }
+
+    .modal-btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
+    }
+
+    .modal-btn-secondary {
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    .modal-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .tea-room-title {
+        font-size: 2.5rem;
+      }
+
+      .spill-tea-btn {
+        font-size: 1.2rem;
+        padding: 1.5rem 2rem;
+      }
+
+      .filter-tabs {
+        flex-direction: column;
+      }
+
+      .tea-reactions {
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .mic-button {
+        width: 120px;
+        height: 120px;
+        font-size: 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Include global nav -->
+  <div id="globalNavContainer"></div>
+
+  <!-- Background -->
+  <div class="tea-room-bg"></div>
+  <canvas id="steamCanvas"></canvas>
+
+  <!-- Container -->
+  <div class="container">
+    <!-- Header -->
+    <div class="tea-room-header">
+      <div class="tea-cup-icon">☕</div>
+      <h1 class="tea-room-title">☕ The Tea Room</h1>
+      <p class="tea-room-tagline">Where The Tea Stays Hot</p>
+    </div>
+
+    <!-- Spill Tea Section -->
+    <div class="spill-tea-section">
+      <button class="spill-tea-btn" onclick="openRecordingModal()">
+        <span>☕</span>
+        <span>SPILL TEA</span>
+      </button>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <div class="filter-tab active" onclick="filterTea('hot')">
+        <span class="count" id="hotCount">🔥 0</span>
+        <span>Hot Tea</span>
+      </div>
+      <div class="filter-tab" onclick="filterTea('fresh')">
+        <span class="count" id="freshCount">✨ 0</span>
+        <span>Fresh Brew</span>
+      </div>
+      <div class="filter-tab" onclick="filterTea('trending')">
+        <span class="count" id="trendingCount">📈 0</span>
+        <span>Trending</span>
+      </div>
+      <div class="filter-tab" onclick="filterTea('all')">
+        <span class="count" id="allCount">☕ 0</span>
+        <span>All Tea</span>
+      </div>
+    </div>
+
+    <!-- Tea Feed -->
+    <div class="tea-feed" id="teaFeed">
+      <div style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.5);">
+        Loading tea... ☕
+      </div>
+    </div>
+  </div>
+
+  <!-- Recording Modal -->
+  <div class="recording-modal" id="recordingModal">
+    <div class="recording-content">
+      <div class="recording-icon">☕</div>
+      <h2 class="recording-title">SPILL YOUR TEA</h2>
+      <p class="recording-subtitle">Say what you really think</p>
+
+      <button class="mic-button" id="micButton" onclick="toggleRecording()">
+        🎙️
+      </button>
+
+      <div class="recording-timer" id="recordingTimer" style="display: none;">00:00</div>
+
+      <div class="recording-actions">
+        <button class="modal-btn modal-btn-secondary" onclick="closeRecordingModal()">
+          Cancel
+        </button>
+        <button class="modal-btn modal-btn-primary" id="submitBtn" onclick="submitTea()" style="display: none;">
+          Serve Tea ☕
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabaseClient as supabase } from '../js/supabase-module.js'
+
+    let currentUser = null
+    let mediaRecorder = null
+    let audioChunks = []
+    let isRecording = false
+    let recordingInterval = null
+    let recordingTime = 0
+    let currentGameId = null
+
+    // ========================================================================
+    // INITIALIZATION
+    // ========================================================================
+
+    async function init() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          window.location.href = '/index.html'
+          return
+        }
+        currentUser = user
+
+        // Check for game filter from URL
+        const urlParams = new URLSearchParams(window.location.search)
+        currentGameId = urlParams.get('game')
+
+        // Show game context if filtering by game
+        if (currentGameId) {
+          const { data: game } = await supabase
+            .from('mm_games')
+            .select('title')
+            .eq('id', currentGameId)
+            .single()
+
+          if (game) {
+            const tagline = document.querySelector('.tea-room-tagline')
+            if (tagline) {
+              tagline.textContent = `🎮 ${game.title} - Lobby Voice Notes`
+            }
+          }
+        }
+
+        await loadTeaFeed()
+      } catch (error) {
+        console.error('Init error:', error)
+      }
+    }
+
+    // ========================================================================
+    // LOAD TEA FEED
+    // ========================================================================
+
+    async function loadTeaFeed(filter = 'all') {
+      const container = document.getElementById('teaFeed')
+
+      try {
+        let query = supabase
+          .from('voice_notes')
+          .select(`
+            *,
+            profiles!inner(display_name, avatar_url)
+          `)
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false })
+          .limit(20)
+
+        // Filter by game if specified (lobby context - show only intros from game cast)
+        if (currentGameId) {
+          // Get cast member user IDs for this game
+          const { data: gameCast } = await supabase
+            .from('mm_game_cast')
+            .select('cast_members!inner(user_id)')
+            .eq('game_id', currentGameId)
+
+          if (gameCast && gameCast.length > 0) {
+            const castUserIds = gameCast.map(gc => gc.cast_members.user_id).filter(Boolean)
+            if (castUserIds.length > 0) {
+              query = query.in('user_id', castUserIds)
+              // In lobby, focus on voice introductions
+              query = query.eq('note_type', 'confession')
+            }
+          }
+        }
+
+        // Apply filters
+        if (filter === 'hot') {
+          query = query.gte('drama_score', 70)
+        } else if (filter === 'fresh') {
+          const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+          query = query.gte('created_at', dayAgo)
+        } else if (filter === 'trending') {
+          query = query.gte('reaction_count', 10)
+        }
+
+        const { data: notes, error } = await query
+
+        if (error) throw error
+
+        // Update counts
+        const { count: hotCount } = await supabase.from('voice_notes').select('*', { count: 'exact', head: true }).gte('drama_score', 70).eq('status', 'approved')
+        const { count: freshCount } = await supabase.from('voice_notes').select('*', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()).eq('status', 'approved')
+        const { count: trendingCount } = await supabase.from('voice_notes').select('*', { count: 'exact', head: true }).gte('reaction_count', 10).eq('status', 'approved')
+        const { count: allCount } = await supabase.from('voice_notes').select('*', { count: 'exact', head: true }).eq('status', 'approved')
+
+        document.getElementById('hotCount').textContent = `🔥 ${hotCount || 0}`
+        document.getElementById('freshCount').textContent = `✨ ${freshCount || 0}`
+        document.getElementById('trendingCount').textContent = `📈 ${trendingCount || 0}`
+        document.getElementById('allCount').textContent = `☕ ${allCount || 0}`
+
+        if (!notes || notes.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 3rem;">
+              <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;">☕</div>
+              <div style="font-size: 1.25rem; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;">No Tea Yet</div>
+              <div style="color: rgba(255,255,255,0.5);">Be the first to spill the tea!</div>
+            </div>
+          `
+          return
+        }
+
+        container.innerHTML = notes.map(note => {
+          const timeAgo = getRelativeTime(note.created_at)
+          const isHot = note.drama_score >= 70
+          const displayName = note.profiles?.display_name || 'Anonymous'
+          const avatar = displayName.charAt(0).toUpperCase()
+
+          // Convert storage path to public URL (or use directly if already a full URL)
+          let audioUrl = ''
+          if (note.audio_url) {
+            if (note.audio_url.startsWith('http://') || note.audio_url.startsWith('https://')) {
+              // Already a full URL, use it directly (legacy support)
+              audioUrl = note.audio_url
+            } else {
+              // It's a storage path - determine correct bucket by filename pattern
+              let bucket = 'voice-notes'  // default
+
+              // Voice introductions: {uuid}-{timestamp}.webm (e.g., abc-123-456-789-1234567890.webm)
+              if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-\d+\.webm$/i.test(note.audio_url)) {
+                bucket = 'voice-introductions'
+              }
+              // Tea room notes: tea-{timestamp}.webm
+              else if (/^tea-\d+\.webm$/.test(note.audio_url)) {
+                bucket = 'voice-notes'
+              }
+              // Alliance messages: alliance-{uuid}-{timestamp}.webm
+              else if (/^alliance-/.test(note.audio_url)) {
+                bucket = 'voice-notes'
+              }
+
+              audioUrl = supabase.storage.from(bucket).getPublicUrl(note.audio_url).data.publicUrl
+            }
+          }
+
+          return `
+            <div class="tea-card">
+              <div class="tea-card-header">
+                <div class="user-avatar">${avatar}</div>
+                <div class="user-info">
+                  <div class="user-name">${displayName}</div>
+                  <div class="tea-time">
+                    <span>☕</span>
+                    <span>${timeAgo}</span>
+                    ${isHot ? '<span class="tea-badge hot">🔥 HOT TEA</span>' : '<span class="tea-badge">☕ CLASSIC</span>'}
+                  </div>
+                </div>
+              </div>
+
+              <div class="tea-audio-player">
+                <div class="audio-controls">
+                  <button class="play-btn" onclick="playAudio('${note.id}', '${audioUrl}')">▶️</button>
+                  <a href="${audioUrl}" target="_blank" style="color: #D4AF37; font-size: 0.85rem; margin-left: 1rem; text-decoration: none;">🔗 Open</a>
+                  <div class="audio-waveform" id="waveform-${note.id}">
+                    ${Array(10).fill('<div class="wave-bar"></div>').join('')}
+                  </div>
+                  <div class="audio-duration">${formatDuration(note.duration)}</div>
+                </div>
+              </div>
+
+              ${note.caption ? `<div class="tea-caption">"${note.caption}"</div>` : ''}
+
+              ${getNoteTypeBadge(note.note_type)}
+
+              <div class="tea-reactions">
+                <button class="reaction-btn" onclick="reactToTea('${note.id}', 'sip')">
+                  <span class="reaction-icon">☕</span>
+                  <span class="reaction-count" id="sip-${note.id}">0</span>
+                </button>
+                <button class="reaction-btn" onclick="reactToTea('${note.id}', 'spill')">
+                  <span class="reaction-icon">💧</span>
+                  <span class="reaction-count" id="spill-${note.id}">0</span>
+                </button>
+                <button class="reaction-btn" onclick="reactToTea('${note.id}', 'hot')">
+                  <span class="reaction-icon">🔥</span>
+                  <span class="reaction-count" id="hot-${note.id}">0</span>
+                </button>
+              </div>
+            </div>
+          `
+        }).join('')
+
+      } catch (error) {
+        console.error('Error loading tea feed:', error)
+        container.innerHTML = `
+          <div style="text-align: center; padding: 3rem; color: rgba(255,68,68,0.8);">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">⚠️</div>
+            <div>Failed to load tea. Please refresh.</div>
+          </div>
+        `
+      }
+    }
+
+    // ========================================================================
+    // FILTER TEA
+    // ========================================================================
+
+    window.filterTea = function(type) {
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active')
+      })
+      event.currentTarget.classList.add('active')
+      loadTeaFeed(type)
+    }
+
+    // ========================================================================
+    // RECORDING
+    // ========================================================================
+
+    window.openRecordingModal = function() {
+      document.getElementById('recordingModal').classList.add('active')
+    }
+
+    window.closeRecordingModal = function() {
+      if (isRecording) {
+        stopRecording()
+      }
+      document.getElementById('recordingModal').classList.remove('active')
+    }
+
+    window.toggleRecording = async function() {
+      if (!isRecording) {
+        await startRecording()
+      } else {
+        stopRecording()
+      }
+    }
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        mediaRecorder = new MediaRecorder(stream)
+        audioChunks = []
+        isRecording = true
+        recordingTime = 0
+
+        const micBtn = document.getElementById('micButton')
+        const timer = document.getElementById('recordingTimer')
+
+        micBtn.classList.add('recording')
+        micBtn.textContent = '⏹️'
+        timer.style.display = 'block'
+
+        mediaRecorder.addEventListener('dataavailable', event => {
+          audioChunks.push(event.data)
+        })
+
+        mediaRecorder.start()
+
+        recordingInterval = setInterval(() => {
+          recordingTime++
+          const minutes = Math.floor(recordingTime / 60)
+          const seconds = recordingTime % 60
+          timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+
+          if (recordingTime >= 120) {
+            stopRecording()
+          }
+        }, 1000)
+
+      } catch (error) {
+        console.error('Recording error:', error)
+        alert('Could not access microphone. Please check permissions.')
+      }
+    }
+
+    function stopRecording() {
+      if (!isRecording) return
+
+      isRecording = false
+      clearInterval(recordingInterval)
+
+      const micBtn = document.getElementById('micButton')
+      const submitBtn = document.getElementById('submitBtn')
+
+      micBtn.classList.remove('recording')
+      micBtn.textContent = '🎙️'
+
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop()
+        mediaRecorder.stream.getTracks().forEach(track => track.stop())
+      }
+
+      if (recordingTime > 0) {
+        submitBtn.style.display = 'inline-block'
+      }
+    }
+
+    window.submitTea = async function() {
+      if (audioChunks.length === 0) {
+        alert('No recording to submit')
+        return
+      }
+
+      try {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+        const fileName = `tea-${Date.now()}.webm`
+
+        // Upload to storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('voice-notes')
+          .upload(fileName, audioBlob)
+
+        if (uploadError) throw uploadError
+
+        // Create voice note record
+        const { error: insertError } = await supabase
+          .from('voice_notes')
+          .insert({
+            user_id: currentUser.id,
+            note_type: 'general',
+            audio_url: uploadData.path,
+            duration: recordingTime,
+            status: 'pending'
+          })
+
+        if (insertError) throw insertError
+
+        alert('☕ Tea successfully spilled! It will appear after moderation.')
+        closeRecordingModal()
+
+        // Reset
+        document.getElementById('recordingTimer').textContent = '00:00'
+        document.getElementById('recordingTimer').style.display = 'none'
+        document.getElementById('submitBtn').style.display = 'none'
+        recordingTime = 0
+        audioChunks = []
+
+        // Reload feed
+        setTimeout(() => loadTeaFeed(), 2000)
+
+      } catch (error) {
+        console.error('Submit error:', error)
+        alert('Failed to submit tea. Please try again.')
+      }
+    }
+
+    // ========================================================================
+    // AUDIO PLAYER
+    // ========================================================================
+
+    const audioPlayers = {}
+    let currentlyPlaying = null
+
+    window.playAudio = function(noteId, audioUrl) {
+      try {
+        if (!audioUrl) {
+          alert('No audio URL provided')
+          return
+        }
+
+        console.log('Attempting to play:', audioUrl)
+
+        // Stop currently playing audio
+        if (currentlyPlaying && currentlyPlaying !== noteId) {
+          if (audioPlayers[currentlyPlaying]) {
+            audioPlayers[currentlyPlaying].pause()
+          }
+        }
+
+        // Create audio player if doesn't exist
+        if (!audioPlayers[noteId]) {
+          audioPlayers[noteId] = new Audio(audioUrl)
+          audioPlayers[noteId].addEventListener('ended', () => {
+            currentlyPlaying = null
+          })
+          audioPlayers[noteId].addEventListener('error', (e) => {
+            console.error('Audio load error:', e)
+            alert('Audio file not available')
+          })
+        }
+
+        // Play audio
+        audioPlayers[noteId].play()
+          .then(() => {
+            currentlyPlaying = noteId
+            console.log('Playing audio:', noteId)
+          })
+          .catch(error => {
+            console.error('Play error:', error)
+            alert('Could not play audio')
+          })
+
+      } catch (error) {
+        console.error('Unexpected error:', error)
+        alert('Error playing audio')
+      }
+    }
+
+    // ========================================================================
+    // REACTIONS
+    // ========================================================================
+
+    window.reactToTea = async function(noteId, type) {
+      try {
+        const { error } = await supabase
+          .from('voice_note_reactions')
+          .upsert({
+            voice_note_id: noteId,
+            user_id: currentUser.id,
+            reaction_type: type
+          })
+
+        if (error) throw error
+
+        // Update count
+        const countEl = document.getElementById(`${type}-${noteId}`)
+        if (countEl) {
+          countEl.textContent = parseInt(countEl.textContent) + 1
+        }
+
+      } catch (error) {
+        console.error('Reaction error:', error)
+      }
+    }
+
+    // ========================================================================
+    // STEAM PARTICLES
+    // ========================================================================
+
+    function initSteam() {
+      const canvas = document.getElementById('steamCanvas')
+      const ctx = canvas.getContext('2d')
+
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+
+      const particles = []
+
+      for (let i = 0; i < 30; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: canvas.height + Math.random() * 100,
+          size: Math.random() * 20 + 10,
+          speedY: Math.random() * 1 + 0.5,
+          opacity: Math.random() * 0.3 + 0.1,
+          wobble: Math.random() * 2 - 1
+        })
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        particles.forEach(p => {
+          ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+          ctx.fill()
+
+          p.y -= p.speedY
+          p.x += p.wobble
+          p.opacity -= 0.001
+
+          if (p.y < -50 || p.opacity <= 0) {
+            p.y = canvas.height + 50
+            p.x = Math.random() * canvas.width
+            p.opacity = Math.random() * 0.3 + 0.1
+          }
+        })
+
+        requestAnimationFrame(animate)
+      }
+
+      animate()
+    }
+
+    // ========================================================================
+    // UTILITIES
+    // ========================================================================
+
+    function getRelativeTime(timestamp) {
+      const diff = Date.now() - new Date(timestamp).getTime()
+      const minutes = Math.floor(diff / 60000)
+      if (minutes < 60) return `${minutes}m ago`
+      const hours = Math.floor(minutes / 60)
+      if (hours < 24) return `${hours}h ago`
+      const days = Math.floor(hours / 24)
+      return `${days}d ago`
+    }
+
+    // Get note type badge
+    function getNoteTypeBadge(noteType) {
+      const badges = {
+        'confession': '<span class="note-type-badge confession">🎙️ Cast Introduction</span>',
+        'response': '<span class="note-type-badge response">🎬 Scenario Response</span>',
+        'drama': '<span class="note-type-badge drama">💬 Alliance Message</span>',
+        'update': '<span class="note-type-badge update">📢 Update</span>',
+        'general': '<span class="note-type-badge general">☕ Tea</span>'
+      }
+      return badges[noteType] || badges['general']
+    }
+
+    function formatDuration(seconds) {
+      if (!seconds) return '0:00'
+      const mins = Math.floor(seconds / 60)
+      const secs = seconds % 60
+      return `${mins}:${String(secs).padStart(2, '0')}`
+    }
+
+    // ========================================================================
+    // INIT
+    // ========================================================================
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initSteam()
+      init()
+    })
+
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('steamCanvas')
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    })
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeRecordingModal()
+      }
+    })
+  </script>
+
+  <!-- Load global nav -->
+  <script type="module">
+    fetch('/includes/global-nav.html')
+      .then(res => res.text())
+      .then(html => {
+        const container = document.getElementById('globalNavContainer')
+        container.innerHTML = html
+
+        // Execute scripts manually since innerHTML doesn't run them
+        const scripts = container.querySelectorAll('script')
+        scripts.forEach(script => {
+          const newScript = document.createElement('script')
+          if (script.type) newScript.type = script.type
+          if (script.src) {
+            newScript.src = script.src
+          } else {
+            newScript.textContent = script.textContent
+          }
+          document.body.appendChild(newScript)
+          script.remove()
+        })
+      })
+      .catch(err => console.error('Failed to load navigation:', err))
+  </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.9);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon { font-size: 2rem; filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5)); }
+    .nav-logo-text { background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .hero {
+      padding: 8rem 2rem 4rem;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+    
+    .category-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .category-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1.5rem;
+    }
+    
+    .faq-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    
+    .faq-question {
+      padding: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .question-text {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .expand-icon {
+      color: var(--color-gold);
+      transition: transform 0.3s;
+    }
+    
+    .faq-item.open .expand-icon {
+      transform: rotate(180deg);
+    }
+    
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s;
+    }
+    
+    .faq-item.open .faq-answer {
+      max-height: 500px;
+    }
+    
+    .answer-content {
+      padding: 0 1.5rem 1.5rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="../index.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <a href="../index.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">← Home</a>
+    </div>
+  </nav>
+  
+  <div class="hero">
+    <h1 class="hero-title">💡 FAQ</h1>
+  </div>
+  
+  <div class="content">
+    <div class="category-section">
+      <h2 class="category-title">Getting Started</h2>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">
+          <span class="question-text">How do I join?</span>
+          <span class="expand-icon">▼</span>
+        </div>
+        <div class="faq-answer">
+          <div class="answer-content">
+            Click "Join the Cast" and complete the 10-minute onboarding process.
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="category-section">
+      <h2 class="category-title">Earnings</h2>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question">
+          <span class="question-text">How much can I make?</span>
+          <span class="expand-icon">▼</span>
+        </div>
+        <div class="faq-answer">
+          <div class="answer-content">
+            Most cast members earn $500-$2,000/month. Top performers earn $3,000-$5,000+.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

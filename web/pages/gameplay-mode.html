@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose Gameplay Mode - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-rose: #C04E63;
+      --color-purple: #8B5CF6;
+      --color-cyan: #06B6D4;
+      --color-success: #10B981;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(192, 78, 99, 0.1) 0%, transparent 40%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .main-container {
+      min-height: 100vh;
+      padding: 8rem 2rem 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .page-header {
+      text-align: center;
+      margin-bottom: 4rem;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .header-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .page-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 800px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+    
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .mode-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem 2rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .mode-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient-gold);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .mode-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
+    }
+    
+    .mode-card:hover::before {
+      opacity: 0.05;
+    }
+    
+    .mode-card.selected {
+      border-color: var(--color-gold);
+      background: rgba(212, 175, 55, 0.1);
+      box-shadow: 0 20px 40px rgba(212, 175, 55, 0.4);
+    }
+    
+    .mode-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.5rem;
+    }
+    
+    .mode-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
+    }
+    
+    .mode-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: var(--color-gold);
+    }
+    
+    .mode-tagline {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    
+    .mode-description {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    
+    .mode-features {
+      list-style: none;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .mode-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+    }
+    
+    .mode-features li:last-child {
+      margin-bottom: 0;
+    }
+    
+    .feature-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    
+    .commitment-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-purple);
+    }
+    
+    .comparison-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+    }
+    
+    .comparison-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .comparison-table th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-gold);
+      border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+    }
+    
+    .comparison-table td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .check {
+      color: var(--color-success);
+      font-size: 1.25rem;
+    }
+    
+    .cross {
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 1.25rem;
+    }
+    
+    .faq-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+    }
+    
+    .faq-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .faq-item {
+      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .faq-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    
+    .faq-question {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .faq-answer {
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+    
+    .page-actions {
+      display: flex;
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .btn {
+      padding: 1rem 2.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      flex: 1;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--color-gold);
+      color: var(--color-gold);
+    }
+    
+    @media (max-width: 968px) {
+      .modes-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .page-title {
+        font-size: 2rem;
+      }
+      
+      .comparison-table {
+        font-size: 0.875rem;
+      }
+      
+      .comparison-table th,
+      .comparison-table td {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <a href="../index.html" class="nav-logo">
+      <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+      <span class="nav-logo-text">MANSION MAYHEM</span>
+    </a>
+    <div style="color: rgba(255,255,255,0.6); font-size: 0.875rem;">Final Step</div>
+  </nav>
+  
+  <div class="main-container">
+    <div class="page-header">
+      <div class="header-icon">🎮</div>
+      <h1 class="page-title">Choose Your Gameplay Mode</h1>
+      <p class="page-subtitle">
+        How much control do you want over your character's decisions? You can change this anytime in settings.
+      </p>
+      <div class="info-badge">
+        <span>💡</span>
+        <span>Most popular: Hybrid Mode (best of both worlds)</span>
+      </div>
+    </div>
+    
+    <!-- Mode Cards -->
+    <div class="modes-grid">
+      <!-- Manual Control -->
+      <div class="mode-card" id="manualCard" onclick="selectMode('manual')">
+        <div class="mode-icon">🎯</div>
+        <h3 class="mode-title">Manual Control</h3>
+        <div class="mode-tagline">"I'm always in charge"</div>
+        <p class="mode-description">
+          You make every decision for your character. AI never responds without your explicit input.
+        </p>
+        <ul class="mode-features">
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Full control over all responses</span>
+          </li>
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Respond to every scenario yourself</span>
+          </li>
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>No AI autopilot ever</span>
+          </li>
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Real-time decision making</span>
+          </li>
+        </ul>
+        <div class="commitment-badge">
+          <span>⏱️</span>
+          <span>High Time Commitment</span>
+        </div>
+      </div>
+      
+      <!-- Hybrid Mode -->
+      <div class="mode-card" id="hybridCard" onclick="selectMode('hybrid')">
+        <div class="mode-icon">⚡</div>
+        <h3 class="mode-title">Hybrid Mode</h3>
+        <div class="mode-tagline">"Best of both worlds"</div>
+        <p class="mode-description">
+          AI responds when you're unavailable, using your personality profile. You take control whenever you're active.
+        </p>
+        <ul class="mode-features">
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>AI autopilot when you're busy</span>
+          </li>
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Take manual control anytime</span>
+          </li>
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Never miss important scenarios</span>
+          </li>
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>AI learns from your choices</span>
+          </li>
+        </ul>
+        <div class="commitment-badge">
+          <span>⏱️</span>
+          <span>Medium Time Commitment</span>
+        </div>
+      </div>
+      
+      <!-- Full Control (AI) -->
+      <div class="mode-card" id="fullControlCard" onclick="selectMode('full-control')">
+        <div class="mode-icon">🤖</div>
+        <h3 class="mode-title">Full Control (AI)</h3>
+        <div class="mode-tagline">"Let AI run the show"</div>
+        <p class="mode-description">
+          AI makes all decisions based on your personality profile. Just sit back and watch your character perform.
+        </p>
+        <ul class="mode-features">
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>AI handles everything 24/7</span>
+          </li>
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Character stays active always</span>
+          </li>
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Based on your personality</span>
+          </li>
+          <li>
+            <span class="feature-icon">✓</span>
+            <span>Watch episodes like a viewer</span>
+          </li>
+        </ul>
+        <div class="commitment-badge">
+          <span>⏱️</span>
+          <span>Low Time Commitment</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Comparison Table -->
+    <div class="comparison-section">
+      <h2 class="comparison-title">Mode Comparison</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th style="text-align: center;">Manual</th>
+            <th style="text-align: center;">Hybrid</th>
+            <th style="text-align: center;">Full Control</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>You respond to scenarios</td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="cross">✗</span></td>
+          </tr>
+          <tr>
+            <td>AI responds when you're unavailable</td>
+            <td style="text-align: center;"><span class="cross">✗</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>AI responds all the time</td>
+            <td style="text-align: center;"><span class="cross">✗</span></td>
+            <td style="text-align: center;"><span class="cross">✗</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Override AI decisions</td>
+            <td style="text-align: center;">—</td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="cross">✗</span></td>
+          </tr>
+          <tr>
+            <td>Character stays active 24/7</td>
+            <td style="text-align: center;"><span class="cross">✗</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Earn money while offline</td>
+            <td style="text-align: center;"><span class="cross">✗</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+            <td style="text-align: center;"><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Time commitment</td>
+            <td style="text-align: center;">High</td>
+            <td style="text-align: center;">Medium</td>
+            <td style="text-align: center;">Low</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- FAQ -->
+    <div class="faq-section">
+      <h2 class="faq-title">Frequently Asked Questions</h2>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>❓</span>
+          <span>Can I change modes later?</span>
+        </div>
+        <div class="faq-answer">
+          Yes! You can switch between modes anytime in your dashboard settings. Try different modes to see what works best for your schedule.
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>❓</span>
+          <span>How does AI know how to respond for me?</span>
+        </div>
+        <div class="faq-answer">
+          AI uses your personality profile (the traits you just set) plus your archetype to make decisions that match your character. In Hybrid Mode, it also learns from your manual responses over time.
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>❓</span>
+          <span>Do I earn the same money in all modes?</span>
+        </div>
+        <div class="faq-answer">
+          Yes! Revenue sharing is the same regardless of mode. The difference is whether YOU or AI controls responses. Screen time and engagement determine earnings, not who made the decision.
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>❓</span>
+          <span>What if I don't like what AI says for me?</span>
+        </div>
+        <div class="faq-answer">
+          In Hybrid Mode, you can always override AI decisions before they're final. In Full Control mode, you give AI full authority, but you can switch to Hybrid anytime if you want more input.
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>❓</span>
+          <span>Which mode is most popular?</span>
+        </div>
+        <div class="faq-answer">
+          Hybrid Mode! It gives you the flexibility to be involved when you want, while ensuring your character stays active and earning even when you're busy. It's perfect for people with jobs or other commitments.
+        </div>
+      </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="page-actions">
+      <button class="btn btn-secondary" onclick="window.location.href='personality-profile.html'">
+        <span>←</span>
+        <span>Back</span>
+      </button>
+      <button class="btn btn-primary" id="continueBtn" disabled onclick="saveGameplayMode()">
+        <span>Complete Setup</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    let selectedMode = null;
+    
+    function selectMode(mode) {
+      selectedMode = mode;
+      
+      // Remove selected class from all cards
+      document.querySelectorAll('.mode-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      
+      // Add selected class to clicked card
+      document.getElementById(mode === 'manual' ? 'manualCard' : 
+                             mode === 'hybrid' ? 'hybridCard' : 
+                             'fullControlCard').classList.add('selected');
+      
+      // Enable continue button
+      document.getElementById('continueBtn').disabled = false;
+    }
+    
+    function saveGameplayMode() {
+      if (!selectedMode) {
+        alert('Please select a gameplay mode');
+        return;
+      }
+      
+      // Store gameplay mode
+      sessionStorage.setItem('gameplayMode', selectedMode);
+      
+      const setupData = {
+        gameplayMode: selectedMode,
+        timestamp: new Date().toISOString()
+      };
+      
+      sessionStorage.setItem('setupComplete', JSON.stringify(setupData));
+      
+      // Show loading
+      const btn = document.getElementById('continueBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>Finalizing Setup...</span>';
+      
+      // In production: Save all onboarding data to database
+      setTimeout(() => {
+        window.location.href = 'player-dashboard.html';
+      }, 2000);
+    }
+  </script>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help Center - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover {
+      color: var(--color-gold);
+    }
+    
+    .hero {
+      padding: 8rem 2rem 4rem;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 2rem;
+    }
+    
+    .search-bar {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 1.25rem 3rem 1.25rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-gold);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .search-icon {
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+    
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+    
+    .category-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .category-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(212, 175, 55, 0.2);
+    }
+    
+    .category-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .category-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 0.75rem;
+    }
+    
+    .category-description {
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .category-count {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.875rem;
+    }
+    
+    .popular-questions {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+    }
+    
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .question-list {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .question-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .question-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--color-gold);
+    }
+    
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .question-text {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .question-answer {
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      display: none;
+    }
+    
+    .question-item.open .question-answer {
+      display: block;
+    }
+    
+    .question-icon {
+      font-size: 1.25rem;
+      color: var(--color-gold);
+      transition: transform 0.3s;
+    }
+    
+    .question-item.open .question-icon {
+      transform: rotate(180deg);
+    }
+    
+    .contact-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 3rem;
+      text-align: center;
+    }
+    
+    .contact-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1rem;
+    }
+    
+    .contact-text {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 2rem;
+    }
+    
+    .contact-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .contact-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+    
+    .contact-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+    }
+    
+    .contact-card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .contact-card-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .contact-card-text {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4);
+    }
+    
+    @media (max-width: 768px) {
+      .hero-title { font-size: 2rem; }
+      .categories-grid { grid-template-columns: 1fr; }
+      .contact-options { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="../index.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <a href="player-dashboard.html" class="nav-link">← Back to Dashboard</a>
+    </div>
+  </nav>
+  
+  <div class="hero">
+    <h1 class="hero-title">How can we help?</h1>
+    <p class="hero-subtitle">Search for answers or browse our help categories below</p>
+    <div class="search-bar">
+      <input type="text" class="search-input" placeholder="Search for help...">
+      <span class="search-icon">🔍</span>
+    </div>
+  </div>
+  
+  <div class="content">
+    <div class="categories-grid">
+      <div class="category-card">
+        <div class="category-icon">🚀</div>
+        <h3 class="category-title">Getting Started</h3>
+        <p class="category-description">
+          Learn the basics of joining Mansion Mayhem and setting up your character
+        </p>
+        <p class="category-count">12 articles</p>
+      </div>
+      
+      <div class="category-card">
+        <div class="category-icon">🎭</div>
+        <h3 class="category-title">Gameplay & Scenarios</h3>
+        <p class="category-description">
+          How to respond to scenarios, manage your character, and maximize engagement
+        </p>
+        <p class="category-count">18 articles</p>
+      </div>
+      
+      <div class="category-card">
+        <div class="category-icon">💰</div>
+        <h3 class="category-title">Earnings & Payments</h3>
+        <p class="category-description">
+          Understanding revenue sharing, payouts, and how you earn money
+        </p>
+        <p class="category-count">15 articles</p>
+      </div>
+      
+      <div class="category-card">
+        <div class="category-icon">🤖</div>
+        <h3 class="category-title">AI & Technology</h3>
+        <p class="category-description">
+          How FaceCast works, AI video generation, and technical details
+        </p>
+        <p class="category-count">10 articles</p>
+      </div>
+      
+      <div class="category-card">
+        <div class="category-icon">⚙️</div>
+        <h3 class="category-title">Account & Settings</h3>
+        <p class="category-description">
+          Managing your account, privacy settings, and preferences
+        </p>
+        <p class="category-count">8 articles</p>
+      </div>
+      
+      <div class="category-card">
+        <div class="category-icon">🛡️</div>
+        <h3 class="category-title">Safety & Guidelines</h3>
+        <p class="category-description">
+          Community guidelines, reporting issues, and staying safe
+        </p>
+        <p class="category-count">7 articles</p>
+      </div>
+    </div>
+    
+    <div class="popular-questions">
+      <h2 class="section-title">Popular Questions</h2>
+      <div class="question-list">
+        <div class="question-item" onclick="this.classList.toggle('open')">
+          <div class="question-header">
+            <span class="question-text">How much money can I realistically make?</span>
+            <span class="question-icon">▼</span>
+          </div>
+          <div class="question-answer">
+            Most cast members earn between $500-$2,000 per month depending on activity level and engagement. 
+            Top performers with high drama and screen time can earn $3,000-$5,000+. Your earnings depend on 
+            screen time, viewer engagement, tips, and the quality of your responses.
+          </div>
+        </div>
+        
+        <div class="question-item" onclick="this.classList.toggle('open')">
+          <div class="question-header">
+            <span class="question-text">How does FaceCast work?</span>
+            <span class="question-icon">▼</span>
+          </div>
+          <div class="question-answer">
+            FaceCast uses AI to create a digital representation of your face from 5-20 photos you upload. 
+            This allows us to generate realistic videos of your character without requiring you to film anything. 
+            Your photos are encrypted and stored securely, and we never use your likeness outside of Mansion Mayhem.
+          </div>
+        </div>
+        
+        <div class="question-item" onclick="this.classList.toggle('open')">
+          <div class="question-header">
+            <span class="question-text">Can I change my gameplay mode later?</span>
+            <span class="question-icon">▼</span>
+          </div>
+          <div class="question-answer">
+            Yes! You can switch between Manual Control, Hybrid Mode, and Full Control anytime in your settings. 
+            Try different modes to find what works best for your schedule and play style.
+          </div>
+        </div>
+        
+        <div class="question-item" onclick="this.classList.toggle('open')">
+          <div class="question-header">
+            <span class="question-text">How often are episodes published?</span>
+            <span class="question-icon">▼</span>
+          </div>
+          <div class="question-answer">
+            New episodes are published weekly, typically on Fridays. Each episode is 15-30 minutes and features 
+            the best drama from that week's scenarios. You'll get notified when you appear in an episode.
+          </div>
+        </div>
+        
+        <div class="question-item" onclick="this.classList.toggle('open')">
+          <div class="question-header">
+            <span class="question-text">What if I want to quit?</span>
+            <span class="question-icon">▼</span>
+          </div>
+          <div class="question-answer">
+            You can leave at any time with no penalties. You'll continue earning from episodes you're already in, 
+            but won't receive new scenarios. Your FaceCast and data are deleted within 30 days of account closure.
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="contact-section">
+      <h2 class="contact-title">Still need help?</h2>
+      <p class="contact-text">Our support team is here to help with any questions</p>
+      
+      <div class="contact-options">
+        <div class="contact-card">
+          <div class="contact-card-icon">📧</div>
+          <h3 class="contact-card-title">Email Support</h3>
+          <p class="contact-card-text">Get help via email within 24 hours</p>
+          <a href="mailto:support@immersiverseos.com" class="btn">Send Email</a>
+        </div>
+        
+        <div class="contact-card">
+          <div class="contact-card-icon">💬</div>
+          <h3 class="contact-card-title">Live Chat</h3>
+          <p class="contact-card-text">Chat with our team in real-time</p>
+          <button class="btn">Start Chat</button>
+        </div>
+        
+        <div class="contact-card">
+          <div class="contact-card-icon">📚</div>
+          <h3 class="contact-card-title">Documentation</h3>
+          <p class="contact-card-text">Detailed guides and tutorials</p>
+          <a href="how-to-play.html" class="btn">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

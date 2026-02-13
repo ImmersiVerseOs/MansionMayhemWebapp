@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Moderation Queue - Admin - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-success: #10B981;
+      --color-warning: #F59E0B;
+      --color-error: #EF4444;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+
+    @keyframes bgShift { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.9);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .nav-logo-icon { font-size: 2rem; filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5)); }
+    .nav-logo-text { background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .main { padding: 6rem 2rem 4rem; max-width: 1800px; margin: 0 auto; }
+
+    .page-header { margin-bottom: 2rem; }
+    .page-title { font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    /* Tabs */
+    .tabs-container {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .tab {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+
+    .tab:hover, .tab.active {
+      background: rgba(212, 175, 55, 0.1);
+      border-color: var(--color-gold);
+    }
+
+    .tab-count {
+      background: rgba(212, 175, 55, 0.2);
+      color: var(--color-gold);
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .tab.active .tab-count {
+      background: var(--color-gold);
+      color: var(--color-dark);
+    }
+
+    /* Filters */
+    .filters-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-select {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      font-size: 0.875rem;
+    }
+
+    .batch-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+
+    .batch-btn {
+      padding: 0.5rem 1rem;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+      color: var(--color-success);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .batch-btn:hover {
+      background: rgba(16, 185, 129, 0.3);
+    }
+
+    .batch-btn.danger {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--color-error);
+    }
+
+    .batch-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    /* Queue Grid */
+    .queue-grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .queue-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1.5rem;
+      align-items: start;
+      transition: all 0.3s;
+    }
+
+    .queue-item:hover {
+      border-color: rgba(212, 175, 55, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .queue-item.high-priority {
+      border-color: rgba(251, 191, 36, 0.5);
+      background: rgba(251, 191, 36, 0.05);
+    }
+
+    .item-checkbox {
+      margin-top: 0.5rem;
+    }
+
+    .item-checkbox input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .item-content {
+      flex: 1;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .item-title {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.95);
+      margin-bottom: 0.5rem;
+    }
+
+    .item-meta {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .meta-item strong {
+      color: var(--color-gold);
+    }
+
+    .priority-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(251, 191, 36, 0.2);
+      color: var(--color-warning);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+    }
+
+    .source-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(139, 92, 246, 0.2);
+      color: #8b5cf6;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+    }
+
+    .context-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .context-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .context-text {
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.6;
+    }
+
+    .audio-player {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      margin: 1rem 0;
+    }
+
+    .play-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--gradient-gold);
+      border-radius: 50%;
+      border: none;
+      color: var(--color-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .waveform {
+      flex: 1;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .wave-bar {
+      flex: 1;
+      background: rgba(212, 175, 55, 0.3);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .wave-bar:hover {
+      background: rgba(212, 175, 55, 0.5);
+    }
+
+    .duration {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 600;
+    }
+
+    .item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 180px;
+    }
+
+    .action-btn {
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-approve {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .btn-approve:hover {
+      background: rgba(16, 185, 129, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-reject {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-error);
+    }
+
+    .btn-reject:hover {
+      background: rgba(239, 68, 68, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-flag {
+      background: rgba(251, 191, 36, 0.2);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: var(--color-warning);
+    }
+
+    .btn-flag:hover {
+      background: rgba(251, 191, 36, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 968px) {
+      .queue-item { grid-template-columns: 1fr; }
+      .item-actions { flex-direction: row; flex-wrap: wrap; min-width: auto; }
+      .item-checkbox { order: -1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+
+  <nav class="nav">
+    <a href="../index.html" class="nav-logo">
+      <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+      <span class="nav-logo-text">MANSION MAYHEM</span>
+    </a>
+    <a href="admin-dashboard.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">← Dashboard</a>
+  </nav>
+
+  <div class="main">
+    <div class="page-header">
+      <h1 class="page-title">🛡️ Voice Moderation Queue</h1>
+      <p style="color: rgba(255,255,255,0.7);">Review and approve all voice submissions</p>
+    </div>
+
+    <!-- Tabs for different source types -->
+    <div class="tabs-container">
+      <div class="tab active" data-source="all" onclick="switchTab('all')">
+        <span>📋</span>
+        <span>All Pending</span>
+        <span class="tab-count" id="count-all">0</span>
+      </div>
+      <div class="tab" data-source="voice_note" onclick="switchTab('voice_note')">
+        <span>🎙️</span>
+        <span>Voice Notes</span>
+        <span class="tab-count" id="count-voice_note">0</span>
+      </div>
+      <div class="tab" data-source="alliance_message" onclick="switchTab('alliance_message')">
+        <span>🤝</span>
+        <span>Alliance Chat</span>
+        <span class="tab-count" id="count-alliance_message">0</span>
+      </div>
+      <div class="tab" data-source="scenario_response" onclick="switchTab('scenario_response')">
+        <span>📝</span>
+        <span>Scenario Responses</span>
+        <span class="tab-count" id="count-scenario_response">0</span>
+      </div>
+      <div class="tab" data-source="voice_introduction" onclick="switchTab('voice_introduction')">
+        <span>👋</span>
+        <span>Introductions</span>
+        <span class="tab-count" id="count-voice_introduction">0</span>
+      </div>
+      <div class="tab" data-source="micro_scenario_response" onclick="switchTab('micro_scenario_response')">
+        <span>⚡</span>
+        <span>Micro Scenarios</span>
+        <span class="tab-count" id="count-micro_scenario_response">0</span>
+      </div>
+    </div>
+
+    <!-- Filters and Batch Actions -->
+    <div class="filters-bar">
+      <select class="filter-select" id="gameFilter" onchange="loadQueue()">
+        <option value="">All Games</option>
+      </select>
+
+      <select class="filter-select" id="priorityFilter" onchange="loadQueue()">
+        <option value="">All Priorities</option>
+        <option value="high">High Priority</option>
+        <option value="normal">Normal Priority</option>
+      </select>
+
+      <div class="batch-actions">
+        <button class="batch-btn" onclick="batchApprove()">
+          ✅ Approve Selected
+        </button>
+        <button class="batch-btn danger" onclick="batchReject()">
+          ❌ Reject Selected
+        </button>
+      </div>
+    </div>
+
+    <!-- Queue Items -->
+    <div class="queue-grid" id="queueGrid">
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <div class="empty-title">Loading queue...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabaseClient as supabase } from '../js/supabase-module.js'
+    import { requireAuth } from '../js/auth.js'
+
+    let currentSourceType = 'all'
+    let currentAudio = null
+
+    // Format time ago
+    function formatTimeAgo(dateString) {
+      const date = new Date(dateString)
+      const now = new Date()
+      const diffInSeconds = Math.floor((now - date) / 1000)
+
+      if (diffInSeconds < 60) return 'Just now'
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+      if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
+      return date.toLocaleDateString()
+    }
+
+    // Format duration
+    function formatDuration(seconds) {
+      if (!seconds) return '0:00'
+      const mins = Math.floor(seconds / 60)
+      const secs = seconds % 60
+      return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    // Get source type icon
+    function getSourceIcon(sourceType) {
+      const icons = {
+        'voice_note': '🎙️',
+        'alliance_message': '🤝',
+        'scenario_response': '📝',
+        'voice_introduction': '👋',
+        'micro_scenario_response': '⚡',
+        'voice_note_reply': '💬'
+      }
+      return icons[sourceType] || '🔊'
+    }
+
+    // Get source type label
+    function getSourceLabel(sourceType) {
+      const labels = {
+        'voice_note': 'Voice Note',
+        'alliance_message': 'Alliance Chat',
+        'scenario_response': 'Scenario Response',
+        'voice_introduction': 'Voice Introduction',
+        'micro_scenario_response': 'Micro Scenario',
+        'voice_note_reply': 'Voice Reply'
+      }
+      return labels[sourceType] || sourceType
+    }
+
+    // Load moderation queue
+    async function loadQueue() {
+      const grid = document.getElementById('queueGrid')
+      const gameFilter = document.getElementById('gameFilter').value
+      const priorityFilter = document.getElementById('priorityFilter').value
+
+      try {
+        // Build query with mm_games join to get game title
+        let query = supabase
+          .from('voice_moderation_queue')
+          .select('*, mm_games(title, game_code)')
+          .eq('status', 'pending')
+          .order('priority', { ascending: false })
+          .order('submitted_at', { ascending: true })
+
+        // Apply filters
+        if (currentSourceType !== 'all') {
+          query = query.eq('source_type', currentSourceType)
+        }
+        if (gameFilter) {
+          query = query.eq('game_id', gameFilter)
+        }
+        if (priorityFilter === 'high') {
+          query = query.gt('priority', 0)
+        } else if (priorityFilter === 'normal') {
+          query = query.eq('priority', 0)
+        }
+
+        const { data: queue, error } = await query
+
+        if (error) throw error
+
+        if (!queue || queue.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">✅</div>
+              <div class="empty-title">All Clear!</div>
+              <div>No voice submissions pending moderation</div>
+            </div>
+          `
+          return
+        }
+
+        // Render queue items
+        grid.innerHTML = queue.map(item => `
+          <div class="queue-item ${item.priority > 0 ? 'high-priority' : ''}" data-id="${item.id}">
+            <div class="item-checkbox">
+              <input type="checkbox" value="${item.id}" class="queue-checkbox">
+            </div>
+
+            <div class="item-content">
+              <div class="item-header">
+                <div>
+                  <div class="item-title">
+                    ${getSourceIcon(item.source_type)} ${item.cast_member_display_name || item.cast_member_name || 'Anonymous'}
+                  </div>
+                  <div class="item-meta">
+                    <div class="meta-item">
+                      <span>📅</span>
+                      <span>${formatTimeAgo(item.submitted_at)}</span>
+                    </div>
+                    ${item.mm_games?.title ? `
+                      <div class="meta-item">
+                        <span>🎮</span>
+                        <strong>${item.mm_games.game_code}: ${item.mm_games.title}</strong>
+                      </div>
+                    ` : ''}
+                    ${item.scenario_title ? `
+                      <div class="meta-item">
+                        <span>📋</span>
+                        <strong>${item.scenario_title}</strong>
+                      </div>
+                    ` : ''}
+                    <div class="meta-item">
+                      <span>⏱️</span>
+                      <span>${formatDuration(item.duration_seconds)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  ${item.priority > 0 ? '<span class="priority-badge">⚡ High Priority</span>' : ''}
+                  <span class="source-badge">${getSourceLabel(item.source_type)}</span>
+                </div>
+              </div>
+
+              ${item.caption ? `
+                <div class="context-box">
+                  <div class="context-label">Caption / Context</div>
+                  <div class="context-text">"${item.caption}"</div>
+                </div>
+              ` : ''}
+
+              <div class="audio-player">
+                <button class="play-btn" onclick="playAudio('${item.audio_url}', this)">▶</button>
+                <div class="waveform">
+                  ${Array.from({length: 12}, (_, i) => {
+                    const height = Math.random() * 20 + 10
+                    return `<div class="wave-bar" style="height: ${height}px;"></div>`
+                  }).join('')}
+                </div>
+                <span class="duration">${formatDuration(item.duration_seconds)}</span>
+              </div>
+
+              <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 1rem;">
+                <strong>Submitted:</strong> ${new Date(item.submitted_at).toLocaleString()}
+              </div>
+            </div>
+
+            <div class="item-actions">
+              <button class="action-btn btn-approve" onclick="moderateItem('${item.id}', 'approve')">
+                ✅ Approve
+              </button>
+              <button class="action-btn btn-reject" onclick="moderateItem('${item.id}', 'reject')">
+                ❌ Reject
+              </button>
+              <button class="action-btn btn-flag" onclick="moderateItem('${item.id}', 'flag')">
+                ⚠️ Flag
+              </button>
+            </div>
+          </div>
+        `).join('')
+
+      } catch (error) {
+        console.error('Error loading queue:', error)
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <div class="empty-title">Error Loading Queue</div>
+            <div>${error.message}</div>
+          </div>
+        `
+      }
+    }
+
+    // Load tab counts
+    async function loadTabCounts() {
+      try {
+        const { data: counts, error } = await supabase
+          .from('voice_moderation_queue')
+          .select('source_type')
+          .eq('status', 'pending')
+
+        if (error) throw error
+
+        const countMap = {}
+        counts.forEach(item => {
+          countMap[item.source_type] = (countMap[item.source_type] || 0) + 1
+        })
+
+        document.getElementById('count-all').textContent = counts.length
+        document.getElementById('count-voice_note').textContent = countMap['voice_note'] || 0
+        document.getElementById('count-alliance_message').textContent = countMap['alliance_message'] || 0
+        document.getElementById('count-scenario_response').textContent = countMap['scenario_response'] || 0
+        document.getElementById('count-voice_introduction').textContent = countMap['voice_introduction'] || 0
+        document.getElementById('count-micro_scenario_response').textContent = countMap['micro_scenario_response'] || 0
+
+      } catch (error) {
+        console.error('Error loading tab counts:', error)
+      }
+    }
+
+    // Load game filter options
+    async function loadGameOptions() {
+      try {
+        const { data: games, error } = await supabase
+          .from('mm_games')
+          .select('id, title, game_code')
+          .order('created_at', { ascending: false })
+          .limit(20)
+
+        if (error) throw error
+
+        const select = document.getElementById('gameFilter')
+        games.forEach(game => {
+          const option = document.createElement('option')
+          option.value = game.id
+          option.textContent = `${game.game_code}: ${game.title}`
+          select.appendChild(option)
+        })
+      } catch (error) {
+        console.error('Error loading games:', error)
+      }
+    }
+
+    // Switch tab
+    window.switchTab = async function(sourceType) {
+      currentSourceType = sourceType
+
+      // Update active state
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'))
+      document.querySelector(`.tab[data-source="${sourceType}"]`).classList.add('active')
+
+      // Reload queue
+      await loadQueue()
+    }
+
+    // Moderate single item
+    window.moderateItem = async function(queueId, action) {
+      try {
+        const reasonMap = {
+          'reject': prompt('Enter rejection reason:'),
+          'flag': prompt('Enter flag reason:')
+        }
+
+        if (action !== 'approve' && !reasonMap[action]) {
+          return // User cancelled
+        }
+
+        let result
+        if (action === 'approve') {
+          const { data, error } = await supabase.rpc('approve_voice_submission', {
+            p_queue_id: queueId,
+            p_admin_id: (await supabase.auth.getUser()).data.user.id
+          })
+          result = { data, error }
+        } else if (action === 'reject') {
+          const { data, error } = await supabase.rpc('reject_voice_submission', {
+            p_queue_id: queueId,
+            p_admin_id: (await supabase.auth.getUser()).data.user.id,
+            p_rejection_reason: reasonMap['reject']
+          })
+          result = { data, error }
+        } else if (action === 'flag') {
+          const { error } = await supabase
+            .from('voice_moderation_queue')
+            .update({
+              status: 'flagged',
+              moderator_notes: reasonMap['flag'],
+              reviewed_by_admin_id: (await supabase.auth.getUser()).data.user.id,
+              reviewed_at: new Date().toISOString()
+            })
+            .eq('id', queueId)
+          result = { error }
+        }
+
+        if (result.error) throw result.error
+
+        await loadQueue()
+        await loadTabCounts()
+
+      } catch (error) {
+        console.error('Error moderating item:', error)
+        alert('Failed to moderate: ' + error.message)
+      }
+    }
+
+    // Batch approve
+    window.batchApprove = async function() {
+      const checkboxes = document.querySelectorAll('.queue-checkbox:checked')
+      const ids = Array.from(checkboxes).map(cb => cb.value)
+
+      if (ids.length === 0) {
+        alert('Please select items to approve')
+        return
+      }
+
+      if (!confirm(`Approve ${ids.length} voice submission(s)?`)) return
+
+      try {
+        const { data, error } = await supabase.rpc('batch_approve_voice_submissions', {
+          p_queue_ids: ids,
+          p_admin_id: (await supabase.auth.getUser()).data.user.id
+        })
+
+        if (error) throw error
+
+        alert(`Approved ${data} submission(s)`)
+        await loadQueue()
+        await loadTabCounts()
+      } catch (error) {
+        console.error('Error batch approving:', error)
+        alert('Failed to batch approve: ' + error.message)
+      }
+    }
+
+    // Batch reject
+    window.batchReject = async function() {
+      const checkboxes = document.querySelectorAll('.queue-checkbox:checked')
+      const ids = Array.from(checkboxes).map(cb => cb.value)
+
+      if (ids.length === 0) {
+        alert('Please select items to reject')
+        return
+      }
+
+      const reason = prompt(`Rejection reason for ${ids.length} item(s):`)
+      if (!reason) return
+
+      try {
+        for (const id of ids) {
+          await supabase.rpc('reject_voice_submission', {
+            p_queue_id: id,
+            p_admin_id: (await supabase.auth.getUser()).data.user.id,
+            p_rejection_reason: reason
+          })
+        }
+
+        alert(`Rejected ${ids.length} submission(s)`)
+        await loadQueue()
+        await loadTabCounts()
+      } catch (error) {
+        console.error('Error batch rejecting:', error)
+        alert('Failed to batch reject: ' + error.message)
+      }
+    }
+
+    // Play audio
+    window.playAudio = function(audioUrl, button) {
+      if (currentAudio && !currentAudio.paused && currentAudio.src === audioUrl) {
+        currentAudio.pause()
+        button.textContent = '▶'
+        return
+      }
+
+      if (currentAudio) {
+        currentAudio.pause()
+      }
+
+      currentAudio = new Audio(audioUrl)
+      currentAudio.addEventListener('ended', () => {
+        button.textContent = '▶'
+      })
+      currentAudio.addEventListener('error', (e) => {
+        console.error('Audio error:', e)
+        alert('Failed to play audio')
+        button.textContent = '▶'
+      })
+
+      button.textContent = '⏸'
+      currentAudio.play().catch(error => {
+        console.error('Playback error:', error)
+        alert('Failed to play audio: ' + error.message)
+        button.textContent = '▶'
+      })
+    }
+
+    // Initialize
+    async function init() {
+      const user = await requireAuth()
+      if (!user) return
+
+      // Check if admin
+      const { data: adminCheck } = await supabase
+        .from('admin_users')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single()
+
+      if (!adminCheck) {
+        alert('Access denied. Admin only.')
+        window.location.href = 'player-dashboard.html'
+        return
+      }
+
+      await loadGameOptions()
+      await loadTabCounts()
+      await loadQueue()
+
+      // Refresh every 30 seconds
+      setInterval(async () => {
+        await loadTabCounts()
+        await loadQueue()
+      }, 30000)
+    }
+
+    init()
+  </script>
+</body>
+</html>

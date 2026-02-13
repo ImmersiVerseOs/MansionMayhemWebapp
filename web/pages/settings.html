@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --color-success: #10B981;
+      --color-error: #EF4444;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-image {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-logo-image:hover {
+      transform: scale(1.1);
+    }
+
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover {
+      color: var(--color-gold);
+    }
+    
+    .main-container {
+      padding: 6rem 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .page-header {
+      margin-bottom: 3rem;
+    }
+    
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.125rem;
+    }
+    
+    .settings-grid {
+      display: grid;
+      gap: 2rem;
+    }
+    
+    .settings-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .section-icon {
+      font-size: 1.5rem;
+    }
+    
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-gold);
+    }
+    
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      transition: all 0.3s;
+    }
+    
+    .setting-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    
+    .setting-info {
+      flex: 1;
+    }
+    
+    .setting-label {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 0.25rem;
+    }
+    
+    .setting-description {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.5;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 56px;
+      height: 32px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      transition: 0.3s;
+    }
+    
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 24px;
+      width: 24px;
+      left: 4px;
+      bottom: 4px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    
+    input:checked + .toggle-slider {
+      background: var(--gradient-gold);
+    }
+    
+    input:checked + .toggle-slider::before {
+      transform: translateX(24px);
+    }
+    
+    .form-input,
+    .form-select {
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      min-width: 200px;
+    }
+    
+    .form-input:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: var(--color-gold);
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-error);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+    
+    .danger-zone {
+      background: rgba(239, 68, 68, 0.05);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .danger-title {
+      color: var(--color-error);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .success-message {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .setting-item {
+        flex-direction: column;
+        align-items: start;
+        gap: 1rem;
+      }
+      
+      .form-input,
+      .form-select {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="player-dashboard.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <div class="nav-right" style="display: flex; gap: 1.5rem; align-items: center;">
+        <a href="player-dashboard.html" class="nav-link">Dashboard</a>
+        <a href="tea-room.html" class="nav-link">The Tea Room</a>
+        <a href="record-voice.html" class="nav-link">Record</a>
+        <a href="gallery.html" class="nav-link">Gallery</a>
+        <a href="settings.html" class="nav-link" style="color: var(--color-gold);">Settings</a>
+        <a href="how-to-play.html" class="nav-link">Help</a>
+        <button id="signOutBtn" style="padding: 0.5rem 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #EF4444; cursor: pointer; transition: all 0.3s;">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="main-container">
+    <div class="page-header">
+      <h1 class="page-title">⚙️ Settings</h1>
+      <p class="page-subtitle">Manage your account, preferences, and privacy</p>
+    </div>
+    
+    <div id="successMessage" class="success-message">
+      ✓ Settings saved successfully!
+    </div>
+    
+    <div class="settings-grid">
+      <!-- Account Settings -->
+      <div class="settings-section">
+        <div class="section-header">
+          <span class="section-icon">👤</span>
+          <h2 class="section-title">Account</h2>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Email Address</div>
+            <div class="setting-description" id="userEmail">Loading...</div>
+          </div>
+          <button class="btn btn-secondary">Change</button>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Password</div>
+            <div class="setting-description">••••••••</div>
+          </div>
+          <button class="btn btn-secondary">Update</button>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Display Name</div>
+            <div class="setting-description">How you appear to other cast members</div>
+          </div>
+          <input type="text" class="form-input" id="displayName" placeholder="Display name">
+        </div>
+
+        <div style="margin-top: 1rem;">
+          <button class="btn btn-primary" id="saveAccountBtn">Save Changes</button>
+        </div>
+      </div>
+      
+      <!-- Gameplay Settings -->
+      <div class="settings-section">
+        <div class="section-header">
+          <span class="section-icon">🎮</span>
+          <h2 class="section-title">Gameplay</h2>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Gameplay Mode</div>
+            <div class="setting-description">Control how your character responds</div>
+          </div>
+          <select class="form-select" id="gameplayMode">
+            <option value="manual">Manual Control</option>
+            <option value="hybrid" selected>Hybrid Mode</option>
+            <option value="full-control">Full Control (AI)</option>
+          </select>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Edit Personality Profile</div>
+            <div class="setting-description">Update your character traits and behavior</div>
+          </div>
+          <button class="btn btn-secondary" onclick="window.location.href='personality-profile.html'">Edit Profile</button>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Auto-Respond Delay</div>
+            <div class="setting-description">How long to wait before AI responds (Hybrid mode)</div>
+          </div>
+          <select class="form-select">
+            <option value="2">2 hours</option>
+            <option value="4" selected>4 hours</option>
+            <option value="8">8 hours</option>
+            <option value="12">12 hours</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Notifications -->
+      <div class="settings-section">
+        <div class="section-header">
+          <span class="section-icon">🔔</span>
+          <h2 class="section-title">Notifications</h2>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">New Scenarios</div>
+            <div class="setting-description">Get notified when new scenarios are posted</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked onchange="saveSetting()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Episode Published</div>
+            <div class="setting-description">When you appear in a new episode</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked onchange="saveSetting()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Earnings Updates</div>
+            <div class="setting-description">Payment confirmations and revenue milestones</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked onchange="saveSetting()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Marketing Emails</div>
+            <div class="setting-description">Updates, tips, and platform news</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" onchange="saveSetting()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      
+      <!-- Privacy & Data -->
+      <div class="settings-section">
+        <div class="section-header">
+          <span class="section-icon">🔒</span>
+          <h2 class="section-title">Privacy & Data</h2>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Profile Visibility</div>
+            <div class="setting-description">Who can see your profile and stats</div>
+          </div>
+          <select class="form-select">
+            <option value="public" selected>Public</option>
+            <option value="cast-only">Cast Members Only</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Download My Data</div>
+            <div class="setting-description">Export all your data (GDPR/CCPA)</div>
+          </div>
+          <button class="btn btn-secondary">Request Export</button>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Data Usage Analytics</div>
+            <div class="setting-description">Help improve the platform with usage data</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked onchange="saveSetting()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      
+      <!-- Payments -->
+      <div class="settings-section">
+        <div class="section-header">
+          <span class="section-icon">💳</span>
+          <h2 class="section-title">Payments</h2>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Payment Method</div>
+            <div class="setting-description">Stripe Connected Account</div>
+          </div>
+          <button class="btn btn-secondary">Manage in Stripe</button>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Minimum Payout</div>
+            <div class="setting-description">Request payout when balance reaches</div>
+          </div>
+          <select class="form-select">
+            <option value="50" selected>$50</option>
+            <option value="100">$100</option>
+            <option value="250">$250</option>
+            <option value="500">$500</option>
+          </select>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Tax Information</div>
+            <div class="setting-description">W-9/W-8 forms and tax documents</div>
+          </div>
+          <button class="btn btn-secondary">Update Tax Info</button>
+        </div>
+      </div>
+      
+      <!-- Danger Zone -->
+      <div class="settings-section">
+        <div class="section-header">
+          <span class="section-icon">⚠️</span>
+          <h2 class="section-title">Account Management</h2>
+        </div>
+        
+        <div class="danger-zone">
+          <div class="danger-title">
+            <span>⚠️</span>
+            <span>Danger Zone</span>
+          </div>
+          
+          <div class="setting-item" style="margin-bottom: 0.5rem;">
+            <div class="setting-info">
+              <div class="setting-label">Pause Account</div>
+              <div class="setting-description">Temporarily stop receiving scenarios (keep earnings)</div>
+            </div>
+            <button class="btn btn-secondary">Pause</button>
+          </div>
+          
+          <div class="setting-item" style="margin-bottom: 0;">
+            <div class="setting-info">
+              <div class="setting-label">Delete Account</div>
+              <div class="setting-description">Permanently delete your account and all data</div>
+            </div>
+            <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    import { supabaseClient as supabase, getCurrentUser, signOut } from '../js/supabase-module.js'
+    import { requireAuth } from '../js/auth.js'
+
+    let currentUser = null
+
+    // Sign out handler
+    document.getElementById('signOutBtn').addEventListener('click', async () => {
+      await signOut()
+    })
+
+    // Show success message
+    function showSuccess(message = 'Settings saved successfully!') {
+      const successMessage = document.getElementById('successMessage')
+      successMessage.textContent = `✓ ${message}`
+      successMessage.style.display = 'block'
+      setTimeout(() => {
+        successMessage.style.display = 'none'
+      }, 3000)
+    }
+
+    // Load user data
+    async function loadUserData() {
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single()
+
+        if (error) throw error
+
+        // Populate account section
+        document.getElementById('userEmail').textContent = currentUser.email
+        document.getElementById('displayName').value = profile.display_name || currentUser.email.split('@')[0]
+
+        // Populate gameplay mode if exists
+        const gameplaySelect = document.getElementById('gameplayMode')
+        if (profile.metadata?.gameplay_mode) {
+          gameplaySelect.value = profile.metadata.gameplay_mode
+        }
+
+      } catch (error) {
+        console.error('Error loading user data:', error)
+      }
+    }
+
+    // Save account settings
+    document.getElementById('saveAccountBtn').addEventListener('click', async () => {
+      const displayName = document.getElementById('displayName').value.trim()
+
+      if (!displayName) {
+        alert('Display name cannot be empty')
+        return
+      }
+
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ display_name: displayName })
+          .eq('id', currentUser.id)
+
+        if (error) throw error
+
+        showSuccess('Account settings saved!')
+      } catch (error) {
+        console.error('Error saving account settings:', error)
+        alert('Failed to save settings: ' + error.message)
+      }
+    })
+
+    // Save gameplay mode
+    document.getElementById('gameplayMode').addEventListener('change', async (e) => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('metadata')
+          .eq('id', currentUser.id)
+          .single()
+
+        const metadata = profile?.metadata || {}
+        metadata.gameplay_mode = e.target.value
+
+        const { error } = await supabase
+          .from('profiles')
+          .update({ metadata })
+          .eq('id', currentUser.id)
+
+        if (error) throw error
+
+        showSuccess('Gameplay mode updated!')
+      } catch (error) {
+        console.error('Error saving gameplay mode:', error)
+        alert('Failed to save gameplay mode: ' + error.message)
+      }
+    })
+
+    // Generic toggle save
+    function saveSetting() {
+      showSuccess()
+    }
+    window.saveSetting = saveSetting
+
+    // Confirm delete
+    function confirmDelete() {
+      if (confirm('Are you sure? This action cannot be undone. All your data will be permanently deleted.')) {
+        alert('Account deletion initiated. Please contact support to complete this process.')
+      }
+    }
+    window.confirmDelete = confirmDelete
+
+    // Initialize
+    async function init() {
+      currentUser = await requireAuth()
+      if (!currentUser) return
+
+      await loadUserData()
+    }
+
+    init()
+  </script>
+</body>
+</html>

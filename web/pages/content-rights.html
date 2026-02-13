@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Rights Agreement - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      line-height: 1.8;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover {
+      color: var(--color-gold);
+    }
+    
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 6rem 2rem 4rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .last-updated {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.95rem;
+    }
+    
+    .intro-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .section-content {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.8;
+    }
+    
+    .section-content p {
+      margin-bottom: 1rem;
+    }
+    
+    .section-content ul {
+      margin: 1rem 0;
+      padding-left: 2rem;
+    }
+    
+    .section-content li {
+      margin-bottom: 0.75rem;
+    }
+    
+    .section-content strong {
+      color: var(--color-gold);
+    }
+    
+    .highlight-box {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .info-box {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .rights-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .rights-table th,
+    .rights-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .rights-table th {
+      background: rgba(255, 255, 255, 0.05);
+      font-weight: 600;
+      color: var(--color-gold);
+    }
+    
+    .rights-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .check {
+      color: #10B981;
+      font-size: 1.25rem;
+    }
+    
+    .contact-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    
+    .contact-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1rem;
+    }
+    
+    .contact-link {
+      color: var(--color-gold);
+      text-decoration: none;
+    }
+    
+    .contact-link:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      .title { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .rights-table { font-size: 0.875rem; }
+      .rights-table th, .rights-table td { padding: 0.75rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="../index.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <a href="../index.html" class="nav-link">← Back to Home</a>
+    </div>
+  </nav>
+  
+  <div class="content">
+    <div class="header">
+      <h1 class="title">Content Rights Agreement</h1>
+      <p class="last-updated">Last Updated: February 7, 2026</p>
+    </div>
+    
+    <div class="intro-box">
+      <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">
+        This Content Rights Agreement ("Agreement") governs the use of your likeness, content, and intellectual 
+        property when participating in Mansion Mayhem. By joining the platform, you agree to grant us specific 
+        rights while retaining ownership of your original content.
+      </p>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>1.</span>
+        <span>Your Ownership Rights</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          You retain full ownership of all original content you create and provide to the Platform, including:
+        </p>
+        <ul>
+          <li><strong>Photos:</strong> Any photos you upload for FaceCast creation</li>
+          <li><strong>Written Responses:</strong> Your scenario responses and character dialogue</li>
+          <li><strong>Character Descriptions:</strong> Your personality profiles and character backgrounds</li>
+          <li><strong>Personal Information:</strong> Your name, likeness, and biographical details</li>
+        </ul>
+        
+        <div class="highlight-box">
+          <strong>✓ You Own It:</strong> We never claim ownership of your photos, responses, or personal content. 
+          You simply grant us a license to use them for the Platform's purposes.
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>2.</span>
+        <span>License Grant to ImmersiVerse OS</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          By participating in Mansion Mayhem, you grant ImmersiVerse OS a:
+        </p>
+        <ul>
+          <li><strong>Worldwide:</strong> Valid in all countries and territories</li>
+          <li><strong>Non-Exclusive:</strong> You can use your content elsewhere</li>
+          <li><strong>Royalty-Free:</strong> No additional payments beyond revenue sharing</li>
+          <li><strong>Sublicensable:</strong> We can authorize partners to use content</li>
+          <li><strong>Transferable:</strong> Rights transfer if we're acquired</li>
+        </ul>
+        
+        <p>This license permits us to:</p>
+        <ul>
+          <li>Create AI-generated videos featuring your likeness</li>
+          <li>Edit, modify, and adapt your content for episodes</li>
+          <li>Distribute episodes on our platform and partner platforms</li>
+          <li>Use your content in promotional materials</li>
+          <li>Create derivative works based on your character</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>3.</span>
+        <span>FaceCast Likeness Rights</span>
+      </h2>
+      <div class="section-content">
+        <h3 style="font-size: 1.25rem; color: var(--color-gold); margin: 1.5rem 0 1rem;">Photo Upload Method</h3>
+        <p>
+          By uploading photos for FaceCast creation, you grant us the right to:
+        </p>
+        <ul>
+          <li>Process and analyze your facial features using AI</li>
+          <li>Create a digital representation (FaceCast) of your likeness</li>
+          <li>Use this FaceCast to generate video content</li>
+          <li>Store your photos securely for the duration of your participation</li>
+        </ul>
+        
+        <h3 style="font-size: 1.25rem; color: var(--color-gold); margin: 1.5rem 0 1rem;">Sora Cameos Method</h3>
+        <p>
+          By authorizing <strong>immersiverseos</strong> as a caster in your Sora Cameos settings, you:
+        </p>
+        <ul>
+          <li>Grant us access to your existing Cameos character</li>
+          <li>Authorize us to cast your Cameos in Mansion Mayhem episodes</li>
+          <li>Allow us to integrate your Cameos with our AI video generation</li>
+          <li>Confirm you have the right to grant this authorization</li>
+        </ul>
+        
+        <div class="info-box">
+          <strong>🔒 Likeness Protection:</strong> We will not use your FaceCast or Cameos character for purposes 
+          outside of Mansion Mayhem without your explicit consent. Your likeness is not sold or licensed to third parties.
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>4.</span>
+        <span>AI-Generated Content Ownership</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          AI-generated videos and episodes are owned by ImmersiVerse OS, but you maintain specific rights:
+        </p>
+        
+        <table class="rights-table">
+          <thead>
+            <tr>
+              <th>Right</th>
+              <th>You</th>
+              <th>ImmersiVerse OS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Own final AI-generated episodes</td>
+              <td>—</td>
+              <td><span class="check">✓</span></td>
+            </tr>
+            <tr>
+              <td>Earn revenue from your appearances</td>
+              <td><span class="check">✓</span></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Share episodes on social media</td>
+              <td><span class="check">✓</span></td>
+              <td><span class="check">✓</span></td>
+            </tr>
+            <tr>
+              <td>Use episodes commercially</td>
+              <td>—</td>
+              <td><span class="check">✓</span></td>
+            </tr>
+            <tr>
+              <td>Request content removal</td>
+              <td><span class="check">✓</span></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>License episodes to third parties</td>
+              <td>—</td>
+              <td><span class="check">✓</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>5.</span>
+        <span>Content Attribution & Credit</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          We will provide appropriate credit for your participation:
+        </p>
+        <ul>
+          <li>Your character name will appear in episode credits</li>
+          <li>Your profile will be linked from episodes you appear in</li>
+          <li>Public analytics will show your contribution to episodes</li>
+        </ul>
+        
+        <p>
+          You may promote your participation by:
+        </p>
+        <ul>
+          <li>Sharing episodes featuring your character</li>
+          <li>Using "Cast Member of Mansion Mayhem" in bios</li>
+          <li>Creating reaction content to your episodes</li>
+          <li>Discussing your experience publicly</li>
+        </ul>
+        
+        <div class="highlight-box">
+          <strong>✓ Attribution Required:</strong> When sharing Mansion Mayhem content, please tag @MansionMayhem 
+          and include "Created with ImmersiVerse OS" for proper attribution.
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>6.</span>
+        <span>Moral Rights</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          To the extent permitted by law, you waive moral rights in your content, meaning:
+        </p>
+        <ul>
+          <li>We may edit or modify your responses for episode flow</li>
+          <li>We may combine your responses with other cast members' content</li>
+          <li>We may use your content in different contexts within episodes</li>
+          <li>We may create promotional materials featuring your character</li>
+        </ul>
+        
+        <p>However, we will not:</p>
+        <ul>
+          <li>Use your likeness to endorse products without your consent</li>
+          <li>Portray you in a defamatory or false light</li>
+          <li>Associate you with illegal or harmful activities</li>
+          <li>Use your content in ways that violate the original context</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>7.</span>
+        <span>Removal & Revocation Rights</span>
+      </h2>
+      <div class="section-content">
+        <h3 style="font-size: 1.25rem; color: var(--color-gold); margin: 1.5rem 0 1rem;">During Active Participation</h3>
+        <ul>
+          <li>You may request removal of specific responses before episodes are published</li>
+          <li>You may update your FaceCast photos with 30 days' notice</li>
+          <li>You may request removal of content that violates the agreed-upon terms</li>
+        </ul>
+        
+        <h3 style="font-size: 1.25rem; color: var(--color-gold); margin: 1.5rem 0 1rem;">After Account Termination</h3>
+        <ul>
+          <li><strong>Published Episodes:</strong> Content in published episodes remains available</li>
+          <li><strong>Revenue Rights:</strong> You continue earning from existing content</li>
+          <li><strong>FaceCast Deletion:</strong> Your photos and FaceCast are deleted within 30 days</li>
+          <li><strong>New Content:</strong> We will not create new content featuring you</li>
+        </ul>
+        
+        <div class="info-box">
+          <strong>ℹ️ Why Published Content Remains:</strong> Episodes are collaborative works involving multiple 
+          cast members. Removing your content could harm other cast members' earnings and viewer experience. 
+          However, you maintain revenue rights from this content indefinitely.
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>8.</span>
+        <span>Third-Party Content</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          You warrant that all content you provide:
+        </p>
+        <ul>
+          <li>Is your original work or properly licensed</li>
+          <li>Does not infringe any third-party intellectual property rights</li>
+          <li>Does not violate any person's privacy or publicity rights</li>
+          <li>Does not contain defamatory or harmful statements</li>
+        </ul>
+        
+        <p>
+          You agree to indemnify ImmersiVerse OS against any claims arising from your violation of these warranties.
+        </p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>9.</span>
+        <span>Revenue Sharing & Royalties</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          In exchange for the content license, you receive:
+        </p>
+        <ul>
+          <li><strong>Direct Compensation:</strong> Revenue share based on screen time and engagement</li>
+          <li><strong>Perpetual Rights:</strong> Earnings continue indefinitely from published content</li>
+          <li><strong>Transparent Tracking:</strong> Real-time analytics on your earnings</li>
+          <li><strong>Fair Distribution:</strong> Automated, algorithm-based revenue allocation</li>
+        </ul>
+        
+        <div class="highlight-box">
+          <strong>✓ Your Investment Has Value:</strong> The more engaging and authentic your content, 
+          the more you earn. Quality contributions are rewarded through our revenue sharing model.
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>10.</span>
+        <span>Modifications to This Agreement</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          We may update this Content Rights Agreement to reflect new features or legal requirements. 
+          Material changes will be communicated via email 30 days before taking effect.
+        </p>
+        <p>
+          Continued participation after changes indicates acceptance. If you do not agree to changes, 
+          you may terminate your account before they take effect.
+        </p>
+      </div>
+    </div>
+    
+    <div class="contact-section">
+      <h2 class="contact-title">Questions About Content Rights?</h2>
+      <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1rem;">
+        For questions about licensing, content usage, or your rights:
+      </p>
+      <p>
+        <strong>Email:</strong> <a href="mailto:legal@immersiverseos.com" class="contact-link">legal@immersiverseos.com</a>
+      </p>
+    </div>
+  </div>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

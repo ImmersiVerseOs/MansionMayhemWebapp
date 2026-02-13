@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>👑 Your Journey to the Crown - Mansion Mayhem</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --color-gold: #D4AF37;
+      --color-dark: #0a0a0a;
+      --color-red: #DC143C;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Cinematic Background */
+    .cinematic-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, rgba(220, 20, 60, 0.1) 0%, transparent 50%),
+        linear-gradient(180deg, #000 0%, #0a0a0a 50%, #000 100%);
+      z-index: 0;
+    }
+
+    /* Spotlight Effect */
+    #spotlightCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.3;
+    }
+
+    /* Container */
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    /* Opening Scene */
+    .opening-scene {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      position: relative;
+    }
+
+    .crown-icon {
+      font-size: 10rem;
+      margin-bottom: 2rem;
+      animation: crownDescend 2s ease-out, crownFloat 4s ease-in-out 2s infinite;
+      filter: drop-shadow(0 0 60px rgba(212, 175, 55, 0.8));
+    }
+
+    @keyframes crownDescend {
+      from {
+        opacity: 0;
+        transform: translateY(-100px) scale(0.5);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes crownFloat {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    .opening-title {
+      font-size: 5rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      letter-spacing: 12px;
+      margin-bottom: 2rem;
+      animation: titleReveal 1.5s ease 0.5s both;
+    }
+
+    @keyframes titleReveal {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+        filter: blur(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .opening-tagline {
+      font-size: 2rem;
+      color: rgba(255, 255, 255, 0.9);
+      letter-spacing: 4px;
+      margin-bottom: 4rem;
+      animation: fadeInUp 1s ease 1s both;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    .scroll-text {
+      color: var(--color-gold);
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+    }
+
+    .scroll-arrow {
+      font-size: 2rem;
+      color: var(--color-gold);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(15px); }
+    }
+
+    /* Chapter Sections */
+    .chapter {
+      min-height: 100vh;
+      padding: 6rem 2rem;
+      position: relative;
+    }
+
+    .chapter-number {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease both;
+    }
+
+    .chapter-title {
+      font-size: 4rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      letter-spacing: 8px;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+    /* Interactive Timeline */
+    .timeline {
+      position: relative;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--color-gold) 0%, transparent 100%);
+      transform: translateX(-50%);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 4rem;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 0.6s ease;
+    }
+
+    .timeline-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .timeline-item:nth-child(odd) .timeline-content {
+      margin-right: auto;
+      margin-left: 0;
+      padding-right: 3rem;
+      text-align: right;
+    }
+
+    .timeline-item:nth-child(even) .timeline-content {
+      margin-left: auto;
+      margin-right: 0;
+      padding-left: 3rem;
+      text-align: left;
+    }
+
+    .timeline-content {
+      width: calc(50% - 2rem);
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(0, 0, 0, 0.9) 100%);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 20px;
+      padding: 2.5rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .timeline-content:hover {
+      border-color: var(--color-gold);
+      box-shadow: 0 0 60px rgba(212, 175, 55, 0.4);
+      transform: scale(1.05);
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: 50%;
+      top: 2rem;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-gold);
+      border: 4px solid #000;
+      border-radius: 50%;
+      z-index: 10;
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+    }
+
+    .timeline-icon {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+    }
+
+    .timeline-step {
+      font-size: 0.9rem;
+      font-weight: 900;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+    }
+
+    .timeline-heading {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .timeline-description {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+
+    .timeline-drama {
+      background: rgba(220, 20, 60, 0.2);
+      border: 1px solid rgba(220, 20, 60, 0.5);
+      border-radius: 12px;
+      padding: 1.5rem;
+      font-style: italic;
+      color: rgba(255, 255, 255, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timeline-drama::before {
+      content: '"';
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      font-size: 5rem;
+      color: var(--color-red);
+      opacity: 0.3;
+    }
+
+    /* Game Modes Section */
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 4rem;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .mode-card {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(0, 0, 0, 0.95) 100%);
+      border: 3px solid rgba(212, 175, 55, 0.3);
+      border-radius: 24px;
+      padding: 3rem;
+      text-align: center;
+      transition: all 0.4s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .mode-card:hover::before {
+      opacity: 1;
+      animation: rotateGlow 3s linear infinite;
+    }
+
+    .mode-card:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-15px);
+      box-shadow: 0 0 80px rgba(212, 175, 55, 0.5);
+    }
+
+    .mode-icon {
+      font-size: 5rem;
+      margin-bottom: 2rem;
+      filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.6));
+    }
+
+    .mode-title {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+    }
+
+    .mode-subtitle {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+
+    .mode-description {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .mode-stats {
+      display: flex;
+      justify-content: space-around;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .mode-stat {
+      text-align: center;
+    }
+
+    .mode-stat-value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--color-gold);
+      display: block;
+    }
+
+    .mode-stat-label {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Drama Meter */
+    .drama-showcase {
+      background: linear-gradient(135deg, rgba(220, 20, 60, 0.2) 0%, rgba(0, 0, 0, 0.95) 100%);
+      border: 3px solid rgba(220, 20, 60, 0.5);
+      border-radius: 24px;
+      padding: 4rem;
+      max-width: 900px;
+      margin: 4rem auto;
+      text-align: center;
+    }
+
+    .drama-title {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--color-red);
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      margin-bottom: 2rem;
+    }
+
+    .drama-meter {
+      width: 100%;
+      height: 30px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(220, 20, 60, 0.5);
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .drama-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FFD700 0%, #DC143C 100%);
+      width: 0%;
+      transition: width 2s ease;
+      box-shadow: 0 0 20px rgba(220, 20, 60, 0.8);
+      animation: dramaPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes dramaPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(220, 20, 60, 0.8); }
+      50% { box-shadow: 0 0 40px rgba(220, 20, 60, 1); }
+    }
+
+    .drama-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 1rem;
+    }
+
+    /* Money Counter */
+    .money-showcase {
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.2) 0%, rgba(0, 0, 0, 0.95) 100%);
+      border: 3px solid rgba(40, 167, 69, 0.5);
+      border-radius: 24px;
+      padding: 4rem;
+      max-width: 900px;
+      margin: 4rem auto;
+      text-align: center;
+    }
+
+    .money-amount {
+      font-size: 6rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #28a745 0%, #FFD700 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 2rem 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .money-label {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+    }
+
+    /* Final CTA */
+    .final-cta {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      position: relative;
+    }
+
+    .cta-icon {
+      font-size: 8rem;
+      margin-bottom: 2rem;
+      animation: throneFloat 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 60px rgba(212, 175, 55, 0.8));
+    }
+
+    @keyframes throneFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-25px); }
+    }
+
+    .cta-title {
+      font-size: 5rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      letter-spacing: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .cta-subtitle {
+      font-size: 1.8rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 4rem;
+      max-width: 700px;
+    }
+
+    .cta-button {
+      padding: 2.5rem 5rem;
+      font-size: 2rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      color: #000;
+      border: 5px solid #fff;
+      border-radius: 16px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 0 60px rgba(212, 175, 55, 0.8);
+      font-family: 'Impact', sans-serif;
+      animation: ctaPulse 3s ease-in-out infinite;
+    }
+
+    .cta-button:hover {
+      transform: scale(1.1) translateY(-10px);
+      box-shadow: 0 0 100px rgba(212, 175, 55, 1);
+    }
+
+    @keyframes ctaPulse {
+      0%, 100% {
+        box-shadow: 0 0 60px rgba(212, 175, 55, 0.8);
+      }
+      50% {
+        box-shadow: 0 0 100px rgba(212, 175, 55, 1);
+        transform: scale(1.05);
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes rotateGlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .opening-title {
+        font-size: 3rem;
+      }
+
+      .chapter-title {
+        font-size: 2.5rem;
+      }
+
+      .timeline-content {
+        width: 100%;
+        padding: 2rem !important;
+        text-align: left !important;
+        margin: 0 !important;
+      }
+
+      .timeline-line {
+        left: 20px;
+      }
+
+      .timeline-dot {
+        left: 20px;
+        transform: translateX(-50%);
+      }
+
+      .modes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-title {
+        font-size: 3rem;
+      }
+
+      .cta-button {
+        padding: 2rem 3rem;
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="cinematic-bg"></div>
+  <canvas id="spotlightCanvas"></canvas>
+
+  <!-- Container -->
+  <div class="container">
+    
+    <!-- Opening Scene -->
+    <section class="opening-scene">
+      <div class="crown-icon">👑</div>
+      <h1 class="opening-title">THE JOURNEY</h1>
+      <p class="opening-tagline">From Nobody to Queen</p>
+      
+      <div class="scroll-indicator">
+        <div class="scroll-text">Your Story Begins</div>
+        <div class="scroll-arrow">↓</div>
+      </div>
+    </section>
+
+    <!-- Chapter 1: The Call -->
+    <section class="chapter">
+      <div class="chapter-number">Chapter 1</div>
+      <h2 class="chapter-title">THE CALL</h2>
+      
+      <div class="timeline">
+        <div class="timeline-line"></div>
+        
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-icon">📱</div>
+            <div class="timeline-step">Step 1</div>
+            <h3 class="timeline-heading">The Notification Drops</h3>
+            <p class="timeline-description">
+              It's Monday morning. Your phone buzzes. A new scenario has arrived. The mansion is stirring with drama, and you're right in the middle of it.
+            </p>
+            <div class="timeline-drama">
+              "Sarah just called you out in front of everyone at the pool party. All eyes are on you. How do you respond?"
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-icon">💭</div>
+            <div class="timeline-step">Step 2</div>
+            <h3 class="timeline-heading">You Make Your Move</h3>
+            <p class="timeline-description">
+              This is YOUR moment. Do you stay calm and diplomatic? Fire back with savage energy? Or play it strategic and form an alliance? The choice is yours.
+            </p>
+            <div class="timeline-drama">
+              Your response determines everything: your alliances, your enemies, your screen time, and your money.
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-icon">🎬</div>
+            <div class="timeline-step">Step 3</div>
+            <h3 class="timeline-heading">The AI Brings It to Life</h3>
+            <p class="timeline-description">
+              Your response becomes a scene. Your FaceCast. Your voice. Your character. The AI generates a cinematic moment featuring YOU in the drama.
+            </p>
+            <div class="timeline-drama">
+              Every week, the best moments from all 20 queens are edited into a full episode. And you're the star of your scenes.
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-icon">📈</div>
+            <div class="timeline-step">Step 4</div>
+            <h3 class="timeline-heading">Build Your Brand</h3>
+            <p class="timeline-description">
+              More screen time = More visibility. More drama = More viewers. More engagement = More opportunities. Build your audience and unlock future revenue streams.
+            </p>
+            <div class="timeline-drama">
+              Top queens attract brand deals, sponsorships, and licensing opportunities. The platform grows with you.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chapter 2: The Game -->
+    <section class="chapter">
+      <div class="chapter-number">Chapter 2</div>
+      <h2 class="chapter-title">THE GAME</h2>
+      
+      <div class="timeline">
+        <div class="timeline-line"></div>
+        
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-icon">🔥</div>
+            <div class="timeline-step">Week 1</div>
+            <h3 class="timeline-heading">The Hot Seats</h3>
+            <p class="timeline-description">
+              Every week, one queen gets the power. She selects TWO queens to put in the hot seats. Those two face elimination. The drama is real. The stakes are high.
+            </p>
+            <div class="timeline-drama">
+              "You have the power this week. Choose wisely. Who do you put on the chopping block?"
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-icon">🗳️</div>
+            <div class="timeline-step">The Vote</div>
+            <h3 class="timeline-heading">Audience Decides</h3>
+            <p class="timeline-description">
+              Once two queens are in the hot seats, the audience votes. They decide who stays and who goes. Your fans can save you. Your enemies can't.
+            </p>
+            <div class="timeline-drama">
+              "The votes are in. One of you is safe. One of you... is going home."
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-icon">💔</div>
+            <div class="timeline-step">Elimination</div>
+            <h3 class="timeline-heading">Someone Goes Home</h3>
+            <p class="timeline-description">
+              Every week, one queen is eliminated. 20 queens started. Only 1 will claim the crown. Survive the drama, win the votes, outlast your rivals.
+            </p>
+            <div class="timeline-drama">
+              "Your journey ends here. Pack your bags. Your reign is over."
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-icon">🤝</div>
+            <div class="timeline-step">Strategy</div>
+            <h3 class="timeline-heading">Alliances & Rivalries</h3>
+            <p class="timeline-description">
+              Form alliances to protect yourself. Create rivalries for screen time. Betray your allies for drama. Every move is strategic. Every relationship matters.
+            </p>
+            <div class="timeline-drama">
+              "In this mansion, you either have allies watching your back... or enemies plotting your downfall. Choose wisely."
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Competition Stats -->
+      <div class="drama-showcase" style="margin-top: 4rem;">
+        <h3 class="drama-title">THE COMPETITION</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 3rem;">
+          <div style="text-align: center;">
+            <div style="font-size: 4rem; font-weight: 900; color: var(--color-gold); margin-bottom: 0.5rem;">20</div>
+            <div style="color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 2px;">Queens Start</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 4rem; font-weight: 900; color: var(--color-gold); margin-bottom: 0.5rem;">20</div>
+            <div style="color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 2px;">Weeks of Drama</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 4rem; font-weight: 900; color: var(--color-red); margin-bottom: 0.5rem;">19</div>
+            <div style="color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 2px;">Eliminations</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 4rem; font-weight: 900; color: var(--color-gold); margin-bottom: 0.5rem;">1</div>
+            <div style="color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 2px;">Survivor</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chapter 3: Choose Your Path -->
+    <section class="chapter">
+      <div class="chapter-number">Chapter 3</div>
+      <h2 class="chapter-title">CHOOSE YOUR PATH</h2>
+      
+      <div class="modes-grid">
+        <div class="mode-card">
+          <div class="mode-icon">👑</div>
+          <h3 class="mode-title">Manual Queen</h3>
+          <p class="mode-subtitle">Full Control</p>
+          <p class="mode-description">
+            You respond to every scenario yourself. Total creative control. You ARE your character 24/7.
+          </p>
+          <div class="mode-stats">
+            <div class="mode-stat">
+              <span class="mode-stat-value">10h</span>
+              <span class="mode-stat-label">Per Week</span>
+            </div>
+            <div class="mode-stat">
+              <span class="mode-stat-value">MAX</span>
+              <span class="mode-stat-label">Drama</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mode-card">
+          <div class="mode-icon">⚡</div>
+          <h3 class="mode-title">Hybrid Queen</h3>
+          <p class="mode-subtitle">Best of Both</p>
+          <p class="mode-description">
+            AI handles scenarios when you're busy. You jump in when you want. Perfect balance of control and passive income.
+          </p>
+          <div class="mode-stats">
+            <div class="mode-stat">
+              <span class="mode-stat-value">3h</span>
+              <span class="mode-stat-label">Per Week</span>
+            </div>
+            <div class="mode-stat">
+              <span class="mode-stat-value">HIGH</span>
+              <span class="mode-stat-label">Drama</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mode-card">
+          <div class="mode-icon">🤖</div>
+          <h3 class="mode-title">AI Queen</h3>
+          <p class="mode-subtitle">Passive Income</p>
+          <p class="mode-description">
+            Your AI twin handles everything. You just watch episodes and collect checks. Zero time commitment.
+          </p>
+          <div class="mode-stats">
+            <div class="mode-stat">
+              <span class="mode-stat-value">30m</span>
+              <span class="mode-stat-label">Per Week</span>
+            </div>
+            <div class="mode-stat">
+              <span class="mode-stat-value">AUTO</span>
+              <span class="mode-stat-label">Drama</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chapter 4: Master the Drama -->
+    <section class="chapter">
+      <div class="chapter-number">Chapter 4</div>
+      <h2 class="chapter-title">MASTER THE DRAMA</h2>
+      
+      <div class="drama-showcase">
+        <h3 class="drama-title">DRAMA LEVEL</h3>
+        <p style="color: rgba(255,255,255,0.8); margin-bottom: 2rem;">The more drama, the more screen time, the more money.</p>
+        
+        <div class="drama-meter">
+          <div class="drama-fill" id="dramaFill"></div>
+        </div>
+        
+        <div class="drama-labels">
+          <span style="color: #FFD700;">DIPLOMATIC</span>
+          <span style="color: #ff8c00;">ASSERTIVE</span>
+          <span style="color: #DC143C;">EXPLOSIVE</span>
+        </div>
+      </div>
+
+      <div class="money-showcase">
+        <div class="money-label">Unlock Revenue Potential</div>
+        <div class="money-amount" id="moneyCounter" style="font-size: 3.5rem;">BRANDS</div>
+        <p style="color: rgba(255,255,255,0.7); font-size: 1.2rem; margin-top: 1rem;">
+          Top queens attract sponsorships, brand deals, and licensing opportunities as the platform grows
+        </p>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+      <div class="cta-icon">🪑</div>
+      <h2 class="cta-title">CLAIM YOUR THRONE</h2>
+      <p class="cta-subtitle">
+        The mansion is waiting. The crown is unclaimed. Your journey to queen begins now.
+      </p>
+      <a href="/pages/sign-in.html" class="cta-button">
+        ENTER THE MANSION
+      </a>
+    </section>
+
+  </div>
+
+  <script>
+    // ========================================================================
+    // SPOTLIGHT CANVAS
+    // ========================================================================
+
+    function initSpotlight() {
+      const canvas = document.getElementById('spotlightCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Create spotlight effect
+        const gradient = ctx.createRadialGradient(
+          canvas.width / 2, 
+          canvas.height / 4, 
+          0,
+          canvas.width / 2, 
+          canvas.height / 4, 
+          canvas.width / 2
+        );
+        
+        gradient.addColorStop(0, 'rgba(212, 175, 55, 0.15)');
+        gradient.addColorStop(0.5, 'rgba(212, 175, 55, 0.05)');
+        gradient.addColorStop(1, 'rgba(212, 175, 55, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        requestAnimationFrame(animate);
+      }
+      
+      animate();
+    }
+
+    // ========================================================================
+    // SCROLL ANIMATIONS
+    // ========================================================================
+
+    function initScrollAnimations() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, {
+        threshold: 0.2
+      });
+      
+      document.querySelectorAll('.timeline-item').forEach(item => {
+        observer.observe(item);
+      });
+    }
+
+    // ========================================================================
+    // DRAMA METER
+    // ========================================================================
+
+    function animateDramaMeter() {
+      const dramaMeter = document.getElementById('dramaFill');
+      
+      // Animate to 85% when visible
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              dramaMeter.style.width = '85%';
+            }, 500);
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.5 });
+      
+      observer.observe(dramaMeter.parentElement);
+    }
+
+    // ========================================================================
+    // BRAND SHOWCASE
+    // ========================================================================
+
+    function animateBrandShowcase() {
+      const counter = document.getElementById('moneyCounter');
+      const brands = ['BRANDS', '🏆 SPONSORS', '📺 ADS', '🤝 DEALS', '⭐ GROWTH'];
+      let index = 0;
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setInterval(() => {
+              counter.textContent = brands[index];
+              index = (index + 1) % brands.length;
+            }, 2000);
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.5 });
+      
+      observer.observe(counter);
+    }
+
+    // ========================================================================
+    // INITIALIZATION
+    // ========================================================================
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initSpotlight();
+      initScrollAnimations();
+      animateDramaMeter();
+      animateBrandShowcase();
+    });
+
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('spotlightCanvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>

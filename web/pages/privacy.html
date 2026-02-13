@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      line-height: 1.8;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover {
+      color: var(--color-gold);
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 6rem 2rem 4rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .page-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .last-updated {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.95rem;
+    }
+    
+    .intro-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .section {
+      margin-bottom: 3rem;
+    }
+    
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .section-content {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .section-content h3 {
+      font-size: 1.25rem;
+      margin: 2rem 0 1rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .section-content p {
+      margin-bottom: 1rem;
+    }
+    
+    .section-content ul {
+      margin: 1rem 0 1rem 2rem;
+    }
+    
+    .section-content li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .highlight-box {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .data-table th,
+    .data-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .data-table th {
+      background: rgba(255, 255, 255, 0.05);
+      font-weight: 600;
+      color: var(--color-gold);
+    }
+    
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .contact-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    
+    .contact-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1rem;
+    }
+    
+    .contact-link {
+      color: var(--color-gold);
+      text-decoration: none;
+    }
+    
+    .contact-link:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 2rem;
+      }
+      
+      .container {
+        padding: 5rem 1.5rem 3rem;
+      }
+      
+      .data-table {
+        font-size: 0.875rem;
+      }
+      
+      .data-table th,
+      .data-table td {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="../index.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <a href="../index.html" class="nav-link">← Back to Home</a>
+    </div>
+  </nav>
+  
+  <div class="container">
+    <div class="header">
+      <h1 class="page-title">Privacy Policy</h1>
+      <p class="last-updated">Last Updated: February 7, 2026</p>
+    </div>
+    
+    <div class="intro-box">
+      <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">
+        ImmersiVerse OS ("we," "us," "our") operates Mansion Mayhem. This Privacy Policy explains how we collect, 
+        use, disclose, and safeguard your information when you use our platform. We are committed to protecting 
+        your privacy and complying with GDPR, CCPA, and other applicable data protection laws.
+      </p>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>1.</span>
+        <span>Information We Collect</span>
+      </h2>
+      <div class="section-content">
+        <h3>1.1 Information You Provide</h3>
+        <ul>
+          <li><strong>Account Information:</strong> Name, email address, phone number, age, location</li>
+          <li><strong>FaceCast Data:</strong> Photos or Sora Cameos authorization for AI character creation</li>
+          <li><strong>Profile Information:</strong> Personality traits, archetype, gameplay preferences</li>
+          <li><strong>Content:</strong> Scenario responses, messages, feedback</li>
+          <li><strong>Payment Information:</strong> Processed securely through Stripe (we don't store full payment details)</li>
+        </ul>
+        
+        <h3>1.2 Automatically Collected Information</h3>
+        <ul>
+          <li><strong>Usage Data:</strong> Pages viewed, features used, time spent on platform</li>
+          <li><strong>Device Information:</strong> IP address, browser type, device type, operating system</li>
+          <li><strong>Cookies:</strong> Authentication, preferences, analytics (see Cookie Policy)</li>
+          <li><strong>Performance Data:</strong> Response times, engagement metrics, error logs</li>
+        </ul>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data Type</th>
+              <th>Purpose</th>
+              <th>Retention</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Account Data</td>
+              <td>Platform access, authentication</td>
+              <td>Until account deletion</td>
+            </tr>
+            <tr>
+              <td>FaceCast Photos</td>
+              <td>AI character generation</td>
+              <td>Until account deletion + 30 days</td>
+            </tr>
+            <tr>
+              <td>Responses</td>
+              <td>Episode generation</td>
+              <td>Indefinite (content license)</td>
+            </tr>
+            <tr>
+              <td>Payment Info</td>
+              <td>Revenue distribution</td>
+              <td>7 years (tax compliance)</td>
+            </tr>
+            <tr>
+              <td>Analytics</td>
+              <td>Platform improvement</td>
+              <td>2 years</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>2.</span>
+        <span>How We Use Your Information</span>
+      </h2>
+      <div class="section-content">
+        <p>We use your information to:</p>
+        <ul>
+          <li><strong>Provide Services:</strong> Create your AI character, generate episodes, process payments</li>
+          <li><strong>Personalization:</strong> Tailor content and recommendations to your preferences</li>
+          <li><strong>Communication:</strong> Send scenario notifications, episode alerts, payment confirmations</li>
+          <li><strong>Platform Improvement:</strong> Analyze usage patterns, fix bugs, develop new features</li>
+          <li><strong>Security:</strong> Detect fraud, prevent abuse, enforce Terms of Service</li>
+          <li><strong>Legal Compliance:</strong> Fulfill legal obligations, respond to lawful requests</li>
+          <li><strong>Marketing:</strong> Send promotional content (opt-out available)</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>3.</span>
+        <span>How We Share Your Information</span>
+      </h2>
+      <div class="section-content">
+        <h3>3.1 We Never Sell Your Data</h3>
+        <p>
+          We do not sell your personal information to third parties. Period.
+        </p>
+        
+        <h3>3.2 Service Providers</h3>
+        <p>We share data with trusted service providers who help us operate:</p>
+        <ul>
+          <li><strong>Supabase:</strong> Database and authentication</li>
+          <li><strong>Stripe:</strong> Payment processing</li>
+          <li><strong>OpenAI/Sora:</strong> AI video generation (if using Sora Cameos)</li>
+          <li><strong>Cloud Storage:</strong> AWS/Google Cloud for secure file storage</li>
+          <li><strong>Analytics:</strong> Google Analytics (anonymized data)</li>
+        </ul>
+        
+        <h3>3.3 Legal Requirements</h3>
+        <p>
+          We may disclose information when required by law, court order, or government request, or to protect 
+          our rights, property, or safety.
+        </p>
+        
+        <h3>3.4 Business Transfers</h3>
+        <p>
+          If we are acquired or merged, your information may be transferred to the new entity. You will be 
+          notified of any such change.
+        </p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>4.</span>
+        <span>Data Security</span>
+      </h2>
+      <div class="section-content">
+        <p>We implement industry-standard security measures:</p>
+        <ul>
+          <li><strong>Encryption:</strong> All data transmitted via HTTPS/TLS; photos encrypted at rest (AES-256)</li>
+          <li><strong>Access Controls:</strong> Limited employee access on need-to-know basis</li>
+          <li><strong>Regular Audits:</strong> Security assessments and penetration testing</li>
+          <li><strong>Secure Infrastructure:</strong> Firewalls, intrusion detection, DDoS protection</li>
+          <li><strong>Incident Response:</strong> 24-hour breach notification protocol</li>
+        </ul>
+        
+        <div class="highlight-box">
+          <strong>✓ Photo Security:</strong> Your FaceCast photos are encrypted using AES-256 and stored in 
+          secure cloud storage with redundancy. Only authorized AI systems can access them for video generation.
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>5.</span>
+        <span>Your Privacy Rights</span>
+      </h2>
+      <div class="section-content">
+        <h3>5.1 GDPR Rights (EU/UK Users)</h3>
+        <ul>
+          <li><strong>Access:</strong> Request a copy of your personal data</li>
+          <li><strong>Rectification:</strong> Correct inaccurate information</li>
+          <li><strong>Erasure:</strong> Request deletion ("right to be forgotten")</li>
+          <li><strong>Restriction:</strong> Limit how we process your data</li>
+          <li><strong>Portability:</strong> Receive your data in machine-readable format</li>
+          <li><strong>Objection:</strong> Object to processing for specific purposes</li>
+          <li><strong>Withdraw Consent:</strong> Revoke consent at any time</li>
+        </ul>
+        
+        <h3>5.2 CCPA Rights (California Users)</h3>
+        <ul>
+          <li><strong>Know:</strong> What personal information we collect and how we use it</li>
+          <li><strong>Delete:</strong> Request deletion of your personal information</li>
+          <li><strong>Opt-Out:</strong> Opt-out of sale (we don't sell data, but right is available)</li>
+          <li><strong>Non-Discrimination:</strong> Equal service regardless of privacy choices</li>
+        </ul>
+        
+        <h3>5.3 Exercising Your Rights</h3>
+        <p>
+          To exercise any of these rights, contact us at 
+          <a href="mailto:privacy@immersiverseos.com" style="color: var(--color-gold);">privacy@immersiverseos.com</a>. 
+          We will respond within 30 days (GDPR) or 45 days (CCPA).
+        </p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>6.</span>
+        <span>Cookies & Tracking</span>
+      </h2>
+      <div class="section-content">
+        <p>We use cookies and similar technologies:</p>
+        <ul>
+          <li><strong>Essential:</strong> Authentication, security, session management</li>
+          <li><strong>Functional:</strong> Preferences, language settings, UI customization</li>
+          <li><strong>Analytics:</strong> Usage patterns, performance monitoring (anonymized)</li>
+          <li><strong>Marketing:</strong> Ad targeting (with consent)</li>
+        </ul>
+        <p>
+          You can control cookies through your browser settings. Note that disabling essential cookies may 
+          affect platform functionality.
+        </p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>7.</span>
+        <span>Children's Privacy</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          Our platform is not intended for users under 18. We do not knowingly collect information from minors. 
+          If we discover we have collected data from someone under 18, we will delete it immediately.
+        </p>
+        <p>
+          Parents who believe their child has provided information should contact us at 
+          <a href="mailto:privacy@immersiverseos.com" style="color: var(--color-gold);">privacy@immersiverseos.com</a>.
+        </p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>8.</span>
+        <span>International Data Transfers</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          We operate globally and may transfer data to the United States and other countries. We use Standard 
+          Contractual Clauses (SCCs) and other legally approved mechanisms to ensure adequate protection.
+        </p>
+        <p>
+          For EU/UK users, we comply with GDPR requirements for international transfers.
+        </p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>9.</span>
+        <span>Data Retention</span>
+      </h2>
+      <div class="section-content">
+        <p>We retain your information as follows:</p>
+        <ul>
+          <li><strong>Active Accounts:</strong> Duration of account + 30 days post-deletion</li>
+          <li><strong>FaceCast Photos:</strong> 30 days after account deletion</li>
+          <li><strong>Published Content:</strong> Indefinite (per content license in Terms)</li>
+          <li><strong>Financial Records:</strong> 7 years (tax/legal compliance)</li>
+          <li><strong>Analytics:</strong> 2 years (aggregated/anonymized)</li>
+        </ul>
+        <p>
+          You may request earlier deletion, subject to legal obligations.
+        </p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>10.</span>
+        <span>Changes to This Policy</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          We may update this Privacy Policy periodically. Material changes will be communicated via email 
+          and/or platform notification 30 days before taking effect. Continued use after changes constitutes 
+          acceptance.
+        </p>
+        <p>
+          Previous versions available upon request.
+        </p>
+      </div>
+    </div>
+    
+    <div class="contact-section">
+      <h2 class="contact-title">Privacy Questions or Requests?</h2>
+      <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1rem;">
+        For privacy-related inquiries, data requests, or to exercise your rights:
+      </p>
+      <p style="margin-bottom: 1rem;">
+        <strong>Email:</strong> <a href="mailto:privacy@immersiverseos.com" class="contact-link">privacy@immersiverseos.com</a>
+      </p>
+      <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
+        <strong>Mailing Address:</strong><br>
+        ImmersiVerse OS<br>
+        Attn: Privacy Officer<br>
+        [Address Line 1]<br>
+        [City, State ZIP]
+      </p>
+    </div>
+  </div>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

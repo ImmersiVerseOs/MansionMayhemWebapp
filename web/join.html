@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Game | MANSION MAYHEM</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Mansion Mayhem Styles -->
+  <link rel="stylesheet" href="css/mansion-mayhem-theme.css">
+  <link rel="stylesheet" href="css/mansion-mayhem-components.css">
+</head>
+<body>
+  <div class="mm-container">
+    <div class="mm-section-xl" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+
+      <!-- Header -->
+      <div class="mm-text-center mm-mb-xl">
+        <div style="font-size: 80px; margin-bottom: var(--mm-space-md);">🏰</div>
+        <h1 class="mm-heading mm-gradient-text" style="font-size: var(--mm-font-5xl); margin-bottom: var(--mm-space-sm);">
+          MANSION MAYHEM
+        </h1>
+        <p style="font-size: var(--mm-font-sm); font-weight: var(--mm-weight-semibold); letter-spacing: 3px; text-transform: uppercase; color: var(--mm-rose);">
+          Join A Game
+        </p>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loadingState" class="mm-hidden">
+        <div class="mm-card mm-text-center">
+          <div class="mm-spinner mm-spinner-large" style="margin: 0 auto var(--mm-space-lg);"></div>
+          <p style="color: var(--mm-text-secondary);">Processing...</p>
+        </div>
+      </div>
+
+      <!-- Token Join Success -->
+      <div id="tokenJoinSuccess" class="mm-hidden">
+        <div class="mm-card">
+          <div style="text-align: center; font-size: 48px; margin-bottom: var(--mm-space-lg);">✓</div>
+          <p class="mm-text-center" style="font-size: var(--mm-font-lg); color: var(--mm-success);">
+            Successfully joined! Redirecting to lobby...
+          </p>
+        </div>
+      </div>
+
+      <!-- Manual Join Form -->
+      <div id="manualJoinForm">
+        <div class="mm-card">
+          <h2 class="mm-heading mm-text-center mm-mb-lg" style="font-size: var(--mm-font-2xl);">
+            Enter Game Code
+          </h2>
+
+          <form id="joinForm" class="mm-flex-col mm-gap-lg">
+            <!-- Game Code Input -->
+            <div>
+              <label style="display: block; font-size: var(--mm-font-xs); font-weight: var(--mm-weight-semibold); letter-spacing: 1px; text-transform: uppercase; color: var(--mm-text-secondary); margin-bottom: var(--mm-space-sm);">
+                Game Code
+              </label>
+              <input
+                type="text"
+                id="gameCode"
+                class="mm-input mm-input-mono"
+                placeholder="MM-BETA-001"
+                required
+                autocomplete="off"
+                style="font-size: var(--mm-font-2xl);"
+              >
+            </div>
+
+            <!-- Cast Member Select -->
+            <div>
+              <label style="display: block; font-size: var(--mm-font-xs); font-weight: var(--mm-weight-semibold); letter-spacing: 1px; text-transform: uppercase; color: var(--mm-text-secondary); margin-bottom: var(--mm-space-sm);">
+                Who Are You?
+              </label>
+              <select id="castMember" class="mm-input" required>
+                <option value="">Select your name...</option>
+              </select>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="mm-button mm-button-primary mm-button-large mm-button-full" id="joinButton">
+              🎬 Join Game
+            </button>
+          </form>
+
+          <p class="mm-text-center mm-mt-lg" style="font-size: var(--mm-font-sm); color: var(--mm-text-secondary); line-height: 1.6;">
+            Don't have a code? Contact your director to get invited.
+          </p>
+        </div>
+      </div>
+
+      <!-- Alert Container -->
+      <div id="alertContainer" style="position: fixed; top: var(--mm-space-lg); left: 50%; transform: translateX(-50%); z-index: 1000; max-width: 428px; width: calc(100% - 32px);"></div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/mansion-mayhem-components.js"></script>
+  <script>
+    // Initialize Supabase
+    const SUPABASE_URL = 'https://dhqwxamggghewbslfdej.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocXd4YW1nZ2doZXdic2xmZGVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM0MjI1MzYsImV4cCI6MjA0ODk5ODUzNn0.6xR8L8wSgCvxnZn_TWhUe-L2h9yWE95BWh-yAuSyqwM';
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Initialize
+    async function init() {
+      // Check for pending invite after authentication
+      const pendingToken = sessionStorage.getItem('pendingInviteToken');
+      const pendingGameId = sessionStorage.getItem('pendingGameId');
+
+      if (pendingToken && pendingGameId) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // Clear pending data
+          sessionStorage.removeItem('pendingInviteToken');
+          sessionStorage.removeItem('pendingGameId');
+
+          // Load game and join
+          const { data: game } = await supabase
+            .from('mm_games')
+            .select('*')
+            .eq('id', pendingGameId)
+            .single();
+
+          if (game) {
+            await handleGameInviteJoin(game);
+            return;
+          }
+        }
+      }
+
+      // Check if token in URL (path or query param)
+      const pathParts = window.location.pathname.split('/');
+      const tokenIndex = pathParts.indexOf('join') + 1;
+      let token = pathParts[tokenIndex] || null;
+
+      if (!token) {
+        const urlParams = new URLSearchParams(window.location.search);
+        token = urlParams.get('token');
+      }
+
+      if (token) {
+        // Token-based join
+        await handleTokenJoin(token);
+      } else {
+        // Manual join - load cast members
+        await loadCastMembers();
+        document.getElementById('joinForm').addEventListener('submit', handleManualJoin);
+      }
+    }
+
+    // Handle token-based join (from email link)
+    async function handleTokenJoin(token) {
+      showLoading(true);
+
+      try {
+        // First, try game-wide invite token (new system)
+        const { data: game, error: gameError } = await supabase
+          .from('mm_games')
+          .select('*')
+          .eq('invite_link_token', token)
+          .single();
+
+        if (game && !gameError) {
+          // Game-wide invite - anyone can join
+          await handleGameInviteJoin(game);
+          return;
+        }
+
+        // Fall back to individual cast member invite (existing system)
+        const { data: gameCast, error: tokenError } = await supabase
+          .from('mm_game_cast')
+          .select('*, mm_games!inner(*), cast_members(*)')
+          .eq('join_token', token)
+          .single();
+
+        if (tokenError || !gameCast) {
+          showAlert('error', 'Invalid or expired join link');
+          showLoading(false);
+          return;
+        }
+
+        // Check game status
+        if (gameCast.mm_games.status !== 'lobby') {
+          if (gameCast.mm_games.status === 'active') {
+            showAlert('info', 'This game has already started. Redirecting to cast portal...');
+            setTimeout(() => {
+              window.location.href = '/mansion-mayhem/cast-portal.html';
+            }, 2000);
+          } else if (gameCast.mm_games.status === 'completed') {
+            showAlert('error', 'This game has ended');
+            showLoading(false);
+          } else {
+            showAlert('error', 'This game is not accepting joins at this time');
+            showLoading(false);
+          }
+          return;
+        }
+
+        // Check if already joined
+        if (gameCast.status === 'joined' || gameCast.status === 'active') {
+          showAlert('info', 'You have already joined this game. Redirecting to lobby...');
+          setTimeout(() => {
+            window.location.href = `/mansion-mayhem/lobby.html?game=${gameCast.game_id}`;
+          }, 2000);
+          return;
+        }
+
+        // Update status to joined
+        const { error: updateError } = await supabase
+          .from('mm_game_cast')
+          .update({
+            status: 'joined',
+            joined_at: new Date().toISOString(),
+            join_link_clicked_at: new Date().toISOString()
+          })
+          .eq('id', gameCast.id);
+
+        if (updateError) {
+          showAlert('error', 'Failed to join game. Please try again.');
+          showLoading(false);
+          return;
+        }
+
+        // Authenticate as cast member
+        await authenticateCastMember(gameCast.cast_members);
+
+        // Show success and redirect
+        document.getElementById('manualJoinForm').classList.add('mm-hidden');
+        document.getElementById('tokenJoinSuccess').classList.remove('mm-hidden');
+        showLoading(false);
+
+        setTimeout(() => {
+          window.location.href = `/mansion-mayhem/lobby.html?game=${gameCast.game_id}`;
+        }, 2000);
+
+      } catch (error) {
+        console.error('Token join error:', error);
+        showAlert('error', 'An unexpected error occurred');
+        showLoading(false);
+      }
+    }
+
+    // Handle game-wide invite join (new system)
+    async function handleGameInviteJoin(game) {
+      try {
+        // Check if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+          // Redirect to auth with return URL
+          sessionStorage.setItem('pendingInviteToken', game.invite_link_token);
+          sessionStorage.setItem('pendingGameId', game.id);
+          window.location.href = `/auth?signup=true`;
+          return;
+        }
+
+        // User is authenticated, create cast member profile if needed
+        let { data: castMember, error: castError } = await supabase
+          .from('cast_members')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .single();
+
+        // If no cast member profile, create one
+        if (!castMember) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', session.user.id)
+            .single();
+
+          const { data: newCastMember, error: createError } = await supabase
+            .from('cast_members')
+            .insert({
+              user_id: session.user.id,
+              full_name: profile?.full_name || profile?.email || 'New Member',
+              display_name: profile?.full_name || profile?.email || 'New Member',
+              status: 'active'
+            })
+            .select()
+            .single();
+
+          if (createError) throw createError;
+          castMember = newCastMember;
+        }
+
+        // Check if already in game
+        const { data: existingCast } = await supabase
+          .from('mm_game_cast')
+          .select('id, status')
+          .eq('game_id', game.id)
+          .eq('cast_member_id', castMember.id)
+          .single();
+
+        if (existingCast) {
+          if (existingCast.status === 'joined' || existingCast.status === 'active') {
+            showAlert('info', 'You are already in this game! Redirecting...');
+            setTimeout(() => {
+              window.location.href = `/cast-portal.html`;
+            }, 2000);
+            return;
+          }
+        }
+
+        // Add to game
+        const { error: joinError } = await supabase
+          .from('mm_game_cast')
+          .insert({
+            game_id: game.id,
+            cast_member_id: castMember.id,
+            status: game.status === 'lobby' ? 'joined' : 'active',
+            joined_at: new Date().toISOString()
+          });
+
+        if (joinError) {
+          if (joinError.code === '23505') { // Already exists
+            showAlert('info', 'You are already in this game! Redirecting...');
+          } else {
+            throw joinError;
+          }
+        }
+
+        // Show success and redirect
+        document.getElementById('manualJoinForm').classList.add('mm-hidden');
+        document.getElementById('tokenJoinSuccess').classList.remove('mm-hidden');
+        showLoading(false);
+
+        showAlert('success', `Welcome to ${game.title}!`);
+        setTimeout(() => {
+          window.location.href = `/cast-portal.html`;
+        }, 2000);
+
+      } catch (error) {
+        console.error('Game invite join error:', error);
+        showAlert('error', 'Failed to join game: ' + error.message);
+        showLoading(false);
+      }
+    }
+
+    // Handle manual join (game code entry)
+    async function handleManualJoin(e) {
+      e.preventDefault();
+
+      const button = document.getElementById('joinButton');
+      setButtonLoading(button, true);
+
+      const gameCode = document.getElementById('gameCode').value.trim().toUpperCase();
+      const castMemberId = document.getElementById('castMember').value;
+
+      if (!castMemberId) {
+        showAlert('error', 'Please select your name');
+        setButtonLoading(button, false);
+        return;
+      }
+
+      try {
+        // Find game by code
+        const { data: game, error: gameError } = await supabase
+          .from('mm_games')
+          .select('*')
+          .eq('game_code', gameCode)
+          .single();
+
+        if (gameError || !game) {
+          showAlert('error', 'Invalid game code');
+          setButtonLoading(button, false);
+          return;
+        }
+
+        // Check game status
+        if (game.status !== 'lobby') {
+          if (game.status === 'active') {
+            showAlert('error', 'This game has already started');
+          } else if (game.status === 'completed') {
+            showAlert('error', 'This game has ended');
+          } else {
+            showAlert('error', 'This game is not accepting joins');
+          }
+          setButtonLoading(button, false);
+          return;
+        }
+
+        // Check if cast member is invited to this game
+        const { data: gameCast, error: castError } = await supabase
+          .from('mm_game_cast')
+          .select('*, cast_members(*)')
+          .eq('game_id', game.id)
+          .eq('cast_member_id', castMemberId)
+          .single();
+
+        if (castError || !gameCast) {
+          showAlert('error', 'You are not invited to this game');
+          setButtonLoading(button, false);
+          return;
+        }
+
+        // Check if already joined
+        if (gameCast.status === 'joined' || gameCast.status === 'active') {
+          showAlert('info', 'You have already joined this game. Redirecting...');
+          setTimeout(() => {
+            window.location.href = `/mansion-mayhem/lobby.html?game=${game.id}`;
+          }, 2000);
+          return;
+        }
+
+        // Update status to joined
+        const { error: updateError } = await supabase
+          .from('mm_game_cast')
+          .update({
+            status: 'joined',
+            joined_at: new Date().toISOString()
+          })
+          .eq('id', gameCast.id);
+
+        if (updateError) {
+          showAlert('error', 'Failed to join game. Please try again.');
+          setButtonLoading(button, false);
+          return;
+        }
+
+        // Authenticate as cast member
+        await authenticateCastMember(gameCast.cast_members);
+
+        // Show success and redirect
+        showAlert('success', 'Successfully joined! Redirecting to lobby...');
+        setTimeout(() => {
+          window.location.href = `/mansion-mayhem/lobby.html?game=${game.id}`;
+        }, 2000);
+
+      } catch (error) {
+        console.error('Manual join error:', error);
+        showAlert('error', 'An unexpected error occurred');
+        setButtonLoading(button, false);
+      }
+    }
+
+    // Load cast members for manual join
+    async function loadCastMembers() {
+      const { data: members, error } = await supabase
+        .from('cast_members')
+        .select('*')
+        .eq('status', 'active')
+        .order('full_name');
+
+      if (error) {
+        console.error('Error loading cast members:', error);
+        return;
+      }
+
+      const select = document.getElementById('castMember');
+      members.forEach(member => {
+        const option = document.createElement('option');
+        option.value = member.id;
+        option.textContent = member.full_name || member.display_name;
+        select.appendChild(option);
+      });
+    }
+
+    // Authenticate cast member (set session)
+    async function authenticateCastMember(castMember) {
+      // Store cast member info in localStorage
+      localStorage.setItem('mm_cast_member', JSON.stringify(castMember));
+
+      // If they have a user_id, sign them in
+      if (castMember.user_id) {
+        // Note: In production, you'd handle proper auth here
+        // For now, we're storing cast info in localStorage
+      }
+    }
+
+    // Show/hide loading state
+    function showLoading(show) {
+      const loading = document.getElementById('loadingState');
+      const form = document.getElementById('manualJoinForm');
+
+      if (show) {
+        loading.classList.remove('mm-hidden');
+        form.classList.add('mm-hidden');
+      } else {
+        loading.classList.add('mm-hidden');
+        form.classList.remove('mm-hidden');
+      }
+    }
+
+    // Show alert using toast system
+    function showAlert(type, message) {
+      toast.show(message, type, 5000);
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+  <script type="module" src="js/invite-gate.js"></script>
+</body>
+</html>

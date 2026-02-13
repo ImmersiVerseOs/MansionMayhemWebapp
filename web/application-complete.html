@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Complete | MANSION MAYHEM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111111;
+      --bg-elevated: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #ffffff;
+      --text-dim: #888888;
+      --text-muted: #555555;
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --rose-dark: #ad1457;
+      --purple: #9c27b0;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at top right, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom left, rgba(233, 30, 99, 0.05) 0%, transparent 50%),
+        var(--bg);
+      z-index: -1;
+    }
+
+    .header {
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+    }
+
+    .logo span {
+      font-weight: 400;
+      font-size: 14px;
+      letter-spacing: 4px;
+      display: block;
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .success-icon {
+      text-align: center;
+      font-size: 80px;
+      margin-bottom: 30px;
+      animation: scaleIn 0.5s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 18px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      margin-bottom: 30px;
+    }
+
+    .info-section {
+      margin-bottom: 30px;
+    }
+
+    .info-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    .info-section p {
+      color: var(--text-dim);
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    .info-section ul {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 16px;
+    }
+
+    .info-section li {
+      padding: 12px 0;
+      padding-left: 30px;
+      position: relative;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-section li:last-child {
+      border-bottom: none;
+    }
+
+    .info-section li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .timeline {
+      background: var(--bg-elevated);
+      border-left: 4px solid var(--gold);
+      padding: 20px;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .timeline-content {
+      flex: 1;
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      text-decoration: none;
+      text-align: center;
+      margin: 0 auto;
+      display: block;
+      width: fit-content;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(233, 30, 99, 0.3);
+    }
+
+    .contact-info {
+      background: var(--bg-elevated);
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .contact-info p {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .contact-info a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .contact-info a:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .header {
+        padding: 16px 20px;
+      }
+
+      .container {
+        padding: 40px 16px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+
+      .success-icon {
+        font-size: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <header class="header">
+    <div class="logo">
+      MANSION MAYHEM
+      <span>CASTING COMPLETE</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="success-icon">✨</div>
+    <h1>Application Complete!</h1>
+    <p class="subtitle">Thank you for applying to be part of Mansion Mayhem</p>
+
+    <div class="card">
+      <div class="info-section">
+        <h2>What Happens Next?</h2>
+        <p>Your application and photos have been successfully submitted to our casting team. Here's what to expect:</p>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-icon">📋</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Initial Review (1-2 weeks)</div>
+              <div class="timeline-desc">Our casting directors will review your application, archetype fit, and FaceCast photos.</div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-icon">🎥</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Callback Interviews (if selected)</div>
+              <div class="timeline-desc">Selected applicants will be invited for a video interview to discuss your personality and fit for the show.</div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-icon">✅</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Final Selection (3-4 weeks)</div>
+              <div class="timeline-desc">Final cast of 20 women will be announced. Production begins April 2026.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h2>Important Information</h2>
+        <ul>
+          <li>Check your email regularly - we'll contact you if you're selected for the next round</li>
+          <li>Keep your phone number and email up to date</li>
+          <li>Maintain your availability for April-June 2026</li>
+          <li>Don't apply multiple times - duplicate applications will be removed</li>
+          <li>Follow @mansionmayhem on social media for casting updates</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h2>Your Commitment</h2>
+        <p>If selected, you agreed to:</p>
+        <ul>
+          <li>Respond to AI-generated scenarios within 24 hours</li>
+          <li>Maintain an 80% minimum response rate</li>
+          <li>Provide voice notes for authentic AI voice generation</li>
+          <li>Allow your AI likeness to be used in episode content</li>
+          <li>Be available April-June 2026 for production period</li>
+        </ul>
+      </div>
+
+      <div class="contact-info">
+        <p><strong>Questions about your application?</strong></p>
+        <p>Email us at <a href="mailto:casting@immersiverseos.com">casting@immersiverseos.com</a></p>
+      </div>
+    </div>
+
+    <a href="casting-call.html" class="btn">Back to Casting Call</a>
+  </div>
+
+  <footer class="footer">
+    <p>© 2026 ImmersiVerse OS</p>
+    <p style="margin-top: 8px;">Part of the <a href="/" style="color: var(--gold); text-decoration: none;">ImmersiVerse OS</a> platform</p>
+  </footer>
+  <script type="module" src="js/invite-gate.js"></script>
+</body>
+</html>

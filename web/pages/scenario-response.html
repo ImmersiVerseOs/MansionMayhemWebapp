@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Respond to Scenario - Mansion Mayhem</title>
+  <style>
+    /* ===== DRAMATIC REALITY TV SHOW THEME ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Theater & Drama Colors */
+      --curtain-red: #8b0000;
+      --spotlight-gold: #ffd700;
+      --dramatic-black: #0a0000;
+      --stage-shadow: rgba(0, 0, 0, 0.9);
+
+      /* Reality TV Accents */
+      --tv-glow: #ff00ff;
+      --danger-alert: #ff0000;
+      --success-green: #00ff41;
+      --warning-amber: #ffaa00;
+
+      /* Text */
+      --text-white: #ffffff;
+      --text-gold: #ffd700;
+      --text-dim: rgba(255, 255, 255, 0.8);
+    }
+
+    /* === DRAMATIC STAGE BACKGROUND === */
+    body {
+      font-family: 'Oswald', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background:
+        linear-gradient(180deg,
+          var(--curtain-red) 0%,
+          #4a0000 10%,
+          var(--dramatic-black) 30%,
+          #000000 100%
+        );
+      color: var(--text-white);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+      animation: dramaticEntrance 1s ease-out;
+    }
+
+    /* Spotlight Effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150%;
+      height: 200%;
+      background:
+        radial-gradient(ellipse at center top,
+          rgba(255, 215, 0, 0.15) 0%,
+          rgba(255, 215, 0, 0.08) 20%,
+          transparent 50%
+        );
+      pointer-events: none;
+      z-index: 0;
+      animation: spotlightPulse 4s ease-in-out infinite;
+    }
+
+    /* Theater Curtain Borders */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background:
+        linear-gradient(180deg,
+          var(--curtain-red) 0%,
+          rgba(139, 0, 0, 0.8) 70%,
+          transparent 100%
+        );
+      pointer-events: none;
+      z-index: 1;
+      box-shadow: 0 10px 30px var(--stage-shadow);
+    }
+
+    @keyframes dramaticEntrance {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes spotlightPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* === MAIN STAGE CONTAINER === */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      padding-top: 40px;
+    }
+
+    /* === DRAMATIC HEADER === */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: dramaticReveal 0.8s ease-out;
+      position: relative;
+    }
+
+    .header h1 {
+      font-family: 'Bebas Neue', 'Oswald', sans-serif;
+      font-size: 4rem;
+      color: var(--spotlight-gold);
+      margin-bottom: 0.5rem;
+      text-shadow:
+        0 0 20px rgba(255, 215, 0, 0.6),
+        0 0 40px rgba(255, 215, 0, 0.4),
+        0 4px 8px rgba(0, 0, 0, 0.8);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      animation: titleGlow 2s ease-in-out infinite;
+    }
+
+    .header p {
+      color: var(--text-dim);
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    @keyframes dramaticReveal {
+      from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes titleGlow {
+      0%, 100% {
+        text-shadow:
+          0 0 20px rgba(255, 215, 0, 0.6),
+          0 0 40px rgba(255, 215, 0, 0.4),
+          0 4px 8px rgba(0, 0, 0, 0.8);
+      }
+      50% {
+        text-shadow:
+          0 0 30px rgba(255, 215, 0, 0.8),
+          0 0 60px rgba(255, 215, 0, 0.5),
+          0 4px 8px rgba(0, 0, 0, 0.8);
+      }
+    }
+
+    /* === TV SCREEN SCENARIO CARD === */
+    .scenario-card {
+      background:
+        linear-gradient(135deg,
+          rgba(20, 0, 0, 0.9) 0%,
+          rgba(40, 0, 0, 0.8) 100%
+        );
+      border: 3px solid var(--spotlight-gold);
+      border-radius: 12px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      box-shadow:
+        0 0 30px rgba(255, 215, 0, 0.3),
+        inset 0 0 50px rgba(0, 0, 0, 0.5);
+      animation: cardReveal 0.8s ease-out 0.3s both;
+    }
+
+    /* TV Screen Corner Accents */
+    .scenario-card::before,
+    .scenario-card::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--spotlight-gold);
+    }
+
+    .scenario-card::before {
+      top: -2px;
+      left: -2px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .scenario-card::after {
+      bottom: -2px;
+      right: -2px;
+      border-left: none;
+      border-top: none;
+    }
+
+    @keyframes cardReveal {
+      from {
+        opacity: 0;
+        transform: scale(0.95) rotateX(10deg);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) rotateX(0deg);
+      }
+    }
+
+    .scenario-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--spotlight-gold);
+      box-shadow: 0 2px 10px rgba(255, 215, 0, 0.2);
+    }
+
+    /* === DRAMATIC TYPE BADGE === */
+    .scenario-type {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background:
+        linear-gradient(135deg,
+          var(--spotlight-gold) 0%,
+          #b8860b 100%
+        );
+      border: 2px solid #ffd700;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--dramatic-black);
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+      box-shadow:
+        0 4px 10px rgba(255, 215, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* === URGENT DEADLINE ALERT === */
+    .deadline-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      background: rgba(255, 0, 0, 0.2);
+      border: 2px solid var(--danger-alert);
+      border-radius: 6px;
+      color: #ff4444;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      animation: urgentPulse 1s ease-in-out infinite;
+    }
+
+    .deadline-badge.soon {
+      background: rgba(255, 170, 0, 0.2);
+      border-color: var(--warning-amber);
+      color: var(--warning-amber);
+    }
+
+    @keyframes urgentPulse {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+      }
+    }
+
+    /* === SCENARIO TITLE === */
+    .scenario-title {
+      font-family: 'Bebas Neue', 'Oswald', sans-serif;
+      font-size: 2.2rem;
+      color: var(--spotlight-gold);
+      margin-bottom: 1rem;
+      text-shadow:
+        0 0 10px rgba(255, 215, 0, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.8);
+      letter-spacing: 2px;
+    }
+
+    .scenario-description {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    /* === VOTING BOOTH MODE SELECTOR === */
+    .response-mode {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      animation: slideUp 0.8s ease 0.4s both;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* === BOOTH BUTTONS === */
+    .mode-btn {
+      padding: 2rem 1.5rem;
+      background:
+        linear-gradient(135deg,
+          rgba(30, 0, 0, 0.8) 0%,
+          rgba(50, 0, 0, 0.6) 100%
+        );
+      border: 3px solid rgba(255, 215, 0, 0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 215, 0, 0.2),
+        transparent
+      );
+      transition: left 0.5s;
+    }
+
+    .mode-btn:hover {
+      background:
+        linear-gradient(135deg,
+          rgba(255, 215, 0, 0.15) 0%,
+          rgba(184, 134, 11, 0.1) 100%
+        );
+      border-color: var(--spotlight-gold);
+      transform: translateY(-5px) scale(1.02);
+      box-shadow:
+        0 10px 30px rgba(255, 215, 0, 0.3),
+        0 0 20px rgba(255, 215, 0, 0.2);
+    }
+
+    .mode-btn:hover::before {
+      left: 100%;
+    }
+
+    .mode-btn.active {
+      background:
+        linear-gradient(135deg,
+          rgba(255, 215, 0, 0.3) 0%,
+          rgba(184, 134, 11, 0.2) 100%
+        );
+      border-color: var(--spotlight-gold);
+      border-width: 4px;
+      box-shadow:
+        0 0 40px rgba(255, 215, 0, 0.5),
+        inset 0 0 30px rgba(255, 215, 0, 0.1);
+      transform: scale(1.05);
+    }
+
+    .mode-icon {
+      font-size: 3rem;
+      margin-bottom: 0.8rem;
+      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+    }
+
+    .mode-title {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: var(--spotlight-gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .mode-description {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    /* === AI RESPONSE OPTIONS === */
+    .ai-options {
+      display: none;
+      animation: slideUp 0.8s ease;
+    }
+
+    .ai-options.active {
+      display: block;
+    }
+
+    .ai-loading {
+      text-align: center;
+      padding: 4rem 2rem;
+      background:
+        radial-gradient(circle,
+          rgba(255, 215, 0, 0.1) 0%,
+          transparent 70%
+        );
+    }
+
+    /* === DRAMATIC SPINNER === */
+    .spinner {
+      border: 4px solid rgba(255, 215, 0, 0.2);
+      border-top: 4px solid var(--spotlight-gold);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: dramaticSpin 1s ease-in-out infinite;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+
+    @keyframes dramaticSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* === AI RESPONSE OPTION CARDS === */
+    .response-option {
+      background:
+        linear-gradient(135deg,
+          rgba(30, 0, 0, 0.6) 0%,
+          rgba(50, 0, 0, 0.4) 100%
+        );
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .response-option::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--spotlight-gold);
+      transform: scaleY(0);
+      transition: transform 0.4s ease;
+    }
+
+    .response-option:hover {
+      background:
+        linear-gradient(135deg,
+          rgba(255, 215, 0, 0.15) 0%,
+          rgba(184, 134, 11, 0.1) 100%
+        );
+      border-color: var(--spotlight-gold);
+      transform: translateX(8px);
+      box-shadow: 0 5px 20px rgba(255, 215, 0, 0.2);
+    }
+
+    .response-option:hover::before {
+      transform: scaleY(1);
+    }
+
+    .response-option.selected {
+      background:
+        linear-gradient(135deg,
+          rgba(255, 215, 0, 0.25) 0%,
+          rgba(184, 134, 11, 0.15) 100%
+        );
+      border-color: var(--spotlight-gold);
+      border-width: 3px;
+      box-shadow:
+        0 0 30px rgba(255, 215, 0, 0.4),
+        inset 0 0 20px rgba(255, 215, 0, 0.1);
+    }
+
+    .response-option.selected::before {
+      transform: scaleY(1);
+    }
+
+    .option-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--spotlight-gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* === DRAMA METER === */
+    .drama-meter {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-gold);
+    }
+
+    .drama-bar {
+      width: 90px;
+      height: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .drama-fill {
+      height: 100%;
+      background: linear-gradient(90deg,
+        var(--success-green) 0%,
+        var(--warning-amber) 50%,
+        var(--danger-alert) 100%
+      );
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .option-text {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-dim);
+    }
+
+    /* === SELECTION INDICATOR === */
+    .select-indicator {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(255, 215, 0, 0.4);
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .response-option.selected .select-indicator {
+      background: var(--spotlight-gold);
+      border-color: var(--spotlight-gold);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+      animation: checkmarkPop 0.3s ease;
+    }
+
+    @keyframes checkmarkPop {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .response-option.selected .select-indicator::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--dramatic-black);
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    /* === CONFESSIONAL CAM MANUAL INPUT === */
+    .manual-input {
+      display: none;
+      animation: slideUp 0.8s ease;
+    }
+
+    .manual-input.active {
+      display: block;
+    }
+
+    .input-group {
+      margin-bottom: 2rem;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 0.8rem;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--spotlight-gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    /* === CONFESSIONAL TEXTAREA === */
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      padding: 1.5rem;
+      background:
+        linear-gradient(135deg,
+          rgba(10, 0, 0, 0.8) 0%,
+          rgba(30, 0, 0, 0.6) 100%
+        );
+      border: 3px solid rgba(255, 215, 0, 0.4);
+      border-radius: 12px;
+      color: var(--text-white);
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: all 0.3s ease;
+      box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.5),
+        inset 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--spotlight-gold);
+      background:
+        linear-gradient(135deg,
+          rgba(255, 215, 0, 0.1) 0%,
+          rgba(30, 0, 0, 0.7) 100%
+        );
+      box-shadow:
+        0 0 30px rgba(255, 215, 0, 0.3),
+        inset 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+      font-style: italic;
+    }
+
+    /* === CHARACTER COUNT === */
+    .char-count {
+      text-align: right;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    .char-count.warning {
+      color: var(--warning-amber);
+      animation: warningPulse 2s ease-in-out infinite;
+    }
+
+    .char-count.danger {
+      color: var(--danger-alert);
+      animation: dangerPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes warningPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @keyframes dangerPulse {
+      0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--danger-alert); }
+      50% { opacity: 0.8; text-shadow: none; }
+    }
+
+    /* === DRAFT SAVED INDICATOR === */
+    .draft-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      padding: 0.75rem 1.25rem;
+      background: rgba(0, 255, 65, 0.1);
+      border: 2px solid rgba(0, 255, 65, 0.4);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--success-green);
+      animation: fadeIn 0.5s ease;
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .draft-indicator .draft-icon {
+      font-size: 1.2rem;
+      animation: checkSpin 0.5s ease;
+    }
+
+    @keyframes checkSpin {
+      from { transform: rotate(-180deg) scale(0); }
+      to { transform: rotate(0deg) scale(1); }
+    }
+
+    /* === AI ASSIST BUTTON === */
+    .ai-assist-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.75rem;
+      background:
+        linear-gradient(135deg,
+          rgba(255, 215, 0, 0.2) 0%,
+          rgba(184, 134, 11, 0.1) 100%
+        );
+      border: 2px solid rgba(255, 215, 0, 0.5);
+      border-radius: 10px;
+      color: var(--spotlight-gold);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .ai-assist-btn:hover {
+      background:
+        linear-gradient(135deg,
+          rgba(255, 215, 0, 0.3) 0%,
+          rgba(184, 134, 11, 0.2) 100%
+        );
+      transform: translateY(-3px);
+      box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .ai-assist-btn:active {
+      transform: translateY(-1px);
+    }
+
+    /* Preview */
+    .response-preview {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+
+    .response-preview.active {
+      display: block;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .preview-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--color-gold);
+    }
+
+    .preview-stats {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .preview-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--color-text-dim);
+      margin-bottom: 1rem;
+    }
+
+    .preview-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .metric {
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--color-gold);
+      display: block;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      color: var(--color-text-dim);
+    }
+
+    /* === ACTION BUTTONS === */
+    .actions {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 3rem;
+      animation: slideUp 0.8s ease 0.5s both;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 1.25rem 2.5rem;
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    /* === PRIMARY DRAMATIC BUTTON === */
+    .btn-primary {
+      background:
+        linear-gradient(135deg,
+          var(--spotlight-gold) 0%,
+          #b8860b 100%
+        );
+      color: var(--dramatic-black);
+      box-shadow:
+        0 5px 20px rgba(255, 215, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow:
+        0 10px 40px rgba(255, 215, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: translateY(-2px) scale(1);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* === SECONDARY BUTTON === */
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 3px solid rgba(255, 215, 0, 0.3);
+      color: var(--text-white);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 215, 0, 0.1);
+      border-color: var(--spotlight-gold);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 5px 20px rgba(255, 215, 0, 0.2);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(-2px) scale(1);
+    }
+
+    /* === VOICE CONFESSIONAL SECTION === */
+    .voice-note-section {
+      background:
+        linear-gradient(135deg,
+          rgba(139, 0, 0, 0.3) 0%,
+          rgba(30, 0, 0, 0.6) 100%
+        );
+      border: 3px solid rgba(255, 215, 0, 0.4);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 2rem 0;
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 30px rgba(255, 215, 0, 0.05);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: 'Bebas Neue', 'Oswald', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      color: var(--spotlight-gold);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    .voice-note-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* === RECORDING BUTTON === */
+    .btn-record {
+      background:
+        linear-gradient(135deg,
+          var(--danger-alert) 0%,
+          #c0392b 100%
+        );
+      border: 3px solid #ff0000;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow:
+        0 5px 20px rgba(255, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-record:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow:
+        0 10px 30px rgba(255, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-record.recording {
+      background:
+        linear-gradient(135deg,
+          #7f8c8d 0%,
+          #5a6268 100%
+        );
+      border-color: #95a5a6;
+      animation: recordingPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes recordingPulse {
+      0%, 100% {
+        box-shadow:
+          0 5px 20px rgba(149, 165, 166, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      }
+      50% {
+        box-shadow:
+          0 5px 30px rgba(149, 165, 166, 0.6),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    /* === RECORDING STATUS === */
+    .recording-status {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--danger-alert);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .recording-indicator {
+      width: 16px;
+      height: 16px;
+      background: var(--danger-alert);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--danger-alert);
+      animation: recordingBlink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes recordingBlink {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 15px var(--danger-alert);
+      }
+      50% {
+        opacity: 0.3;
+        transform: scale(1.3);
+        box-shadow: 0 0 25px var(--danger-alert);
+      }
+    }
+
+    /* === AUDIO PLAYBACK === */
+    #audioPlayback {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 1.5rem;
+      border-radius: 8px;
+      filter: drop-shadow(0 4px 15px rgba(255, 215, 0, 0.2));
+    }
+
+    #audioPlayback::-webkit-media-controls-panel {
+      background: linear-gradient(135deg,
+        rgba(255, 215, 0, 0.2) 0%,
+        rgba(184, 134, 11, 0.1) 100%
+      );
+    }
+
+    .voice-note-hint {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      font-style: italic;
+      margin: 1rem 0 0 0;
+    }
+
+    /* === DRAMATIC SUCCESS MODAL === */
+    .success-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle,
+          rgba(139, 0, 0, 0.8) 0%,
+          rgba(0, 0, 0, 0.95) 100%
+        );
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(15px);
+    }
+
+    .success-modal.active {
+      display: flex;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .success-content {
+      background:
+        linear-gradient(135deg,
+          rgba(30, 0, 0, 0.95) 0%,
+          rgba(50, 0, 0, 0.9) 100%
+        );
+      border: 4px solid var(--spotlight-gold);
+      border-radius: 24px;
+      padding: 4rem 3rem;
+      text-align: center;
+      max-width: 600px;
+      width: 90%;
+      animation: successReveal 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow:
+        0 0 60px rgba(255, 215, 0, 0.5),
+        inset 0 0 40px rgba(255, 215, 0, 0.1);
+      position: relative;
+    }
+
+    .success-content::before {
+      content: '★';
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 4rem;
+      color: var(--spotlight-gold);
+      animation: starTwinkle 2s ease-in-out infinite;
+    }
+
+    @keyframes starTwinkle {
+      0%, 100% {
+        opacity: 1;
+        transform: translateX(-50%) rotate(0deg) scale(1);
+      }
+      50% {
+        opacity: 0.7;
+        transform: translateX(-50%) rotate(180deg) scale(1.2);
+      }
+    }
+
+    @keyframes successReveal {
+      from {
+        opacity: 0;
+        transform: scale(0.5) rotateY(-180deg);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) rotateY(0deg);
+      }
+    }
+
+    .success-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      animation: iconBounce 0.8s ease;
+      filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
+    }
+
+    @keyframes iconBounce {
+      0%, 100% { transform: translateY(0); }
+      25% { transform: translateY(-20px); }
+      50% { transform: translateY(0); }
+      75% { transform: translateY(-10px); }
+    }
+
+    .success-title {
+      font-family: 'Bebas Neue', 'Oswald', sans-serif;
+      font-size: 3rem;
+      color: var(--spotlight-gold);
+      margin-bottom: 1rem;
+      text-shadow:
+        0 0 20px rgba(255, 215, 0, 0.8),
+        0 4px 8px rgba(0, 0, 0, 0.8);
+      letter-spacing: 4px;
+      animation: titleGlow 2s ease-in-out infinite;
+    }
+
+    .success-message {
+      font-size: 1.2rem;
+      color: var(--text-dim);
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    /* === MOBILE RESPONSIVE === */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem 0.5rem;
+      }
+
+      body::after {
+        height: 40px;
+      }
+
+      .container {
+        padding-top: 20px;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+      }
+
+      .header p {
+        font-size: 1rem;
+      }
+
+      .scenario-card {
+        padding: 1.5rem;
+      }
+
+      .scenario-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .scenario-title {
+        font-size: 1.8rem;
+      }
+
+      .response-mode {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .mode-btn {
+        padding: 1.5rem;
+      }
+
+      .mode-title {
+        font-size: 1.1rem;
+      }
+
+      .actions {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+      }
+
+      .voice-note-section {
+        padding: 1.5rem;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+      }
+
+      .btn-record {
+        padding: 0.9rem 1.5rem;
+        font-size: 1rem;
+      }
+
+      .success-content {
+        padding: 2.5rem 2rem;
+      }
+
+      .success-title {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+      }
+
+      .success-content::before {
+        font-size: 3rem;
+        top: -25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🎭 Respond to Scenario</h1>
+      <p>Choose your approach - AI or manual</p>
+    </div>
+
+    <!-- Scenario Card -->
+    <div class="scenario-card">
+      <div class="scenario-header">
+        <span class="scenario-type" id="scenarioType">Confrontation</span>
+        <div class="deadline-badge" id="deadlineBadge">
+          ⏰ <span id="deadlineText">2 hours remaining</span>
+        </div>
+      </div>
+      
+      <h2 class="scenario-title" id="scenarioTitle">
+        Pool Party Drama
+      </h2>
+      
+      <p class="scenario-description" id="scenarioDescription">
+        Someone just accused you of talking behind their back at the pool party yesterday. Multiple cast members are watching this confrontation unfold. How do you respond?
+      </p>
+    </div>
+
+    <!-- Response Mode Selector -->
+    <div class="response-mode">
+      <div class="mode-btn active" onclick="selectMode('ai')" id="modeAI">
+        <div class="mode-icon">🤖</div>
+        <div class="mode-title">AI Assist</div>
+        <div class="mode-description">Get AI-generated options</div>
+      </div>
+      
+      <div class="mode-btn" onclick="selectMode('manual')" id="modeManual">
+        <div class="mode-icon">✍️</div>
+        <div class="mode-title">Write Manually</div>
+        <div class="mode-description">Type your own response</div>
+      </div>
+    </div>
+
+    <!-- AI Response Options -->
+    <div class="ai-options active" id="aiOptions">
+      <div class="ai-loading" id="aiLoading">
+        <div class="spinner"></div>
+        <p>Generating responses based on your personality...</p>
+      </div>
+
+      <div id="aiResponsesList" style="display: none;">
+        <!-- AI options will be inserted here -->
+      </div>
+    </div>
+
+    <!-- Manual Input -->
+    <div class="manual-input" id="manualInput">
+      <button class="ai-assist-btn" onclick="getAISuggestion()">
+        <span>✨</span>
+        <span>Get AI Suggestion</span>
+      </button>
+
+      <div class="input-group">
+        <label for="responseText">Your Response</label>
+        <textarea 
+          id="responseText" 
+          placeholder="Type your response here... Be dramatic, be real, be you!"
+          oninput="updateCharCount()"
+          maxlength="500"
+        ></textarea>
+        <div class="char-count" id="charCount">0 / 500 characters</div>
+        <div class="draft-indicator" id="draftIndicator" style="display: none;">
+          <span class="draft-icon">💾</span>
+          <span class="draft-text">Draft saved</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Response Preview -->
+    <div class="response-preview" id="responsePreview">
+      <div class="preview-header">
+        <div class="preview-title">📝 Response Preview</div>
+        <div class="preview-stats">
+          <div class="stat">
+            <span>📏</span>
+            <span id="previewWords">0 words</span>
+          </div>
+          <div class="stat">
+            <span>🔥</span>
+            <span id="previewDrama">Drama: --</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="preview-text" id="previewText"></div>
+      
+      <div class="preview-metrics">
+        <div class="metric">
+          <span class="metric-value" id="metricTone">--</span>
+          <span class="metric-label">Tone</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="metricImpact">--</span>
+          <span class="metric-label">Impact</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="metricLength">--</span>
+          <span class="metric-label">Length</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice Note (Optional) -->
+    <div class="voice-note-section">
+      <div class="section-title">
+        <span>🎤</span>
+        <span>Add Voice Note (Optional)</span>
+      </div>
+      <div class="voice-note-controls">
+        <button class="btn btn-record" id="recordBtn" onclick="toggleRecording()">
+          <span id="recordIcon">🎤</span>
+          <span id="recordText">Start Recording</span>
+        </button>
+        <div class="recording-status" id="recordingStatus" style="display: none;">
+          <div class="recording-indicator"></div>
+          <span id="recordingTime">0:00</span>
+        </div>
+        <audio id="audioPlayback" controls style="display: none;"></audio>
+      </div>
+      <p class="voice-note-hint">Add a voice note to bring your response to life! (Optional)</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="goBack()">
+        ← Back to Dashboard
+      </button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitResponse()" disabled>
+        Submit Response
+      </button>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="success-modal" id="successModal">
+    <div class="success-content">
+      <div class="success-icon">✅</div>
+      <h2 class="success-title">Response Submitted!</h2>
+      <p class="success-message" id="successMessage">
+        Your response has been recorded. The drama unfolds...
+      </p>
+      <button class="btn btn-primary" onclick="closeSuccess()">
+        Back to Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- Supabase CDN (must load BEFORE modules) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script type="module">
+    import { supabaseClient as supabase, getCurrentUser } from '../js/supabase-module.js'
+    import { requireAuth } from '../js/auth.js'
+
+    // ============================================================================
+    // STATE MANAGEMENT
+    // ============================================================================
+
+    let currentMode = 'ai'
+    let selectedResponse = null
+    let manualResponse = ''
+    let scenario = null
+    let currentUser = null
+    let audioChunks = []
+    let mediaRecorder = null
+    let isRecording = false
+    let recordingStartTime = null
+    let recordingInterval = null
+
+    // ============================================================================
+    // MODE SELECTION
+    // ============================================================================
+
+    function selectMode(mode) {
+      currentMode = mode
+      
+      // Update buttons
+      document.getElementById('modeAI').classList.remove('active')
+      document.getElementById('modeManual').classList.remove('active')
+      
+      if (mode === 'ai') {
+        document.getElementById('modeAI').classList.add('active')
+        document.getElementById('aiOptions').classList.add('active')
+        document.getElementById('manualInput').classList.remove('active')
+      } else {
+        document.getElementById('modeManual').classList.add('active')
+        document.getElementById('aiOptions').classList.remove('active')
+        document.getElementById('manualInput').classList.add('active')
+      }
+      
+      updateSubmitButton()
+    }
+
+    // ============================================================================
+    // VOICE NOTE RECORDING
+    // ============================================================================
+
+    async function toggleRecording() {
+      if (!isRecording) {
+        await startRecording()
+      } else {
+        stopRecording()
+      }
+    }
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        mediaRecorder = new MediaRecorder(stream)
+        audioChunks = []
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data)
+          }
+        }
+
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+          const audioUrl = URL.createObjectURL(audioBlob)
+          const audioPlayback = document.getElementById('audioPlayback')
+          audioPlayback.src = audioUrl
+          audioPlayback.style.display = 'block'
+
+          // Stop all tracks
+          stream.getTracks().forEach(track => track.stop())
+        }
+
+        mediaRecorder.start()
+        isRecording = true
+        recordingStartTime = Date.now()
+
+        // Update UI
+        const recordBtn = document.getElementById('recordBtn')
+        recordBtn.classList.add('recording')
+        document.getElementById('recordIcon').textContent = '⏹️'
+        document.getElementById('recordText').textContent = 'Stop Recording'
+        document.getElementById('recordingStatus').style.display = 'flex'
+        document.getElementById('audioPlayback').style.display = 'none'
+
+        // Start recording timer
+        recordingInterval = setInterval(updateRecordingTime, 100)
+
+      } catch (error) {
+        console.error('Error starting recording:', error)
+        alert('Could not access microphone. Please ensure microphone permissions are granted.')
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop()
+        isRecording = false
+
+        // Update UI
+        const recordBtn = document.getElementById('recordBtn')
+        recordBtn.classList.remove('recording')
+        document.getElementById('recordIcon').textContent = '🎤'
+        document.getElementById('recordText').textContent = 'Re-record'
+        document.getElementById('recordingStatus').style.display = 'none'
+
+        // Clear recording timer
+        if (recordingInterval) {
+          clearInterval(recordingInterval)
+          recordingInterval = null
+        }
+      }
+    }
+
+    function updateRecordingTime() {
+      if (!recordingStartTime) return
+      const elapsed = Date.now() - recordingStartTime
+      const seconds = Math.floor(elapsed / 1000)
+      const minutes = Math.floor(seconds / 60)
+      const remainingSeconds = seconds % 60
+      document.getElementById('recordingTime').textContent =
+        `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+    }
+
+    // ============================================================================
+    // AI RESPONSE GENERATION
+    // ============================================================================
+
+    async function generateAIResponses() {
+      // Show loading
+      document.getElementById('aiLoading').style.display = 'block'
+      document.getElementById('aiResponsesList').style.display = 'none'
+      
+      // Simulate API call (replace with actual API)
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Generate 3 response options
+      const responses = [
+        {
+          id: 'option-1',
+          label: 'Diplomatic',
+          dramaLevel: 30,
+          text: "Look, I think there's been a misunderstanding. I value our friendship and I'd never intentionally talk behind your back. Can we talk about this privately and clear the air?"
+        },
+        {
+          id: 'option-2',
+          label: 'Assertive',
+          dramaLevel: 65,
+          text: "I'm not going to apologize for something I didn't do. If someone told you I was talking about you, maybe you should question their motives instead of attacking me in front of everyone."
+        },
+        {
+          id: 'option-3',
+          label: 'Confrontational',
+          dramaLevel: 95,
+          text: "Are you serious right now? YOU'RE accusing ME? That's rich coming from someone who literally gossips about everyone in this house. At least I'm honest about it!"
+        }
+      ]
+      
+      // Display options
+      displayAIResponses(responses)
+    }
+
+    function displayAIResponses(responses) {
+      document.getElementById('aiLoading').style.display = 'none'
+      
+      const container = document.getElementById('aiResponsesList')
+      container.innerHTML = ''
+      container.style.display = 'block'
+      
+      responses.forEach(response => {
+        const optionDiv = document.createElement('div')
+        optionDiv.className = 'response-option'
+        optionDiv.onclick = () => selectAIResponse(response)
+        
+        optionDiv.innerHTML = `
+          <div class="select-indicator"></div>
+          <div class="option-header">
+            <div class="option-label">
+              <span>${getDramaEmoji(response.dramaLevel)}</span>
+              <span>${response.label}</span>
+            </div>
+            <div class="drama-meter">
+              <div class="drama-bar">
+                <div class="drama-fill" style="width: ${response.dramaLevel}%"></div>
+              </div>
+              <span>${response.dramaLevel}%</span>
+            </div>
+          </div>
+          <div class="option-text">${response.text}</div>
+        `
+        
+        container.appendChild(optionDiv)
+      })
+    }
+
+    function getDramaEmoji(level) {
+      if (level < 40) return '😊'
+      if (level < 70) return '😤'
+      return '🔥'
+    }
+
+    function selectAIResponse(response) {
+      // Deselect all
+      document.querySelectorAll('.response-option').forEach(opt => {
+        opt.classList.remove('selected')
+      })
+      
+      // Select this one
+      event.currentTarget.classList.add('selected')
+      
+      selectedResponse = response
+      showPreview(response.text, response.dramaLevel)
+      updateSubmitButton()
+    }
+
+    // ============================================================================
+    // MANUAL INPUT
+    // ============================================================================
+
+    function updateCharCount() {
+      const textarea = document.getElementById('responseText')
+      const charCount = document.getElementById('charCount')
+      const length = textarea.value.length
+      
+      charCount.textContent = `${length} / 500 characters`
+      
+      if (length > 450) {
+        charCount.classList.add('danger')
+        charCount.classList.remove('warning')
+      } else if (length > 400) {
+        charCount.classList.add('warning')
+        charCount.classList.remove('danger')
+      } else {
+        charCount.classList.remove('warning', 'danger')
+      }
+      
+      manualResponse = textarea.value
+      
+      if (length > 20) {
+        showPreview(manualResponse)
+      } else {
+        document.getElementById('responsePreview').classList.remove('active')
+      }
+      
+      updateSubmitButton()
+    }
+
+    async function getAISuggestion() {
+      const textarea = document.getElementById('responseText')
+      const currentText = textarea.value
+      
+      // Show loading
+      textarea.placeholder = 'Generating AI suggestion...'
+      textarea.disabled = true
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Generate suggestion based on personality
+      const suggestion = "I understand you're upset, but let's be real - if I had something to say, I'd say it to your face. That's just who I am. Maybe someone's trying to stir up drama between us?"
+      
+      textarea.value = currentText + (currentText ? '\n\n' : '') + suggestion
+      textarea.disabled = false
+      textarea.placeholder = 'Type your response here...'
+      
+      updateCharCount()
+    }
+
+    // ============================================================================
+    // PREVIEW
+    // ============================================================================
+
+    function showPreview(text, dramaLevel = null) {
+      const preview = document.getElementById('responsePreview')
+      preview.classList.add('active')
+      
+      // Update text
+      document.getElementById('previewText').textContent = text
+      
+      // Calculate metrics
+      const words = text.split(/\s+/).filter(w => w.length > 0).length
+      document.getElementById('previewWords').textContent = `${words} words`
+      
+      // Drama level
+      if (dramaLevel === null) {
+        dramaLevel = calculateDramaLevel(text)
+      }
+      document.getElementById('previewDrama').textContent = `Drama: ${dramaLevel}%`
+      
+      // Tone
+      const tone = getTone(text)
+      document.getElementById('metricTone').textContent = tone
+      
+      // Impact
+      const impact = getImpact(words, dramaLevel)
+      document.getElementById('metricImpact').textContent = impact
+      
+      // Length
+      const lengthCategory = words < 30 ? 'Short' : words < 80 ? 'Medium' : 'Long'
+      document.getElementById('metricLength').textContent = lengthCategory
+    }
+
+    function calculateDramaLevel(text) {
+      const dramaWords = [
+        'never', 'always', 'serious', 'unbelievable', 'honestly',
+        'really', 'literally', 'actually', 'excuse me', 'wow'
+      ]
+      
+      let score = 40 // Base score
+      
+      // Check for drama words
+      dramaWords.forEach(word => {
+        if (text.toLowerCase().includes(word)) score += 5
+      })
+      
+      // Exclamation marks add drama
+      score += (text.match(/!/g) || []).length * 8
+      
+      // All caps adds drama
+      if (text === text.toUpperCase()) score += 20
+      
+      // Question marks
+      score += (text.match(/\?/g) || []).length * 3
+      
+      return Math.min(100, Math.max(0, score))
+    }
+
+    function getTone(text) {
+      const lowerText = text.toLowerCase()
+      
+      if (lowerText.includes('sorry') || lowerText.includes('apologize')) {
+        return 'Apologetic'
+      } else if (lowerText.includes('!') && lowerText.length > 100) {
+        return 'Passionate'
+      } else if (text.match(/\?/g)?.length > 1) {
+        return 'Questioning'
+      } else if (lowerText.includes('understand') || lowerText.includes('talk')) {
+        return 'Diplomatic'
+      } else {
+        return 'Direct'
+      }
+    }
+
+    function getImpact(words, drama) {
+      if (drama > 80) return 'High'
+      if (drama > 50 && words > 40) return 'Medium-High'
+      if (drama > 30 && words > 20) return 'Medium'
+      return 'Low'
+    }
+
+    // ============================================================================
+    // SUBMIT
+    // ============================================================================
+
+    function updateSubmitButton() {
+      const btn = document.getElementById('submitBtn')
+      
+      if (currentMode === 'ai') {
+        btn.disabled = !selectedResponse
+      } else {
+        btn.disabled = manualResponse.length < 20
+      }
+    }
+
+    async function submitResponse() {
+      const responseText = currentMode === 'ai' ? selectedResponse.text : manualResponse
+      const dramaLevel = currentMode === 'ai' ? selectedResponse.dramaLevel : calculateDramaLevel(manualResponse)
+
+      // Disable button
+      const btn = document.getElementById('submitBtn')
+      btn.disabled = true
+      btn.textContent = 'Submitting...'
+
+      try {
+        // Upload voice note if recorded
+        let voiceNoteUrl = null
+        if (audioChunks.length > 0) {
+          btn.textContent = 'Uploading voice note...'
+          voiceNoteUrl = await uploadVoiceNote()
+        }
+
+        // Insert response into database with pending moderation status
+        const { data, error } = await supabase
+          .from('scenario_responses')
+          .insert({
+            scenario_id: scenario.id,
+            user_id: currentUser.id,
+            response_text: responseText,
+            response_type: currentMode === 'ai' ? 'ai_generated' : 'manual',
+            voice_note_url: voiceNoteUrl,
+            moderation_status: voiceNoteUrl ? 'pending' : 'approved', // Only moderate if has voice
+            submitted_at: new Date().toISOString()
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+
+        console.log('Response submitted:', data)
+
+        // If voice note included, submit to moderation queue
+        if (voiceNoteUrl) {
+          btn.textContent = 'Submitting for review...'
+
+          const { error: queueError } = await supabase.rpc('submit_voice_for_moderation', {
+            p_source_type: 'scenario_response',
+            p_source_table: 'scenario_responses',
+            p_source_record_id: data.id,
+            p_submitter_user_id: currentUser.id,
+            p_submitter_cast_id: null, // Get cast member ID if available
+            p_game_id: scenario.game_id,
+            p_audio_url: voiceNoteUrl,
+            p_duration_seconds: Math.round(recordingDuration),
+            p_caption: responseText.substring(0, 200),
+            p_priority: 1 // Higher priority for scenario responses
+          })
+
+          if (queueError) {
+            console.warn('Error adding to moderation queue:', queueError)
+            // Continue anyway - response was saved
+          }
+        }
+
+        // Clear draft on successful submission
+        const urlParams = new URLSearchParams(window.location.search)
+        const scenarioId = urlParams.get('id')
+        if (scenarioId) {
+          clearDraft(scenarioId)
+        }
+
+        // Stop auto-save
+        if (autoSaveInterval) {
+          clearInterval(autoSaveInterval)
+        }
+
+        // Show success modal with appropriate message
+        const successMessage = document.getElementById('successMessage')
+        if (voiceNoteUrl) {
+          successMessage.innerHTML = `
+            Your response has been submitted!<br><br>
+            <strong>⏳ Voice note under review</strong><br>
+            Your voice note will appear once it's been approved by our moderation team.
+          `
+        } else {
+          successMessage.textContent = 'Your response has been recorded. The drama unfolds...'
+        }
+        document.getElementById('successModal').classList.add('active')
+
+      } catch (error) {
+        console.error('Error submitting response:', error)
+        alert('Failed to submit response: ' + error.message)
+
+        // Re-enable button
+        btn.disabled = false
+        btn.textContent = 'Submit Response'
+      }
+    }
+
+    async function uploadVoiceNote() {
+      try {
+        if (audioChunks.length === 0) return null
+
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+        const fileName = `voice-notes/${currentUser.id}/${scenario.id}_${Date.now()}.webm`
+
+        // Upload to moderation pending bucket
+        const { data, error } = await supabase.storage
+          .from('voice-moderation-pending')
+          .upload(fileName, audioBlob, {
+            contentType: 'audio/webm',
+            upsert: false
+          })
+
+        if (error) {
+          console.error('Voice note upload error:', error)
+          return null
+        }
+
+        // Get URL (private bucket for moderation)
+        const { data: publicUrlData } = supabase.storage
+          .from('voice-moderation-pending')
+          .getPublicUrl(fileName)
+
+        return publicUrlData.publicUrl
+      } catch (error) {
+        console.error('Error uploading voice note:', error)
+        return null
+      }
+    }
+
+    function closeSuccess() {
+      window.location.href = 'player-dashboard.html'
+    }
+
+    function goBack() {
+      window.location.href = 'player-dashboard.html'
+    }
+
+    // ============================================================================
+    // AUTO-SAVE DRAFTS
+    // ============================================================================
+
+    let autoSaveInterval = null
+    let lastSaveTime = null
+    const AUTO_SAVE_DELAY = 30000 // 30 seconds
+
+    function getDraftKey(scenarioId) {
+      return `draft_scenario_${scenarioId}`
+    }
+
+    function saveDraft(scenarioId, mode, text, selectedResponseIndex = null) {
+      try {
+        const draft = {
+          mode,
+          text,
+          selectedResponseIndex,
+          savedAt: new Date().toISOString()
+        }
+
+        localStorage.setItem(getDraftKey(scenarioId), JSON.stringify(draft))
+        lastSaveTime = Date.now()
+
+        // Show draft indicator
+        showDraftIndicator()
+
+        console.log('Draft saved:', draft)
+      } catch (error) {
+        console.warn('Could not save draft:', error)
+      }
+    }
+
+    function loadDraft(scenarioId) {
+      try {
+        const draftJson = localStorage.getItem(getDraftKey(scenarioId))
+        if (!draftJson) return null
+
+        const draft = JSON.parse(draftJson)
+        console.log('Draft loaded:', draft)
+        return draft
+      } catch (error) {
+        console.warn('Could not load draft:', error)
+        return null
+      }
+    }
+
+    function clearDraft(scenarioId) {
+      try {
+        localStorage.removeItem(getDraftKey(scenarioId))
+        console.log('Draft cleared')
+      } catch (error) {
+        console.warn('Could not clear draft:', error)
+      }
+    }
+
+    function showDraftIndicator() {
+      const indicator = document.getElementById('draftIndicator')
+      if (indicator) {
+        indicator.style.display = 'flex'
+
+        // Fade out after 2 seconds
+        setTimeout(() => {
+          indicator.style.opacity = '0'
+          setTimeout(() => {
+            indicator.style.display = 'none'
+            indicator.style.opacity = '1'
+          }, 300)
+        }, 2000)
+      }
+    }
+
+    function initAutoSave(scenarioId) {
+      // Stop any existing interval
+      if (autoSaveInterval) {
+        clearInterval(autoSaveInterval)
+      }
+
+      // Auto-save every 30 seconds
+      autoSaveInterval = setInterval(() => {
+        if (currentMode === 'manual') {
+          const textarea = document.getElementById('responseText')
+          const text = textarea.value.trim()
+
+          // Only save if there's content and it's been changed
+          if (text.length > 0) {
+            saveDraft(scenarioId, currentMode, text)
+          }
+        } else if (currentMode === 'ai' && selectedResponse) {
+          saveDraft(scenarioId, currentMode, selectedResponse.text,
+                   aiResponses.indexOf(selectedResponse))
+        }
+      }, AUTO_SAVE_DELAY)
+
+      // Save on textarea input (debounced via interval)
+      const textarea = document.getElementById('responseText')
+      if (textarea) {
+        textarea.addEventListener('input', () => {
+          // Visual feedback that content will be saved
+          const now = Date.now()
+          if (!lastSaveTime || now - lastSaveTime > AUTO_SAVE_DELAY) {
+            // Will be saved on next interval
+          }
+        })
+      }
+
+      // Save before page unload
+      window.addEventListener('beforeunload', () => {
+        if (currentMode === 'manual') {
+          const textarea = document.getElementById('responseText')
+          const text = textarea.value.trim()
+          if (text.length > 0) {
+            saveDraft(scenarioId, currentMode, text)
+          }
+        }
+      })
+
+      console.log('Auto-save initialized for scenario:', scenarioId)
+    }
+
+    function restoreDraft(scenarioId) {
+      const draft = loadDraft(scenarioId)
+      if (!draft) return false
+
+      // Show confirmation dialog
+      const age = Date.now() - new Date(draft.savedAt).getTime()
+      const ageMinutes = Math.floor(age / 60000)
+      const ageText = ageMinutes < 60
+        ? `${ageMinutes} minute${ageMinutes === 1 ? '' : 's'} ago`
+        : `${Math.floor(ageMinutes / 60)} hour${Math.floor(ageMinutes / 60) === 1 ? '' : 's'} ago`
+
+      const confirmed = confirm(
+        `A draft was saved ${ageText}.\n\nWould you like to restore it?`
+      )
+
+      if (!confirmed) {
+        clearDraft(scenarioId)
+        return false
+      }
+
+      // Restore draft based on mode
+      if (draft.mode === 'manual') {
+        switchMode('manual')
+        const textarea = document.getElementById('responseText')
+        textarea.value = draft.text
+        manualResponse = draft.text
+        updateCharCount()
+        updateResponsePreview()
+      } else if (draft.mode === 'ai' && draft.selectedResponseIndex !== null) {
+        switchMode('ai')
+        // Will be restored after AI responses are generated
+        window.draftResponseIndex = draft.selectedResponseIndex
+      }
+
+      console.log('Draft restored')
+      return true
+    }
+
+    // ============================================================================
+    // INITIALIZATION
+    // ============================================================================
+
+    async function init() {
+      // Require authentication
+      currentUser = await requireAuth()
+      if (!currentUser) return
+
+      // Get scenario ID from URL
+      const urlParams = new URLSearchParams(window.location.search)
+      const scenarioId = urlParams.get('id')
+
+      if (!scenarioId) {
+        // Show preview mode when no scenario is provided
+        showPreviewMode()
+        return
+      }
+
+      // Load scenario from database
+      await loadScenario(scenarioId)
+
+      // Initialize auto-save
+      initAutoSave(scenarioId)
+
+      // Try to restore draft
+      restoreDraft(scenarioId)
+
+      // Update deadline
+      updateDeadline()
+      setInterval(updateDeadline, 60000) // Update every minute
+
+      // Generate AI responses
+      if (currentMode === 'ai') {
+        await generateAIResponses()
+
+        // Restore AI selection from draft if available
+        if (window.draftResponseIndex !== undefined && aiResponses[window.draftResponseIndex]) {
+          selectResponse(window.draftResponseIndex)
+          delete window.draftResponseIndex
+        }
+      }
+    }
+
+    async function loadScenario(scenarioId) {
+      try {
+        // Check if already responded to this scenario
+        const { data: existingResponse, error: responseError } = await supabase
+          .from('scenario_responses')
+          .select('id')
+          .eq('scenario_id', scenarioId)
+          .eq('user_id', currentUser.id)
+          .maybeSingle()
+
+        if (existingResponse) {
+          alert('You have already responded to this scenario')
+          window.location.href = '../cast-portal.html'
+          return
+        }
+
+        // Load scenario
+        const { data, error } = await supabase
+          .from('scenarios')
+          .select('*')
+          .eq('id', scenarioId)
+          .single()
+
+        if (error) throw error
+
+        if (!data) {
+          alert('Scenario not found')
+          window.location.href = '../cast-portal.html'
+          return
+        }
+
+        scenario = data
+
+        // Update UI with scenario data
+        document.getElementById('scenarioType').textContent = formatScenarioType(scenario.scenario_type)
+        document.getElementById('scenarioTitle').textContent = scenario.title
+        document.getElementById('scenarioDescription').textContent = scenario.description
+
+        // Set deadline
+        if (scenario.deadline_at) {
+          scenario.deadline = new Date(scenario.deadline_at)
+        }
+
+      } catch (error) {
+        console.error('Error loading scenario:', error)
+        alert('Failed to load scenario: ' + error.message)
+        window.location.href = '../cast-portal.html'
+      }
+    }
+
+    function formatScenarioType(type) {
+      const types = {
+        'confession': 'Confession',
+        'confrontation': 'Confrontation',
+        'alliance': 'Alliance',
+        'challenge': 'Challenge',
+        'elimination': 'Elimination'
+      }
+      return types[type] || type
+    }
+
+    function showPreviewMode() {
+      // Update scenario details to show preview
+      document.getElementById('scenarioType').textContent = 'Preview Mode'
+      document.getElementById('scenarioTitle').textContent = 'No Active Scenario'
+      document.getElementById('scenarioDescription').textContent = 'When you receive a scenario, you\'ll see the details here. You can then choose from AI-generated responses or write your own custom response.'
+
+      // Hide deadline badge
+      const deadlineBadge = document.getElementById('deadlineBadge')
+      if (deadlineBadge) {
+        deadlineBadge.style.display = 'none'
+      }
+
+      // Disable submit button
+      const submitBtn = document.getElementById('submitBtn')
+      if (submitBtn) {
+        submitBtn.disabled = true
+        submitBtn.textContent = 'Waiting for Scenario...'
+        submitBtn.style.opacity = '0.5'
+        submitBtn.style.cursor = 'not-allowed'
+      }
+
+      // Add info banner at the top
+      const container = document.querySelector('.container')
+      const infoBanner = document.createElement('div')
+      infoBanner.style.cssText = `
+        background: rgba(33, 150, 243, 0.1);
+        border: 1px solid rgba(33, 150, 243, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      `
+      infoBanner.innerHTML = `
+        <div style="font-size: 2.5rem; flex-shrink: 0;">ℹ️</div>
+        <div>
+          <h3 style="color: #2196f3; margin-bottom: 0.5rem; font-size: 1.2rem;">Preview Mode</h3>
+          <p style="color: var(--color-text-dim); font-size: 0.95rem; margin: 0;">
+            This is how you'll respond to scenarios. When a scenario is assigned to you, you'll see it here and can submit your response.
+          </p>
+        </div>
+      `
+
+      // Insert banner before the scenario card
+      const scenarioCard = document.querySelector('.scenario-card')
+      if (scenarioCard && container) {
+        container.insertBefore(infoBanner, scenarioCard)
+      }
+
+      // Reduce opacity of scenario card to show it's a preview
+      if (scenarioCard) {
+        scenarioCard.style.opacity = '0.6'
+      }
+
+      console.log('Preview mode activated - no scenario ID provided')
+    }
+
+    window.addEventListener('DOMContentLoaded', init)
+
+    function updateDeadline() {
+      const now = new Date()
+      const diff = scenario.deadline - now
+      const hours = Math.floor(diff / (1000 * 60 * 60))
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      
+      const badge = document.getElementById('deadlineBadge')
+      const text = document.getElementById('deadlineText')
+      
+      if (hours < 1) {
+        badge.classList.add('soon')
+        text.textContent = `${minutes} minutes remaining`
+      } else if (hours < 6) {
+        badge.classList.add('soon')
+        text.textContent = `${hours} hours remaining`
+      } else {
+        text.textContent = `${hours} hours remaining`
+      }
+    }
+  </script>
+</body>
+</html>

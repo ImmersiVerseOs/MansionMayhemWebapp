@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mansion Mayhem - Enter</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* Full-screen video container */
+    .video-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Video styling - responsive fullscreen */
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* For desktop/tablet - use contain to show full video */
+    @media (min-width: 768px) {
+      video {
+        object-fit: contain;
+      }
+    }
+
+    /* Overlay gradient for better button visibility */
+    .overlay {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Loading screen */
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 80px;
+      height: 80px;
+      border: 5px solid rgba(212, 175, 55, 0.2);
+      border-top: 5px solid #D4AF37;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 2rem;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #D4AF37;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      animation: pulse-text 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-text {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Controls container */
+    .controls {
+      position: fixed;
+      bottom: 4rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 2rem;
+      z-index: 100;
+      padding: 0 2rem;
+      opacity: 0;
+      animation: fadeIn 0.5s ease 0.5s forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    .controls.hidden {
+      display: none;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 1.75rem 4rem;
+      font-size: 1.3rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-skip {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-skip:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-enter {
+      background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+      color: #000;
+      border: 3px solid #fff;
+      box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 60px rgba(212, 175, 55, 1);
+        transform: scale(1.03);
+      }
+    }
+
+    .btn-enter:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 80px rgba(212, 175, 55, 1);
+    }
+
+    .btn-enter.hidden {
+      display: none;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .controls {
+        flex-direction: column;
+        gap: 1.5rem;
+        bottom: 2rem;
+        left: 0;
+        right: 0;
+        padding: 0 1.5rem;
+        transform: none;
+        align-items: stretch;
+      }
+
+      .btn {
+        padding: 1.25rem 2rem;
+        font-size: 1rem;
+        letter-spacing: 2px;
+      }
+
+      .loading-text {
+        font-size: 1.2rem;
+      }
+
+      .spinner {
+        width: 60px;
+        height: 60px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .btn {
+        padding: 1rem 1.5rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading Experience...</div>
+  </div>
+
+  <!-- Video Wrapper -->
+  <div class="video-wrapper">
+    <video id="video" preload="auto" playsinline muted>
+      <source src="Logo_Animation_for_Website_Landing_Page.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <!-- Bottom overlay for better button visibility -->
+  <div class="overlay"></div>
+
+  <!-- Controls -->
+  <div class="controls hidden" id="controls">
+    <button class="btn btn-skip" onclick="skipVideo()" aria-label="Skip intro">
+      Skip Intro
+    </button>
+    <button class="btn btn-enter hidden" id="enterBtn" onclick="enterMansion()" aria-label="Enter the mansion">
+      Enter Mansion
+    </button>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const loading = document.getElementById('loading');
+    const controls = document.getElementById('controls');
+    const enterBtn = document.getElementById('enterBtn');
+    let hasInteracted = false;
+    let videoLoaded = false;
+
+    // Timeout fallback - if video doesn't load in 5 seconds, show Enter button
+    const loadingTimeout = setTimeout(() => {
+      if (!videoLoaded) {
+        console.log('⚠️ Video loading timeout - showing Enter button');
+        hideLoadingShowEnter();
+      }
+    }, 5000);
+
+    function hideLoadingShowEnter() {
+      loading.classList.add('fade-out');
+      setTimeout(() => {
+        loading.style.display = 'none';
+      }, 500);
+      controls.classList.remove('hidden');
+      enterBtn.classList.remove('hidden');
+      videoLoaded = true;
+    }
+
+    // Video loaded - hide loading, show controls, auto-play
+    // Use 'loadedmetadata' instead of 'loadeddata' for faster loading on mobile
+    video.addEventListener('loadedmetadata', () => {
+      console.log('✅ Video metadata loaded');
+      if (videoLoaded) return; // Already handled by timeout
+      clearTimeout(loadingTimeout);
+      videoLoaded = true;
+
+      loading.classList.add('fade-out');
+      setTimeout(() => {
+        loading.style.display = 'none';
+      }, 500);
+
+      controls.classList.remove('hidden');
+
+      // Try to autoplay (may be blocked by browser)
+      video.play().catch(err => {
+        console.log('⚠️ Autoplay blocked - user interaction required');
+        // Show Enter button if autoplay fails
+        enterBtn.classList.remove('hidden');
+      });
+    });
+
+    // Video ended - show Enter button
+    video.addEventListener('ended', () => {
+      console.log('🎬 Video ended');
+      enterBtn.classList.remove('hidden');
+    });
+
+    // Video error - show Enter button immediately
+    video.addEventListener('error', (e) => {
+      console.error('❌ Video error:', e);
+      clearTimeout(loadingTimeout);
+      if (!videoLoaded) {
+        hideLoadingShowEnter();
+      }
+    });
+
+    // Skip video and go to landing
+    function skipVideo() {
+      video.pause();
+      enterMansion();
+    }
+
+    // Navigate to landing page
+    function enterMansion() {
+      // Smooth fade out
+      document.body.style.transition = 'opacity 0.5s ease';
+      document.body.style.opacity = '0';
+
+      setTimeout(() => {
+        window.location.href = '/landing.html';
+      }, 500);
+    }
+
+    // Click anywhere to play (if autoplay blocked)
+    document.addEventListener('click', () => {
+      if (!hasInteracted && video.paused) {
+        video.play();
+        hasInteracted = true;
+      }
+    });
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (!enterBtn.classList.contains('hidden')) {
+          enterMansion();
+        } else {
+          skipVideo();
+        }
+      }
+      if (e.key === 'Escape') {
+        skipVideo();
+      }
+    });
+
+    // Prevent context menu on video
+    video.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+  </script>
+</body>
+</html>

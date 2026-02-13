@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mansion Mayhem - Screen Flow Showcase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #000;
+      color: #fff;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 56px;
+      background: linear-gradient(135deg, #D4AF37 0%, #E91E63 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      color: #A0A0A0;
+      font-size: 18px;
+    }
+    
+    .flow-diagram {
+      text-align: center;
+      margin: 60px 0;
+      padding: 40px;
+      background: #1A1A1A;
+      border-radius: 16px;
+    }
+    
+    .flow-step {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #D4AF37 0%, #E91E63 100%);
+      border-radius: 8px;
+      margin: 0 10px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .arrow {
+      display: inline-block;
+      margin: 0 10px;
+      font-size: 24px;
+      color: #D4AF37;
+    }
+    
+    .screen-section {
+      margin-bottom: 80px;
+    }
+    
+    .screen-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .screen-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 72px;
+      color: #D4AF37;
+      line-height: 1;
+    }
+    
+    .screen-info h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+    
+    .screen-info p {
+      color: #A0A0A0;
+      font-size: 16px;
+    }
+    
+    .screen-showcase {
+      display: grid;
+      grid-template-columns: 428px 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+    
+    .phone-mockup {
+      width: 428px;
+      background: #1A1A1A;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 2px #2A2A2A;
+      position: sticky;
+      top: 20px;
+    }
+    
+    .phone-screen {
+      width: 100%;
+      height: 926px;
+      background: #0A0A0A;
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .screen-details {
+      background: #1A1A1A;
+      padding: 40px;
+      border-radius: 16px;
+    }
+    
+    .screen-details h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: #D4AF37;
+      margin-bottom: 20px;
+    }
+    
+    .screen-details ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .screen-details li {
+      padding: 12px 0;
+      border-bottom: 1px solid #2A2A2A;
+      color: #A0A0A0;
+      line-height: 1.6;
+    }
+    
+    .screen-details li:last-child {
+      border-bottom: none;
+    }
+    
+    .screen-details strong {
+      color: #fff;
+      display: block;
+      margin-bottom: 4px;
+    }
+    
+    .feature-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #D4AF37;
+      color: #0A0A0A;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    
+    /* Screen-specific styles */
+    .splash-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      padding: 40px;
+    }
+    
+    .splash-castle {
+      font-size: 120px;
+      margin-bottom: 30px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+    
+    .splash-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #D4AF37 0%, #E91E63 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+    }
+    
+    .splash-tagline {
+      color: #A0A0A0;
+      font-size: 18px;
+      font-style: italic;
+      margin-bottom: 40px;
+    }
+    
+    .loading-dots {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .loading-dots span {
+      width: 8px;
+      height: 8px;
+      background: #D4AF37;
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+    
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+    
+    /* Welcome Screen */
+    .welcome-content {
+      padding: 60px 40px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .welcome-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    .welcome-castle {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+    
+    .welcome-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #D4AF37 0%, #E91E63 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+    
+    .welcome-subtitle {
+      color: #A0A0A0;
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 350px;
+      margin: 0 auto;
+    }
+    
+    .welcome-cta {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #D4AF37 0%, #E91E63 100%);
+      color: #fff;
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: none;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: #fff;
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: 2px solid #D4AF37;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 20px 0;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .welcome-footer {
+      text-align: center;
+      margin-top: 40px;
+    }
+    
+    .welcome-footer p {
+      color: #A0A0A0;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .welcome-footer a {
+      color: #D4AF37;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    
+    /* Join Code Screen */
+    .join-content {
+      padding: 40px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .back-btn {
+      color: #D4AF37;
+      font-size: 16px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .join-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    
+    .join-header p {
+      color: #A0A0A0;
+      font-size: 16px;
+      margin-bottom: 40px;
+    }
+    
+    .code-input-wrapper {
+      margin-bottom: 40px;
+    }
+    
+    .code-label {
+      color: #A0A0A0;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+    
+    .code-input {
+      width: 100%;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 24px;
+      font-weight: 600;
+      padding: 20px;
+      background: #1A1A1A;
+      border: 2px solid #3A3A3A;
+      border-radius: 12px;
+      color: #fff;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .code-input:focus {
+      outline: none;
+      border-color: #D4AF37;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+    }
+    
+    .qr-section {
+      text-align: center;
+      padding: 40px;
+      background: #1A1A1A;
+      border-radius: 12px;
+      border: 2px dashed #3A3A3A;
+      margin-bottom: 40px;
+    }
+    
+    .qr-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+    
+    .qr-section p {
+      color: #A0A0A0;
+      font-size: 14px;
+    }
+    
+    /* Dashboard */
+    .dashboard-header {
+      background: linear-gradient(135deg, #D4AF37 0%, #E91E63 100%);
+      padding: 40px 30px;
+      position: relative;
+    }
+    
+    .dashboard-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)" /></svg>');
+    }
+    
+    .dashboard-header-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .game-code {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+    
+    .game-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .day-progress {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    
+    .dashboard-content {
+      padding: 30px;
+      padding-bottom: 100px;
+    }
+    
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .scenario-card {
+      background: #1A1A1A;
+      border: 2px solid #D4AF37;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+    }
+    
+    .scenario-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    
+    .scenario-number {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      color: #A0A0A0;
+      margin-bottom: 8px;
+    }
+    
+    .scenario-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .urgent-badge {
+      background: #FF6B35;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .scenario-preview {
+      color: #A0A0A0;
+      font-size: 14px;
+      line-height: 1.6;
+      font-style: italic;
+      margin: 16px 0;
+      padding-left: 12px;
+      border-left: 3px solid #D4AF37;
+    }
+    
+    .timer-display {
+      text-align: center;
+      padding: 20px 0;
+      border-top: 1px solid #2A2A2A;
+      border-bottom: 1px solid #2A2A2A;
+      margin: 20px 0;
+    }
+    
+    .timer {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 32px;
+      color: #D4AF37;
+      font-weight: 600;
+    }
+    
+    .timer-labels {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      background: #1A1A1A;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-label {
+      color: #A0A0A0;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .cast-status {
+      background: #1A1A1A;
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .cast-info-label {
+      color: #A0A0A0;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    
+    .cast-info-value {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .btn-small {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid #D4AF37;
+      color: #D4AF37;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .tab-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1A1A1A;
+      border-top: 1px solid #2A2A2A;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      padding: 12px 0;
+    }
+    
+    .tab-item {
+      text-align: center;
+      color: #666;
+      font-size: 11px;
+    }
+    
+    .tab-item.active {
+      color: #D4AF37;
+    }
+    
+    .tab-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+    
+    /* Scenario Detail */
+    .scenario-detail-header {
+      background: #1A1A1A;
+      padding: 30px;
+      border-bottom: 2px solid #D4AF37;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .scenario-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: 20px;
+    }
+    
+    .scenario-type-badge {
+      display: inline-block;
+      background: #FF6B35;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .scenario-detail-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    
+    .timer-compact {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 16px;
+      color: #D4AF37;
+    }
+    
+    .scenario-detail-content {
+      padding: 40px 30px;
+      padding-bottom: 100px;
+    }
+    
+    .scenario-text {
+      background: #1A1A1A;
+      padding: 30px;
+      border-radius: 12px;
+      border-left: 4px solid #D4AF37;
+      margin-bottom: 40px;
+      font-size: 16px;
+      line-height: 1.8;
+      color: #E0E0E0;
+    }
+    
+    .scenario-text p {
+      margin-bottom: 20px;
+    }
+    
+    .scenario-text p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .response-section {
+      margin-bottom: 40px;
+    }
+    
+    .response-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      margin-bottom: 24px;
+    }
+    
+    .option-card {
+      background: #1A1A1A;
+      border: 2px solid #2A2A2A;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .option-card:hover {
+      border-color: #D4AF37;
+      transform: translateY(-2px);
+    }
+    
+    .option-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .radio {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #666;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .radio-inner {
+      width: 10px;
+      height: 10px;
+      background: #D4AF37;
+      border-radius: 50%;
+      opacity: 0;
+    }
+    
+    .option-card.selected {
+      border-color: #D4AF37;
+      background: #1F1F1F;
+    }
+    
+    .option-card.selected .radio {
+      border-color: #D4AF37;
+    }
+    
+    .option-card.selected .radio-inner {
+      opacity: 1;
+    }
+    
+    .option-title {
+      font-size: 16px;
+      font-weight: 600;
+      flex: 1;
+    }
+    
+    .option-description {
+      color: #A0A0A0;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-left: 32px;
+    }
+    
+    .voice-note-section {
+      background: #1A1A1A;
+      border: 2px dashed #3A3A3A;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 40px;
+    }
+    
+    .voice-note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .voice-note-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .optional-badge {
+      background: #3A3A3A;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      color: #A0A0A0;
+    }
+    
+    .voice-hint {
+      color: #A0A0A0;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    
+    .scenario-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1A1A1A;
+      border-top: 1px solid #2A2A2A;
+      padding: 20px 30px;
+    }
+    
+    .highlight {
+      color: #D4AF37;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏰 Mansion Mayhem</h1>
+      <p>Complete Screen Flow - From Sign Up to Game Completion</p>
+    </div>
+    
+    <div class="flow-diagram">
+      <div class="flow-step">1. Splash</div>
+      <span class="arrow">→</span>
+      <div class="flow-step">2. Welcome</div>
+      <span class="arrow">→</span>
+      <div class="flow-step">3. Join Code</div>
+      <span class="arrow">→</span>
+      <div class="flow-step">4. Dashboard</div>
+      <span class="arrow">→</span>
+      <div class="flow-step">5. Scenario</div>
+      <span class="arrow">→</span>
+      <div class="flow-step">🎉 Submit</div>
+    </div>
+
+    <!-- SCREEN 1: SPLASH -->
+    <div class="screen-section">
+      <div class="screen-header">
+        <div class="screen-number">1</div>
+        <div class="screen-info">
+          <h2>Splash Screen</h2>
+          <p>First impression - Auto-advances after 2.5 seconds</p>
+        </div>
+      </div>
+      
+      <div class="screen-showcase">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="splash-content">
+              <div class="splash-castle">🏰</div>
+              <div class="splash-title">MANSION MAYHEM</div>
+              <div class="splash-tagline">Where drama becomes destiny</div>
+              <div class="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="screen-details">
+          <h3>What Happens Here</h3>
+          <ul>
+            <li>
+              <strong>Brand Introduction</strong>
+              Animated castle emoji and gradient logo create immediate luxury feel
+            </li>
+            <li>
+              <strong>Auto-Navigation (2.5s)</strong>
+              Checks if user is authenticated, then navigates to Welcome or Dashboard
+            </li>
+            <li>
+              <strong>Loading Indicator</strong>
+              Animated dots show app is loading in background
+            </li>
+            <li>
+              <strong>First Impression</strong>
+              Sets the tone: elegant, dramatic, reality TV aesthetic
+            </li>
+          </ul>
+          
+          <h3 style="margin-top: 30px;">Design Elements</h3>
+          <div>
+            <span class="feature-badge">Animated Castle</span>
+            <span class="feature-badge">Gold→Rose Gradient</span>
+            <span class="feature-badge">Loading Dots</span>
+            <span class="feature-badge">Auto-Advance</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: WELCOME -->
+    <div class="screen-section">
+      <div class="screen-header">
+        <div class="screen-number">2</div>
+        <div class="screen-info">
+          <h2>Welcome Screen</h2>
+          <p>Entry point for new users - Choice between join or sign in</p>
+        </div>
+      </div>
+      
+      <div class="screen-showcase">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="welcome-content">
+              <div class="welcome-header">
+                <div class="welcome-castle">🏰</div>
+                <div class="welcome-title">MANSION MAYHEM</div>
+                <div class="welcome-subtitle">
+                  Welcome to the most <span class="highlight">dramatic reality show</span> that's never been filmed.
+                </div>
+              </div>
+              
+              <div class="welcome-cta">
+                <button class="btn-primary">
+                  🎬 Join with Invite Code
+                </button>
+                
+                <div class="divider">or</div>
+                
+                <button class="btn-secondary">
+                  Sign In
+                </button>
+              </div>
+              
+              <div class="welcome-footer">
+                <p>Don't have a code?</p>
+                <a href="#">Request Beta Access →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="screen-details">
+          <h3>What Happens Here</h3>
+          <ul>
+            <li>
+              <strong>First-Time Users</strong>
+              Primary CTA "Join with Invite Code" - this is the main path for new players
+            </li>
+            <li>
+              <strong>Returning Users</strong>
+              "Sign In" button for users who already have accounts
+            </li>
+            <li>
+              <strong>Request Access</strong>
+              Text link for people without invite codes to request beta access
+            </li>
+            <li>
+              <strong>Value Proposition</strong>
+              Clear messaging: "Interactive. Dramatic. Yours."
+            </li>
+          </ul>
+          
+          <h3 style="margin-top: 30px;">User Journey</h3>
+          <div>
+            <span class="feature-badge">Join Code → Next</span>
+            <span class="feature-badge">Sign In → Auth</span>
+            <span class="feature-badge">Request → Form</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: JOIN WITH CODE -->
+    <div class="screen-section">
+      <div class="screen-header">
+        <div class="screen-number">3</div>
+        <div class="screen-info">
+          <h2>Join with Code</h2>
+          <p>Validate invitation and create account</p>
+        </div>
+      </div>
+      
+      <div class="screen-showcase">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="join-content">
+              <div class="back-btn">← Back</div>
+              
+              <div class="join-header">
+                <h2>Join a Game</h2>
+                <p>Enter your invitation code to join the cast</p>
+              </div>
+              
+              <div class="code-input-wrapper">
+                <label class="code-label">Game Code</label>
+                <input type="text" class="code-input" placeholder="MM-BETA-001" value="MM-BETA-001">
+                <p style="color: #A0A0A0; font-size: 13px; margin-top: 10px;">
+                  Check your email for the invitation code
+                </p>
+              </div>
+              
+              <div style="text-align: center; color: #666; margin: 30px 0;">
+                — or scan QR code —
+              </div>
+              
+              <div class="qr-section">
+                <div class="qr-icon">📱</div>
+                <p>Point your camera at the QR code<br>from your invitation email</p>
+              </div>
+              
+              <button class="btn-primary" style="margin-top: auto;">
+                Join Lobby
+              </button>
+              
+              <button class="btn-secondary" style="margin-top: 16px;">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="screen-details">
+          <h3>What Happens Here</h3>
+          <ul>
+            <li>
+              <strong>Code Entry</strong>
+              User types invite code (e.g., MM-BETA-001) - auto-uppercase, monospace font
+            </li>
+            <li>
+              <strong>Real-Time Validation</strong>
+              Minimum 8 characters, shows error if invalid format
+            </li>
+            <li>
+              <strong>QR Scanner Option</strong>
+              Alternative method - scan QR code from email invitation
+            </li>
+            <li>
+              <strong>Backend Validation</strong>
+              Checks if code exists in database and is still valid
+            </li>
+            <li>
+              <strong>Account Creation</strong>
+              If valid, creates user account and links to game
+            </li>
+            <li>
+              <strong>Success → Dashboard</strong>
+              Navigates to game dashboard on successful join
+            </li>
+          </ul>
+          
+          <h3 style="margin-top: 30px;">Validation Rules</h3>
+          <div>
+            <span class="feature-badge">Min 8 Chars</span>
+            <span class="feature-badge">Uppercase</span>
+            <span class="feature-badge">DB Check</span>
+            <span class="feature-badge">Error States</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: GAME DASHBOARD -->
+    <div class="screen-section">
+      <div class="screen-header">
+        <div class="screen-number">4</div>
+        <div class="screen-info">
+          <h2>Game Dashboard</h2>
+          <p>Main hub - Shows active scenarios, stats, and game status</p>
+        </div>
+      </div>
+      
+      <div class="screen-showcase">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="dashboard-header">
+              <div class="dashboard-header-content">
+                <div class="game-code">🎬 MM-BETA-001</div>
+                <div class="game-title">Beta Test #1</div>
+                <div class="day-progress">Day 3 of 7</div>
+              </div>
+            </div>
+            
+            <div class="dashboard-content">
+              <div class="section-title">🔥 Active Scenario</div>
+              
+              <div class="scenario-card">
+                <div class="scenario-card-header">
+                  <div>
+                    <div class="scenario-number">SCENARIO #7</div>
+                    <div class="scenario-title">Pool Party Confrontation</div>
+                  </div>
+                  <div class="urgent-badge">🔥 URGENT</div>
+                </div>
+                
+                <div class="scenario-preview">
+                  "Keisha just accused you of scheming behind her back at the pool party. Everyone is watching. How do you respond?"
+                </div>
+                
+                <div class="timer-display">
+                  <div class="timer">08:45:32</div>
+                  <div class="timer-labels">
+                    <span>Hours</span>
+                    <span>Min</span>
+                    <span>Sec</span>
+                  </div>
+                </div>
+                
+                <button class="btn-primary" style="width: 100%; margin-top: 20px;">
+                  ⚡ Respond Now
+                </button>
+              </div>
+              
+              <div class="section-title">📊 Your Status</div>
+              
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <div class="stat-label">Scenarios</div>
+                  <div class="stat-value">5/7</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Response Rate</div>
+                  <div class="stat-value">92%</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Voice Notes</div>
+                  <div class="stat-value">3</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Status</div>
+                  <div class="stat-value" style="color: #4CAF50;">Safe ✓</div>
+                </div>
+              </div>
+              
+              <div class="section-title">👥 Cast</div>
+              
+              <div class="cast-status">
+                <div>
+                  <div class="cast-info-label">Active Cast Members</div>
+                  <div class="cast-info-value">7 of 8</div>
+                </div>
+                <button class="btn-small">View Roster</button>
+              </div>
+            </div>
+            
+            <div class="tab-bar">
+              <div class="tab-item active">
+                <div class="tab-icon">🏠</div>
+                <div>Home</div>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">🎭</div>
+                <div>Scenarios</div>
+              </div>
+              <div class="tab-item">
+                <div class="tab-icon">👥</div>
+                <div>Cast</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="screen-details">
+          <h3>What Happens Here</h3>
+          <ul>
+            <li>
+              <strong>Game Status Header</strong>
+              Shows game code, name, and day progress (Day 3 of 7)
+            </li>
+            <li>
+              <strong>Active Scenario Card</strong>
+              Highlighted card with 🔥 URGENT badge - this is the main call to action
+            </li>
+            <li>
+              <strong>Real-Time Countdown</strong>
+              Timer shows hours:minutes:seconds remaining to respond (updates every second)
+            </li>
+            <li>
+              <strong>Scenario Preview</strong>
+              Brief excerpt of the drama to hook the user
+            </li>
+            <li>
+              <strong>"Respond Now" Button</strong>
+              Primary action - navigates to Scenario Detail screen
+            </li>
+            <li>
+              <strong>Your Stats</strong>
+              Personal performance metrics: scenarios completed, response rate, voice notes
+            </li>
+            <li>
+              <strong>Cast Status</strong>
+              Shows how many players are active and who responded today
+            </li>
+            <li>
+              <strong>Tab Navigation</strong>
+              Bottom tabs: Home (current), Scenarios (history), Cast (roster)
+            </li>
+          </ul>
+          
+          <h3 style="margin-top: 30px;">User Behavior</h3>
+          <div>
+            <span class="feature-badge">Check 2-3x Daily</span>
+            <span class="feature-badge">Push Notifications</span>
+            <span class="feature-badge">Real-Time Updates</span>
+            <span class="feature-badge">Quick Glance</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: SCENARIO DETAIL -->
+    <div class="screen-section">
+      <div class="screen-header">
+        <div class="screen-number">5</div>
+        <div class="screen-info">
+          <h2>Scenario Detail</h2>
+          <p>Read the drama and make your choice</p>
+        </div>
+      </div>
+      
+      <div class="screen-showcase">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="scenario-detail-header">
+              <div class="back-btn">← Back to Dashboard</div>
+              
+              <div class="scenario-meta">
+                <div>
+                  <div class="scenario-number">SCENARIO #7</div>
+                  <div class="scenario-type-badge">🔥 CONFRONTATION</div>
+                  <div class="scenario-detail-title">Pool Party Showdown</div>
+                </div>
+                <div class="timer-compact">⏰ 08:45:32</div>
+              </div>
+            </div>
+            
+            <div class="scenario-detail-content">
+              <div class="scenario-text">
+                <p>The sun beats down on the mansion's infinity pool. Everyone's gathered for what was supposed to be a relaxing afternoon.</p>
+                
+                <p>Then Keisha walks over, her eyes locked on you.</p>
+                
+                <p>"We need to talk," she says loudly enough for everyone to hear. "I know what you've been saying about me behind my back. And I'm done pretending everything's fine."</p>
+                
+                <p>The music stops. All eyes are on you.</p>
+              </div>
+              
+              <div class="response-section">
+                <div class="response-title">How do you respond?</div>
+                
+                <div class="option-card selected">
+                  <div class="option-header">
+                    <div class="radio">
+                      <div class="radio-inner"></div>
+                    </div>
+                    <div class="option-title">Own it - stand your ground</div>
+                  </div>
+                  <div class="option-description">
+                    You were strategizing. No apologies. This is a game and you're here to win.
+                  </div>
+                </div>
+                
+                <div class="option-card">
+                  <div class="option-header">
+                    <div class="radio">
+                      <div class="radio-inner"></div>
+                    </div>
+                    <div class="option-title">Deflect - turn it back on her</div>
+                  </div>
+                  <div class="option-description">
+                    Point out her hypocrisy. She's been doing the exact same thing. Two can play this game.
+                  </div>
+                </div>
+                
+                <div class="option-card">
+                  <div class="option-header">
+                    <div class="radio">
+                      <div class="radio-inner"></div>
+                    </div>
+                    <div class="option-title">Play innocent - deny everything</div>
+                  </div>
+                  <div class="option-description">
+                    Act shocked and hurt. You have no idea what she's talking about. Someone must be lying.
+                  </div>
+                </div>
+              </div>
+              
+              <div class="voice-note-section">
+                <div class="voice-note-header">
+                  <div class="voice-note-title">
+                    🎤 Add Voice Note
+                    <span class="optional-badge">OPTIONAL</span>
+                  </div>
+                </div>
+                <div class="voice-hint">React authentically - 60 seconds max</div>
+                <button class="btn-secondary" style="width: 100%;">🎤 Start Recording</button>
+              </div>
+            </div>
+            
+            <div class="scenario-footer">
+              <button class="btn-primary" style="width: 100%;">
+                Submit Response
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="screen-details">
+          <h3>What Happens Here</h3>
+          <ul>
+            <li>
+              <strong>Sticky Header</strong>
+              Shows scenario number, type badge (CONFRONTATION), title, and countdown timer
+            </li>
+            <li>
+              <strong>Dramatic Narrative</strong>
+              Multi-paragraph story sets the scene - written like a reality TV moment
+            </li>
+            <li>
+              <strong>Multiple Choice Response</strong>
+              User selects ONE option (radio button behavior)
+            </li>
+            <li>
+              <strong>Three Response Strategies</strong>
+              Each option has a title and description explaining the consequences
+            </li>
+            <li>
+              <strong>Optional Voice Note</strong>
+              Users can record a 30-60 second audio reaction (premium feature)
+            </li>
+            <li>
+              <strong>Submit Button</strong>
+              Sticky footer button - disabled until user selects an option
+            </li>
+            <li>
+              <strong>After Submission</strong>
+              Shows confirmation modal, then returns to dashboard
+            </li>
+            <li>
+              <strong>What Happens Next</strong>
+              User waits for other cast to respond. In 4-24 hours, scenario closes and outcomes are revealed
+            </li>
+          </ul>
+          
+          <h3 style="margin-top: 30px;">Core Gameplay</h3>
+          <div>
+            <span class="feature-badge">Read Drama</span>
+            <span class="feature-badge">Choose Response</span>
+            <span class="feature-badge">Voice Note</span>
+            <span class="feature-badge">Submit</span>
+            <span class="feature-badge">Wait for Results</span>
+          </div>
+          
+          <h3 style="margin-top: 30px;">After Submit</h3>
+          <ul>
+            <li>
+              <strong>Confirmation Message</strong>
+              "✅ Response submitted! The directors are reviewing..."
+            </li>
+            <li>
+              <strong>Return to Dashboard</strong>
+              User goes back to main screen and waits
+            </li>
+            <li>
+              <strong>Scenario Closes</strong>
+              When deadline hits, all responses are locked
+            </li>
+            <li>
+              <strong>Outcomes Revealed</strong>
+              Next day shows what happened based on everyone's choices
+            </li>
+            <li>
+              <strong>Next Scenario</strong>
+              Push notification: "🔥 New scenario available!"
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPLETION -->
+    <div style="text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #D4AF37 0%, #E91E63 100%); border-radius: 24px; margin-top: 60px;">
+      <div style="font-size: 80px; margin-bottom: 20px;">🎉</div>
+      <h2 style="font-family: 'Playfair Display', serif; font-size: 48px; margin-bottom: 16px;">Complete Game Loop</h2>
+      <p style="font-size: 20px; opacity: 0.9; max-width: 600px; margin: 0 auto;">
+        After submitting, users return to the dashboard and wait for the next scenario. The game continues with 1-3 scenarios per day for 3-7 days until elimination or finale.
+      </p>
+      
+      <div style="margin-top: 40px; padding: 30px; background: rgba(0,0,0,0.2); border-radius: 16px; max-width: 800px; margin-left: auto; margin-right: auto;">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 20px;">🔄 The Loop</h3>
+        <p style="font-size: 16px; line-height: 1.8; text-align: left;">
+          <strong>1.</strong> User receives push notification: "New scenario!"<br>
+          <strong>2.</strong> Opens app → Dashboard shows active scenario<br>
+          <strong>3.</strong> Taps "Respond Now" → Reads drama<br>
+          <strong>4.</strong> Selects choice → Optionally records voice<br>
+          <strong>5.</strong> Submits → Returns to dashboard<br>
+          <strong>6.</strong> Waits 4-24 hours for results<br>
+          <strong>7.</strong> Next scenario arrives → Repeat
+        </p>
+      </div>
+      
+      <div style="margin-top: 40px;">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 16px;">🏆 Game Ends When...</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 900px; margin: 0 auto;">
+          <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px;">
+            <div style="font-size: 40px; margin-bottom: 12px;">🥇</div>
+            <strong>You Win</strong><br>
+            <span style="font-size: 14px; opacity: 0.8;">Last one standing</span>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px;">
+            <div style="font-size: 40px; margin-bottom: 12px;">🚪</div>
+            <strong>Eliminated</strong><br>
+            <span style="font-size: 14px; opacity: 0.8;">Voted out by cast</span>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px;">
+            <div style="font-size: 40px; margin-bottom: 12px;">📺</div>
+            <strong>Season Finale</strong><br>
+            <span style="font-size: 14px; opacity: 0.8;">Day 7 final episode</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="text-align: center; margin-top: 80px; padding: 40px; border-top: 2px solid #2A2A2A;">
+      <p style="color: #A0A0A0; font-size: 18px; margin-bottom: 20px;">
+        This is exactly how the Mansion Mayhem app works from first launch to game completion.
+      </p>
+      <p style="color: #D4AF37; font-size: 16px; font-weight: 600;">
+        🏰 Ready to build it? Open the <strong>index.html</strong> file to experience the live interactive version.
+      </p>
+    </div>
+  </div>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

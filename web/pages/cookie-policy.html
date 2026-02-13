@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookie Policy - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      line-height: 1.8;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover {
+      color: var(--color-gold);
+    }
+    
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 6rem 2rem 4rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .last-updated {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.95rem;
+    }
+    
+    .intro-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .section-content {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.8;
+    }
+    
+    .section-content p {
+      margin-bottom: 1rem;
+    }
+    
+    .section-content ul {
+      margin: 1rem 0;
+      padding-left: 2rem;
+    }
+    
+    .section-content li {
+      margin-bottom: 0.75rem;
+    }
+    
+    .cookie-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .cookie-table th,
+    .cookie-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .cookie-table th {
+      background: rgba(255, 255, 255, 0.05);
+      font-weight: 600;
+      color: var(--color-gold);
+    }
+    
+    .cookie-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .cookie-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .cookie-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .highlight-box {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .control-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    
+    .control-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 1.5rem;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      margin: 0.5rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--color-gold);
+    }
+    
+    @media (max-width: 768px) {
+      .title { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .cookie-table { font-size: 0.875rem; }
+      .cookie-table th, .cookie-table td { padding: 0.75rem 0.5rem; }
+      .btn { width: 100%; justify-content: center; margin: 0.5rem 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="../index.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <a href="../index.html" class="nav-link">← Back to Home</a>
+    </div>
+  </nav>
+  
+  <div class="content">
+    <div class="header">
+      <h1 class="title">Cookie Policy</h1>
+      <p class="last-updated">Last Updated: February 7, 2026</p>
+    </div>
+    
+    <div class="intro-box">
+      <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">
+        This Cookie Policy explains how Mansion Mayhem (operated by ImmersiVerse OS) uses cookies and similar 
+        tracking technologies. We use cookies to improve your experience, remember your preferences, and analyze 
+        platform usage.
+      </p>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>🍪</span>
+        <span>What Are Cookies?</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          Cookies are small text files stored on your device when you visit websites. They help websites remember 
+          information about your visit, making your next visit easier and the site more useful to you.
+        </p>
+        <p>
+          We use both <strong>first-party cookies</strong> (set by us) and <strong>third-party cookies</strong> 
+          (set by our service providers like Google Analytics).
+        </p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>📋</span>
+        <span>Types of Cookies We Use</span>
+      </h2>
+      <div class="section-content">
+        <div class="cookie-card">
+          <div class="cookie-card-title">
+            <span>🔒</span>
+            <span>Essential Cookies</span>
+          </div>
+          <p>
+            <strong>Purpose:</strong> Required for the platform to function properly. Cannot be disabled.
+          </p>
+          <p><strong>What they do:</strong></p>
+          <ul>
+            <li>Authentication and login state</li>
+            <li>Security and fraud prevention</li>
+            <li>Session management</li>
+            <li>Load balancing</li>
+          </ul>
+          <p><strong>Duration:</strong> Session (deleted when you close browser) or up to 1 year</p>
+        </div>
+        
+        <div class="cookie-card">
+          <div class="cookie-card-title">
+            <span>⚙️</span>
+            <span>Functional Cookies</span>
+          </div>
+          <p>
+            <strong>Purpose:</strong> Remember your preferences and settings.
+          </p>
+          <p><strong>What they do:</strong></p>
+          <ul>
+            <li>Language preferences</li>
+            <li>UI theme and layout preferences</li>
+            <li>Volume and playback settings</li>
+            <li>Notification preferences</li>
+          </ul>
+          <p><strong>Duration:</strong> Up to 1 year</p>
+        </div>
+        
+        <div class="cookie-card">
+          <div class="cookie-card-title">
+            <span>📊</span>
+            <span>Analytics Cookies</span>
+          </div>
+          <p>
+            <strong>Purpose:</strong> Help us understand how you use the platform.
+          </p>
+          <p><strong>What they do:</strong></p>
+          <ul>
+            <li>Track page views and user flows</li>
+            <li>Measure feature usage</li>
+            <li>Identify technical issues</li>
+            <li>Understand demographic information (anonymized)</li>
+          </ul>
+          <p><strong>Third Parties:</strong> Google Analytics, Mixpanel</p>
+          <p><strong>Duration:</strong> Up to 2 years</p>
+        </div>
+        
+        <div class="cookie-card">
+          <div class="cookie-card-title">
+            <span>🎯</span>
+            <span>Marketing Cookies</span>
+          </div>
+          <p>
+            <strong>Purpose:</strong> Deliver relevant advertising and measure campaign effectiveness.
+          </p>
+          <p><strong>What they do:</strong></p>
+          <ul>
+            <li>Track ad impressions and clicks</li>
+            <li>Retargeting on other platforms</li>
+            <li>Measure conversion rates</li>
+            <li>Personalize ad content</li>
+          </ul>
+          <p><strong>Third Parties:</strong> Google Ads, Facebook Pixel</p>
+          <p><strong>Duration:</strong> Up to 1 year</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>📱</span>
+        <span>Specific Cookies We Use</span>
+      </h2>
+      <div class="section-content">
+        <table class="cookie-table">
+          <thead>
+            <tr>
+              <th>Cookie Name</th>
+              <th>Type</th>
+              <th>Purpose</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>auth_token</code></td>
+              <td>Essential</td>
+              <td>User authentication</td>
+              <td>7 days</td>
+            </tr>
+            <tr>
+              <td><code>session_id</code></td>
+              <td>Essential</td>
+              <td>Session management</td>
+              <td>Session</td>
+            </tr>
+            <tr>
+              <td><code>csrf_token</code></td>
+              <td>Essential</td>
+              <td>Security protection</td>
+              <td>Session</td>
+            </tr>
+            <tr>
+              <td><code>user_prefs</code></td>
+              <td>Functional</td>
+              <td>UI preferences</td>
+              <td>1 year</td>
+            </tr>
+            <tr>
+              <td><code>_ga</code></td>
+              <td>Analytics</td>
+              <td>Google Analytics visitor ID</td>
+              <td>2 years</td>
+            </tr>
+            <tr>
+              <td><code>_gid</code></td>
+              <td>Analytics</td>
+              <td>Google Analytics session ID</td>
+              <td>24 hours</td>
+            </tr>
+            <tr>
+              <td><code>_fbp</code></td>
+              <td>Marketing</td>
+              <td>Facebook Pixel tracking</td>
+              <td>3 months</td>
+            </tr>
+            <tr>
+              <td><code>_gcl_au</code></td>
+              <td>Marketing</td>
+              <td>Google Ads conversion</td>
+              <td>3 months</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>🌐</span>
+        <span>Third-Party Services</span>
+      </h2>
+      <div class="section-content">
+        <p>We use the following third-party services that may set cookies:</p>
+        
+        <ul>
+          <li>
+            <strong>Google Analytics:</strong> Website analytics and user behavior tracking 
+            (<a href="https://policies.google.com/privacy" style="color: var(--color-gold);">Privacy Policy</a>)
+          </li>
+          <li>
+            <strong>Stripe:</strong> Payment processing 
+            (<a href="https://stripe.com/privacy" style="color: var(--color-gold);">Privacy Policy</a>)
+          </li>
+          <li>
+            <strong>Supabase:</strong> Backend infrastructure 
+            (<a href="https://supabase.com/privacy" style="color: var(--color-gold);">Privacy Policy</a>)
+          </li>
+          <li>
+            <strong>Google Ads:</strong> Advertising and remarketing 
+            (<a href="https://policies.google.com/technologies/ads" style="color: var(--color-gold);">Ad Settings</a>)
+          </li>
+          <li>
+            <strong>Facebook Pixel:</strong> Social media advertising 
+            (<a href="https://www.facebook.com/privacy/explanation" style="color: var(--color-gold);">Privacy Policy</a>)
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>⚙️</span>
+        <span>Managing Your Cookie Preferences</span>
+      </h2>
+      <div class="section-content">
+        <h3 style="font-size: 1.25rem; color: var(--color-gold); margin: 1.5rem 0 1rem;">Browser Controls</h3>
+        <p>Most browsers allow you to control cookies through settings:</p>
+        <ul>
+          <li><strong>Chrome:</strong> Settings → Privacy and Security → Cookies</li>
+          <li><strong>Firefox:</strong> Settings → Privacy & Security → Cookies and Site Data</li>
+          <li><strong>Safari:</strong> Preferences → Privacy → Manage Website Data</li>
+          <li><strong>Edge:</strong> Settings → Privacy → Cookies</li>
+        </ul>
+        
+        <h3 style="font-size: 1.25rem; color: var(--color-gold); margin: 1.5rem 0 1rem;">Platform Settings</h3>
+        <p>
+          You can manage cookie preferences in your Mansion Mayhem account settings. Essential cookies 
+          cannot be disabled as they're required for platform functionality.
+        </p>
+        
+        <h3 style="font-size: 1.25rem; color: var(--color-gold); margin: 1.5rem 0 1rem;">Opt-Out Links</h3>
+        <ul>
+          <li><a href="https://tools.google.com/dlpage/gaoptout" style="color: var(--color-gold);">Google Analytics Opt-Out</a></li>
+          <li><a href="https://optout.networkadvertising.org/" style="color: var(--color-gold);">NAI Opt-Out</a></li>
+          <li><a href="https://optout.aboutads.info/" style="color: var(--color-gold);">DAA Opt-Out</a></li>
+        </ul>
+        
+        <div class="highlight-box">
+          <strong>⚠️ Important:</strong> Disabling cookies may affect platform functionality. Some features 
+          may not work properly without essential and functional cookies.
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>🔐</span>
+        <span>Do Not Track (DNT)</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          Some browsers offer a "Do Not Track" (DNT) signal. At this time, there is no industry standard 
+          for how to respond to DNT signals. We do not currently respond to DNT signals, but we provide 
+          cookie management options as described above.
+        </p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">
+        <span>📝</span>
+        <span>Updates to This Policy</span>
+      </h2>
+      <div class="section-content">
+        <p>
+          We may update this Cookie Policy periodically to reflect changes in our practices or legal requirements. 
+          Updates will be posted on this page with a new "Last Updated" date.
+        </p>
+        <p>
+          Significant changes will be communicated via email or platform notification.
+        </p>
+      </div>
+    </div>
+    
+    <div class="control-section">
+      <h2 class="control-title">Manage Your Cookie Settings</h2>
+      <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1.5rem;">
+        Control which cookies you allow on Mansion Mayhem
+      </p>
+      <div>
+        <a href="settings.html" class="btn">
+          <span>⚙️</span>
+          <span>Cookie Settings</span>
+        </a>
+        <button class="btn btn-secondary" onclick="clearCookies()">
+          <span>🗑️</span>
+          <span>Clear All Cookies</span>
+        </button>
+      </div>
+      <p style="color: rgba(255, 255, 255, 0.6); margin-top: 1.5rem; font-size: 0.9rem;">
+        Questions? Contact us at <a href="mailto:privacy@immersiverseos.com" style="color: var(--color-gold);">privacy@immersiverseos.com</a>
+      </p>
+    </div>
+  </div>
+  
+  <script>
+    function clearCookies() {
+      if (confirm('This will clear all non-essential cookies. You may need to log in again. Continue?')) {
+        // Clear cookies (except essential ones)
+        document.cookie.split(";").forEach(cookie => {
+          const name = cookie.split("=")[0].trim();
+          if (!['auth_token', 'session_id', 'csrf_token'].includes(name)) {
+            document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/;';
+          }
+        });
+        alert('Non-essential cookies cleared!');
+      }
+    }
+  </script>
+  <script type="module" src="../js/invite-gate.js"></script>
+</body>
+</html>

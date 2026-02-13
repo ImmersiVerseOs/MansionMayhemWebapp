@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Start | MANSION MAYHEM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111111;
+      --bg-elevated: #1a1a1a;
+      --bg-sidebar: #0d0d0d;
+      --border: #2a2a2a;
+      --text: #ffffff;
+      --text-dim: #888888;
+      --text-muted: #555555;
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --rose-dark: #ad1457;
+      --purple: #9c27b0;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .app-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 340px;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-header {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .sidebar-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .sidebar-logo span {
+      display: block;
+      font-size: 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 4px;
+    }
+    .nav-section { margin-bottom: 24px; }
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 20px;
+      margin-bottom: 8px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .nav-item:hover {
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent);
+      color: var(--gold);
+      border-left: 3px solid var(--gold);
+    }
+    .nav-icon { font-size: 18px; }
+    .main-content {
+      padding: 32px;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .page-subtitle {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--bg);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+    }
+    .btn-secondary {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { border-color: var(--gold); }
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    .btn-danger:hover {
+      background: #d32f2f;
+    }
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    .btn-success:hover {
+      background: #388e3c;
+    }
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      background: linear-gradient(135deg, var(--bg-elevated), var(--bg-card));
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title {
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-body { padding: 24px; }
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .form-select, .form-input {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .form-select:focus, .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    .form-textarea {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 80px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 10px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .radio-label:has(input:checked) {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.1);
+    }
+    .radio-label input[type="radio"] {
+      accent-color: var(--gold);
+    }
+    .cast-selection-grid {
+      display: grid;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .cast-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .cast-checkbox:hover {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.05);
+    }
+    .cast-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+    .cast-info {
+      flex: 1;
+    }
+    .cast-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .cast-meta {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .selection-counter {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--bg);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 12px;
+    }
+    .game-list {
+      display: grid;
+      gap: 16px;
+    }
+    .game-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s ease;
+    }
+    .game-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.1);
+    }
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    .game-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .game-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .game-status.setup { background: var(--text-muted); color: white; }
+    .game-status.lobby { background: var(--warning); color: white; }
+    .game-status.active { background: var(--success); color: white; }
+    .game-status.paused { background: var(--purple); color: white; }
+    .game-status.completed { background: var(--text-dim); color: white; }
+    .game-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .game-description {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+    .game-progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .progress-bar {
+      flex: 1;
+      height: 8px;
+      background: var(--bg-card);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--rose));
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+    .game-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+    }
+    .game-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .right-panel {
+      background: var(--bg-sidebar);
+      border-left: 1px solid var(--border);
+      padding: 24px;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+    .panel-section {
+      margin-bottom: 24px;
+    }
+    .panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .alert {
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    .alert-success {
+      background: rgba(76, 175, 80, 0.1);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+    .alert-error {
+      background: rgba(244, 67, 54, 0.1);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+    .alert-warning {
+      background: rgba(255, 152, 0, 0.1);
+      border: 1px solid var(--warning);
+      color: var(--warning);
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-dim);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          MANSION MAYHEM
+          <span>Director Studio</span>
+        </div>
+      </div>
+
+      <nav>
+        <div class="nav-section">
+          <div class="nav-label">Management</div>
+          <a href="game-start.html" class="nav-item active">
+            <span class="nav-icon">🎬</span>
+            Game Start
+          </a>
+          <a href="director-console.html" class="nav-item">
+            <span class="nav-icon">🎭</span>
+            Director Console
+          </a>
+          <a href="casting-call.html" class="nav-item">
+            <span class="nav-icon">👥</span>
+            Casting Call
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Content</div>
+          <a href="voting.html" class="nav-item">
+            <span class="nav-icon">🗳️</span>
+            Voting Center
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Game Start</h1>
+          <p class="page-subtitle">Create and manage game instances</p>
+        </div>
+      </div>
+
+      <!-- Alert Messages -->
+      <div id="alertContainer"></div>
+
+      <!-- Create New Game -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎬 Create New Game</div>
+        </div>
+        <div class="card-body">
+          <form id="createGameForm">
+            <div class="form-group">
+              <label class="form-label">Game Type</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="gameType" value="beta_test" checked>
+                  <span>Beta Test</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="gameType" value="production">
+                  <span>Production</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="gameType" value="rehearsal">
+                  <span>Rehearsal</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Game Code</label>
+                <input type="text" id="gameCode" class="form-input" placeholder="MM-BETA-001" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-secondary" onclick="generateGameCode()">
+                  Generate Code
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Game Title</label>
+              <input type="text" id="gameTitle" class="form-input" placeholder="Beta Test #1" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Description (Optional)</label>
+              <textarea id="gameDescription" class="form-textarea" placeholder="Testing the new game instances system..."></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Max Cast Members</label>
+                <input type="number" id="maxCast" class="form-input" value="8" min="2" max="20" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Planned Scenarios</label>
+                <input type="number" id="scenariosCount" class="form-input" value="3" min="1" max="10" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Episode Length (Days)</label>
+                <input type="number" id="episodeLength" class="form-input" value="7" min="1" max="30" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Season / Episode (Optional)</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="number" id="seasonNumber" class="form-input" placeholder="S1" min="1">
+                  <input type="number" id="episodeNumber" class="form-input" placeholder="E1" min="1">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Admin Notes (Optional)</label>
+              <textarea id="adminNotes" class="form-textarea" placeholder="Internal notes for directors..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <span>🎬</span> Create Game
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Select & Invite Cast -->
+      <div class="card hidden" id="castSelectionCard">
+        <div class="card-header">
+          <div class="card-title">
+            👥 Select Cast Members
+            <span id="selectionCounter" class="selection-counter">0/8 selected</span>
+          </div>
+          <button class="btn btn-small btn-secondary" onclick="toggleSelectAll()">
+            Select All
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <input type="text" id="castSearch" class="form-input" placeholder="🔍 Search cast members...">
+          </div>
+
+          <div id="castGrid" class="cast-selection-grid">
+            <!-- Cast members will be loaded here -->
+          </div>
+
+          <div class="form-group" style="margin-top: 24px;">
+            <label class="radio-label" style="cursor: pointer;">
+              <input type="checkbox" id="includeWelcome" checked>
+              <span>Include welcome message in email</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="radio-label" style="cursor: pointer;">
+              <input type="checkbox" id="sendReminder">
+              <span>Send reminder in 24 hours</span>
+            </label>
+          </div>
+
+          <button class="btn btn-primary" onclick="sendInvitations()">
+            <span>📧</span> Send Invitations
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Games List -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎮 Active Games</div>
+          <button class="btn btn-small btn-secondary" onclick="refreshGamesList()">
+            Refresh
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="gamesList" class="game-list">
+            <div class="loading">Loading games...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Panel: Stats -->
+    <aside class="right-panel">
+      <div class="panel-section">
+        <div class="panel-title">Quick Stats</div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalGames">0</div>
+          <div class="stat-label">Total Games</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="activeGames">0</div>
+          <div class="stat-label">Active Games</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="lobbyGames">0</div>
+          <div class="stat-label">In Lobby</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Initialize Supabase
+    const SUPABASE_URL = 'https://dhqwxamggghewbslfdej.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocXd4YW1nZ2doZXdic2xmZGVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM0MjI1MzYsImV4cCI6MjA0ODk5ODUzNn0.6xR8L8wSgCvxnZn_TWhUe-L2h9yWE95BWh-yAuSyqwM';
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentGameId = null;
+    let selectedCastIds = new Set();
+    let allCastMembers = [];
+    let maxCastCount = 8;
+
+    // Initialize page
+    async function init() {
+      await checkAuth();
+      await loadGamesList();
+      await loadCastMembers();
+      setupRealtimeSubscription();
+
+      // Setup event listeners
+      document.getElementById('createGameForm').addEventListener('submit', handleCreateGame);
+      document.getElementById('castSearch').addEventListener('input', filterCastMembers);
+    }
+
+    // Check authentication
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      // Check if user is admin
+      const { data: admin } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (!admin) {
+        showAlert('error', 'Access denied. Admin privileges required.');
+        setTimeout(() => window.location.href = '/', 3000);
+      }
+    }
+
+    // Generate unique game code
+    async function generateGameCode() {
+      const gameType = document.querySelector('input[name="gameType"]:checked').value;
+      let prefix = 'MM-BETA';
+
+      if (gameType === 'production') prefix = 'MM-S01';
+      if (gameType === 'rehearsal') prefix = 'MM-RH';
+
+      const { count, error } = await supabase
+        .from('mm_games')
+        .select('*', { count: 'exact', head: true })
+        .like('game_code', `${prefix}%`);
+
+      if (error) {
+        console.error('Error counting games:', error);
+        return;
+      }
+
+      const nextNum = (count + 1).toString().padStart(3, '0');
+      document.getElementById('gameCode').value = `${prefix}-${nextNum}`;
+    }
+
+    // Handle create game form submission
+    async function handleCreateGame(e) {
+      e.preventDefault();
+
+      const gameType = document.querySelector('input[name="gameType"]:checked').value;
+      const gameCode = document.getElementById('gameCode').value.trim();
+      const title = document.getElementById('gameTitle').value.trim();
+      const description = document.getElementById('gameDescription').value.trim();
+      const maxCast = parseInt(document.getElementById('maxCast').value);
+      const scenariosCount = parseInt(document.getElementById('scenariosCount').value);
+      const episodeLength = parseInt(document.getElementById('episodeLength').value);
+      const seasonNumber = document.getElementById('seasonNumber').value || null;
+      const episodeNumber = document.getElementById('episodeNumber').value || null;
+      const adminNotes = document.getElementById('adminNotes').value.trim();
+
+      // Get current user ID
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const gameData = {
+        game_code: gameCode,
+        title: title,
+        description: description || null,
+        game_type: gameType,
+        max_cast_members: maxCast,
+        scenarios_count: scenariosCount,
+        episode_length_days: episodeLength,
+        season_number: seasonNumber ? parseInt(seasonNumber) : null,
+        episode_number: episodeNumber ? parseInt(episodeNumber) : null,
+        admin_notes: adminNotes || null,
+        created_by_admin_id: session.user.id,
+        status: 'setup'
+      };
+
+      const { data, error } = await supabase
+        .from('mm_games')
+        .insert([gameData])
+        .select()
+        .single();
+
+      if (error) {
+        showAlert('error', `Failed to create game: ${error.message}`);
+        return;
+      }
+
+      showAlert('success', `Game "${title}" created successfully!`);
+      currentGameId = data.id;
+      maxCastCount = maxCast;
+
+      // Show cast selection card
+      document.getElementById('castSelectionCard').classList.remove('hidden');
+      document.getElementById('selectionCounter').textContent = `0/${maxCast} selected`;
+
+      // Scroll to cast selection
+      document.getElementById('castSelectionCard').scrollIntoView({ behavior: 'smooth' });
+
+      // Reset form
+      document.getElementById('createGameForm').reset();
+
+      // Refresh games list
+      await loadGamesList();
+    }
+
+    // Load cast members
+    async function loadCastMembers() {
+      const { data, error } = await supabase
+        .from('cast_members')
+        .select('*')
+        .eq('status', 'active')
+        .order('full_name');
+
+      if (error) {
+        console.error('Error loading cast:', error);
+        return;
+      }
+
+      allCastMembers = data;
+      renderCastGrid(data);
+    }
+
+    // Render cast grid
+    function renderCastGrid(members) {
+      const grid = document.getElementById('castGrid');
+      if (!members || members.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No active cast members found</div>';
+        return;
+      }
+
+      grid.innerHTML = members.map(member => `
+        <label class="cast-checkbox">
+          <input type="checkbox" value="${member.id}" onchange="toggleCastSelection('${member.id}')">
+          <div class="cast-info">
+            <div class="cast-name">${member.full_name || member.display_name}</div>
+            <div class="cast-meta">${member.archetype || 'No archetype'} • ${member.screen_time_score || 'N/A'} screen time</div>
+          </div>
+        </label>
+      `).join('');
+    }
+
+    // Filter cast members
+    function filterCastMembers(e) {
+      const query = e.target.value.toLowerCase();
+      const filtered = allCastMembers.filter(member =>
+        (member.full_name || member.display_name).toLowerCase().includes(query) ||
+        (member.archetype || '').toLowerCase().includes(query)
+      );
+      renderCastGrid(filtered);
+
+      // Restore checked state
+      selectedCastIds.forEach(id => {
+        const checkbox = document.querySelector(`input[value="${id}"]`);
+        if (checkbox) checkbox.checked = true;
+      });
+    }
+
+    // Toggle cast selection
+    function toggleCastSelection(castId) {
+      if (selectedCastIds.has(castId)) {
+        selectedCastIds.delete(castId);
+      } else {
+        if (selectedCastIds.size >= maxCastCount) {
+          showAlert('warning', `Maximum ${maxCastCount} cast members allowed for this game`);
+          event.target.checked = false;
+          return;
+        }
+        selectedCastIds.add(castId);
+      }
+      updateSelectionCounter();
+    }
+
+    // Toggle select all
+    function toggleSelectAll() {
+      const checkboxes = document.querySelectorAll('.cast-checkbox input[type="checkbox"]');
+      if (selectedCastIds.size === allCastMembers.length) {
+        // Deselect all
+        selectedCastIds.clear();
+        checkboxes.forEach(cb => cb.checked = false);
+      } else {
+        // Select all (up to max)
+        selectedCastIds.clear();
+        let count = 0;
+        checkboxes.forEach(cb => {
+          if (count < maxCastCount) {
+            cb.checked = true;
+            selectedCastIds.add(cb.value);
+            count++;
+          } else {
+            cb.checked = false;
+          }
+        });
+      }
+      updateSelectionCounter();
+    }
+
+    // Update selection counter
+    function updateSelectionCounter() {
+      document.getElementById('selectionCounter').textContent = `${selectedCastIds.size}/${maxCastCount} selected`;
+    }
+
+    // Send invitations
+    async function sendInvitations() {
+      if (!currentGameId) {
+        showAlert('error', 'Please create a game first');
+        return;
+      }
+
+      if (selectedCastIds.size === 0) {
+        showAlert('warning', 'Please select at least one cast member');
+        return;
+      }
+
+      // Get game details
+      const { data: game } = await supabase
+        .from('mm_games')
+        .select('*')
+        .eq('id', currentGameId)
+        .single();
+
+      if (!game) {
+        showAlert('error', 'Game not found');
+        return;
+      }
+
+      // Create game_cast records and send emails
+      const castRecords = Array.from(selectedCastIds).map(castId => ({
+        game_id: currentGameId,
+        cast_member_id: castId,
+        status: 'invited',
+        invited_at: new Date().toISOString()
+      }));
+
+      const { data: insertedRecords, error: insertError } = await supabase
+        .from('mm_game_cast')
+        .insert(castRecords)
+        .select('*, cast_members(*)');
+
+      if (insertError) {
+        showAlert('error', `Failed to create invitations: ${insertError.message}`);
+        return;
+      }
+
+      // Send emails to each cast member
+      let successCount = 0;
+      for (const record of insertedRecords) {
+        const joinUrl = `${window.location.origin}/mansion-mayhem/join.html?token=${record.join_token}`;
+
+        try {
+          const response = await fetch('/.netlify/functions/send-game-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              game_system: 'mansion-mayhem',
+              template_name: 'game_invite',
+              to: record.cast_members.email,
+              data: {
+                cast_name: record.cast_members.full_name || record.cast_members.display_name,
+                game_title: game.title,
+                game_code: game.game_code,
+                game_description: game.description,
+                cast_count: game.max_cast_members,
+                episode_length: game.episode_length_days,
+                join_url: joinUrl
+              }
+            })
+          });
+
+          if (response.ok) {
+            successCount++;
+            // Update email sent status
+            await supabase
+              .from('mm_game_cast')
+              .update({
+                invite_email_sent: true,
+                invite_email_sent_at: new Date().toISOString()
+              })
+              .eq('id', record.id);
+          }
+        } catch (emailError) {
+          console.error('Email send error:', emailError);
+        }
+      }
+
+      showAlert('success', `Invitations sent to ${successCount}/${insertedRecords.length} cast members!`);
+
+      // Update game status to lobby
+      await supabase
+        .from('mm_games')
+        .update({
+          status: 'lobby',
+          lobby_opened_at: new Date().toISOString()
+        })
+        .eq('id', currentGameId);
+
+      // Reset selection
+      selectedCastIds.clear();
+      currentGameId = null;
+      document.getElementById('castSelectionCard').classList.add('hidden');
+      document.querySelectorAll('.cast-checkbox input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+      // Refresh games list
+      await loadGamesList();
+    }
+
+    // Load games list
+    async function loadGamesList() {
+      const { data: games, error } = await supabase
+        .from('mm_games')
+        .select('*, mm_game_cast(count)')
+        .in('status', ['setup', 'lobby', 'active', 'paused'])
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading games:', error);
+        document.getElementById('gamesList').innerHTML = '<div class="empty-state">Failed to load games</div>';
+        return;
+      }
+
+      const gamesContainer = document.getElementById('gamesList');
+      if (!games || games.length === 0) {
+        gamesContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">🎬</div><p>No active games. Create one to get started!</p></div>';
+        updateStats(0, 0, 0);
+        return;
+      }
+
+      gamesContainer.innerHTML = games.map(game => renderGameCard(game)).join('');
+
+      // Update stats
+      const activeCount = games.filter(g => g.status === 'active').length;
+      const lobbyCount = games.filter(g => g.status === 'lobby').length;
+      updateStats(games.length, activeCount, lobbyCount);
+    }
+
+    // Render game card
+    function renderGameCard(game) {
+      const joinPercentage = Math.round((game.cast_joined_count / game.max_cast_members) * 100);
+      const timeSince = getTimeSince(game.created_at);
+
+      let actions = '';
+      if (game.status === 'lobby') {
+        actions = `
+          <button class="btn btn-small btn-secondary" onclick="viewGame('${game.id}')">View Lobby</button>
+          <button class="btn btn-small btn-success" onclick="launchGame('${game.id}')">Launch</button>
+          <button class="btn btn-small btn-danger" onclick="cancelGame('${game.id}')">Cancel</button>
+        `;
+      } else if (game.status === 'active') {
+        actions = `
+          <button class="btn btn-small btn-secondary" onclick="viewGame('${game.id}')">View Game</button>
+          <button class="btn btn-small btn-secondary" onclick="manageGame('${game.id}')">Manage</button>
+          <button class="btn btn-small btn-danger" onclick="endGame('${game.id}')">End Game</button>
+        `;
+      } else if (game.status === 'setup') {
+        actions = `
+          <button class="btn btn-small btn-secondary" onclick="viewGame('${game.id}')">View</button>
+          <button class="btn btn-small btn-danger" onclick="cancelGame('${game.id}')">Delete</button>
+        `;
+      }
+
+      return `
+        <div class="game-card">
+          <div class="game-header">
+            <div class="game-code">${game.game_code}</div>
+            <div class="game-status ${game.status}">${game.status}</div>
+          </div>
+          <div class="game-title">${game.title}</div>
+          ${game.description ? `<div class="game-description">${game.description}</div>` : ''}
+          ${game.status === 'lobby' ? `
+            <div class="game-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${joinPercentage}%"></div>
+              </div>
+              <div class="progress-text">${game.cast_joined_count}/${game.max_cast_members} joined (${joinPercentage}%)</div>
+            </div>
+          ` : ''}
+          ${game.status === 'active' ? `
+            <div class="game-meta">
+              <div>📊 ${game.scenarios_launched_count} scenarios</div>
+              <div>💬 ${game.total_responses_count} responses</div>
+            </div>
+          ` : ''}
+          <div class="game-meta">
+            <div>⏱️ ${timeSince}</div>
+            <div>🎭 ${game.max_cast_members} cast</div>
+            <div>📅 ${game.episode_length_days} days</div>
+          </div>
+          <div class="game-actions">
+            ${actions}
+          </div>
+        </div>
+      `;
+    }
+
+    // Game actions
+    async function viewGame(gameId) {
+      window.location.href = `lobby.html?game=${gameId}`;
+    }
+
+    async function launchGame(gameId) {
+      if (!confirm('Launch this game? All joined cast members will be moved to active status and notified.')) {
+        return;
+      }
+
+      const { error } = await supabase
+        .from('mm_games')
+        .update({
+          status: 'active',
+          started_at: new Date().toISOString()
+        })
+        .eq('id', gameId);
+
+      if (error) {
+        showAlert('error', `Failed to launch game: ${error.message}`);
+        return;
+      }
+
+      // Send game_started emails
+      const { data: castMembers } = await supabase
+        .from('mm_game_cast')
+        .select('*, cast_members(*)')
+        .eq('game_id', gameId)
+        .eq('status', 'joined');
+
+      const { data: game } = await supabase
+        .from('mm_games')
+        .select('*')
+        .eq('id', gameId)
+        .single();
+
+      for (const member of castMembers) {
+        try {
+          await fetch('/.netlify/functions/send-game-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              game_system: 'mansion-mayhem',
+              template_name: 'game_started',
+              to: member.cast_members.email,
+              data: {
+                cast_name: member.cast_members.full_name || member.cast_members.display_name,
+                game_title: game.title,
+                game_code: game.game_code,
+                cast_portal_url: `${window.location.origin}/mansion-mayhem/cast-portal.html`
+              }
+            })
+          });
+        } catch (error) {
+          console.error('Error sending game started email:', error);
+        }
+      }
+
+      showAlert('success', 'Game launched successfully!');
+      await loadGamesList();
+    }
+
+    async function cancelGame(gameId) {
+      if (!confirm('Delete this game? This action cannot be undone.')) {
+        return;
+      }
+
+      const { error } = await supabase
+        .from('mm_games')
+        .delete()
+        .eq('id', gameId);
+
+      if (error) {
+        showAlert('error', `Failed to delete game: ${error.message}`);
+        return;
+      }
+
+      showAlert('success', 'Game deleted successfully');
+      await loadGamesList();
+    }
+
+    async function endGame(gameId) {
+      if (!confirm('End this game? It will be marked as completed.')) {
+        return;
+      }
+
+      const { error } = await supabase
+        .from('mm_games')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', gameId);
+
+      if (error) {
+        showAlert('error', `Failed to end game: ${error.message}`);
+        return;
+      }
+
+      showAlert('success', 'Game ended successfully');
+      await loadGamesList();
+    }
+
+    function manageGame(gameId) {
+      window.location.href = `game-detail.html?game=${gameId}`;
+    }
+
+    // Update stats
+    function updateStats(total, active, lobby) {
+      document.getElementById('totalGames').textContent = total;
+      document.getElementById('activeGames').textContent = active;
+      document.getElementById('lobbyGames').textContent = lobby;
+    }
+
+    // Setup realtime subscription
+    function setupRealtimeSubscription() {
+      supabase
+        .channel('games-changes')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'mm_games'
+        }, () => {
+          loadGamesList();
+        })
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'mm_game_cast'
+        }, () => {
+          loadGamesList();
+        })
+        .subscribe();
+    }
+
+    // Refresh games list
+    async function refreshGamesList() {
+      await loadGamesList();
+      showAlert('success', 'Games list refreshed');
+    }
+
+    // Helper: Show alert
+    function showAlert(type, message) {
+      const container = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      container.appendChild(alert);
+
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+
+    // Helper: Get time since
+    function getTimeSince(timestamp) {
+      const now = new Date();
+      const then = new Date(timestamp);
+      const diffMs = now - then;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 60) return `${diffMins} min ago`;
+      if (diffHours < 24) return `${diffHours} hours ago`;
+      return `${diffDays} days ago`;
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+  <script type="module" src="js/invite-gate.js"></script>
+</body>
+</html>

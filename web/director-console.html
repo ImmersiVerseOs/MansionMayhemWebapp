@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Director Console | MANSION MAYHEM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/navigation.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111111;
+      --bg-elevated: #1a1a1a;
+      --bg-sidebar: #0d0d0d;
+      --border: #2a2a2a;
+      --text: #ffffff;
+      --text-dim: #888888;
+      --text-muted: #555555;
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --rose: #e91e63;
+      --rose-dark: #ad1457;
+      --purple: #9c27b0;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .app-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 340px;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-header {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .sidebar-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .sidebar-logo span {
+      display: block;
+      font-size: 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 4px;
+    }
+    .nav-section { margin-bottom: 24px; }
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 20px;
+      margin-bottom: 8px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .nav-item:hover {
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent);
+      color: var(--gold);
+      border-left: 3px solid var(--gold);
+    }
+    .nav-icon { font-size: 18px; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--rose);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .main-content {
+      padding: 32px;
+      overflow-y: auto;
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .page-subtitle {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--bg);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+    }
+    .btn-secondary {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      border-color: var(--gold);
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .quick-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .quick-stat-value.gold { color: var(--gold); }
+    .quick-stat-value.rose { color: var(--rose); }
+    .quick-stat-value.success { color: var(--success); }
+    .quick-stat-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .scenario-builder {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    .builder-header {
+      background: linear-gradient(135deg, var(--bg-elevated), var(--bg-card));
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .builder-title {
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .builder-body { padding: 24px; }
+    .form-group { margin-bottom: 24px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    .form-select, .form-input {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .form-select:focus, .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    .form-textarea {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 120px;
+    }
+    .cast-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .cast-chip {
+      background: var(--bg-elevated);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .cast-chip:hover { border-color: var(--gold); }
+    .cast-chip.selected {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.1);
+    }
+    .cast-chip-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      margin: 0 auto 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .cast-chip-name {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .cast-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .cast-actions button {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .cast-actions button:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .option-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .option-input {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+    }
+    .option-tag-select {
+      width: 140px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+    }
+    .option-remove {
+      width: 36px;
+      height: 36px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .option-remove:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+    .add-option-btn {
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text-dim);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .add-option-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .builder-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .builder-meta {
+      display: flex;
+      gap: 20px;
+    }
+    .meta-item {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    .meta-item strong { color: var(--text); }
+    .active-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-title {
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-badge {
+      background: var(--rose);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 10px;
+    }
+    .scenario-item {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .scenario-item:hover { background: var(--bg-elevated); }
+    .scenario-item:last-child { border-bottom: none; }
+    .scenario-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .scenario-item-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .scenario-item-timer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--warning);
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--success));
+      border-radius: 3px;
+    }
+    .scenario-item-stats {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .scenario-item-stats strong { color: var(--success); }
+    .right-sidebar {
+      background: var(--bg-sidebar);
+      border-left: 1px solid var(--border);
+      padding: 24px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .response-monitor { padding: 0 16px; flex: 1; }
+    .monitor-header { margin-bottom: 20px; }
+    .monitor-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .monitor-subtitle {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .response-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .response-item {
+      background: var(--bg-elevated);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .response-item.submitted { border-left: 3px solid var(--success); }
+    .response-item.pending {
+      border-left: 3px solid var(--warning);
+      opacity: 0.7;
+    }
+    .response-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .response-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .response-name {
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .response-status {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .response-status.submitted { color: var(--success); }
+    .response-status.pending { color: var(--warning); }
+    .response-choice {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      padding: 8px 10px;
+      background: var(--bg);
+      border-radius: 6px;
+    }
+    .response-voice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--rose);
+    }
+    .play-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--rose);
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 10px;
+    }
+    .generate-section {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .generate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--rose), var(--purple));
+      border: none;
+      color: white;
+      padding: 16px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(233, 30, 99, 0.3);
+    }
+    .generate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    @media (max-width: 1200px) {
+      .app-layout { grid-template-columns: 220px 1fr 300px; }
+      .cast-grid { grid-template-columns: repeat(4, 1fr); }
+      .quick-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 992px) {
+      .app-layout { grid-template-columns: 1fr; }
+      .sidebar, .right-sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- MANSION MAYHEM - Persistent Navigation Bar -->
+  <!-- Navigation (loaded from include) -->
+  <div id="globalNavPlaceholder"></div>
+  <script>
+    fetch('/includes/global-nav.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('globalNavPlaceholder').innerHTML = data;
+      });
+  </script>
+  <!-- Navigation loaded - displays role-based links, notifications, and user menu -->
+
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          MANSION MAYHEM
+          <span>Director Console</span>
+        </div>
+      </div>
+      <nav>
+        <div class="nav-section">
+          <div class="nav-label">Scenarios</div>
+          <a href="director-console.html" class="nav-item active"><span class="nav-icon">🎬</span>Create Scenario</a>
+          <a href="director-console.html?view=active" class="nav-item"><span class="nav-icon">📋</span>Active Scenarios<span class="nav-badge">2</span></a>
+          <a href="director-console.html?view=past" class="nav-item"><span class="nav-icon">📁</span>Past Scenarios</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">Cast</div>
+          <a href="cast-portal.html" class="nav-item"><span class="nav-icon">👥</span>All Cast (20)</a>
+          <a href="applications-admin.html" class="nav-item"><span class="nav-icon">📊</span>Response Rates</a>
+          <a href="pages/tea-room.html" class="nav-item"><span class="nav-icon">🎤</span>Voice Notes</a>
+          <a href="pages/voice-moderation-simple.html" class="nav-item"><span class="nav-icon">🛡️</span>Moderate Voices</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">Content</div>
+          <a href="episode-editor.html" class="nav-item"><span class="nav-icon">🎥</span>Generate Scenes</a>
+          <a href="episode-editor.html" class="nav-item"><span class="nav-icon">✂️</span>Episode Editor</a>
+          <a href="episode-editor.html?view=social" class="nav-item"><span class="nav-icon">📱</span>Social Posts</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">Analytics</div>
+          <a href="leaderboard.html" class="nav-item"><span class="nav-icon">📈</span>Engagement</a>
+          <a href="voting.html" class="nav-item"><span class="nav-icon">🗳️</span>Audience Votes</a>
+        </div>
+      </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Create Scenario</h1>
+          <p class="page-subtitle">Trigger drama and capture authentic reactions</p>
+        </div>
+        <div class="header-actions">
+          <select id="gameFilter" class="form-select" style="width: 250px; margin-right: 12px;" onchange="filterByGame()">
+            <option value="all">All Games</option>
+            <option value="legacy">Legacy (No Game)</option>
+          </select>
+          <button class="btn btn-secondary">📋 Templates</button>
+          <button class="btn btn-secondary">👁️ Preview</button>
+        </div>
+      </div>
+      
+      <div class="quick-stats">
+        <div class="quick-stat"><div class="quick-stat-value gold" id="stat-cast-members">-</div><div class="quick-stat-label">Cast Members</div></div>
+        <div class="quick-stat"><div class="quick-stat-value rose" id="stat-active-scenarios">-</div><div class="quick-stat-label">Active Scenarios</div></div>
+        <div class="quick-stat"><div class="quick-stat-value success" id="stat-response-rate">-%</div><div class="quick-stat-label">Avg Response Rate</div></div>
+        <div class="quick-stat"><div class="quick-stat-value gold" id="stat-voice-notes">-</div><div class="quick-stat-label">Voice Notes</div></div>
+      </div>
+      
+      <div class="scenario-builder">
+        <div class="builder-header">
+          <div class="builder-title"><span>🔥</span> New Scenario</div>
+          <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 12px;">Load Template</button>
+        </div>
+        <div class="builder-body">
+          <div class="form-group">
+            <label class="form-label">Scenario Type</label>
+            <select class="form-select" id="scenarioType">
+              <option value="">Select a type...</option>
+              <option value="confrontation">🔥 Confrontation</option>
+              <option value="power">👑 Power Shift</option>
+              <option value="betrayal">🗡️ Betrayal</option>
+              <option value="revelation">🎭 Revelation</option>
+              <option value="alliance">🤝 Alliance Test</option>
+              <option value="elimination">🗳️ Elimination</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">📍 Location</label>
+            <select class="form-select" id="scenarioLocation" required>
+              <option value="">Select mansion location...</option>
+              <option value="pool">🏊 Pool</option>
+              <option value="kitchen">🍳 Kitchen</option>
+              <option value="living_room">🛋️ Living Room</option>
+              <option value="hallway">🚪 Hallway</option>
+              <option value="gym">💪 Gym</option>
+              <option value="master_bedroom">🛏️ Master Bedroom</option>
+              <option value="dining_room">🍽️ Dining Room</option>
+              <option value="wine_cellar">🍷 Wine Cellar</option>
+              <option value="rooftop">🌆 Rooftop</option>
+              <option value="confessional">🎙️ Confessional</option>
+              <option value="game_room">🎮 Game Room</option>
+              <option value="spa">🧖 Spa</option>
+              <option value="garage">🚗 Garage</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Game</label>
+            <select class="form-select" id="scenarioGame" onchange="filterCastByGame()">
+              <option value="">Select game...</option>
+              <option value="legacy">Legacy / All Cast (no specific game)</option>
+            </select>
+            <p style="font-size: 12px; color: var(--text-dim); margin-top: 8px;">
+              Select a specific game or choose "Legacy" for scenarios visible to all cast members
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Target Cast Members</label>
+            <div class="cast-grid" id="castGrid">
+              <!-- Cast members loaded from database -->
+            </div>
+            <div class="cast-actions">
+              <button type="button" onclick="document.querySelectorAll('.cast-chip').forEach(c=>c.classList.add('selected')); updateSelectedCount();">Select All</button>
+              <button type="button" onclick="document.querySelectorAll('.cast-chip').forEach(c=>c.classList.remove('selected')); updateSelectedCount();">Clear</button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Scenario Prompt</label>
+            <textarea class="form-textarea" id="scenarioPrompt" placeholder="Write the situation the cast will respond to...
+
+Describe the dramatic moment or challenge the cast members need to react to."></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Response Options</label>
+            <div class="options-list" id="optionsList">
+              <div class="option-row">
+                <input type="text" class="option-input" placeholder="Option 1: Describe the first response option">
+                <select class="option-tag-select"><option>🔥 Aggressive</option><option>🕊️ Diplomatic</option><option>🧠 Strategic</option><option>😶 Passive</option></select>
+                <button class="option-remove" onclick="this.parentElement.remove()">×</button>
+              </div>
+              <div class="option-row">
+                <input type="text" class="option-input" placeholder="Option 2: Describe the second response option">
+                <select class="option-tag-select"><option>🔥 Aggressive</option><option>🕊️ Diplomatic</option><option>🧠 Strategic</option><option>😶 Passive</option></select>
+                <button class="option-remove" onclick="this.parentElement.remove()">×</button>
+              </div>
+            </div>
+            <button class="add-option-btn" onclick="addResponseOption()">+ Add Another Option</button>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Response Deadline</label>
+              <select class="form-select" id="scenarioDeadline">
+                <option value="6">6 hours</option>
+                <option value="12">12 hours</option>
+                <option value="24" selected>24 hours</option>
+                <option value="48">48 hours</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Voice Note</label>
+              <select class="form-select" id="scenarioVoiceNote">
+                <option value="encouraged" selected>Encouraged</option>
+                <option value="required">Required</option>
+                <option value="optional">Optional</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="builder-footer">
+          <div class="builder-meta">
+            <span class="meta-item">Targets: <strong id="selectedCount">0 cast</strong></span>
+            <span class="meta-item">Deadline: <strong id="selectedDeadline">24h</strong></span>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary">Save Draft</button>
+            <button class="btn btn-primary" id="launchBtn">🚀 Launch Scenario</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="active-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>📋</span> Active Scenarios<span class="panel-badge" id="active-scenarios-count">0</span></div>
+        </div>
+
+        <!-- Location Filter Tabs -->
+        <div class="location-filter" style="display: flex; gap: 0.5rem; padding: 1rem; flex-wrap: wrap; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <button class="location-tab active" onclick="filterByLocation('all')" data-location="all" style="padding: 0.5rem 1rem; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; color: white; font-size: 0.875rem; cursor: pointer; transition: all 0.3s;">
+            🏰 All <span class="count">0</span>
+          </button>
+          <button class="location-tab" onclick="filterByLocation('pool')" data-location="pool" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 0.875rem; cursor: pointer; transition: all 0.3s;">
+            🏊 Pool <span class="count">0</span>
+          </button>
+          <button class="location-tab" onclick="filterByLocation('kitchen')" data-location="kitchen" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 0.875rem; cursor: pointer; transition: all 0.3s;">
+            🍳 Kitchen <span class="count">0</span>
+          </button>
+          <button class="location-tab" onclick="filterByLocation('living_room')" data-location="living_room" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 0.875rem; cursor: pointer; transition: all 0.3s;">
+            🛋️ Living Room <span class="count">0</span>
+          </button>
+          <button class="location-tab" onclick="filterByLocation('gym')" data-location="gym" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 0.875rem; cursor: pointer; transition: all 0.3s;">
+            💪 Gym <span class="count">0</span>
+          </button>
+          <button class="location-tab" onclick="filterByLocation('confessional')" data-location="confessional" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 0.875rem; cursor: pointer; transition: all 0.3s;">
+            🎙️ Confessional <span class="count">0</span>
+          </button>
+          <button class="location-tab" onclick="filterByLocation('other')" data-location="other" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 0.875rem; cursor: pointer; transition: all 0.3s;">
+            📍 Other <span class="count">0</span>
+          </button>
+        </div>
+
+        <div id="active-scenarios-list">
+          <div style="padding: 20px; text-align: center; color: var(--text-dim);">Loading scenarios...</div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Right Sidebar -->
+    <aside class="right-sidebar">
+      <!-- Data loaded via JavaScript from Supabase -->
+      <div class="response-monitor">
+        <div class="monitor-header">
+          <div class="monitor-title">Response Monitor</div>
+          <div class="monitor-subtitle" id="monitorSubtitle">Select active scenario</div>
+        </div>
+        <div class="response-list" id="responseList">
+          <div style="padding: 20px; text-align: center; color: var(--text-dim); font-size: 12px;">
+            No active scenarios
+          </div>
+        </div>
+      </div>
+      <div class="generate-section">
+        <button class="generate-btn" id="generateScenesBtn"><span>🎥</span> Generate Scenes<span style="font-weight:400;font-size:12px;" id="responseCount">(0/0)</span></button>
+        <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:10px;">Wait for all or generate now</p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Supabase Integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Wait for Supabase library to load, then initialize client
+    (function initSupabase() {
+      if (typeof window.supabase === 'undefined') {
+        setTimeout(initSupabase, 50);
+        return;
+      }
+
+      // Initialize Supabase Client (global scope for navigation.js)
+      var supabase = window.supabase.createClient(
+        'https://mllqzeaxqusoryteaxzg.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sbHF6ZWF4cXVzb3J5dGVheHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODA1NzAsImV4cCI6MjA4NjA1NjU3MH0.s9CAe91gUG8uZ7Nrjd1pIX9YYvpNKa2lOrt6HDUarec'
+      );
+      window.supabase = supabase; // For legacy code
+      window.supabaseClient = supabase; // For navigation.js
+    })();
+
+    // currentUser is declared in navigation.js
+    let allCastMembers = [];
+    let allGames = [];
+    let selectedGameFilter = 'all';
+    let activeScenarios = [];
+
+    // ========================================
+    // AUTHENTICATION & AUTHORIZATION
+    // ========================================
+    async function checkAuth() {
+      // navigation.js already handles auth - this is just to get current user
+      // If navigation.js let us get here, we're authenticated
+
+      try {
+        // Wait a moment for navigation.js to set currentUser
+        let attempts = 0;
+        while (!currentUser && attempts < 20) {
+          await new Promise(resolve => setTimeout(resolve, 50));
+          attempts++;
+        }
+
+        if (!currentUser) {
+          // Get user directly from Supabase
+          const { data: { user }, error } = await supabase.auth.getUser();
+          if (user) {
+            currentUser = user;
+          } else {
+            console.log('No user session found, but continuing anyway');
+            // Don't block - navigation.js will redirect if needed
+            return true;
+          }
+        }
+
+        console.log('✅ Director console loaded for user:', currentUser?.email);
+        return true;
+
+      } catch (err) {
+        console.error('Auth check error:', err);
+        // Don't block on errors - let navigation.js handle redirects
+        return true;
+      }
+    }
+
+    // ========================================
+    // LOAD GAMES
+    // ========================================
+    async function loadGames() {
+      const { data, error } = await supabase
+        .from('mm_games')
+        .select('*')
+        .in('status', ['lobby', 'active', 'paused'])
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading games:', error);
+        return;
+      }
+
+      allGames = data || [];
+
+      // Populate game filter dropdown
+      const gameFilter = document.getElementById('gameFilter');
+      const scenarioGame = document.getElementById('scenarioGame');
+
+      // Add games to both dropdowns
+      allGames.forEach(game => {
+        const option1 = document.createElement('option');
+        option1.value = game.id;
+        option1.textContent = `${game.game_code} - ${game.title}`;
+        gameFilter.appendChild(option1);
+
+        const option2 = document.createElement('option');
+        option2.value = game.id;
+        option2.textContent = `${game.game_code} - ${game.title}`;
+        scenarioGame.appendChild(option2);
+      });
+    }
+
+    function filterByGame() {
+      selectedGameFilter = document.getElementById('gameFilter').value;
+      loadActiveScenarios();
+    }
+
+    async function filterCastByGame() {
+      const gameId = document.getElementById('scenarioGame').value;
+
+      if (!gameId || gameId === 'legacy') {
+        // Show all cast members
+        renderCastGrid(allCastMembers);
+        return;
+      }
+
+      // Filter cast members by game
+      const { data, error } = await supabase
+        .from('mm_game_cast')
+        .select('cast_member_id, cast_members(*)')
+        .eq('game_id', gameId)
+        .in('status', ['joined', 'active']);
+
+      if (error) {
+        console.error('Error filtering cast by game:', error);
+        return;
+      }
+
+      const gameCastMembers = data.map(gc => gc.cast_members);
+      renderCastGrid(gameCastMembers);
+    }
+
+    // ========================================
+    // LOAD CAST MEMBERS
+    // ========================================
+    async function loadCastMembers() {
+      const { data, error } = await supabase
+        .from('cast_members')
+        .select('*')
+        .order('full_name', { ascending: true });
+
+      if (error) {
+        console.error('Error loading cast members:', error);
+        return;
+      }
+
+      allCastMembers = data;
+      renderCastGrid(data);
+      updateQuickStats();
+    }
+
+    function renderCastGrid(castMembers) {
+      const castGrid = document.querySelector('.cast-grid');
+      if (!castGrid) return;
+
+      castGrid.innerHTML = castMembers.map(member => {
+        const name = member.full_name || member.display_name || member.name || 'Unknown';
+        return `
+          <div class="cast-chip" data-member-id="${member.id}" onclick="toggleCastSelection(this)">
+            <div class="cast-chip-avatar">${getInitials(name)}</div>
+            <div class="cast-chip-name">${name.split(' ')[0]}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getInitials(name) {
+      if (!name) return '??';
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function toggleCastSelection(element) {
+      element.classList.toggle('selected');
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      const selected = document.querySelectorAll('.cast-chip.selected').length;
+      const metaItem = document.querySelector('.builder-meta .meta-item:first-child strong');
+      if (metaItem) {
+        metaItem.textContent = `${selected} cast`;
+      }
+    }
+
+    // ========================================
+    // LOAD ACTIVE SCENARIOS
+    // ========================================
+    async function loadActiveScenarios() {
+      // Load scenarios with responses
+      const { data: scenarios, error: scenariosError } = await supabase
+        .from('scenarios')
+        .select('*')
+        .eq('status', 'active')
+        .order('deadline_at', { ascending: true });
+
+      if (scenariosError) {
+        console.error('Error loading active scenarios:', scenariosError);
+        return;
+      }
+
+      // Load response counts for each scenario
+      const scenariosWithStats = await Promise.all(scenarios.map(async (scenario) => {
+        let count = 0;
+        try {
+          const result = await supabase
+            .from('scenario_responses')
+            .select('*', { count: 'exact', head: true })
+            .eq('scenario_id', scenario.id);
+          count = result.count || 0;
+        } catch (err) {
+          console.log('Could not load response count:', err);
+        }
+
+        return {
+          ...scenario,
+          response_count: count,
+          target_count: scenario.total_targets || 0
+        };
+      }));
+
+      activeScenarios = scenariosWithStats;
+      renderActiveScenarios(scenariosWithStats);
+      updateQuickStats();
+
+      // Update the badge count
+      const badge = document.querySelector('.nav-item .nav-badge');
+      if (badge) {
+        badge.textContent = scenariosWithStats.length;
+      }
+    }
+
+    function renderActiveScenarios(scenarios) {
+      // Update badge count
+      const badgeEl = document.getElementById('active-scenarios-count');
+      if (badgeEl) badgeEl.textContent = scenarios.length;
+
+      // Render scenarios list
+      const listContainer = document.getElementById('active-scenarios-list');
+      if (!listContainer) return;
+
+      if (!scenarios || scenarios.length === 0) {
+        listContainer.innerHTML = `
+          <div style="padding: 40px 20px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">✅</div>
+            <div style="font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem;">All Clear!</div>
+            <div style="color: var(--text-dim);">No active scenarios right now.</div>
+          </div>
+        `;
+        return;
+      }
+
+      const scenariosHtml = scenarios.map(scenario => {
+        const totalResponses = scenario.response_count || 0;
+        const totalTargets = scenario.target_count || scenario.max_participants || 0;
+        const progressPercent = totalTargets > 0 ? Math.round((totalResponses / totalTargets) * 100) : 0;
+
+        const timeRemaining = calculateTimeRemaining(scenario.deadline_at);
+        const locationBadge = getLocationBadge(scenario.location);
+
+        return `
+          <div class="scenario-item" onclick="viewScenarioDetails('${scenario.id}')" data-location="${scenario.location || 'other'}">
+            <div class="scenario-item-header">
+              <span class="scenario-item-title">${getScenarioIcon(scenario.scenario_type)} "${scenario.title}"</span>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                ${locationBadge}
+                <span class="scenario-item-timer">⏱️ ${timeRemaining}</span>
+              </div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width: ${progressPercent}%;"></div></div>
+            <div class="scenario-item-stats">Responses: <strong>${totalResponses}${totalTargets > 0 ? '/' + totalTargets : ''}</strong></div>
+          </div>
+        `;
+      }).join('');
+
+      listContainer.innerHTML = scenariosHtml;
+
+      // Update location counts after rendering
+      updateLocationCounts();
+
+      // Apply current filter
+      if (currentLocationFilter !== 'all') {
+        filterByLocation(currentLocationFilter);
+      }
+    }
+
+    function getScenarioIcon(type) {
+      const icons = {
+        'confession': '🎭',
+        'confrontation': '🔥',
+        'alliance': '🤝',
+        'challenge': '⚡',
+        'elimination': '🗳️'
+      };
+      return icons[type] || '📝';
+    }
+
+    function getLocationBadge(location) {
+      const locationEmojis = {
+        pool: '🏊', kitchen: '🍳', living_room: '🛋️', hallway: '🚪',
+        gym: '💪', master_bedroom: '🛏️', dining_room: '🍽️',
+        wine_cellar: '🍷', rooftop: '🌆', confessional: '🎙️',
+        game_room: '🎮', spa: '🧖', garage: '🚗'
+      };
+
+      const emoji = locationEmojis[location] || '📍';
+      const label = (location || 'other').replace('_', ' ').toUpperCase();
+
+      return `<span style="padding: 0.25rem 0.75rem; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 6px; font-size: 0.75rem; font-weight: 600; color: var(--color-gold);">${emoji} ${label}</span>`;
+    }
+
+    let currentLocationFilter = 'all';
+
+    function filterByLocation(location) {
+      currentLocationFilter = location;
+
+      // Update active tab
+      document.querySelectorAll('.location-tab').forEach(tab => {
+        if (tab.dataset.location === location) {
+          tab.classList.add('active');
+          tab.style.background = 'rgba(212,175,55,0.1)';
+          tab.style.borderColor = 'rgba(212,175,55,0.3)';
+          tab.style.color = 'white';
+        } else {
+          tab.classList.remove('active');
+          tab.style.background = 'rgba(255,255,255,0.02)';
+          tab.style.borderColor = 'rgba(255,255,255,0.05)';
+          tab.style.color = 'rgba(255,255,255,0.7)';
+        }
+      });
+
+      // Filter scenarios
+      document.querySelectorAll('.scenario-item').forEach(item => {
+        const itemLocation = item.dataset.location || 'other';
+        if (location === 'all' || itemLocation === location) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      // Update counts
+      updateLocationCounts();
+    }
+
+    function updateLocationCounts() {
+      const locations = ['all', 'pool', 'kitchen', 'living_room', 'gym', 'confessional', 'other'];
+      const scenarioItems = document.querySelectorAll('.scenario-item');
+
+      locations.forEach(loc => {
+        const tab = document.querySelector(`.location-tab[data-location="${loc}"]`);
+        if (!tab) return;
+
+        let count;
+        if (loc === 'all') {
+          count = scenarioItems.length;
+        } else if (loc === 'other') {
+          count = Array.from(scenarioItems).filter(item => {
+            const itemLoc = item.dataset.location;
+            return !itemLoc || !['pool', 'kitchen', 'living_room', 'gym', 'confessional', 'hallway', 'master_bedroom', 'dining_room', 'wine_cellar', 'rooftop', 'game_room', 'spa', 'garage'].includes(itemLoc);
+          }).length;
+        } else {
+          count = Array.from(scenarioItems).filter(item => item.dataset.location === loc).length;
+        }
+
+        const countSpan = tab.querySelector('.count');
+        if (countSpan) {
+          countSpan.textContent = count;
+        }
+      });
+    }
+
+    function calculateTimeRemaining(deadlineAt) {
+      if (!deadlineAt) return '--:--:--';
+
+      const deadline = new Date(deadlineAt);
+      const now = new Date();
+      const diff = deadline - now;
+
+      if (diff <= 0) return 'Expired';
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    // ========================================
+    // CREATE NEW SCENARIO
+    // ========================================
+    async function launchScenario() {
+      const scenarioType = document.getElementById('scenarioType')?.value;
+      const location = document.getElementById('scenarioLocation')?.value;
+      const promptText = document.getElementById('scenarioPrompt')?.value;
+      const deadlineHours = document.getElementById('scenarioDeadline')?.value || 24;
+      const voiceSetting = document.getElementById('scenarioVoiceNote')?.value || 'encouraged';
+
+      const selectedCastIds = Array.from(document.querySelectorAll('.cast-chip.selected'))
+        .map(chip => chip.dataset.memberId)
+        .filter(Boolean);
+
+      // Get response options
+      const optionInputs = document.querySelectorAll('.option-input');
+      const optionTags = document.querySelectorAll('.option-tag-select');
+      const responseOptions = [];
+
+      optionInputs.forEach((input, index) => {
+        if (input.value.trim()) {
+          responseOptions.push({
+            option_number: index + 1,
+            option_text: input.value.trim(),
+            option_tag: optionTags[index]?.selectedOptions[0]?.text.split(' ')[1]?.toLowerCase() || 'custom'
+          });
+        }
+      });
+
+      // Validation
+      if (!scenarioType) {
+        alert('Please select a scenario type');
+        return;
+      }
+
+      if (!location) {
+        alert('Please select a location');
+        return;
+      }
+      if (!promptText || promptText.trim().length < 10) {
+        alert('Please write a scenario prompt (at least 10 characters)');
+        return;
+      }
+      if (selectedCastIds.length === 0) {
+        alert('Please select at least one cast member');
+        return;
+      }
+      if (responseOptions.length < 2) {
+        alert('Please provide at least 2 response options');
+        return;
+      }
+
+      const launchBtn = document.querySelector('.btn-primary');
+      launchBtn.disabled = true;
+      launchBtn.innerHTML = '⏳ Launching...';
+
+      try {
+        // Get selected game
+        const selectedGame = document.getElementById('scenarioGame')?.value;
+        const gameId = (selectedGame && selectedGame !== 'legacy') ? selectedGame : null;
+
+        // Insert scenario
+        const { data: scenario, error: scenarioError } = await supabase
+          .from('scenarios')
+          .insert({
+            title: promptText.slice(0, 100),
+            description: promptText, // Required field - use prompt as description
+            episode_number: 4, // You can make this dynamic
+            scenario_type: scenarioType,
+            location: location,
+            prompt_text: promptText,
+            deadline_hours: parseInt(deadlineHours),
+            voice_note_setting: voiceSetting,
+            game_id: gameId,
+            status: 'active',
+            launched_at: new Date().toISOString(),
+            deadline_at: new Date(Date.now() + parseInt(deadlineHours) * 60 * 60 * 1000).toISOString(),
+            total_targets: selectedCastIds.length
+          })
+          .select()
+          .single();
+
+        if (scenarioError) throw scenarioError;
+
+        // Insert scenario targets
+        const targets = selectedCastIds.map(castId => ({
+          scenario_id: scenario.id,
+          cast_member_id: castId,
+          notified_at: new Date().toISOString()
+        }));
+
+        const { error: targetsError } = await supabase
+          .from('scenario_targets')
+          .insert(targets);
+
+        if (targetsError) throw targetsError;
+
+        // Insert response options
+        const options = responseOptions.map(opt => ({
+          scenario_id: scenario.id,
+          ...opt
+        }));
+
+        const { error: optionsError } = await supabase
+          .from('response_options')
+          .insert(options);
+
+        if (optionsError) throw optionsError;
+
+        alert(`✅ Scenario launched successfully! ${selectedCastIds.length} cast members will be notified.`);
+
+        // Reset form
+        resetScenarioForm();
+
+        // Reload active scenarios
+        await loadActiveScenarios();
+
+      } catch (error) {
+        console.error('Error launching scenario:', error);
+        alert('Failed to launch scenario: ' + error.message);
+      } finally {
+        launchBtn.disabled = false;
+        launchBtn.innerHTML = '🚀 Launch Scenario';
+      }
+    }
+
+    function resetScenarioForm() {
+      document.querySelector('.form-textarea').value = '';
+      document.querySelectorAll('.option-input').forEach(input => input.value = '');
+      document.querySelectorAll('.cast-chip').forEach(chip => chip.classList.remove('selected'));
+      updateSelectedCount();
+    }
+
+    // ========================================
+    // REAL-TIME RESPONSE MONITORING
+    // ========================================
+    let responseSubscription = null;
+
+    async function loadResponseMonitor(scenarioId) {
+      if (!scenarioId) {
+        // Get the first active scenario
+        if (activeScenarios.length > 0) {
+          scenarioId = activeScenarios[0].id;
+        } else {
+          return;
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('scenario_responses')
+        .select(`
+          *,
+          profiles (
+            email,
+            role
+          )
+        `)
+        .eq('scenario_id', scenarioId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading responses:', error);
+        return;
+      }
+
+      renderResponseMonitor(data);
+
+      // Subscribe to real-time updates
+      subscribeToResponses(scenarioId);
+    }
+
+    function renderResponseMonitor(responses) {
+      const container = document.querySelector('.response-list');
+      if (!container) return;
+
+      container.innerHTML = responses.map(response => {
+        const isSubmitted = response.status === 'submitted';
+        const castName = response.cast_members?.name || 'Unknown';
+        const initials = getInitials(castName);
+        const choiceText = response.custom_response || response.response_options?.option_text || 'Pending';
+
+        return `
+          <div class="response-item ${isSubmitted ? 'submitted' : 'pending'}">
+            <div class="response-header">
+              <div class="response-avatar">${initials}</div>
+              <div class="response-name">${castName.split(' ')[0]}</div>
+              <span class="response-status ${isSubmitted ? 'submitted' : 'pending'}">
+                ${isSubmitted ? '✓ Submitted' : '⏳ Pending'}
+              </span>
+            </div>
+            ${isSubmitted ? `
+              <div class="response-choice">${choiceText}</div>
+              ${response.voice_note_url ? `
+                <div class="response-voice">
+                  <button class="play-btn" onclick="playVoiceNote('${response.voice_note_url}')">▶</button>
+                  Voice note: ${response.voice_note_duration || '0:00'}
+                </div>
+              ` : ''}
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function subscribeToResponses(scenarioId) {
+      // Unsubscribe from previous channel
+      if (responseSubscription) {
+        supabase.removeChannel(responseSubscription);
+      }
+
+      // Subscribe to new responses
+      responseSubscription = supabase
+        .channel(`scenario_${scenarioId}`)
+        .on('postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'scenario_responses',
+            filter: `scenario_id=eq.${scenarioId}`
+          },
+          (payload) => {
+            console.log('Response update:', payload);
+            loadResponseMonitor(scenarioId);
+          }
+        )
+        .subscribe();
+    }
+
+    function playVoiceNote(url) {
+      if (!url) return;
+      const audio = new Audio(url);
+      audio.play();
+    }
+
+    // ========================================
+    // UPDATE QUICK STATS
+    // ========================================
+    function updateQuickStats() {
+      // Cast members count
+      const castEl = document.getElementById('stat-cast-members');
+      if (castEl) castEl.textContent = allCastMembers.length;
+
+      // Active scenarios count
+      const scenariosEl = document.getElementById('stat-active-scenarios');
+      if (scenariosEl) scenariosEl.textContent = activeScenarios.length;
+
+      // Calculate average response rate
+      let totalTargets = 0;
+      let totalResponses = 0;
+      activeScenarios.forEach(scenario => {
+        totalTargets += scenario.scenario_targets?.length || 0;
+        totalResponses += scenario.scenario_responses?.filter(r => r.status === 'submitted').length || 0;
+      });
+      const avgRate = totalTargets > 0 ? Math.round((totalResponses / totalTargets) * 100) : 0;
+      const rateEl = document.getElementById('stat-response-rate');
+      if (rateEl) rateEl.textContent = avgRate + '%';
+
+      // Count voice notes
+      let voiceCount = 0;
+      activeScenarios.forEach(scenario => {
+        voiceCount += scenario.scenario_responses?.filter(r => r.voice_note_url).length || 0;
+      });
+      const voiceEl = document.getElementById('stat-voice-notes');
+      if (voiceEl) voiceEl.textContent = voiceCount;
+    }
+
+    // ========================================
+    // UTILITY FUNCTIONS
+    // ========================================
+    function viewScenarioDetails(scenarioId) {
+      window.location.href = `pages/scenario-response.html?id=${scenarioId}`;
+    }
+
+    function addResponseOption() {
+      const optionsList = document.getElementById('optionsList');
+      const optionCount = optionsList.children.length + 1;
+      const newOption = document.createElement('div');
+      newOption.className = 'option-row';
+      newOption.innerHTML = `
+        <input type="text" class="option-input" placeholder="Option ${optionCount}: Describe the response option">
+        <select class="option-tag-select">
+          <option>🔥 Aggressive</option>
+          <option>🕊️ Diplomatic</option>
+          <option>🧠 Strategic</option>
+          <option>😶 Passive</option>
+        </select>
+        <button class="option-remove" onclick="this.parentElement.remove()">×</button>
+      `;
+      optionsList.appendChild(newOption);
+    }
+
+    // ========================================
+    // INITIALIZE APP
+    // ========================================
+    async function init() {
+      const isAuthorized = await checkAuth();
+      if (!isAuthorized) return;
+
+      await loadGames();
+      await loadCastMembers();
+      await loadActiveScenarios();
+
+      if (activeScenarios.length > 0) {
+        await loadResponseMonitor(activeScenarios[0].id);
+      }
+
+      // Attach event listener to launch button
+      const launchBtn = document.querySelector('.btn-primary');
+      if (launchBtn) {
+        launchBtn.addEventListener('click', launchScenario);
+      }
+
+      // Update timers every second
+      setInterval(() => {
+        if (activeScenarios.length > 0) {
+          renderActiveScenarios(activeScenarios);
+        }
+      }, 1000);
+    }
+
+    // Start the app - wait for navigation.js to initialize first
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(init, 100); // Small delay to let navigation.js finish
+      });
+    } else {
+      setTimeout(init, 100);
+    }
+  </script>
+  <script type="module" src="js/invite-gate.js"></script>
+  <script src="/js/navigation.js"></script>
+</body>
+</html>

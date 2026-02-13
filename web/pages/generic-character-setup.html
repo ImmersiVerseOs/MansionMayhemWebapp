@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create AI Character - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --color-dark: #0a0a0a;
+      --color-gold: #D4AF37;
+      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+    }
+    
+    .nav-logo-image {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-logo-image:hover {
+      transform: scale(1.1);
+    }
+
+    .nav-logo-text {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .main-container {
+      min-height: 100vh;
+      padding: 8rem 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .header-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .page-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .form-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .form-group {
+      margin-bottom: 2rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.75rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-gold);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .option-card {
+      position: relative;
+    }
+    
+    .option-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .option-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.5rem 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .option-label:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+    }
+    
+    .option-card input[type="radio"]:checked + .option-label {
+      background: rgba(212, 175, 55, 0.1);
+      border-color: var(--color-gold);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+    }
+    
+    .option-icon {
+      font-size: 2.5rem;
+    }
+    
+    .option-text {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .color-option {
+      position: relative;
+      aspect-ratio: 1;
+    }
+    
+    .color-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .color-label {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    
+    .color-label:hover {
+      transform: scale(1.1);
+      border-color: white;
+    }
+    
+    .color-option input[type="radio"]:checked + .color-label {
+      border-color: var(--color-gold);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+      transform: scale(1.15);
+    }
+    
+    .preview-sidebar {
+      position: sticky;
+      top: 8rem;
+      height: fit-content;
+    }
+    
+    .preview-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 2rem;
+    }
+    
+    .preview-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .character-preview {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .character-avatar {
+      font-size: 8rem;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
+    }
+    
+    .character-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .character-details {
+      display: grid;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+    }
+    
+    .detail-value {
+      font-weight: 600;
+      color: var(--color-gold);
+    }
+    
+    .info-box {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .info-box strong {
+      color: var(--color-gold);
+    }
+    
+    .page-actions {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .btn {
+      padding: 1rem 2.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      flex: 1;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--color-gold);
+      color: var(--color-gold);
+    }
+    
+    @media (max-width: 968px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .preview-sidebar {
+        position: relative;
+        top: 0;
+      }
+      
+      .page-title {
+        font-size: 2rem;
+      }
+      
+      .form-section {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="../index.html" class="nav-logo">
+        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
+        <span class="nav-logo-text">MANSION MAYHEM</span>
+      </a>
+      <div style="color: rgba(255,255,255,0.6); font-size: 0.875rem;">Character Creation</div>
+    </div>
+  </nav>
+  
+  <div class="main-container">
+    <div class="page-header">
+      <div class="header-icon">🤖</div>
+      <h1 class="page-title">Create Your AI Character</h1>
+      <p class="page-subtitle">
+        Design your custom AI-generated character. Choose appearance, personality, and style. 
+        This character will represent you in all episodes.
+      </p>
+    </div>
+    
+    <div class="content-grid">
+      <!-- Form Section -->
+      <div class="form-section">
+        <div class="section-title">
+          <span>✨</span>
+          <span>Character Details</span>
+        </div>
+        
+        <!-- Character Name -->
+        <div class="form-group">
+          <label class="form-label">Character Name *</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            id="characterName"
+            placeholder="e.g., Phoenix Storm, Luna Martinez"
+            oninput="updatePreview()"
+            required
+          >
+        </div>
+        
+        <!-- Gender -->
+        <div class="form-group">
+          <label class="form-label">Gender Presentation *</label>
+          <div class="option-grid">
+            <div class="option-card">
+              <input type="radio" name="gender" id="female" value="female" onchange="updatePreview()" checked>
+              <label for="female" class="option-label">
+                <span class="option-icon">👩</span>
+                <span class="option-text">Female</span>
+              </label>
+            </div>
+            
+            <div class="option-card">
+              <input type="radio" name="gender" id="male" value="male" onchange="updatePreview()">
+              <label for="male" class="option-label">
+                <span class="option-icon">👨</span>
+                <span class="option-text">Male</span>
+              </label>
+            </div>
+            
+            <div class="option-card">
+              <input type="radio" name="gender" id="nonbinary" value="nonbinary" onchange="updatePreview()">
+              <label for="nonbinary" class="option-label">
+                <span class="option-icon">🧑</span>
+                <span class="option-text">Non-Binary</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Age Range -->
+        <div class="form-group">
+          <label class="form-label">Age Range *</label>
+          <select class="form-select" id="ageRange" onchange="updatePreview()" required>
+            <option value="">Select age range</option>
+            <option value="18-25">18-25 (Young Adult)</option>
+            <option value="26-35">26-35 (Adult)</option>
+            <option value="36-45">36-45 (Mature Adult)</option>
+            <option value="46-55">46-55 (Middle Age)</option>
+            <option value="56+">56+ (Senior)</option>
+          </select>
+        </div>
+        
+        <!-- Ethnicity -->
+        <div class="form-group">
+          <label class="form-label">Ethnicity/Background *</label>
+          <select class="form-select" id="ethnicity" onchange="updatePreview()" required>
+            <option value="">Select ethnicity</option>
+            <option value="white">White/Caucasian</option>
+            <option value="black">Black/African American</option>
+            <option value="hispanic">Hispanic/Latino</option>
+            <option value="asian">Asian</option>
+            <option value="middle-eastern">Middle Eastern</option>
+            <option value="native">Native American</option>
+            <option value="pacific">Pacific Islander</option>
+            <option value="mixed">Mixed/Multiracial</option>
+          </select>
+        </div>
+        
+        <!-- Hair Color -->
+        <div class="form-group">
+          <label class="form-label">Hair Color</label>
+          <div class="color-grid">
+            <div class="color-option">
+              <input type="radio" name="hairColor" id="black" value="black" onchange="updatePreview()" checked>
+              <label for="black" class="color-label" style="background: #1a1a1a;"></label>
+            </div>
+            <div class="color-option">
+              <input type="radio" name="hairColor" id="brown" value="brown" onchange="updatePreview()">
+              <label for="brown" class="color-label" style="background: #4a2511;"></label>
+            </div>
+            <div class="color-option">
+              <input type="radio" name="hairColor" id="blonde" value="blonde" onchange="updatePreview()">
+              <label for="blonde" class="color-label" style="background: #f5d76e;"></label>
+            </div>
+            <div class="color-option">
+              <input type="radio" name="hairColor" id="red" value="red" onchange="updatePreview()">
+              <label for="red" class="color-label" style="background: #8b2e16;"></label>
+            </div>
+            <div class="color-option">
+              <input type="radio" name="hairColor" id="gray" value="gray" onchange="updatePreview()">
+              <label for="gray" class="color-label" style="background: #808080;"></label>
+            </div>
+            <div class="color-option">
+              <input type="radio" name="hairColor" id="white" value="white" onchange="updatePreview()">
+              <label for="white" class="color-label" style="background: #f0f0f0;"></label>
+            </div>
+            <div class="color-option">
+              <input type="radio" name="hairColor" id="blue" value="blue" onchange="updatePreview()">
+              <label for="blue" class="color-label" style="background: #4a90e2;"></label>
+            </div>
+            <div class="color-option">
+              <input type="radio" name="hairColor" id="pink" value="pink" onchange="updatePreview()">
+              <label for="pink" class="color-label" style="background: #ff69b4;"></label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Style -->
+        <div class="form-group">
+          <label class="form-label">Style/Fashion *</label>
+          <select class="form-select" id="style" onchange="updatePreview()" required>
+            <option value="">Select style</option>
+            <option value="casual">Casual & Comfortable</option>
+            <option value="glamorous">Glamorous & High Fashion</option>
+            <option value="athletic">Athletic & Sporty</option>
+            <option value="edgy">Edgy & Alternative</option>
+            <option value="professional">Professional & Polished</option>
+            <option value="bohemian">Bohemian & Free-Spirited</option>
+            <option value="streetwear">Streetwear & Urban</option>
+          </select>
+        </div>
+        
+        <!-- Background Story -->
+        <div class="form-group">
+          <label class="form-label">Background Story (Optional)</label>
+          <textarea 
+            class="form-textarea" 
+            id="background"
+            placeholder="Give your character a brief backstory (e.g., where they're from, what they do, why they joined the mansion)..."
+            oninput="updatePreview()"
+          ></textarea>
+        </div>
+        
+        <div class="info-box">
+          <strong>💡 Pro Tip:</strong> The more detailed your character, the more realistic and consistent 
+          they'll appear in AI-generated videos. Take your time!
+        </div>
+      </div>
+      
+      <!-- Preview Sidebar -->
+      <div class="preview-sidebar">
+        <div class="preview-card">
+          <div class="preview-title">Character Preview</div>
+          
+          <div class="character-preview">
+            <div class="character-avatar" id="previewAvatar">🤖</div>
+            <div class="character-name" id="previewName">Your Character</div>
+          </div>
+          
+          <div class="character-details">
+            <div class="detail-row">
+              <span>Gender</span>
+              <span class="detail-value" id="previewGender">Female</span>
+            </div>
+            <div class="detail-row">
+              <span>Age Range</span>
+              <span class="detail-value" id="previewAge">Not set</span>
+            </div>
+            <div class="detail-row">
+              <span>Ethnicity</span>
+              <span class="detail-value" id="previewEthnicity">Not set</span>
+            </div>
+            <div class="detail-row">
+              <span>Hair Color</span>
+              <span class="detail-value" id="previewHair">Black</span>
+            </div>
+            <div class="detail-row">
+              <span>Style</span>
+              <span class="detail-value" id="previewStyle">Not set</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="page-actions">
+      <button class="btn btn-secondary" onclick="window.location.href='casting-call.html'">
+        <span>←</span>
+        <span>Back</span>
+      </button>
+      <button class="btn btn-primary" id="continueBtn" onclick="saveCharacter()">
+        <span>Create Character</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    function updatePreview() {
+      // Name
+      const name = document.getElementById('characterName').value || 'Your Character';
+      document.getElementById('previewName').textContent = name;
+      
+      // Gender
+      const gender = document.querySelector('input[name="gender"]:checked').value;
+      const genderMap = {
+        'female': 'Female',
+        'male': 'Male',
+        'nonbinary': 'Non-Binary'
+      };
+      document.getElementById('previewGender').textContent = genderMap[gender];
+      
+      // Avatar based on gender
+      const avatarMap = {
+        'female': '👩',
+        'male': '👨',
+        'nonbinary': '🧑'
+      };
+      document.getElementById('previewAvatar').textContent = avatarMap[gender];
+      
+      // Age
+      const age = document.getElementById('ageRange').value;
+      document.getElementById('previewAge').textContent = age || 'Not set';
+      
+      // Ethnicity
+      const ethnicity = document.getElementById('ethnicity').value;
+      const ethnicityMap = {
+        'white': 'White/Caucasian',
+        'black': 'Black/African American',
+        'hispanic': 'Hispanic/Latino',
+        'asian': 'Asian',
+        'middle-eastern': 'Middle Eastern',
+        'native': 'Native American',
+        'pacific': 'Pacific Islander',
+        'mixed': 'Mixed/Multiracial'
+      };
+      document.getElementById('previewEthnicity').textContent = ethnicity ? ethnicityMap[ethnicity] : 'Not set';
+      
+      // Hair Color
+      const hairColor = document.querySelector('input[name="hairColor"]:checked').value;
+      const hairColorMap = {
+        'black': 'Black',
+        'brown': 'Brown',
+        'blonde': 'Blonde',
+        'red': 'Red',
+        'gray': 'Gray',
+        'white': 'White',
+        'blue': 'Blue',
+        'pink': 'Pink'
+      };
+      document.getElementById('previewHair').textContent = hairColorMap[hairColor];
+      
+      // Style
+      const style = document.getElementById('style').value;
+      const styleMap = {
+        'casual': 'Casual',
+        'glamorous': 'Glamorous',
+        'athletic': 'Athletic',
+        'edgy': 'Edgy',
+        'professional': 'Professional',
+        'bohemian': 'Bohemian',
+        'streetwear': 'Streetwear'
+      };
+      document.getElementById('previewStyle').textContent = style ? styleMap[style] : 'Not set';
+    }
+    
+    function saveCharacter() {
+      // Validate required fields
+      const name = document.getElementById('characterName').value;
+      const age = document.getElementById('ageRange').value;
+      const ethnicity = document.getElementById('ethnicity').value;
+      const style = document.getElementById('style').value;
+      
+      if (!name || !age || !ethnicity || !style) {
+        alert('Please fill in all required fields');
+        return;
+      }
+      
+      // Collect character data
+      const character = {
+        name: name,
+        gender: document.querySelector('input[name="gender"]:checked').value,
+        ageRange: age,
+        ethnicity: ethnicity,
+        hairColor: document.querySelector('input[name="hairColor"]:checked').value,
+        style: style,
+        background: document.getElementById('background').value,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Store character
+      sessionStorage.setItem('genericCharacter', JSON.stringify(character));
+      sessionStorage.setItem('faceCastMethod', 'generic');
+      
+      // Show loading
+      const btn = document.getElementById('continueBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>Creating Character...</span>';
+      
+      // In production: Generate AI character via API
+      setTimeout(() => {
+        window.location.href = 'personality-profile.html';
+      }, 2000);
+    }
+    
+    // Initialize preview
+    updatePreview();
+  </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # Netlify configuration for Mansion Mayhem
 
 [build]
-  publish = "."
+  publish = "web"
   command = ""
 
 [[redirects]]

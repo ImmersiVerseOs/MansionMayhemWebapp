@@ -6,7 +6,7 @@
 // NEW Supabase Instance (fpxbhqibimekjhlumnmc)
 export const SUPABASE_CONFIG = {
   url: 'https://fpxbhqibimekjhlumnmc.supabase.co',
-  anonKey: 'YOUR_NEW_ANON_KEY_HERE' // Get from: https://supabase.com/dashboard/project/fpxbhqibimekjhlumnmc/settings/api
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
 };
 
 // Fallback to environment variables if available (for Netlify)

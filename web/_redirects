@@ -1,7 +1,10 @@
 # Netlify redirects file for Mansion Mayhem
 
 # Redirect root to landing page
-/ /landing.html 200
+/  /landing.html  200
 
-# SPA fallback - serve index.html for any route not found
-/* /index.html 200
+# Old auth paths to new paths
+/auth/login.html  /pages/sign-in.html  301
+
+# 404 fallback (don't catch valid pages)
+/404  /landing.html  404

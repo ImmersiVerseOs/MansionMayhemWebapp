@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
   <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body style="background: var(--color-background);">
   <div style="max-width: var(--max-width-7xl); margin: 0 auto; padding: var(--space-3xl) var(--space-xl);">
@@ -170,6 +171,20 @@
       </table>
     </div>
   </div>
+
+  <script>
+    // Initialize Supabase
+    const supabase = window.supabase.createClient(
+      'https://fpxbhqibimekjhlumnmc.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY2MDQ2OTQsImV4cCI6MjA1MjE4MDY5NH0.MR-tL5bkq2sMz_OuE0f7VjWbKVAvpf1kWe9h7mz_wWw'
+    );
+
+    // TODO: Fetch real analytics data from Supabase
+    // Example queries:
+    // - Total players: SELECT COUNT(*) FROM cast_members
+    // - Active games: SELECT COUNT(*) FROM mm_games WHERE status = 'active'
+    // - Revenue data: Calculate from game entries and subscriptions
+  </script>
   <script type="module" src="../js/invite-gate.js"></script>
 </body>
 </html>

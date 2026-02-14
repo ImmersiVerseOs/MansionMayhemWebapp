@@ -6,7 +6,8 @@
   <title>Choose Gameplay Mode - Mansion Mayhem</title>
   <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
   <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
-  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       margin: 0;
@@ -682,6 +683,12 @@
   </div>
   
   <script>
+    // Initialize Supabase
+    const supabase = window.supabase.createClient(
+      'https://fpxbhqibimekjhlumnmc.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY2MDQ2OTQsImV4cCI6MjA1MjE4MDY5NH0.MR-tL5bkq2sMz_OuE0f7VjWbKVAvpf1kWe9h7mz_wWw'
+    );
+
     let selectedMode = null;
     
     function selectMode(mode) {

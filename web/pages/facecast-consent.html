@@ -6,7 +6,8 @@
   <title>FaceCast Consent - Mansion Mayhem</title>
   <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
   <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
-  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       margin: 0;
@@ -559,6 +560,12 @@
   </div>
   
   <script>
+    // Initialize Supabase
+    const supabase = window.supabase.createClient(
+      'https://fpxbhqibimekjhlumnmc.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY2MDQ2OTQsImV4cCI6MjA1MjE4MDY5NH0.MR-tL5bkq2sMz_OuE0f7VjWbKVAvpf1kWe9h7mz_wWw'
+    );
+
     let canvas, ctx, isDrawing = false, hasSignature = false;
     const method = sessionStorage.getItem('faceCastMethod') || 'photos';
     
@@ -696,10 +703,10 @@
       }
     }
     
-    function submitConsent() {
+    async function submitConsent() {
       // Get signature as base64
       const signatureData = canvas.toDataURL();
-      
+
       // Collect all consent data
       const consentData = {
         method: method,
@@ -713,26 +720,40 @@
           agreesToTerms: true
         }
       };
-      
+
       if (method === 'cameos') {
         consentData.soraUsername = sessionStorage.getItem('soraUsername');
         consentData.authorizedCaster = 'immersiverseos';
       } else {
         consentData.photoCount = JSON.parse(sessionStorage.getItem('facecastPhotos') || '[]').length;
       }
-      
-      // Store consent
+
+      // Store consent in sessionStorage
       sessionStorage.setItem('faceCastConsent', JSON.stringify(consentData));
-      
+
       // Show loading
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.innerHTML = '<span>Processing...</span>';
-      
-      // In production: Upload signature and consent to database
+
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          // TODO: Save consent data to database when facecast_consent table is created
+          // For now, consent is stored in sessionStorage and will be linked during profile creation
+          console.log('User authenticated, consent data ready for storage');
+        }
+      } catch (error) {
+        console.error('Error saving consent:', error);
+        // Continue anyway - consent is stored in sessionStorage
+      }
+
+      // Continue to next step
       setTimeout(() => {
         window.location.href = 'personality-profile.html';
-      }, 2000);
+      }, 1000);
     }
   </script>
   <script type="module" src="../js/invite-gate.js"></script>

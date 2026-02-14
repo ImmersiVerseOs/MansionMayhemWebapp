@@ -755,9 +755,23 @@
             <h3 class="empty-title">No games found</h3>
             <p class="empty-description">
               ${currentFilter === 'recruiting'
-                ? 'No games are currently recruiting. Check back soon!'
+                ? 'No games are currently recruiting. Be the first to start one!'
                 : 'Try adjusting your filters or search query.'}
             </p>
+            <button onclick="startNewGame()" style="
+              margin-top: 2rem;
+              padding: 1rem 2rem;
+              background: linear-gradient(135deg, var(--rose), var(--purple));
+              color: white;
+              border: none;
+              border-radius: 12px;
+              font-size: 1.1rem;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.3s;
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(233, 30, 99, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+              🎮 Start New Game
+            </button>
           </div>
         `
         return
@@ -917,6 +931,40 @@
       } catch (error) {
         console.error('Error joining game:', error)
         alert('Failed to join game: ' + error.message)
+      }
+    }
+
+    // Start new game function
+    window.startNewGame = async function() {
+      if (!currentUser) {
+        alert('Please sign in to start a game')
+        window.location.href = '/pages/sign-in.html?redirect=/pages/browse-games.html'
+        return
+      }
+
+      try {
+        // Create a new game with waiting_lobby status
+        const { data: newGame, error: gameError } = await supabase
+          .from('mm_games')
+          .insert({
+            title: `Game ${new Date().toLocaleDateString()}`,
+            description: 'New Mansion Mayhem game',
+            status: 'waiting_lobby',
+            max_players: 20,
+            created_at: new Date().toISOString()
+          })
+          .select()
+          .single()
+
+        if (gameError) throw gameError
+
+        // Redirect to lobby
+        alert('🎮 New game created! Welcome to the lobby!')
+        window.location.href = `/pages/lobby.html?game=${newGame.id}`
+
+      } catch (error) {
+        console.error('Error creating game:', error)
+        alert('Failed to create game: ' + error.message)
       }
     }
 

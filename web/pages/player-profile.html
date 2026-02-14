@@ -586,6 +586,8 @@
 
     let castMember = null
     let currentAudio = null
+    let currentUser = null
+    let isOwnProfile = false
 
     // Get cast member ID from URL
     const urlParams = new URLSearchParams(window.location.search)
@@ -593,8 +595,8 @@
 
     // Initialize
     async function init() {
-      const user = await requireAuth()
-      if (!user) return
+      currentUser = await requireAuth()
+      if (!currentUser) return
 
       if (!castId) {
         alert('No cast member specified')
@@ -622,13 +624,28 @@
         if (error) throw error
         castMember = data
 
+        // Check if viewing own profile
+        isOwnProfile = castMember.user_id === currentUser.id
+
         // Update header
         const header = document.getElementById('profileHeader')
         const archetypeEmoji = getArchetypeEmoji(data.archetype)
 
+        // Get avatar URL if exists
+        let avatarContent = data.display_name?.charAt(0).toUpperCase() || '?'
+        if (data.avatar_url) {
+          avatarContent = `<img src="${data.avatar_url}" alt="${data.display_name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+        }
+
         header.innerHTML = `
-          <div class="profile-avatar-large">
-            ${data.display_name?.charAt(0).toUpperCase() || '?'}
+          <div class="profile-avatar-large" style="position: relative;">
+            ${avatarContent}
+            ${isOwnProfile ? `
+              <label for="avatarUpload" style="position: absolute; bottom: 0; right: 0; width: 50px; height: 50px; background: var(--gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid var(--bg); box-shadow: 0 4px 15px rgba(233,30,99,0.4);">
+                📷
+              </label>
+              <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+            ` : ''}
           </div>
           <h1 class="profile-name">${data.display_name || data.full_name || 'Anonymous'}</h1>
           ${data.archetype ? `<div class="profile-archetype">${archetypeEmoji} ${formatArchetype(data.archetype)}</div>` : ''}
@@ -646,12 +663,15 @@
 
     // Load stats
     async function loadStats() {
-      // Count alliances (from relationship edges where alliance > rivalry)
-      const { count: allianceCount } = await supabase
+      // Count alliances (from relationship edges - filter client-side)
+      const { data: allRelationships } = await supabase
         .from('mm_relationship_edges')
-        .select('*', { count: 'exact', head: true })
+        .select('alliance_strength, rivalry_level')
         .or(`cast_member_a_id.eq.${castId},cast_member_b_id.eq.${castId}`)
-        .gt('alliance_strength', 'rivalry_level')
+
+      const allianceCount = allRelationships?.filter(r =>
+        (r.alliance_strength || 0) > (r.rivalry_level || 0)
+      ).length || 0
 
       // Count voice notes
       const { count: voiceNoteCount } = await supabase
@@ -750,20 +770,24 @@
     // Load alliances
     async function loadAlliances() {
       try {
-        // Get relationships where alliance_strength > rivalry_level
+        // Get all relationships, filter client-side for alliances
         const { data, error } = await supabase
           .from('mm_relationship_edges')
           .select('*, cast_member_a:cast_members!cast_member_a_id(id, display_name), cast_member_b:cast_members!cast_member_b_id(id, display_name)')
           .or(`cast_member_a_id.eq.${castId},cast_member_b_id.eq.${castId}`)
-          .gt('alliance_strength', 'rivalry_level')
           .order('alliance_strength', { ascending: false })
-          .limit(10)
+          .limit(20)
 
         if (error) throw error
 
+        // Filter for alliances where alliance_strength > rivalry_level
+        const alliances = data?.filter(rel =>
+          (rel.alliance_strength || 0) > (rel.rivalry_level || 0)
+        ) || []
+
         const container = document.getElementById('allianceBadges')
 
-        if (!data || data.length === 0) {
+        if (alliances.length === 0) {
           container.innerHTML = `
             <div class="empty-state">
               <div class="empty-icon">🤝</div>
@@ -773,7 +797,7 @@
           return
         }
 
-        container.innerHTML = data.map(rel => {
+        container.innerHTML = alliances.slice(0, 10).map(rel => {
           // Get the other cast member (not the current one)
           const otherMember = rel.cast_member_a_id === castId ? rel.cast_member_b : rel.cast_member_a
           return `
@@ -940,6 +964,74 @@
         const height = Math.random() * 20 + 10
         return `<div class="wave-bar" style="height: ${height}px;"></div>`
       }).join('')
+    }
+
+    // Handle avatar upload
+    window.handleAvatarUpload = async function(event) {
+      const file = event.target.files[0]
+      if (!file) return
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file')
+        return
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image must be less than 5MB')
+        return
+      }
+
+      try {
+        // Show loading state
+        const avatarDiv = document.querySelector('.profile-avatar-large')
+        const originalContent = avatarDiv.innerHTML
+        avatarDiv.innerHTML = '<div style="font-size: 24px;">⏳</div><div style="font-size: 12px; margin-top: 8px;">Uploading...</div>'
+
+        // Create unique filename
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${castId}-${Date.now()}.${fileExt}`
+        const filePath = `avatars/${fileName}`
+
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('cast-avatars')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) {
+          throw uploadError
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('cast-avatars')
+          .getPublicUrl(filePath)
+
+        const avatarUrl = urlData.publicUrl
+
+        // Update database
+        const { error: updateError } = await supabase
+          .from('cast_members')
+          .update({ avatar_url: avatarUrl })
+          .eq('id', castId)
+
+        if (updateError) throw updateError
+
+        // Reload profile to show new avatar
+        await loadProfile()
+
+        alert('Profile picture updated successfully! ✨')
+
+      } catch (error) {
+        console.error('Error uploading avatar:', error)
+        alert('Failed to upload profile picture: ' + error.message)
+        // Restore original content
+        await loadProfile()
+      }
     }
 
     init()

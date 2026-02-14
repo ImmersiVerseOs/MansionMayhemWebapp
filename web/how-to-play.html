@@ -78,7 +78,7 @@
       font-size: 10rem;
       margin-bottom: 2rem;
       animation: crownDescend 2s ease-out, crownFloat 4s ease-in-out 2s infinite;
-      filter: drop-shadow(0 0 60px rgba(212, 175, 55, 0.8));
+      filter: drop-shadow(0 0 60px rgba(255, 193, 7, 0.8));
     }
 
     @keyframes crownDescend {
@@ -236,8 +236,8 @@
 
     .timeline-content {
       width: calc(50% - 2rem);
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(0, 0, 0, 0.9) 100%);
-      border: 2px solid rgba(212, 175, 55, 0.3);
+      background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(0, 0, 0, 0.9) 100%);
+      border: 2px solid rgba(255, 193, 7, 0.3);
       border-radius: 20px;
       padding: 2.5rem;
       position: relative;
@@ -246,7 +246,7 @@
 
     .timeline-content:hover {
       border-color: var(--color-gold);
-      box-shadow: 0 0 60px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 0 60px rgba(255, 193, 7, 0.4);
       transform: scale(1.05);
     }
 
@@ -261,13 +261,13 @@
       border: 4px solid #000;
       border-radius: 50%;
       z-index: 10;
-      box-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+      box-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
     }
 
     .timeline-icon {
       font-size: 3rem;
       margin-bottom: 1.5rem;
-      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+      filter: drop-shadow(0 0 20px rgba(255, 193, 7, 0.6));
     }
 
     .timeline-step {
@@ -328,8 +328,8 @@
     }
 
     .mode-card {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(0, 0, 0, 0.95) 100%);
-      border: 3px solid rgba(212, 175, 55, 0.3);
+      background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(0, 0, 0, 0.95) 100%);
+      border: 3px solid rgba(255, 193, 7, 0.3);
       border-radius: 24px;
       padding: 3rem;
       text-align: center;
@@ -346,7 +346,7 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(255, 193, 7, 0.1) 0%, transparent 70%);
       opacity: 0;
       transition: opacity 0.4s ease;
     }
@@ -359,13 +359,13 @@
     .mode-card:hover {
       border-color: var(--color-gold);
       transform: translateY(-15px);
-      box-shadow: 0 0 80px rgba(212, 175, 55, 0.5);
+      box-shadow: 0 0 80px rgba(255, 193, 7, 0.5);
     }
 
     .mode-icon {
       font-size: 5rem;
       margin-bottom: 2rem;
-      filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.6));
+      filter: drop-shadow(0 0 30px rgba(255, 193, 7, 0.6));
     }
 
     .mode-title {
@@ -395,7 +395,7 @@
       display: flex;
       justify-content: space-around;
       padding-top: 1.5rem;
-      border-top: 1px solid rgba(212, 175, 55, 0.3);
+      border-top: 1px solid rgba(255, 193, 7, 0.3);
     }
 
     .mode-stat {
@@ -516,7 +516,7 @@
       font-size: 8rem;
       margin-bottom: 2rem;
       animation: throneFloat 4s ease-in-out infinite;
-      filter: drop-shadow(0 0 60px rgba(212, 175, 55, 0.8));
+      filter: drop-shadow(0 0 60px rgba(255, 193, 7, 0.8));
     }
 
     @keyframes throneFloat {
@@ -557,22 +557,22 @@
       transition: all 0.3s ease;
       text-decoration: none;
       display: inline-block;
-      box-shadow: 0 0 60px rgba(212, 175, 55, 0.8);
+      box-shadow: 0 0 60px rgba(255, 193, 7, 0.8);
       font-family: 'Impact', sans-serif;
       animation: ctaPulse 3s ease-in-out infinite;
     }
 
     .cta-button:hover {
       transform: scale(1.1) translateY(-10px);
-      box-shadow: 0 0 100px rgba(212, 175, 55, 1);
+      box-shadow: 0 0 100px rgba(255, 193, 7, 1);
     }
 
     @keyframes ctaPulse {
       0%, 100% {
-        box-shadow: 0 0 60px rgba(212, 175, 55, 0.8);
+        box-shadow: 0 0 60px rgba(255, 193, 7, 0.8);
       }
       50% {
-        box-shadow: 0 0 100px rgba(212, 175, 55, 1);
+        box-shadow: 0 0 100px rgba(255, 193, 7, 1);
         transform: scale(1.05);
       }
     }
@@ -952,9 +952,9 @@
           canvas.width / 2
         );
         
-        gradient.addColorStop(0, 'rgba(212, 175, 55, 0.15)');
-        gradient.addColorStop(0.5, 'rgba(212, 175, 55, 0.05)');
-        gradient.addColorStop(1, 'rgba(212, 175, 55, 0)');
+        gradient.addColorStop(0, 'rgba(255, 193, 7, 0.15)');
+        gradient.addColorStop(0.5, 'rgba(255, 193, 7, 0.05)');
+        gradient.addColorStop(1, 'rgba(255, 193, 7, 0)');
         
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);

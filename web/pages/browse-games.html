@@ -870,7 +870,7 @@
                    ${isFull ? 'Game Full' : 'Closed'}
                  </button>`
             }
-            <a href="/pages/lobby.html?game=${game.id}" class="btn-view">View Details</a>
+            <a href="/lobby.html?game=${game.id}" class="btn-view">View Details</a>
           </div>
         </div>
       `
@@ -929,7 +929,7 @@
 
         if (existingGameCast) {
           alert('You are already a cast member in this game!')
-          window.location.href = `/pages/lobby.html?game=${gameId}`
+          window.location.href = `/lobby.html?game=${gameId}`
           return
         }
 

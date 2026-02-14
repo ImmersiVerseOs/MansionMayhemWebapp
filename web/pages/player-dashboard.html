@@ -1188,12 +1188,12 @@
         if (!stillAuthed) {
           console.error('⚠️ User session lost after game creation!')
           alert('Please sign in again to access your game')
-          window.location.href = `/pages/sign-in.html?redirect=/pages/lobby.html?game=${newGame.id}`
+          window.location.href = `/pages/sign-in.html?redirect=/lobby.html?game=${newGame.id}`
           return
         }
 
         console.log('Redirecting to lobby...')
-        window.location.href = `/pages/lobby.html?game=${newGame.id}`
+        window.location.href = `/lobby.html?game=${newGame.id}`
 
       } catch (error) {
         console.error('❌ Error creating game:', error)

@@ -767,8 +767,8 @@
           `You have ${pendingCount} active scenario${pendingCount > 1 ? 's' : ''} waiting for your response`
 
         await loadScenarios(user.id, pendingCount)
-        await loadEarnings(user.id, stats)
-        await loadActivity(user.id)
+        // await loadEarnings(user.id, stats)  // Disabled - earnings table not implemented yet
+        // await loadActivity(user.id)  // Disabled - episode_cast/voice_notes tables not implemented yet
 
       } catch (error) {
         console.error('❌ Error loading dashboard:', error)

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Game Features - Mansion Mayhem</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0612;
+      color: #fafafa;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #d4af37;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+
+    .section {
+      background: #151020;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .section h2 {
+      color: #d4af37;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      background: linear-gradient(135deg, #d4af37, #f4c542);
+      color: #0a0612;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    .result {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .success {
+      color: #10b981;
+    }
+
+    .error {
+      color: #ef4444;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: #fafafa;
+      margin-bottom: 1rem;
+      font-family: inherit;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .info {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Test Game Features</h1>
+
+    <div class="info">
+      <strong>Note:</strong> Make sure you're logged in first! This page tests all the new game features.
+    </div>
+
+    <!-- Dashboard Test -->
+    <div class="section">
+      <h2>1. Dashboard Stats</h2>
+      <button onclick="testDashboard()">Load Dashboard</button>
+      <div id="dashboardResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Scenarios Test -->
+    <div class="section">
+      <h2>2. Active Scenarios</h2>
+      <button onclick="testScenarios()">Load Scenarios</button>
+      <div id="scenariosResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Alliances Test -->
+    <div class="section">
+      <h2>3. My Alliances</h2>
+      <button onclick="testAlliances()">Load My Alliances</button>
+      <div id="alliancesResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Send Alliance Request -->
+    <div class="section">
+      <h2>4. Send Alliance Request</h2>
+      <input type="text" id="targetCastMemberId" placeholder="Target Cast Member ID (UUID)">
+      <select id="linkUpType" style="width: 100%; margin-bottom: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fafafa;">
+        <option value="duo">Duo</option>
+        <option value="trio">Trio</option>
+      </select>
+      <textarea id="requestMessage" placeholder="Message (optional)"></textarea>
+      <button onclick="testSendRequest()">Send Request</button>
+      <div id="sendRequestResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Submit Confession -->
+    <div class="section">
+      <h2>5. Submit Confession</h2>
+      <textarea id="confessionText" placeholder="Your confession..."></textarea>
+      <label style="display: block; margin-bottom: 1rem;">
+        <input type="checkbox" id="isAnonymous" checked>
+        Submit anonymously
+      </label>
+      <button onclick="testSubmitConfession()">Submit Confession</button>
+      <div id="confessionResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Database Tables Check -->
+    <div class="section">
+      <h2>6. Check Database Tables</h2>
+      <button onclick="checkTables()">Check All Tables</button>
+      <div id="tablesResult" class="result" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabaseClient as supabase, getCurrentUser } from '../js/supabase-module.js'
+
+    window.supabase = supabase
+    window.getCurrentUser = getCurrentUser
+
+    window.testDashboard = async function() {
+      const result = document.getElementById('dashboardResult')
+      result.style.display = 'block'
+      result.innerHTML = 'Loading...'
+
+      try {
+        const user = await getCurrentUser()
+        if (!user) {
+          result.className = 'result error'
+          result.innerHTML = '❌ Not logged in'
+          return
+        }
+
+        const { data, error } = await supabase.rpc('get_character_dashboard', {
+          p_user_id: user.id
+        })
+
+        if (error) throw error
+
+        result.className = 'result success'
+        result.innerHTML = '✅ Dashboard loaded:\n\n' + JSON.stringify(data, null, 2)
+      } catch (err) {
+        result.className = 'result error'
+        result.innerHTML = '❌ Error: ' + err.message
+      }
+    }
+
+    window.testScenarios = async function() {
+      const result = document.getElementById('scenariosResult')
+      result.style.display = 'block'
+      result.innerHTML = 'Loading...'
+
+      try {
+        const user = await getCurrentUser()
+        if (!user) {
+          result.className = 'result error'
+          result.innerHTML = '❌ Not logged in'
+          return
+        }
+
+        const { data, error } = await supabase.rpc('get_active_scenarios', {
+          p_user_id: user.id
+        })
+
+        if (error) throw error
+
+        result.className = 'result success'
+        result.innerHTML = '✅ Scenarios loaded:\n\n' + JSON.stringify(data, null, 2)
+      } catch (err) {
+        result.className = 'result error'
+        result.innerHTML = '❌ Error: ' + err.message
+      }
+    }
+
+    window.testAlliances = async function() {
+      const result = document.getElementById('alliancesResult')
+      result.style.display = 'block'
+      result.innerHTML = 'Loading...'
+
+      try {
+        const user = await getCurrentUser()
+        if (!user) {
+          result.className = 'result error'
+          result.innerHTML = '❌ Not logged in'
+          return
+        }
+
+        const { data, error } = await supabase.rpc('get_user_alliances', {
+          p_user_id: user.id
+        })
+
+        if (error) throw error
+
+        result.className = 'result success'
+        result.innerHTML = '✅ Alliances loaded:\n\n' + JSON.stringify(data, null, 2)
+      } catch (err) {
+        result.className = 'result error'
+        result.innerHTML = '❌ Error: ' + err.message
+      }
+    }
+
+    window.testSendRequest = async function() {
+      const result = document.getElementById('sendRequestResult')
+      result.style.display = 'block'
+      result.innerHTML = 'Sending...'
+
+      try {
+        const user = await getCurrentUser()
+        if (!user) {
+          result.className = 'result error'
+          result.innerHTML = '❌ Not logged in'
+          return
+        }
+
+        const targetId = document.getElementById('targetCastMemberId').value
+        const linkUpType = document.getElementById('linkUpType').value
+        const message = document.getElementById('requestMessage').value
+
+        if (!targetId) {
+          result.className = 'result error'
+          result.innerHTML = '❌ Please enter a target cast member ID'
+          return
+        }
+
+        // Get active game ID
+        const { data: games } = await supabase
+          .from('mm_games')
+          .select('id')
+          .eq('status', 'active')
+          .limit(1)
+
+        if (!games || games.length === 0) {
+          result.className = 'result error'
+          result.innerHTML = '❌ No active game found'
+          return
+        }
+
+        const { data, error } = await supabase.rpc('send_link_up_request', {
+          p_from_user_id: user.id,
+          p_to_cast_member_id: targetId,
+          p_game_id: games[0].id,
+          p_link_up_type: linkUpType,
+          p_message: message || null
+        })
+
+        if (error) throw error
+
+        result.className = 'result success'
+        result.innerHTML = '✅ Request sent! ID: ' + data
+      } catch (err) {
+        result.className = 'result error'
+        result.innerHTML = '❌ Error: ' + err.message
+      }
+    }
+
+    window.testSubmitConfession = async function() {
+      const result = document.getElementById('confessionResult')
+      result.style.display = 'block'
+      result.innerHTML = 'Submitting...'
+
+      try {
+        const user = await getCurrentUser()
+        if (!user) {
+          result.className = 'result error'
+          result.innerHTML = '❌ Not logged in'
+          return
+        }
+
+        const confessionText = document.getElementById('confessionText').value
+        const isAnonymous = document.getElementById('isAnonymous').checked
+
+        if (!confessionText) {
+          result.className = 'result error'
+          result.innerHTML = '❌ Please enter confession text'
+          return
+        }
+
+        // Get active game ID
+        const { data: games } = await supabase
+          .from('mm_games')
+          .select('id')
+          .eq('status', 'active')
+          .limit(1)
+
+        if (!games || games.length === 0) {
+          result.className = 'result error'
+          result.innerHTML = '❌ No active game found'
+          return
+        }
+
+        const { data, error } = await supabase.rpc('submit_confession', {
+          p_user_id: user.id,
+          p_game_id: games[0].id,
+          p_confession_text: confessionText,
+          p_voice_note_url: null,
+          p_duration_seconds: null,
+          p_is_anonymous: isAnonymous
+        })
+
+        if (error) throw error
+
+        result.className = 'result success'
+        result.innerHTML = '✅ Confession submitted! ID: ' + data + '\n\n(Requires admin approval before visible)'
+
+        document.getElementById('confessionText').value = ''
+      } catch (err) {
+        result.className = 'result error'
+        result.innerHTML = '❌ Error: ' + err.message
+      }
+    }
+
+    window.checkTables = async function() {
+      const result = document.getElementById('tablesResult')
+      result.style.display = 'block'
+      result.innerHTML = 'Checking...'
+
+      try {
+        const tables = [
+          'cast_members',
+          'profiles',
+          'mm_games',
+          'mm_game_cast',
+          'scenarios',
+          'mm_link_up_requests',
+          'mm_alliance_rooms',
+          'mm_alliance_messages',
+          'mm_confession_cards',
+          'mm_voting_rounds',
+          'notifications'
+        ]
+
+        let output = '✅ Checking tables:\n\n'
+
+        for (const table of tables) {
+          try {
+            const { count, error } = await supabase
+              .from(table)
+              .select('*', { count: 'exact', head: true })
+
+            if (error) throw error
+
+            output += `✅ ${table}: ${count} rows\n`
+          } catch (err) {
+            output += `❌ ${table}: ${err.message}\n`
+          }
+        }
+
+        result.className = 'result success'
+        result.innerHTML = output
+      } catch (err) {
+        result.className = 'result error'
+        result.innerHTML = '❌ Error: ' + err.message
+      }
+    }
+  </script>
+</body>
+</html>

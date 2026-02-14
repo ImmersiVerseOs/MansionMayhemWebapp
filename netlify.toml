@@ -9,10 +9,12 @@
   to = "/landing.html"
   status = 200
 
+# Only redirect actual 404s to landing page (not all routes!)
+# This allows /pages/player-dashboard.html and other pages to work
 [[redirects]]
   from = "/*"
-  to = "/index.html"
-  status = 200
+  to = "/landing.html"
+  status = 404
 
 [[headers]]
   for = "/*"

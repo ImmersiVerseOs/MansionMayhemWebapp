@@ -66,13 +66,20 @@ CREATE TABLE IF NOT EXISTS public.mm_games (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
-  status TEXT NOT NULL DEFAULT 'recruiting' CHECK (status IN ('recruiting', 'active', 'completed', 'cancelled')),
+  status TEXT NOT NULL DEFAULT 'recruiting' CHECK (status IN ('recruiting', 'waiting_lobby', 'active_lobby', 'active', 'paused', 'completed', 'cancelled')),
   max_players INTEGER NOT NULL DEFAULT 20,
   current_players INTEGER NOT NULL DEFAULT 0,
 
   -- Game timing
   started_at TIMESTAMPTZ,
   completed_at TIMESTAMPTZ,
+
+  -- Two-stage lobby timestamps
+  waiting_lobby_starts_at TIMESTAMPTZ,
+  waiting_lobby_ends_at TIMESTAMPTZ,
+  active_lobby_starts_at TIMESTAMPTZ,
+  active_lobby_ends_at TIMESTAMPTZ,
+  game_starts_at TIMESTAMPTZ,
 
   -- Metadata
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -88,6 +95,7 @@ CREATE TABLE IF NOT EXISTS public.mm_game_cast (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   game_id UUID NOT NULL REFERENCES public.mm_games(id) ON DELETE CASCADE,
   cast_member_id UUID NOT NULL REFERENCES public.cast_members(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'eliminated')),
   joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   eliminated_at TIMESTAMPTZ,
   placement INTEGER, -- Final placement (1st, 2nd, etc.)
@@ -106,9 +114,13 @@ CREATE TABLE IF NOT EXISTS public.mm_game_stages (
   game_id UUID NOT NULL REFERENCES public.mm_games(id) ON DELETE CASCADE,
   stage_name TEXT NOT NULL,
   stage_number INTEGER NOT NULL,
+  stage_type TEXT CHECK (stage_type IN ('waiting_lobby', 'active_lobby', 'gameplay', 'voting', 'elimination')),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'completed')),
   started_at TIMESTAMPTZ,
   completed_at TIMESTAMPTZ,
+  stage_ends_at TIMESTAMPTZ,
+  min_players INTEGER DEFAULT 2,
+  auto_advance BOOLEAN DEFAULT TRUE,
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
@@ -129,14 +141,17 @@ CREATE TABLE IF NOT EXISTS public.scenarios (
   context_notes TEXT,
   scenario_type TEXT NOT NULL CHECK (scenario_type IN ('alliance', 'conflict', 'strategy', 'personal', 'wildcard')),
   target_archetype TEXT, -- Optional: target specific archetype
+  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'active', 'completed', 'expired')),
 
   -- Timing
   deadline_at TIMESTAMPTZ,
   closed_at TIMESTAMPTZ,
+  distribution_date DATE,
 
   -- Response tracking
   responses_received INTEGER DEFAULT 0,
   voice_notes_received INTEGER DEFAULT 0,
+  assigned_count INTEGER DEFAULT 0,
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -162,6 +177,46 @@ CREATE TABLE IF NOT EXISTS public.scenario_responses (
 
 CREATE INDEX idx_scenario_responses_scenario_id ON public.scenario_responses(scenario_id);
 CREATE INDEX idx_scenario_responses_cast_member_id ON public.scenario_responses(cast_member_id);
+
+-- ============================================================================
+-- 7A. SCENARIO_TARGETS - Links Scenarios to Specific Cast Members
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.scenario_targets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  scenario_id UUID NOT NULL REFERENCES public.scenarios(id) ON DELETE CASCADE,
+  cast_member_id UUID NOT NULL REFERENCES public.cast_members(id) ON DELETE CASCADE,
+  assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  notified_at TIMESTAMPTZ,
+
+  UNIQUE(scenario_id, cast_member_id)
+);
+
+CREATE INDEX idx_scenario_targets_scenario ON public.scenario_targets(scenario_id);
+CREATE INDEX idx_scenario_targets_cast_member ON public.scenario_targets(cast_member_id);
+
+-- ============================================================================
+-- 7B. MM_SCENARIO_QUOTAS - Scenario Quota Tracking (3-5 max per cast member)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.mm_scenario_quotas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  game_id UUID NOT NULL REFERENCES public.mm_games(id) ON DELETE CASCADE,
+  cast_member_id UUID NOT NULL REFERENCES public.cast_members(id) ON DELETE CASCADE,
+  week_number INTEGER NOT NULL DEFAULT 1,
+
+  total_assigned INTEGER DEFAULT 0,
+  total_completed INTEGER DEFAULT 0,
+  week_assigned INTEGER DEFAULT 0,
+
+  max_scenarios_total INTEGER DEFAULT 5,
+  max_scenarios_per_day INTEGER DEFAULT 3,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  UNIQUE(game_id, cast_member_id, week_number)
+);
+
+CREATE INDEX idx_mm_scenario_quotas_game_cast ON public.mm_scenario_quotas(game_id, cast_member_id);
 
 -- ============================================================================
 -- 8. MM_LINK_UP_REQUESTS - Alliance Invitations
@@ -214,7 +269,7 @@ CREATE TABLE IF NOT EXISTS public.mm_alliance_rooms (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   game_id UUID NOT NULL REFERENCES public.mm_games(id) ON DELETE CASCADE,
   room_name TEXT NOT NULL,
-  room_type TEXT NOT NULL CHECK (room_type IN ('duo', 'trio')),
+  room_type TEXT NOT NULL CHECK (room_type IN ('duo', 'trio', 'quad', 'quintet')),
   member_ids UUID[] NOT NULL,
 
   -- Room status
@@ -222,7 +277,10 @@ CREATE TABLE IF NOT EXISTS public.mm_alliance_rooms (
   dissolved_at TIMESTAMPTZ,
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraint to limit alliance room to max 5 members
+  CONSTRAINT alliance_room_max_members CHECK (array_length(member_ids, 1) <= 5)
 );
 
 CREATE INDEX idx_mm_alliance_rooms_game_id ON public.mm_alliance_rooms(game_id);
@@ -235,15 +293,41 @@ CREATE INDEX idx_mm_alliance_rooms_member_ids ON public.mm_alliance_rooms USING 
 CREATE TABLE IF NOT EXISTS public.mm_alliance_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   room_id UUID NOT NULL REFERENCES public.mm_alliance_rooms(id) ON DELETE CASCADE,
-  cast_member_id UUID NOT NULL REFERENCES public.cast_members(id) ON DELETE CASCADE,
-  message TEXT NOT NULL,
+  sender_cast_id UUID NOT NULL REFERENCES public.cast_members(id) ON DELETE CASCADE,
+  message TEXT,
+  message_type TEXT DEFAULT 'text' CHECK (message_type IN ('text', 'voice', 'system')),
+  voice_note_url TEXT,
+  voice_note_duration_seconds INTEGER,
+  moderation_status TEXT DEFAULT 'approved' CHECK (moderation_status IN ('pending', 'approved', 'rejected')),
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_mm_alliance_messages_room_id ON public.mm_alliance_messages(room_id);
-CREATE INDEX idx_mm_alliance_messages_cast_member_id ON public.mm_alliance_messages(cast_member_id);
+CREATE INDEX idx_mm_alliance_messages_sender_cast_id ON public.mm_alliance_messages(sender_cast_id);
 CREATE INDEX idx_mm_alliance_messages_created_at ON public.mm_alliance_messages(created_at DESC);
+CREATE INDEX idx_mm_alliance_messages_type ON public.mm_alliance_messages(message_type);
+CREATE INDEX idx_mm_alliance_messages_moderation ON public.mm_alliance_messages(moderation_status);
+
+-- ============================================================================
+-- 11A. MM_ALLIANCE_QUOTAS - Track Alliance Participation (Max 5 per player)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.mm_alliance_quotas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  game_id UUID NOT NULL REFERENCES public.mm_games(id) ON DELETE CASCADE,
+  cast_member_id UUID NOT NULL REFERENCES public.cast_members(id) ON DELETE CASCADE,
+
+  active_alliances INTEGER DEFAULT 0,
+  max_alliances INTEGER DEFAULT 5,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  UNIQUE(game_id, cast_member_id),
+  CHECK (active_alliances <= max_alliances)
+);
+
+CREATE INDEX idx_mm_alliance_quotas_game_cast ON public.mm_alliance_quotas(game_id, cast_member_id);
 
 -- ============================================================================
 -- 12. MM_RELATIONSHIP_EDGES - Player Relationship Scores
@@ -349,8 +433,12 @@ CREATE TABLE IF NOT EXISTS public.mm_confession_cards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   game_id UUID NOT NULL REFERENCES public.mm_games(id) ON DELETE CASCADE,
   cast_member_id UUID REFERENCES public.cast_members(id) ON DELETE SET NULL, -- Anonymous possible
-  confession_text TEXT NOT NULL,
+  confession_text TEXT,
+  audio_url TEXT,
+  duration INTEGER,
   is_anonymous BOOLEAN DEFAULT true,
+  submitter_identity TEXT DEFAULT 'profile_name' CHECK (submitter_identity IN ('profile_name', 'anonymous')),
+  display_name_override TEXT,
 
   -- Moderation
   is_approved BOOLEAN DEFAULT false,
@@ -378,6 +466,30 @@ CREATE TABLE IF NOT EXISTS public.mm_confession_reactions (
 
 CREATE INDEX idx_mm_confession_reactions_confession_id ON public.mm_confession_reactions(confession_id);
 CREATE INDEX idx_mm_confession_reactions_cast_member_id ON public.mm_confession_reactions(cast_member_id);
+
+-- ============================================================================
+-- 17A. MM_QUEEN_SELECTIONS - Weekly Queen Selection History
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.mm_queen_selections (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  game_id UUID NOT NULL REFERENCES public.mm_games(id) ON DELETE CASCADE,
+  week_number INTEGER NOT NULL,
+  round_number INTEGER NOT NULL,
+
+  selected_queen_id UUID NOT NULL REFERENCES public.cast_members(id) ON DELETE CASCADE,
+  selection_method TEXT DEFAULT 'random_lottery' CHECK (selection_method IN ('random_lottery', 'director_pick', 'vote')),
+
+  nominee_a_id UUID REFERENCES public.cast_members(id) ON DELETE SET NULL,
+  nominee_b_id UUID REFERENCES public.cast_members(id) ON DELETE SET NULL,
+
+  selected_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  nomination_deadline TIMESTAMPTZ,
+
+  UNIQUE(game_id, week_number)
+);
+
+CREATE INDEX idx_mm_queen_selections_game ON public.mm_queen_selections(game_id);
+CREATE INDEX idx_mm_queen_selections_week ON public.mm_queen_selections(week_number);
 
 -- ============================================================================
 -- 18. USER_GAME_STATE - User Progress Tracking
@@ -507,6 +619,14 @@ CREATE TRIGGER update_user_game_state_updated_at
 
 CREATE TRIGGER update_user_settings_updated_at
   BEFORE UPDATE ON public.user_settings
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_mm_scenario_quotas_updated_at
+  BEFORE UPDATE ON public.mm_scenario_quotas
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_mm_alliance_quotas_updated_at
+  BEFORE UPDATE ON public.mm_alliance_quotas
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================

@@ -482,6 +482,269 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
+-- 11. INITIALIZE GAME LOBBIES (Two-Stage Lobby System)
+-- ============================================================================
+-- Initialize game with 3hr waiting lobby + 48hr active lobby
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.initialize_game_lobbies(p_game_id UUID)
+RETURNS VOID AS $$
+DECLARE
+  v_waiting_ends TIMESTAMPTZ;
+  v_active_ends TIMESTAMPTZ;
+BEGIN
+  v_waiting_ends := NOW() + INTERVAL '3 hours';
+  v_active_ends := v_waiting_ends + INTERVAL '48 hours';
+
+  UPDATE mm_games SET
+    status = 'waiting_lobby',
+    waiting_lobby_starts_at = NOW(),
+    waiting_lobby_ends_at = v_waiting_ends,
+    active_lobby_starts_at = v_waiting_ends,
+    active_lobby_ends_at = v_active_ends,
+    updated_at = NOW()
+  WHERE id = p_game_id;
+
+  -- Create waiting lobby stage
+  INSERT INTO mm_game_stages (game_id, stage_name, stage_number, stage_type, status, started_at, stage_ends_at, auto_advance, min_players)
+  VALUES (p_game_id, 'Waiting Room', 1, 'waiting_lobby', 'active', NOW(), v_waiting_ends, TRUE, 2);
+
+  -- Pre-create active lobby stage
+  INSERT INTO mm_game_stages (game_id, stage_name, stage_number, stage_type, status, started_at, stage_ends_at, auto_advance)
+  VALUES (p_game_id, 'Alliance Lobby', 2, 'active_lobby', 'pending', v_waiting_ends, v_active_ends, TRUE);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================================
+-- 12. ADVANCE TO ACTIVE LOBBY
+-- ============================================================================
+-- Transition from 3hr waiting room to 48hr alliance lobby
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.advance_to_active_lobby(p_game_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  -- Complete waiting lobby
+  UPDATE mm_game_stages SET status = 'completed', completed_at = NOW()
+  WHERE game_id = p_game_id AND stage_type = 'waiting_lobby';
+
+  -- Activate alliance lobby
+  UPDATE mm_game_stages SET status = 'active'
+  WHERE game_id = p_game_id AND stage_type = 'active_lobby';
+
+  UPDATE mm_games SET status = 'active_lobby', updated_at = NOW()
+  WHERE id = p_game_id;
+
+  -- Notify players
+  INSERT INTO notifications (user_id, notification_type, title, message, link_url)
+  SELECT p.id, 'game_phase_change', 'Alliance Lobby Now Open!',
+    'The 48-hour alliance phase has begun. Form alliances and record your introduction!',
+    '/lobby.html?game=' || p_game_id
+  FROM mm_game_cast gc
+  JOIN cast_members cm ON cm.id = gc.cast_member_id
+  JOIN profiles p ON p.id = cm.user_id
+  WHERE gc.game_id = p_game_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================================
+-- 13. START ACTIVE GAME PHASE
+-- ============================================================================
+-- Transition from alliance lobby to active gameplay
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.start_game_active_phase(p_game_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  -- Complete active lobby
+  UPDATE mm_game_stages SET status = 'completed', completed_at = NOW()
+  WHERE game_id = p_game_id AND stage_type = 'active_lobby';
+
+  UPDATE mm_games SET
+    status = 'active',
+    game_starts_at = NOW(),
+    started_at = NOW(),
+    updated_at = NOW()
+  WHERE id = p_game_id;
+
+  -- Create gameplay stage
+  INSERT INTO mm_game_stages (game_id, stage_name, stage_number, stage_type, status, started_at)
+  VALUES (p_game_id, 'Week 1 - Gameplay', 3, 'gameplay', 'active', NOW());
+
+  -- Initialize scenario quotas for all cast members
+  INSERT INTO mm_scenario_quotas (game_id, cast_member_id, week_number, max_scenarios_total, max_scenarios_per_day)
+  SELECT p_game_id, cast_member_id, 1, 5, 3
+  FROM mm_game_cast
+  WHERE game_id = p_game_id;
+
+  -- Notify players
+  INSERT INTO notifications (user_id, notification_type, title, message, link_url)
+  SELECT p.id, 'game_started', 'The Game Has Begun!',
+    'Mansion Mayhem is now live. Check your scenarios!',
+    '/pages/player-dashboard.html?game=' || p_game_id
+  FROM mm_game_cast gc
+  JOIN cast_members cm ON cm.id = gc.cast_member_id
+  JOIN profiles p ON p.id = cm.user_id
+  WHERE gc.game_id = p_game_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================================
+-- 14. CHECK AND ADVANCE LOBBIES (Cron Job)
+-- ============================================================================
+-- Check and advance lobbies when timers expire
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.check_and_advance_lobbies()
+RETURNS VOID AS $$
+DECLARE
+  v_game RECORD;
+BEGIN
+  -- Advance waiting lobbies to active lobbies
+  FOR v_game IN
+    SELECT id FROM mm_games
+    WHERE status = 'waiting_lobby' AND waiting_lobby_ends_at <= NOW()
+  LOOP
+    PERFORM advance_to_active_lobby(v_game.id);
+  END LOOP;
+
+  -- Advance active lobbies to game start
+  FOR v_game IN
+    SELECT id FROM mm_games
+    WHERE status = 'active_lobby' AND active_lobby_ends_at <= NOW()
+  LOOP
+    PERFORM start_game_active_phase(v_game.id);
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- 15. DISTRIBUTE DAILY SCENARIOS
+-- ============================================================================
+-- Distribute 2-3 scenarios per day with 3-5 max total per cast member
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.distribute_daily_scenarios()
+RETURNS JSON AS $$
+DECLARE
+  v_game RECORD;
+  v_cast_member RECORD;
+  v_scenario RECORD;
+  v_daily_limit INTEGER := 3;
+  v_total_limit INTEGER := 5;
+  v_result JSONB := '[]'::JSONB;
+BEGIN
+  FOR v_game IN SELECT id FROM mm_games WHERE status = 'active' LOOP
+
+    -- Get undistributed scenarios
+    FOR v_scenario IN
+      SELECT s.* FROM scenarios s
+      WHERE s.game_id = v_game.id
+        AND s.status = 'queued'
+        AND s.distribution_date IS NULL
+      ORDER BY s.created_at ASC
+      LIMIT 10
+    LOOP
+
+      -- Find eligible cast members (under quota)
+      FOR v_cast_member IN
+        SELECT
+          gc.cast_member_id,
+          cm.archetype,
+          COALESCE(sq.total_assigned, 0) as total_assigned
+        FROM mm_game_cast gc
+        JOIN cast_members cm ON cm.id = gc.cast_member_id
+        LEFT JOIN mm_scenario_quotas sq ON sq.cast_member_id = gc.cast_member_id AND sq.game_id = v_game.id
+        WHERE gc.game_id = v_game.id
+          AND gc.status = 'active'
+          AND COALESCE(sq.total_assigned, 0) < v_total_limit
+          AND (v_scenario.target_archetype IS NULL OR v_scenario.target_archetype = cm.archetype)
+        ORDER BY COALESCE(sq.total_assigned, 0) ASC, RANDOM()
+        LIMIT v_daily_limit
+      LOOP
+
+        -- Assign scenario to cast member
+        INSERT INTO scenario_targets (scenario_id, cast_member_id)
+        VALUES (v_scenario.id, v_cast_member.cast_member_id)
+        ON CONFLICT DO NOTHING;
+
+        -- Update quota
+        INSERT INTO mm_scenario_quotas (game_id, cast_member_id, week_number, total_assigned, week_assigned, max_scenarios_total, max_scenarios_per_day)
+        VALUES (v_game.id, v_cast_member.cast_member_id, 1, 1, 1, v_total_limit, v_daily_limit)
+        ON CONFLICT (game_id, cast_member_id, week_number)
+        DO UPDATE SET
+          total_assigned = mm_scenario_quotas.total_assigned + 1,
+          week_assigned = mm_scenario_quotas.week_assigned + 1,
+          updated_at = NOW();
+
+        v_result := v_result || jsonb_build_object(
+          'scenario_id', v_scenario.id,
+          'cast_member_id', v_cast_member.cast_member_id
+        );
+      END LOOP;
+
+      -- Mark scenario as distributed with 24hr deadline
+      UPDATE scenarios SET
+        status = 'active',
+        distribution_date = CURRENT_DATE,
+        deadline_at = NOW() + INTERVAL '24 hours',
+        assigned_count = (SELECT COUNT(*) FROM scenario_targets WHERE scenario_id = v_scenario.id)
+      WHERE id = v_scenario.id;
+
+    END LOOP;
+  END LOOP;
+
+  RETURN json_build_object('success', true, 'distributions', v_result);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================================
+-- 16. TRIGGER QUEEN SELECTION (Weekly)
+-- ============================================================================
+-- Weekly queen selection (runs on Sundays at 8 PM UTC)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.trigger_queen_selection()
+RETURNS JSON AS $$
+DECLARE
+  v_game RECORD;
+  v_week_number INTEGER;
+  v_selected_queen UUID;
+  v_result JSONB := '[]'::JSONB;
+BEGIN
+  FOR v_game IN SELECT id, started_at FROM mm_games WHERE status = 'active' LOOP
+
+    v_week_number := FLOOR(EXTRACT(EPOCH FROM (NOW() - v_game.started_at)) / (7 * 24 * 3600)) + 1;
+
+    -- Skip if already selected for this week
+    IF EXISTS (SELECT 1 FROM mm_queen_selections WHERE game_id = v_game.id AND week_number = v_week_number) THEN
+      CONTINUE;
+    END IF;
+
+    -- Random lottery selection
+    SELECT cast_member_id INTO v_selected_queen
+    FROM mm_game_cast
+    WHERE game_id = v_game.id AND status = 'active' AND eliminated_at IS NULL
+    ORDER BY RANDOM()
+    LIMIT 1;
+
+    IF v_selected_queen IS NULL THEN CONTINUE; END IF;
+
+    -- Insert selection record
+    INSERT INTO mm_queen_selections (game_id, week_number, round_number, selected_queen_id, selection_method, selected_at, nomination_deadline)
+    VALUES (v_game.id, v_week_number, v_week_number, v_selected_queen, 'random_lottery', NOW(), NOW() + INTERVAL '48 hours');
+
+    -- Notify players
+    INSERT INTO notifications (user_id, notification_type, title, message, link_url)
+    SELECT p.id, 'queen_selected', 'Week ' || v_week_number || ' Queen Announced!',
+      'Check who has the power this week!', '/queen-selection.html?game=' || v_game.id
+    FROM mm_game_cast gc
+    JOIN cast_members cm ON cm.id = gc.cast_member_id
+    JOIN profiles p ON p.id = cm.user_id
+    WHERE gc.game_id = v_game.id;
+
+    v_result := v_result || jsonb_build_object('game_id', v_game.id, 'week', v_week_number, 'queen_id', v_selected_queen);
+  END LOOP;
+
+  RETURN json_build_object('selections', v_result);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================================
 -- Grant execute permissions to authenticated users
 -- ============================================================================
 GRANT EXECUTE ON FUNCTION public.get_character_dashboard(UUID) TO authenticated;
@@ -494,3 +757,9 @@ GRANT EXECUTE ON FUNCTION public.flag_content(UUID, TEXT, UUID, TEXT, TEXT) TO a
 GRANT EXECUTE ON FUNCTION public.calculate_character_earnings(UUID, DATE, DATE) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_admin_analytics(INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.complete_character_setup(UUID, JSON, JSON, JSON, JSON) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.initialize_game_lobbies(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.advance_to_active_lobby(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.start_game_active_phase(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.check_and_advance_lobbies() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.distribute_daily_scenarios() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.trigger_queen_selection() TO authenticated;

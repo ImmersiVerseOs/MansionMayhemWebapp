@@ -691,6 +691,14 @@
 
       <div class="recording-timer" id="recordingTimer" style="display: none;">00:00</div>
 
+      <!-- Anonymous Toggle -->
+      <div class="recording-option" style="margin: 16px 0;">
+        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; justify-content: center;">
+          <input type="checkbox" id="anonymousToggle" style="width: 20px; height: 20px; cursor: pointer;">
+          <span style="font-size: 1rem; color: rgba(255,255,255,0.6);">Post anonymously (hide my name)</span>
+        </label>
+      </div>
+
       <div class="recording-actions">
         <button class="modal-btn modal-btn-secondary" onclick="closeRecordingModal()">
           Cancel
@@ -812,7 +820,12 @@
         container.innerHTML = notes.map(note => {
           const timeAgo = getRelativeTime(note.created_at)
           const isHot = note.drama_score >= 70
-          const displayName = note.profiles?.display_name || 'Anonymous'
+
+          // Check submitter_identity to determine display name
+          const displayName = note.submitter_identity === 'anonymous'
+            ? (note.display_name_override || 'Anonymous')
+            : (note.cast_members?.display_name || 'Anonymous')
+
           const avatar = displayName.charAt(0).toUpperCase()
 
           // Convert storage path to public URL (or use directly if already a full URL)
@@ -1005,6 +1018,16 @@
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
         const fileName = `tea-${Date.now()}.webm`
 
+        // Get anonymous toggle state
+        const isAnonymous = document.getElementById('anonymousToggle').checked
+
+        // Get current cast member ID
+        const { data: castMember } = await supabase
+          .from('cast_members')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .single()
+
         // Upload to storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('voice-notes')
@@ -1012,15 +1035,18 @@
 
         if (uploadError) throw uploadError
 
-        // Create voice note record
+        // Create confession card record
         const { error: insertError } = await supabase
-          .from('voice_notes')
+          .from('mm_confession_cards')
           .insert({
-            user_id: currentUser.id,
-            note_type: 'general',
+            game_id: currentGameId,
+            cast_member_id: isAnonymous ? null : (castMember?.id || null),
             audio_url: uploadData.path,
             duration: recordingTime,
-            status: 'pending'
+            is_anonymous: isAnonymous,
+            submitter_identity: isAnonymous ? 'anonymous' : 'profile_name',
+            display_name_override: isAnonymous ? 'Anonymous Player' : null,
+            is_approved: false
           })
 
         if (insertError) throw insertError
@@ -1032,6 +1058,7 @@
         document.getElementById('recordingTimer').textContent = '00:00'
         document.getElementById('recordingTimer').style.display = 'none'
         document.getElementById('submitBtn').style.display = 'none'
+        document.getElementById('anonymousToggle').checked = false
         recordingTime = 0
         audioChunks = []
 

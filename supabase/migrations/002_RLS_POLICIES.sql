@@ -199,7 +199,7 @@ CREATE POLICY "authenticated_write" ON public.mm_link_up_responses
   FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 -- ============================================================================
--- 10. MM_ALLIANCE_ROOMS - Public read, authenticated write
+-- 10. MM_ALLIANCE_ROOMS - Members only (private), quota enforcement
 -- ============================================================================
 ALTER TABLE public.mm_alliance_rooms ENABLE ROW LEVEL SECURITY;
 
@@ -207,20 +207,48 @@ DROP POLICY IF EXISTS "service_role_all" ON public.mm_alliance_rooms;
 CREATE POLICY "service_role_all" ON public.mm_alliance_rooms
   FOR ALL USING (auth.role() = 'service_role');
 
+-- Members can view own alliance rooms
 DROP POLICY IF EXISTS "public_read" ON public.mm_alliance_rooms;
-CREATE POLICY "public_read" ON public.mm_alliance_rooms
-  FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Members can view own alliance rooms" ON public.mm_alliance_rooms;
+CREATE POLICY "Members can view own alliance rooms" ON public.mm_alliance_rooms
+  FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM cast_members cm
+      WHERE cm.user_id = auth.uid() AND cm.id = ANY(mm_alliance_rooms.member_ids)
+    )
+  );
 
+-- Alliance room creation with quota check
 DROP POLICY IF EXISTS "authenticated_write" ON public.mm_alliance_rooms;
-CREATE POLICY "authenticated_write" ON public.mm_alliance_rooms
-  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Users can create alliance rooms" ON public.mm_alliance_rooms;
+CREATE POLICY "Users can create alliance rooms" ON public.mm_alliance_rooms
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    -- Check user is in member_ids AND hasn't exceeded quota
+    EXISTS (
+      SELECT 1 FROM cast_members cm
+      LEFT JOIN mm_alliance_quotas aq ON aq.cast_member_id = cm.id
+      WHERE cm.user_id = auth.uid()
+        AND cm.id = ANY(mm_alliance_rooms.member_ids)
+        AND COALESCE(aq.active_alliances, 0) < COALESCE(aq.max_alliances, 5)
+    )
+    -- Verify room has max 5 members
+    AND array_length(mm_alliance_rooms.member_ids, 1) <= 5
+  );
 
 DROP POLICY IF EXISTS "authenticated_update" ON public.mm_alliance_rooms;
 CREATE POLICY "authenticated_update" ON public.mm_alliance_rooms
-  FOR UPDATE USING (auth.role() = 'authenticated');
+  FOR UPDATE TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM cast_members cm
+      WHERE cm.user_id = auth.uid() AND cm.id = ANY(mm_alliance_rooms.member_ids)
+    )
+  );
 
 -- ============================================================================
--- 11. MM_ALLIANCE_MESSAGES - Public read, authenticated write if in room
+-- 11. MM_ALLIANCE_MESSAGES - Members only (private)
 -- ============================================================================
 ALTER TABLE public.mm_alliance_messages ENABLE ROW LEVEL SECURITY;
 
@@ -228,19 +256,29 @@ DROP POLICY IF EXISTS "service_role_all" ON public.mm_alliance_messages;
 CREATE POLICY "service_role_all" ON public.mm_alliance_messages
   FOR ALL USING (auth.role() = 'service_role');
 
+-- Alliance members can view messages
 DROP POLICY IF EXISTS "public_read" ON public.mm_alliance_messages;
-CREATE POLICY "public_read" ON public.mm_alliance_messages
-  FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Alliance members can view messages" ON public.mm_alliance_messages;
+CREATE POLICY "Alliance members can view messages" ON public.mm_alliance_messages
+  FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM mm_alliance_rooms ar
+      JOIN cast_members cm ON cm.id = ANY(ar.member_ids)
+      WHERE ar.id = mm_alliance_messages.room_id AND cm.user_id = auth.uid()
+    )
+  );
 
--- Write only if cast member is in the room
+-- Alliance members can send messages
 DROP POLICY IF EXISTS "authenticated_write_if_member" ON public.mm_alliance_messages;
-CREATE POLICY "authenticated_write_if_member" ON public.mm_alliance_messages
-  FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated'
-    OR cast_member_id IN (
-      SELECT unnest(member_ids)
-      FROM public.mm_alliance_rooms
-      WHERE id = room_id
+DROP POLICY IF EXISTS "Alliance members can send messages" ON public.mm_alliance_messages;
+CREATE POLICY "Alliance members can send messages" ON public.mm_alliance_messages
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM mm_alliance_rooms ar
+      JOIN cast_members cm ON cm.id = ANY(ar.member_ids)
+      WHERE ar.id = mm_alliance_messages.room_id AND cm.user_id = auth.uid() AND cm.id = mm_alliance_messages.sender_cast_id
     )
   );
 
@@ -448,6 +486,93 @@ CREATE POLICY "admin_read_all" ON public.payment_transactions
       AND profiles.role IN ('admin', 'super_admin')
     )
   );
+
+-- ============================================================================
+-- 22. SCENARIO_TARGETS - Public read, admin write
+-- ============================================================================
+ALTER TABLE public.scenario_targets ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "service_role_all" ON public.scenario_targets;
+CREATE POLICY "service_role_all" ON public.scenario_targets
+  FOR ALL USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "public_read" ON public.scenario_targets;
+CREATE POLICY "public_read" ON public.scenario_targets
+  FOR SELECT USING (true);
+
+-- ============================================================================
+-- 23. MM_SCENARIO_QUOTAS - Public read, admin write
+-- ============================================================================
+ALTER TABLE public.mm_scenario_quotas ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "service_role_all" ON public.mm_scenario_quotas;
+CREATE POLICY "service_role_all" ON public.mm_scenario_quotas
+  FOR ALL USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "public_read" ON public.mm_scenario_quotas;
+CREATE POLICY "public_read" ON public.mm_scenario_quotas
+  FOR SELECT USING (true);
+
+-- ============================================================================
+-- 24. MM_ALLIANCE_QUOTAS - Public read, system write
+-- ============================================================================
+ALTER TABLE public.mm_alliance_quotas ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "service_role_all" ON public.mm_alliance_quotas;
+CREATE POLICY "service_role_all" ON public.mm_alliance_quotas
+  FOR ALL USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "public_read" ON public.mm_alliance_quotas;
+CREATE POLICY "public_read" ON public.mm_alliance_quotas
+  FOR SELECT USING (true);
+
+-- ============================================================================
+-- 25. MM_QUEEN_SELECTIONS - Public read, admin write
+-- ============================================================================
+ALTER TABLE public.mm_queen_selections ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "service_role_all" ON public.mm_queen_selections;
+CREATE POLICY "service_role_all" ON public.mm_queen_selections
+  FOR ALL USING (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "public_read" ON public.mm_queen_selections;
+CREATE POLICY "public_read" ON public.mm_queen_selections
+  FOR SELECT USING (true);
+
+-- ============================================================================
+-- TRIGGER: Update Alliance Quotas
+-- ============================================================================
+-- Trigger to update alliance quotas when rooms are created/dissolved
+CREATE OR REPLACE FUNCTION public.update_alliance_quotas()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    -- Increment quota for all members when alliance created
+    INSERT INTO mm_alliance_quotas (game_id, cast_member_id, active_alliances, max_alliances)
+    SELECT NEW.game_id, unnest(NEW.member_ids), 1, 5
+    ON CONFLICT (game_id, cast_member_id)
+    DO UPDATE SET
+      active_alliances = mm_alliance_quotas.active_alliances + 1,
+      updated_at = NOW();
+
+  ELSIF TG_OP = 'UPDATE' AND OLD.status = 'active' AND NEW.status IN ('dissolved', 'betrayed') THEN
+    -- Decrement quota when alliance dissolved
+    UPDATE mm_alliance_quotas SET
+      active_alliances = GREATEST(0, active_alliances - 1),
+      updated_at = NOW()
+    WHERE game_id = NEW.game_id
+      AND cast_member_id = ANY(NEW.member_ids);
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS alliance_quota_update ON public.mm_alliance_rooms;
+CREATE TRIGGER alliance_quota_update
+  AFTER INSERT OR UPDATE ON public.mm_alliance_rooms
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_alliance_quotas();
 
 -- ============================================================================
 -- VERIFICATION

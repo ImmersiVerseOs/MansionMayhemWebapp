@@ -721,10 +721,11 @@
           return
         }
 
-        if (game.status !== 'lobby' && game.status !== 'setup') {
+        // Support old 'lobby' status and new two-stage lobby
+        const validLobbyStatuses = ['lobby', 'setup', 'waiting_lobby', 'active_lobby', 'recruiting']
+        if (!validLobbyStatuses.includes(game.status)) {
           console.log('⚠️ Game status invalid for joining:', game.status)
           alert('This game is not accepting players')
-          // Don't redirect - let user see the error
           return
         }
 
@@ -732,19 +733,31 @@
 
         // Update header
         document.getElementById('gameTitle').textContent = game.title
-        document.getElementById('gameCode').textContent = `CODE: ${game.game_code}`
+        document.getElementById('gameCode').textContent = game.game_code ? `CODE: ${game.game_code}` : ''
 
-        // Load lobby timer from mm_game_stages
-        const { data: gameStage } = await supabase
-          .from('mm_game_stages')
-          .select('stage_ends_at, current_stage')
-          .eq('game_id', currentGameId)
-          .eq('current_stage', 'lobby')
-          .single()
+        // Determine which lobby phase we're in and start timer
+        let targetTime, phaseLabel
 
-        // Start lobby timer if available
-        if (gameStage && gameStage.stage_ends_at) {
-          startLobbyTimer(gameStage.stage_ends_at)
+        if (game.status === 'waiting_lobby' && game.waiting_lobby_ends_at) {
+          targetTime = new Date(game.waiting_lobby_ends_at)
+          phaseLabel = '⏳ Waiting Room Closes In'
+          startLobbyTimer(targetTime, phaseLabel)
+        } else if (game.status === 'active_lobby' && game.active_lobby_ends_at) {
+          targetTime = new Date(game.active_lobby_ends_at)
+          phaseLabel = '🤝 Alliance Phase Ends In'
+          startLobbyTimer(targetTime, phaseLabel)
+        } else {
+          // Fallback: try to load from mm_game_stages for old games
+          const { data: gameStage } = await supabase
+            .from('mm_game_stages')
+            .select('stage_ends_at')
+            .eq('game_id', currentGameId)
+            .eq('status', 'active')
+            .single()
+
+          if (gameStage && gameStage.stage_ends_at) {
+            startLobbyTimer(new Date(gameStage.stage_ends_at), '⏱️ Lobby Closes In')
+          }
         }
 
         // Load cast list
@@ -957,8 +970,8 @@
     // Lobby countdown timer
     let timerInterval = null
 
-    function startLobbyTimer(lobbyEndsAt) {
-      console.log('⏱️ Starting lobby timer. Ends at:', lobbyEndsAt)
+    function startLobbyTimer(lobbyEndsAt, phaseLabel = '⏱️ Lobby Closes In') {
+      console.log('⏱️ Starting lobby timer. Ends at:', lobbyEndsAt, 'Label:', phaseLabel)
       const timerDisplay = document.getElementById('timerDisplay')
       const lobbyTimerEl = document.getElementById('lobbyTimer')
       const statusMessageEl = document.getElementById('statusMessage')
@@ -973,15 +986,14 @@
         const diff = end - now
 
         if (diff <= 0) {
-          // Timer expired - start the game
-          console.log('⏰ TIMER EXPIRED - Game is starting!')
-          if (timerDisplay) timerDisplay.textContent = 'STARTING NOW!'
+          // Timer expired - reload page to show next phase
+          console.log('⏰ TIMER EXPIRED - Reloading to show next phase')
+          if (timerDisplay) timerDisplay.innerHTML = `<div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${phaseLabel.replace('Closes In', 'Complete!')}</div><div>Loading next phase...</div>`
           if (timerInterval) clearInterval(timerInterval)
 
-          // Redirect to player dashboard with game ID
-          console.log('➡️ Redirecting to player dashboard in 2 seconds...')
+          // Reload page after 2 seconds to show next phase
           setTimeout(() => {
-            window.location.href = `/pages/player-dashboard.html?game=${currentGameId}`
+            location.reload()
           }, 2000)
           return
         }
@@ -1002,7 +1014,12 @@
           timeText = `${minutes}:${seconds.toString().padStart(2, '0')}`
         }
 
-        if (timerDisplay) timerDisplay.textContent = timeText
+        if (timerDisplay) {
+          timerDisplay.innerHTML = `
+            <div style="font-size: 1.2rem; margin-bottom: 0.5rem; opacity: 0.8;">${phaseLabel}</div>
+            <div style="font-size: 2.5rem; font-weight: 900;">${timeText}</div>
+          `
+        }
       }
 
       // Update immediately and then every second

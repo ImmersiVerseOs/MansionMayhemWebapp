@@ -936,16 +936,53 @@
               archetype: archetype,
               screen_time_score: 'medium', // Default to medium
               status: 'active',
-              backstory: backstoryParts.join('\n')
+              backstory: backstoryParts.join('\n'),
+              is_ai_player: false
             })
             .select()
             .single();
 
           if (castMemberError) {
             console.error('❌ Error creating cast member:', castMemberError);
-            // Don't fail the whole process, but log it
+
+            // Check if it's an RLS error
+            if (castMemberError.code === '42501') {
+              alert('❌ Permission denied: Unable to create cast profile. Please contact support.');
+              nextBtn.disabled = false;
+              nextBtn.innerHTML = '<span>Submit Application</span><span>🚀</span>';
+              return;
+            }
+
+            // For other errors, show message but continue (profile may already exist)
+            console.warn('⚠️ Cast member creation issue - may already exist');
           } else {
             console.log('✅ Cast member created:', castMemberData);
+
+            // Store cast member ID for future use
+            localStorage.setItem('currentCastMemberId', castMemberData.id);
+            localStorage.setItem('castMemberArchetype', castMemberData.archetype);
+          }
+
+          // Verify profile was created
+          const { data: verifyProfile, error: verifyError } = await supabase
+            .from('profiles')
+            .select('id, full_name, display_name, cast_members(id, archetype, status)')
+            .eq('id', signUpData.user.id)
+            .single();
+
+          if (verifyError || !verifyProfile) {
+            console.error('❌ Profile verification failed:', verifyError);
+            alert('⚠️ Account created but profile incomplete. Please contact support.');
+            nextBtn.disabled = false;
+            nextBtn.innerHTML = '<span>Submit Application</span><span>🚀</span>';
+            return;
+          }
+
+          console.log('✅ Profile verified:', verifyProfile);
+
+          // Check if cast_member was actually created
+          if (!verifyProfile.cast_members || verifyProfile.cast_members.length === 0) {
+            console.warn('⚠️ No cast_member found after creation, may need manual setup');
           }
         }
 

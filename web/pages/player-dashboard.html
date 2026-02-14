@@ -617,10 +617,10 @@
       <div class="logo-subtitle">Reality TV Game</div>
     </div>
 
-    <a href="/pages/browse-games.html" class="start-game-btn">
+    <button onclick="startNewGame()" class="start-game-btn" style="border: none; cursor: pointer; width: calc(100% - 2rem);">
       <span class="icon">🎮</span>
-      Browse Games
-    </a>
+      Start New Game
+    </button>
 
     <nav class="nav-section">
       <div class="nav-title">Main</div>
@@ -694,10 +694,13 @@
           <p id="welcomeSubtitle">Your game is live. Time to make moves.</p>
         </div>
         <div class="header-actions">
+          <button onclick="startNewGame()" class="btn btn-primary" style="border: none; cursor: pointer;">
+            🎮 Start New Game
+          </button>
           <a href="/pages/scenarios.html" class="btn btn-secondary">
             📝 View Scenarios
           </a>
-          <a href="/pages/tea-room.html" class="btn btn-primary">
+          <a href="/pages/tea-room.html" class="btn btn-secondary">
             ☕ Spill Tea
           </a>
         </div>
@@ -1033,6 +1036,63 @@
     window.handleLogout = async () => {
       await supabase.auth.signOut()
       window.location.href = '/auth/login.html'
+    }
+
+    // Start new game and go straight to lobby
+    window.startNewGame = async () => {
+      console.log('🎮 Starting new game...')
+
+      if (!currentUser) {
+        alert('Please sign in to start a game')
+        window.location.href = '/pages/sign-in.html'
+        return
+      }
+
+      try {
+        console.log('Creating new game...')
+
+        // Create a new game with setup status
+        const { data: newGame, error: gameError } = await supabase
+          .from('mm_games')
+          .insert({
+            title: `Mansion Mayhem - ${new Date().toLocaleDateString()}`,
+            description: 'New Mansion Mayhem game launching this Sunday!',
+            status: 'setup',
+            max_players: 20,
+            created_at: new Date().toISOString()
+          })
+          .select()
+          .single()
+
+        if (gameError) {
+          console.error('❌ Game creation error:', gameError)
+          throw gameError
+        }
+
+        console.log('✅ Game created:', newGame)
+
+        // Try to initialize week-long lobby (optional - if RPC exists)
+        try {
+          const { data: lobbyInfo, error: lobbyError } = await supabase
+            .rpc('initialize_week_long_lobby', { p_game_id: newGame.id })
+
+          if (lobbyError) {
+            console.warn('⚠️ Lobby initialization not available:', lobbyError)
+          } else {
+            console.log('✅ Lobby initialized:', lobbyInfo)
+          }
+        } catch (rpcError) {
+          console.warn('⚠️ RPC function not available, continuing anyway')
+        }
+
+        // Redirect straight to lobby
+        console.log('Redirecting to lobby...')
+        window.location.href = `/pages/lobby.html?game=${newGame.id}`
+
+      } catch (error) {
+        console.error('❌ Error creating game:', error)
+        alert('Failed to create game: ' + error.message)
+      }
     }
 
     init()

@@ -9,22 +9,26 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #0a0a0a;
-      --bg-card: #111;
-      --bg-elevated: #1a1a1a;
-      --border: #2a2a2a;
-      --text: #fff;
-      --text-dim: #888;
-      --gold: #d4af37;
-      --rose: #e91e63;
-      --success: #4caf50;
-      --error: #f44336;
+      --bg-primary: #0A0E27;
+      --bg-secondary: #151936;
+      --bg-card: #1E2139;
+      --bg-elevated: #252949;
+      --accent-pink: #E91E63;
+      --accent-purple: #9C27B0;
+      --accent-gold: #FFC107;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B8B9C5;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --success: #00C853;
+      --danger: #D32F2F;
     }
     body {
-      font-family: 'Montserrat', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
       min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
     .container {
       max-width: 1400px;
@@ -32,41 +36,74 @@
       padding: 32px 20px;
     }
     .page-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 36px;
-      color: var(--gold);
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       margin-bottom: 8px;
     }
     .section {
       background: var(--bg-card);
-      border: 2px solid var(--border);
+      border: 1px solid var(--border-subtle);
       border-radius: 16px;
-      padding: 24px;
+      padding: 28px;
       margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
     .section-title {
-      font-size: 20px;
-      color: var(--gold);
-      margin-bottom: 16px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      border-radius: 2px;
     }
     .cast-selector {
-      background: var(--bg-card);
-      border: 2px solid var(--gold);
-      border-radius: 12px;
-      padding: 24px;
+      background: linear-gradient(135deg, rgba(233, 30, 99, 0.1), rgba(156, 39, 176, 0.05));
+      border: 1px solid var(--accent-pink);
+      border-radius: 16px;
+      padding: 28px;
       margin-bottom: 32px;
       text-align: center;
+      box-shadow: 0 4px 12px rgba(233, 30, 99, 0.2);
     }
     .request-card {
       background: var(--bg-elevated);
-      border: 2px solid var(--border);
+      border: 1px solid var(--border-subtle);
       border-radius: 12px;
-      padding: 20px;
+      padding: 24px;
       margin-bottom: 16px;
       transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .request-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+      opacity: 0;
+      transition: opacity 0.3s;
     }
     .request-card:hover {
-      border-color: var(--gold);
+      border-color: var(--accent-pink);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(233, 30, 99, 0.2);
+    }
+    .request-card:hover::before {
+      opacity: 1;
     }
     .request-header {
       display: flex;
@@ -78,22 +115,23 @@
     }
     .requester-name {
       font-weight: 700;
-      font-size: 18px;
-      color: var(--gold);
+      font-size: 1.125rem;
+      color: var(--text-primary);
     }
     .link-type-badge {
       display: inline-block;
-      background: var(--rose);
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
       color: white;
       padding: 6px 16px;
-      border-radius: 12px;
-      font-size: 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     .invitees-list {
-      color: var(--text-dim);
-      font-size: 14px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
       margin-bottom: 12px;
     }
     .action-buttons {
@@ -102,45 +140,51 @@
       margin-top: 16px;
     }
     .btn {
-      padding: 10px 20px;
+      padding: 12px 24px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
-      font-size: 14px;
+      transition: all 0.2s;
+      font-size: 0.9rem;
     }
     .btn-accept {
       background: var(--success);
       color: white;
+      box-shadow: 0 2px 8px rgba(0, 200, 83, 0.3);
     }
     .btn-accept:hover {
-      background: #45a049;
+      background: #00B249;
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 200, 83, 0.4);
     }
     .btn-decline {
-      background: var(--error);
+      background: var(--danger);
       color: white;
+      box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
     }
     .btn-decline:hover {
-      background: #da190b;
+      background: #C62828;
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(211, 47, 47, 0.4);
     }
     .btn-primary {
-      background: var(--gold);
-      color: var(--bg);
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      color: white;
+      box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
     }
     .btn-primary:hover {
-      background: #c49b2e;
       transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(233, 30, 99, 0.5);
     }
     .btn-secondary {
       background: var(--bg-elevated);
-      color: var(--text);
-      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
     }
     .btn-secondary:hover {
-      border-color: var(--gold);
+      border-color: var(--accent-pink);
+      background: rgba(233, 30, 99, 0.1);
       transform: translateY(-2px);
     }
     .btn:disabled {
@@ -153,43 +197,47 @@
     }
     .form-label {
       display: block;
-      color: var(--gold);
+      color: var(--text-primary);
       font-weight: 600;
       margin-bottom: 8px;
-      font-size: 14px;
+      font-size: 0.9rem;
     }
     .form-select,
     .form-input {
       width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      padding: 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
       background: var(--bg-elevated);
-      color: var(--text);
-      font-size: 16px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.2s;
     }
     .form-select:focus,
     .form-input:focus {
       outline: none;
-      border-color: var(--gold);
+      border-color: var(--accent-pink);
+      box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
     }
     .cast-member-checkbox {
       display: flex;
       align-items: center;
-      padding: 12px;
+      padding: 14px;
       background: var(--bg-elevated);
-      border: 2px solid var(--border);
-      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
       margin-bottom: 8px;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.2s;
     }
     .cast-member-checkbox:hover {
-      border-color: var(--gold);
+      border-color: var(--accent-pink);
+      background: rgba(233, 30, 99, 0.05);
     }
     .cast-member-checkbox.selected {
-      border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.1);
+      border-color: var(--accent-pink);
+      background: rgba(233, 30, 99, 0.1);
+      box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
     }
     .cast-member-checkbox input[type="checkbox"] {
       margin-right: 12px;
@@ -199,8 +247,8 @@
     }
     .empty-state {
       text-align: center;
-      padding: 40px 20px;
-      color: var(--text-dim);
+      padding: 48px 20px;
+      color: var(--text-secondary);
     }
     .empty-state-icon {
       font-size: 64px;
@@ -208,12 +256,12 @@
     }
     .response-message-input {
       width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 14px;
+      padding: 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 0.9rem;
       margin-bottom: 12px;
       display: none;
     }
@@ -221,31 +269,37 @@
       display: block;
     }
     .progress-indicator {
-      font-size: 12px;
-      color: var(--text-dim);
-      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      font-weight: 500;
     }
     .progress-bar {
-      height: 6px;
-      background: var(--border);
-      border-radius: 3px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
       overflow: hidden;
-      margin-top: 4px;
+      margin-top: 8px;
     }
     .progress-bar-fill {
       height: 100%;
-      background: var(--gold);
+      background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
       transition: width 0.3s;
+      box-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
     }
     .back-link {
-      display: inline-block;
-      color: var(--gold);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
       text-decoration: none;
       margin-bottom: 24px;
-      font-weight: 600;
+      font-weight: 500;
+      transition: all 0.2s;
     }
     .back-link:hover {
-      text-decoration: underline;
+      color: var(--accent-pink);
+      transform: translateX(-4px);
     }
     .radio-group {
       display: flex;
@@ -264,29 +318,31 @@
       cursor: pointer;
     }
     .expires-at {
-      font-size: 12px;
-      color: var(--text-dim);
-      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      font-style: italic;
     }
     .toast {
       position: fixed;
       top: 20px;
       right: 20px;
       background: var(--bg-card);
-      border: 2px solid var(--gold);
+      border: 1px solid var(--border-subtle);
       border-radius: 12px;
       padding: 16px 24px;
-      color: var(--text);
+      color: var(--text-primary);
       font-weight: 600;
       z-index: 1000;
       animation: slideIn 0.3s ease;
       max-width: 400px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
     .toast.success {
-      border-color: var(--success);
+      border-left: 4px solid var(--success);
     }
     .toast.error {
-      border-color: var(--error);
+      border-left: 4px solid var(--danger);
     }
     @keyframes slideIn {
       from {
@@ -312,16 +368,16 @@
   </script>
 
   <div class="container">
-    <a href="/lobby-dashboard.html" class="back-link">← Back to Lobby</a>
+    <a href="/lobby.html" class="back-link">← Back to Lobby</a>
 
     <h1 class="page-title">🤝 Link-Up Requests</h1>
-    <p style="color: var(--text-dim); margin-bottom: 32px;">Connect with other cast members to form alliances</p>
+    <p style="color: var(--text-secondary); margin-bottom: 32px; font-size: 1.1rem;">Connect with other cast members to form powerful alliances</p>
 
     <!-- Cast Member Selection -->
     <div id="cast-selector" class="cast-selector">
-      <h3 style="color: var(--gold); margin-bottom: 16px;">👤 Who are you?</h3>
-      <select id="cast-member-select" class="form-select" style="max-width: 400px; margin: 0 auto;">
-        <option value="">Select your cast member...</option>
+      <h3 style="color: var(--text-primary); margin-bottom: 16px; font-weight: 700; font-size: 1.25rem;">👤 Select Your Cast Member</h3>
+      <select id="cast-member-select" class="form-select" style="max-width: 500px; margin: 0 auto;">
+        <option value="">Choose your character...</option>
       </select>
     </div>
 
@@ -531,7 +587,7 @@
       }
 
       container.innerHTML = await Promise.all(requests.map(async (request) => {
-        const requester = allCastMembers.find(m => m.id === request.requester_cast_id);
+        const requester = allCastMembers.find(m => m.id === request.from_cast_member_id);
         const requesterName = requester ? requester.display_name : 'Unknown';
 
         // Get invitee names
@@ -659,7 +715,7 @@
 
         if (responseError) throw responseError;
 
-        const memberIds = [request.requester_cast_id, ...acceptedResponses.map(r => r.cast_member_id)];
+        const memberIds = [request.from_cast_member_id, ...acceptedResponses.map(r => r.cast_member_id)];
 
         // Create alliance room
         const roomName = request.custom_name || `${request.link_up_type.charAt(0).toUpperCase() + request.link_up_type.slice(1)} Alliance`;
@@ -670,7 +726,7 @@
             game_id: gameId,
             room_name: roomName,
             room_type: request.link_up_type,
-            member_cast_ids: memberIds,
+            member_ids: memberIds,
             is_active: true,
             created_from_request_id: request.id
           });
@@ -762,7 +818,7 @@
           .from('mm_link_up_requests')
           .insert({
             game_id: gameId,
-            requester_cast_id: currentCastMemberId,
+            from_cast_member_id: currentCastMemberId,
             link_up_type: linkType,
             invited_cast_ids: invitedIds,
             status: 'pending',
@@ -797,7 +853,7 @@
         const { data, error } = await window.supabaseClient
           .from('mm_link_up_requests')
           .select('*')
-          .eq('requester_cast_id', currentCastMemberId)
+          .eq('from_cast_member_id', currentCastMemberId)
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
 
@@ -859,7 +915,7 @@
         const { data, error } = await window.supabaseClient
           .from('mm_alliance_rooms')
           .select('*')
-          .contains('member_cast_ids', [currentCastMemberId])
+          .contains('member_ids', [currentCastMemberId])
           .eq('is_active', true)
           .order('created_at', { ascending: false });
 
@@ -887,7 +943,7 @@
       }
 
       container.innerHTML = rooms.map(room => {
-        const memberNames = room.member_cast_ids
+        const memberNames = room.member_ids
           .map(id => {
             const member = allCastMembers.find(m => m.id === id);
             return member ? member.display_name : 'Unknown';

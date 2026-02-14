@@ -761,52 +761,37 @@
 
       try {
         let query = supabase
-          .from('voice_notes')
+          .from('mm_confession_cards')
           .select(`
             *,
-            profiles!inner(display_name, avatar_url)
+            cast_members(display_name, avatar_url)
           `)
-          .eq('status', 'approved')
+          .eq('is_approved', true)
           .order('created_at', { ascending: false })
           .limit(20)
 
-        // Filter by game if specified (lobby context - show only intros from game cast)
+        // Filter by game if specified
         if (currentGameId) {
-          // Get cast member user IDs for this game
-          const { data: gameCast } = await supabase
-            .from('mm_game_cast')
-            .select('cast_members!inner(user_id)')
-            .eq('game_id', currentGameId)
-
-          if (gameCast && gameCast.length > 0) {
-            const castUserIds = gameCast.map(gc => gc.cast_members.user_id).filter(Boolean)
-            if (castUserIds.length > 0) {
-              query = query.in('user_id', castUserIds)
-              // In lobby, focus on voice introductions
-              query = query.eq('note_type', 'confession')
-            }
-          }
+          query = query.eq('game_id', currentGameId)
         }
 
         // Apply filters
-        if (filter === 'hot') {
-          query = query.gte('drama_score', 70)
-        } else if (filter === 'fresh') {
+        if (filter === 'fresh') {
           const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
           query = query.gte('created_at', dayAgo)
-        } else if (filter === 'trending') {
-          query = query.gte('reaction_count', 10)
         }
+        // Note: 'hot' and 'trending' filters disabled (no drama_score/reaction_count in mm_confession_cards)
 
         const { data: notes, error } = await query
 
         if (error) throw error
 
         // Update counts
-        const { count: hotCount } = await supabase.from('voice_notes').select('*', { count: 'exact', head: true }).gte('drama_score', 70).eq('status', 'approved')
-        const { count: freshCount } = await supabase.from('voice_notes').select('*', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()).eq('status', 'approved')
-        const { count: trendingCount } = await supabase.from('voice_notes').select('*', { count: 'exact', head: true }).gte('reaction_count', 10).eq('status', 'approved')
-        const { count: allCount } = await supabase.from('voice_notes').select('*', { count: 'exact', head: true }).eq('status', 'approved')
+        const { count: freshCount } = await supabase.from('mm_confession_cards').select('*', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()).eq('is_approved', true)
+        const { count: allCount } = await supabase.from('mm_confession_cards').select('*', { count: 'exact', head: true }).eq('is_approved', true)
+
+        const hotCount = 0  // Disabled
+        const trendingCount = 0  // Disabled
 
         document.getElementById('hotCount').textContent = `🔥 ${hotCount || 0}`
         document.getElementById('freshCount').textContent = `✨ ${freshCount || 0}`

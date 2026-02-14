@@ -590,15 +590,17 @@
         console.error('Error in cast member check:', error)
       }
 
-      // Get active game
+      // Get current game (waiting_lobby, lobby, or active)
       const { data: game } = await sb
         .from('mm_games')
         .select('*')
-        .eq('status', 'active')
+        .in('status', ['recruiting', 'waiting_lobby', 'lobby', 'active'])
+        .order('created_at', { ascending: false })
+        .limit(1)
         .single()
 
       if (!game) {
-        document.getElementById('content').innerHTML = '<div class="error">No active game found</div>'
+        document.getElementById('content').innerHTML = '<div class="error">No game found. Start a new game from the dashboard!</div>'
         return
       }
 
@@ -632,7 +634,9 @@
     function updateCountdown() {
       if (!currentGame) return
       const now = new Date()
-      const start = new Date(currentGame.started_at)
+
+      // Use game_starts_at (Sunday 8 PM ET) for countdown
+      const start = new Date(currentGame.game_starts_at)
       const diff = start - now
 
       if (diff <= 0) {
@@ -640,12 +644,19 @@
         return
       }
 
-      const hours = Math.floor(diff / (1000 * 60 * 60))
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
       const seconds = Math.floor((diff % (1000 * 60)) / 1000)
 
-      document.getElementById('countdown').textContent =
-        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+      // Show days if more than 24 hours
+      if (days > 0) {
+        document.getElementById('countdown').textContent =
+          `${days}d ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+      } else {
+        document.getElementById('countdown').textContent =
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+      }
     }
 
     async function loadStats() {

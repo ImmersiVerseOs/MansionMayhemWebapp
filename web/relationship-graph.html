@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relationship Graph - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="stylesheet" href="/css/modern-theme.css">
+
+  <!-- Vis.js Network for graph visualization -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg-primary: #0A0E27;
+      --bg-secondary: #151936;
+      --bg-card: #1E2139;
+      --bg-elevated: #252949;
+
+      --accent-pink: #E91E63;
+      --accent-purple: #9C27B0;
+      --accent-gold: #FFC107;
+
+      --text-primary: #FFFFFF;
+      --text-secondary: #B8B9C5;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+
+      --success: #00C853;
+      --danger: #D32F2F;
+      --warning: #FF9800;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: rgba(10, 14, 39, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 1000;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-gold);
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Legend */
+    .legend {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.75rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    /* Graph Container */
+    .graph-container {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-primary);
+    }
+
+    #network {
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 193, 7, 0.03) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(233, 30, 99, 0.03) 0%, transparent 40%),
+                  radial-gradient(circle at 20% 80%, rgba(156, 39, 176, 0.03) 0%, transparent 40%);
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 33, 57, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      gap: 1rem;
+      z-index: 100;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-gold);
+    }
+
+    .control-btn.active {
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      border-color: transparent;
+    }
+
+    /* Info Panel */
+    .info-panel {
+      position: fixed;
+      top: 90px;
+      right: 2rem;
+      width: 320px;
+      max-height: calc(100vh - 120px);
+      background: rgba(30, 33, 57, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.5rem;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .info-panel.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .info-panel h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .info-panel .archetype {
+      font-size: 0.875rem;
+      color: var(--accent-gold);
+      margin-bottom: 1rem;
+    }
+
+    .info-panel .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.875rem;
+    }
+
+    .info-panel .stat-label {
+      color: var(--text-secondary);
+    }
+
+    .info-panel .stat-value {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .close-info {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-primary);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .close-info:hover {
+      background: var(--danger);
+    }
+
+    /* Loading */
+    .loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 2000;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 193, 7, 0.2);
+      border-top: 4px solid var(--accent-gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--accent-gold);
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        padding: 0 1rem;
+      }
+
+      .header-title {
+        font-size: 1.25rem;
+      }
+
+      .legend {
+        display: none;
+      }
+
+      .controls-panel {
+        bottom: 1rem;
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+      }
+
+      .control-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+      }
+
+      .info-panel {
+        right: 1rem;
+        left: 1rem;
+        width: auto;
+        max-height: calc(100vh - 200px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Building Relationship Network...</div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <a href="/lobby.html" class="back-btn">
+        <span>←</span>
+        <span>Back to Lobby</span>
+      </a>
+      <h1 class="header-title">🕸️ Relationship Graph</h1>
+    </div>
+    <div class="header-right">
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #00C853;"></div>
+          <span>Alliance</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #E91E63;"></div>
+          <span>Romance</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #D32F2F;"></div>
+          <span>Rivalry</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #FFC107;"></div>
+          <span>Neutral</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graph Container -->
+  <div class="graph-container">
+    <div id="network"></div>
+  </div>
+
+  <!-- Controls Panel -->
+  <div class="controls-panel">
+    <button class="control-btn active" onclick="fitNetwork()">
+      <span>🎯</span>
+      <span>Fit All</span>
+    </button>
+    <button class="control-btn" onclick="togglePhysics()">
+      <span>⚡</span>
+      <span id="physicsText">Freeze</span>
+    </button>
+    <button class="control-btn" onclick="toggleLabels()">
+      <span>🏷️</span>
+      <span id="labelsText">Hide Labels</span>
+    </button>
+    <button class="control-btn" onclick="filterByType('all')">
+      <span>🌐</span>
+      <span>All</span>
+    </button>
+    <button class="control-btn" onclick="filterByType('alliance')">
+      <span>🤝</span>
+      <span>Alliances</span>
+    </button>
+    <button class="control-btn" onclick="filterByType('rivalry')">
+      <span>⚔️</span>
+      <span>Rivalries</span>
+    </button>
+  </div>
+
+  <!-- Info Panel -->
+  <div class="info-panel" id="infoPanel">
+    <button class="close-info" onclick="closeInfo()">×</button>
+    <div id="infoContent"></div>
+  </div>
+
+  <script type="module">
+    import { supabaseClient } from '/js/supabase-module.js'
+    window.supabaseClient = supabaseClient
+
+    let network;
+    let nodes, edges;
+    let allNodes = [];
+    let allEdges = [];
+    let physicsEnabled = true;
+    let labelsVisible = true;
+    let currentFilter = 'all';
+    let currentGameId;
+
+    // Get game ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    currentGameId = urlParams.get('game');
+
+    if (!currentGameId) {
+      alert('No game ID provided');
+      window.location.href = '/lobby.html';
+    }
+
+    // Initialize
+    async function init() {
+      try {
+        // Check auth
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
+          window.location.href = '/pages/sign-in.html';
+          return;
+        }
+
+        // Load data
+        await loadGraphData();
+
+        // Hide loading
+        document.getElementById('loading').style.display = 'none';
+      } catch (error) {
+        console.error('Error initializing:', error);
+        alert('Error loading relationship graph: ' + error.message);
+      }
+    }
+
+    async function loadGraphData() {
+      console.log('Loading graph data for game:', currentGameId);
+
+      // Get all cast members in this game
+      const { data: gameCast, error: castError } = await supabaseClient
+        .from('mm_game_cast')
+        .select(`
+          cast_member_id,
+          cast_members (
+            id,
+            display_name,
+            archetype,
+            screen_time_score,
+            status
+          )
+        `)
+        .eq('game_id', currentGameId);
+
+      if (castError) throw castError;
+
+      console.log('Cast members:', gameCast);
+
+      // Get all relationships
+      const { data: relationships, error: relError } = await supabaseClient
+        .from('mm_relationship_edges')
+        .select('*')
+        .eq('game_id', currentGameId);
+
+      if (relError) throw relError;
+
+      console.log('Relationships:', relationships);
+
+      // Build nodes
+      allNodes = gameCast.map(gc => {
+        const cm = gc.cast_members;
+        return {
+          id: cm.id,
+          label: cm.display_name,
+          title: `${cm.display_name}\n${cm.archetype}`,
+          archetype: cm.archetype,
+          screenTime: cm.screen_time_score,
+          status: cm.status,
+          color: getNodeColor(cm.archetype),
+          size: getNodeSize(cm.screen_time_score),
+          font: {
+            color: '#FFFFFF',
+            size: 14,
+            face: 'Arial',
+            strokeWidth: 3,
+            strokeColor: '#0A0E27'
+          },
+          borderWidth: 2,
+          borderWidthSelected: 4
+        };
+      });
+
+      // Build edges
+      allEdges = relationships.map(rel => ({
+        from: rel.cast_member_a_id,
+        to: rel.cast_member_b_id,
+        value: rel.relationship_strength || 5,
+        relationshipType: rel.relationship_type || 'neutral',
+        label: rel.relationship_type || '',
+        color: getEdgeColor(rel.relationship_type),
+        width: (rel.relationship_strength || 5) / 2,
+        smooth: {
+          type: 'curvedCW',
+          roundness: 0.2
+        },
+        font: {
+          size: 10,
+          color: '#B8B9C5',
+          strokeWidth: 2,
+          strokeColor: '#0A0E27'
+        }
+      }));
+
+      // Create network
+      createNetwork();
+    }
+
+    function getNodeColor(archetype) {
+      const colors = {
+        'queen': '#FFC107',
+        'villain': '#D32F2F',
+        'wildcard': '#9C27B0',
+        'hero': '#00C853',
+        'strategist': '#2196F3',
+        'socialite': '#E91E63',
+        'underdog': '#FF9800'
+      };
+      return {
+        background: colors[archetype] || '#9C27B0',
+        border: '#FFFFFF',
+        highlight: {
+          background: colors[archetype] || '#9C27B0',
+          border: '#FFC107'
+        },
+        hover: {
+          background: colors[archetype] || '#9C27B0',
+          border: '#FFC107'
+        }
+      };
+    }
+
+    function getNodeSize(screenTime) {
+      const sizes = {
+        'high': 30,
+        'medium': 20,
+        'low': 15
+      };
+      return sizes[screenTime] || 20;
+    }
+
+    function getEdgeColor(type) {
+      const colors = {
+        'alliance': { color: '#00C853', highlight: '#00E676' },
+        'romance': { color: '#E91E63', highlight: '#FF4081' },
+        'rivalry': { color: '#D32F2F', highlight: '#FF5252' },
+        'friendship': { color: '#2196F3', highlight: '#448AFF' },
+        'neutral': { color: '#FFC107', highlight: '#FFD54F' }
+      };
+      return colors[type] || colors.neutral;
+    }
+
+    function createNetwork() {
+      const container = document.getElementById('network');
+
+      nodes = new vis.DataSet(allNodes);
+      edges = new vis.DataSet(allEdges);
+
+      const data = { nodes, edges };
+
+      const options = {
+        nodes: {
+          shape: 'dot',
+          shadow: {
+            enabled: true,
+            color: 'rgba(0, 0, 0, 0.5)',
+            size: 10,
+            x: 0,
+            y: 0
+          }
+        },
+        edges: {
+          arrows: {
+            to: { enabled: false }
+          },
+          shadow: {
+            enabled: true,
+            color: 'rgba(0, 0, 0, 0.3)',
+            size: 5,
+            x: 0,
+            y: 0
+          }
+        },
+        physics: {
+          enabled: true,
+          stabilization: {
+            enabled: true,
+            iterations: 200
+          },
+          barnesHut: {
+            gravitationalConstant: -8000,
+            centralGravity: 0.3,
+            springLength: 150,
+            springConstant: 0.04,
+            damping: 0.09,
+            avoidOverlap: 0.5
+          }
+        },
+        interaction: {
+          hover: true,
+          tooltipDelay: 100,
+          zoomView: true,
+          dragView: true,
+          navigationButtons: true,
+          keyboard: true
+        }
+      };
+
+      network = new vis.Network(container, data, options);
+
+      // Event listeners
+      network.on('click', function(params) {
+        if (params.nodes.length > 0) {
+          showNodeInfo(params.nodes[0]);
+        } else {
+          closeInfo();
+        }
+      });
+
+      network.on('stabilized', function() {
+        console.log('Network stabilized');
+      });
+    }
+
+    function showNodeInfo(nodeId) {
+      const node = allNodes.find(n => n.id === nodeId);
+      if (!node) return;
+
+      // Count relationships
+      const connections = allEdges.filter(e =>
+        e.from === nodeId || e.to === nodeId
+      );
+
+      const alliances = connections.filter(e => e.relationshipType === 'alliance').length;
+      const rivalries = connections.filter(e => e.relationshipType === 'rivalry').length;
+      const romances = connections.filter(e => e.relationshipType === 'romance').length;
+
+      const html = `
+        <h3>${node.label}</h3>
+        <div class="archetype">${node.archetype}</div>
+        <div class="stat-row">
+          <span class="stat-label">Status</span>
+          <span class="stat-value">${node.status}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Screen Time</span>
+          <span class="stat-value">${node.screenTime}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Total Connections</span>
+          <span class="stat-value">${connections.length}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">🤝 Alliances</span>
+          <span class="stat-value">${alliances}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">⚔️ Rivalries</span>
+          <span class="stat-value">${rivalries}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">💕 Romances</span>
+          <span class="stat-value">${romances}</span>
+        </div>
+      `;
+
+      document.getElementById('infoContent').innerHTML = html;
+      document.getElementById('infoPanel').classList.add('visible');
+    }
+
+    window.closeInfo = function() {
+      document.getElementById('infoPanel').classList.remove('visible');
+    };
+
+    window.fitNetwork = function() {
+      network.fit({
+        animation: {
+          duration: 1000,
+          easingFunction: 'easeInOutQuad'
+        }
+      });
+    };
+
+    window.togglePhysics = function() {
+      physicsEnabled = !physicsEnabled;
+      network.setOptions({ physics: { enabled: physicsEnabled } });
+      document.getElementById('physicsText').textContent = physicsEnabled ? 'Freeze' : 'Unfreeze';
+    };
+
+    window.toggleLabels = function() {
+      labelsVisible = !labelsVisible;
+      nodes.forEach(node => {
+        nodes.update({
+          id: node.id,
+          label: labelsVisible ? node.label : ''
+        });
+      });
+      document.getElementById('labelsText').textContent = labelsVisible ? 'Hide Labels' : 'Show Labels';
+    };
+
+    window.filterByType = function(type) {
+      currentFilter = type;
+
+      if (type === 'all') {
+        edges.clear();
+        edges.add(allEdges);
+      } else {
+        const filtered = allEdges.filter(e => e.relationshipType === type);
+        edges.clear();
+        edges.add(filtered);
+      }
+    };
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>

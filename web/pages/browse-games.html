@@ -602,9 +602,9 @@
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('full_name, display_name, role, subscription_tier')
+            .select('*')
             .eq('id', user.id)
-            .single()
+            .maybeSingle()
           currentProfile = profile
         }
 
@@ -626,15 +626,7 @@
         // Fetch all games
         const { data: games, error } = await supabase
           .from('mm_games')
-          .select(`
-            id,
-            game_code,
-            title,
-            description,
-            max_players,
-            status,
-            created_at
-          `)
+          .select('*')
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -654,7 +646,7 @@
             const userIds = admins.map(a => a.user_id).filter(Boolean)
             const { data: profiles } = await supabase
               .from('profiles')
-              .select('id, full_name, email')
+              .select('*')
               .in('id', userIds)
 
             if (profiles) {

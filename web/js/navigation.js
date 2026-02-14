@@ -55,7 +55,7 @@ async function initNavigation() {
     // Get user profile and role
     const { data: profile, error: profileError } = await window.supabaseClient
       .from('profiles')
-      .select('full_name, role, avatar_url, subscription_tier')
+      .select('display_name, role, avatar_url, subscription_tier')
       .eq('id', user.id)
       .single();
 
@@ -107,7 +107,7 @@ function updateNavUI() {
   const userAvatarEl = document.getElementById('userAvatar');
 
   if (userNameEl) {
-    userNameEl.textContent = currentProfile.full_name || 'User';
+    userNameEl.textContent = currentProfile.display_name || 'User';
   }
 
   if (userAvatarEl) {
@@ -351,7 +351,7 @@ function toggleUserMenu() {
   html += `<div class="user-menu-header">`;
   html += `<img src="${currentProfile?.avatar_url || '/assets/default-avatar.png'}" class="user-menu-avatar">`;
   html += `<div class="user-menu-info">`;
-  html += `<div class="user-menu-name">${currentProfile?.full_name || 'User'}</div>`;
+  html += `<div class="user-menu-name">${currentProfile?.display_name || 'User'}</div>`;
   html += `<div class="user-menu-role">${formatRole(currentProfile?.role)}</div>`;
   html += `</div>`;
   html += `</div>`;
@@ -465,7 +465,7 @@ function renderGlobalNav(userRole = 'cast', options = {}) {
 
   const isAdmin = userRole === 'admin';
   const isDirector = userRole === 'director';
-  const userName = currentProfile?.full_name || currentUser?.email?.split('@')[0] || 'User';
+  const userName = currentProfile?.display_name || currentUser?.email?.split('@')[0] || 'User';
 
   return `
     <nav class="global-nav" style="

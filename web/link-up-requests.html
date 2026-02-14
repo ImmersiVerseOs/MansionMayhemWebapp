@@ -373,12 +373,11 @@
     <h1 class="page-title">🤝 Link-Up Requests</h1>
     <p style="color: var(--text-secondary); margin-bottom: 32px; font-size: 1.1rem;">Connect with other cast members to form powerful alliances</p>
 
-    <!-- Cast Member Selection -->
-    <div id="cast-selector" class="cast-selector">
-      <h3 style="color: var(--text-primary); margin-bottom: 16px; font-weight: 700; font-size: 1.25rem;">👤 Select Your Cast Member</h3>
-      <select id="cast-member-select" class="form-select" style="max-width: 500px; margin: 0 auto;">
-        <option value="">Choose your character...</option>
-      </select>
+    <!-- Cast Member Display (Auto-loaded) -->
+    <div id="cast-selector" class="cast-selector" style="display: none;">
+      <h3 style="color: var(--text-primary); margin-bottom: 12px; font-weight: 700; font-size: 1.25rem;">👤 Playing As</h3>
+      <div id="current-cast-display" style="font-size: 1.5rem; font-weight: 700; color: var(--accent-pink);"></div>
+      <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">Your character in this game</div>
     </div>
 
     <!-- Pending Requests (Received) -->
@@ -482,43 +481,52 @@
       }, 3000);
     }
 
-    // Load cast members
+    // Load cast members and authenticate current user
     async function loadCastMembers() {
       try {
-        const { data, error } = await window.supabaseClient
+        // Get current authenticated user
+        const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
+
+        if (authError || !user) {
+          showToast('Please sign in first', 'error');
+          window.location.href = '/pages/sign-in.html';
+          return;
+        }
+
+        // Get user's cast member for this game
+        const { data: userCastMember, error: castError } = await window.supabaseClient
+          .from('cast_members')
+          .select('id, full_name, display_name')
+          .eq('user_id', user.id)
+          .single();
+
+        if (castError || !userCastMember) {
+          showToast('You need to create a cast member profile first', 'error');
+          window.location.href = '/pages/casting-call.html';
+          return;
+        }
+
+        // Set current cast member (security: only user's own cast member)
+        currentCastMemberId = userCastMember.id;
+        localStorage.setItem('currentCastMemberId', currentCastMemberId);
+
+        // Display current cast member
+        document.getElementById('current-cast-display').textContent = userCastMember.display_name;
+        document.getElementById('cast-selector').style.display = 'block';
+
+        // Load all cast members for display purposes (but can't act as them)
+        const { data: allMembers, error: membersError } = await window.supabaseClient
           .from('cast_members')
           .select('id, full_name, display_name, avatar_url, status')
           .eq('status', 'active')
           .order('display_name');
 
-        if (error) throw error;
+        if (membersError) throw membersError;
+        allCastMembers = allMembers;
 
-        allCastMembers = data;
+        // Load all data for current user
+        await loadAllData();
 
-        const select = document.getElementById('cast-member-select');
-        select.innerHTML = '<option value="">Select your cast member...</option>';
-
-        data.forEach(member => {
-          const option = document.createElement('option');
-          option.value = member.id;
-          option.textContent = `${member.display_name} (${member.full_name})`;
-          select.appendChild(option);
-        });
-
-        if (currentCastMemberId) {
-          select.value = currentCastMemberId;
-          await loadAllData();
-        }
-
-        select.addEventListener('change', async (e) => {
-          const castMemberId = e.target.value;
-          if (castMemberId) {
-            localStorage.setItem('currentCastMemberId', castMemberId);
-            currentCastMemberId = castMemberId;
-            showToast('Cast member selected!');
-            await loadAllData();
-          }
-        });
       } catch (error) {
         console.error('Error loading cast members:', error);
         showToast('Error loading cast members', 'error');
@@ -727,7 +735,7 @@
             room_name: roomName,
             room_type: request.link_up_type,
             member_ids: memberIds,
-            is_active: true,
+            status: 'active',
             created_from_request_id: request.id
           });
 
@@ -916,7 +924,7 @@
           .from('mm_alliance_rooms')
           .select('*')
           .contains('member_ids', [currentCastMemberId])
-          .eq('is_active', true)
+          .eq('status', 'active')
           .order('created_at', { ascending: false });
 
         if (error) throw error;

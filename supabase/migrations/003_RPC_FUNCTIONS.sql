@@ -515,16 +515,90 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
+-- 11A. AUTO-FILL AI CAST
+-- ============================================================================
+-- Automatically fills empty cast slots with AI characters
+-- Ensures every game has full 20-person cast
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.auto_fill_ai_cast(
+  p_game_id UUID,
+  p_target_count INTEGER DEFAULT 20
+)
+RETURNS INTEGER AS $$
+DECLARE
+  v_current_count INTEGER;
+  v_needed_count INTEGER;
+  v_ai_added INTEGER := 0;
+  v_ai_character RECORD;
+BEGIN
+  -- Count current players in game
+  SELECT COUNT(*) INTO v_current_count
+  FROM mm_game_cast
+  WHERE game_id = p_game_id;
+
+  -- Calculate how many AI needed
+  v_needed_count := p_target_count - v_current_count;
+
+  -- If game is already full or over capacity, do nothing
+  IF v_needed_count <= 0 THEN
+    RAISE NOTICE 'Game already has % players (target: %). No AI needed.', v_current_count, p_target_count;
+    RETURN 0;
+  END IF;
+
+  RAISE NOTICE 'Game has % players. Adding % AI characters to reach %...', v_current_count, v_needed_count, p_target_count;
+
+  -- Add random AI characters until we reach target count
+  FOR v_ai_character IN
+    SELECT cm.id
+    FROM cast_members cm
+    WHERE cm.is_ai_player = true
+      AND cm.status = 'active'
+      -- Exclude AI already in this game
+      AND cm.id NOT IN (
+        SELECT cast_member_id
+        FROM mm_game_cast
+        WHERE game_id = p_game_id
+      )
+    ORDER BY RANDOM()
+    LIMIT v_needed_count
+  LOOP
+    -- Add AI character to game cast
+    INSERT INTO mm_game_cast (game_id, cast_member_id, status, joined_at)
+    VALUES (p_game_id, v_ai_character.id, 'active', NOW())
+    ON CONFLICT (game_id, cast_member_id) DO NOTHING;
+
+    v_ai_added := v_ai_added + 1;
+  END LOOP;
+
+  -- Update game's current_players count
+  UPDATE mm_games
+  SET current_players = current_players + v_ai_added,
+      updated_at = NOW()
+  WHERE id = p_game_id;
+
+  RAISE NOTICE 'Successfully added % AI characters to game', v_ai_added;
+  RETURN v_ai_added;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================================
 -- 12. ADVANCE TO ACTIVE LOBBY
 -- ============================================================================
 -- Transition from 3hr waiting room to 48hr alliance lobby
+-- Auto-fills AI characters to reach 20-person cast
 -- ============================================================================
 CREATE OR REPLACE FUNCTION public.advance_to_active_lobby(p_game_id UUID)
 RETURNS VOID AS $$
+DECLARE
+  v_ai_added INTEGER;
 BEGIN
   -- Complete waiting lobby
   UPDATE mm_game_stages SET status = 'completed', completed_at = NOW()
   WHERE game_id = p_game_id AND stage_type = 'waiting_lobby';
+
+  -- AUTO-FILL: Add AI characters to reach 20-person cast
+  SELECT auto_fill_ai_cast(p_game_id, 20) INTO v_ai_added;
+  RAISE NOTICE 'Auto-filled % AI characters', v_ai_added;
 
   -- Activate alliance lobby
   UPDATE mm_game_stages SET status = 'active'
@@ -533,7 +607,7 @@ BEGIN
   UPDATE mm_games SET status = 'active_lobby', updated_at = NOW()
   WHERE id = p_game_id;
 
-  -- Notify players
+  -- Notify ALL players (real + AI)
   INSERT INTO notifications (user_id, notification_type, title, message, link_url)
   SELECT p.id, 'game_phase_change', 'Alliance Lobby Now Open!',
     'The 48-hour alliance phase has begun. Form alliances and record your introduction!',
@@ -541,7 +615,8 @@ BEGIN
   FROM mm_game_cast gc
   JOIN cast_members cm ON cm.id = gc.cast_member_id
   JOIN profiles p ON p.id = cm.user_id
-  WHERE gc.game_id = p_game_id;
+  WHERE gc.game_id = p_game_id
+    AND cm.user_id IS NOT NULL; -- Only notify real players, not AI
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -758,6 +833,7 @@ GRANT EXECUTE ON FUNCTION public.calculate_character_earnings(UUID, DATE, DATE) 
 GRANT EXECUTE ON FUNCTION public.get_admin_analytics(INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.complete_character_setup(UUID, JSON, JSON, JSON, JSON) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.initialize_game_lobbies(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.auto_fill_ai_cast(UUID, INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.advance_to_active_lobby(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.start_game_active_phase(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.check_and_advance_lobbies() TO authenticated;

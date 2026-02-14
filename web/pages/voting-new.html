@@ -159,8 +159,18 @@
     </div>
   </div>
 
-  <script type="module">
-    import { supabaseClient as supabase, getCurrentUser } from '../js/supabase-module.js'
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Initialize Supabase directly
+    const supabase = window.supabase.createClient(
+      'https://fpxbhqibimekjhlumnmc.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
+    )
+
+    async function getCurrentUser() {
+      const { data: { session } } = await supabase.auth.getSession()
+      return session?.user || null
+    }
 
     let selectedNomineeId = null
     let currentRound = null

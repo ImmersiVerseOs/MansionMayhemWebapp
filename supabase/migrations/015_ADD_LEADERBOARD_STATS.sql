@@ -38,7 +38,7 @@ BEGIN
 
   -- Count voice introduction plays
   SELECT COALESCE(SUM(play_count), 0) INTO v_voice_plays
-  FROM voice_introductions
+  FROM mm_voice_introductions
   WHERE cast_member_id = p_cast_member_id
     AND (p_game_id IS NULL OR game_id = p_game_id);
 
@@ -91,9 +91,9 @@ BEGIN
 END;
 $$;
 
-DROP TRIGGER IF EXISTS voice_intro_play_update_scores ON voice_introductions;
+DROP TRIGGER IF EXISTS voice_intro_play_update_scores ON mm_voice_introductions;
 CREATE TRIGGER voice_intro_play_update_scores
-  AFTER INSERT OR UPDATE OF play_count ON voice_introductions
+  AFTER INSERT OR UPDATE OF play_count ON mm_voice_introductions
   FOR EACH ROW
   EXECUTE FUNCTION trigger_update_scores_on_voice_play();
 

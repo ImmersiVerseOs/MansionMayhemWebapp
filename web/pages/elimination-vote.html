@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elimination Night | Mansion Mayhem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(233, 30, 99, 0.15) 0%, transparent 50%),
+        linear-gradient(180deg, #000 0%, #0a0612 50%, #000 100%);
+      z-index: -1;
+    }
+
+    .sparkles {
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.3), transparent),
+        radial-gradient(2px 2px at 60% 70%, rgba(212, 175, 55, 0.4), transparent),
+        radial-gradient(1px 1px at 50% 50%, rgba(233, 30, 99, 0.3), transparent);
+      background-size: 200px 200px;
+      animation: sparkle 20s linear infinite;
+      opacity: 0.4;
+      z-index: -1;
+    }
+
+    @keyframes sparkle {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-200px); }
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+      background: linear-gradient(180deg, rgba(10, 6, 18, 0.9) 0%, transparent 100%);
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #d4af37 0%, #ffd700 50%, #d4af37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 40px rgba(212, 175, 55, 0.5);
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+    }
+
+    .episode-tag {
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+
+    /* Live Badge */
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%);
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      letter-spacing: 1px;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px rgba(233, 30, 99, 0.4);
+    }
+
+    .live-dot {
+      width: 10px;
+      height: 10px;
+      background: #fff;
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* Queen Section */
+    .queen-section {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+      border: 3px solid;
+      border-image: linear-gradient(135deg, #d4af37, #ffd700) 1;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .queen-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+      animation: glow 3s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .crown-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .queen-label {
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #d4af37;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .queen-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 20px rgba(212, 175, 55, 0.5);
+    }
+
+    .queen-title {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Vote Section */
+    .vote-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .vote-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .vote-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.6);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Countdown Timer */
+    .countdown {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(233, 30, 99, 0.1);
+      border: 2px solid rgba(233, 30, 99, 0.3);
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      margin-top: 1.5rem;
+    }
+
+    .countdown-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .countdown-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #e91e63;
+    }
+
+    /* Nominees Grid */
+    .nominees-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .nominee-card {
+      background: linear-gradient(135deg, rgba(20, 16, 32, 0.6) 0%, rgba(10, 6, 18, 0.8) 100%);
+      border: 2px solid rgba(212, 175, 55, 0.2);
+      border-radius: 20px;
+      padding: 2.5rem;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nominee-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0) 0%, rgba(212, 175, 55, 0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .nominee-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(212, 175, 55, 0.6);
+      box-shadow: 0 20px 60px rgba(212, 175, 55, 0.3);
+    }
+
+    .nominee-card:hover::before {
+      opacity: 1;
+    }
+
+    .nominee-card.selected {
+      border-color: #e91e63;
+      background: linear-gradient(135deg, rgba(233, 30, 99, 0.2) 0%, rgba(156, 39, 176, 0.2) 100%);
+      box-shadow: 0 20px 60px rgba(233, 30, 99, 0.4);
+    }
+
+    .nominee-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #e91e63, #9c27b0);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(233, 30, 99, 0.6);
+    }
+
+    .nominee-header {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .nominee-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d4af37, #ffd700);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 900;
+      border: 4px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 0 8px 32px rgba(212, 175, 55, 0.4);
+    }
+
+    .nominee-info {
+      flex: 1;
+    }
+
+    .nominee-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 900;
+      margin-bottom: 0.25rem;
+    }
+
+    .nominee-archetype {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .vote-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #d4af37;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Vote Button */
+    .vote-button-container {
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    .vote-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+      color: #000;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 1.5rem 4rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 32px rgba(212, 175, 55, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vote-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .vote-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(212, 175, 55, 0.6);
+    }
+
+    .vote-btn:hover::before {
+      opacity: 1;
+    }
+
+    .vote-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .vote-btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .success-message {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+      border: 2px solid rgba(16, 185, 129, 0.4);
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .success-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .success-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #10b981;
+      margin-bottom: 0.5rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 4rem 2rem;
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid rgba(239, 68, 68, 0.3);
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      color: #ef4444;
+    }
+
+    @media (max-width: 768px) {
+      .logo { font-size: 2rem; }
+      .queen-name { font-size: 1.75rem; }
+      .vote-title { font-size: 1.75rem; }
+      .nominees-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .vote-btn { padding: 1.25rem 2.5rem; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-overlay"></div>
+  <div class="sparkles"></div>
+
+  <div class="header">
+    <div class="logo">MANSION MAYHEM</div>
+    <div class="episode-tag">Elimination Night</div>
+  </div>
+
+  <div class="container">
+    <div style="text-align: center;">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE VOTE
+      </div>
+    </div>
+
+    <div id="content" class="loading">
+      Loading elimination vote...
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const sb = window.supabase.createClient(
+      'https://fpxbhqibimekjhlumnmc.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
+    )
+
+    let selectedNominee = null
+    let currentRound = null
+
+    async function loadVote() {
+      const content = document.getElementById('content')
+
+      try {
+        const { data: rounds, error } = await sb
+          .from('mm_voting_rounds')
+          .select(`
+            *,
+            queen:cast_members!queen_id(id, display_name, archetype),
+            nominee_a:cast_members!nominee_a_id(id, display_name, archetype),
+            nominee_b:cast_members!nominee_b_id(id, display_name, archetype)
+          `)
+          .eq('status', 'active')
+          .order('round_number', { ascending: false })
+          .limit(1)
+
+        if (error) throw error
+        if (!rounds || rounds.length === 0) {
+          content.innerHTML = '<div class="error">No active elimination vote at this time.</div>'
+          return
+        }
+
+        currentRound = rounds[0]
+
+        // Check if user voted
+        const { data: { session } } = await sb.auth.getSession()
+        let hasVoted = false
+
+        if (session?.user) {
+          const { data: profile } = await sb
+            .from('profiles')
+            .select('cast_member_id')
+            .eq('id', session.user.id)
+            .single()
+
+          if (profile?.cast_member_id) {
+            const { data: vote } = await sb
+              .from('mm_elimination_votes')
+              .select('voted_for_id')
+              .eq('round_id', currentRound.id)
+              .eq('cast_member_id', profile.cast_member_id)
+              .single()
+
+            if (vote) {
+              hasVoted = true
+              showSuccessMessage()
+              return
+            }
+          }
+        }
+
+        // Calculate percentages
+        const totalVotes = (currentRound.votes_for_a || 0) + (currentRound.votes_for_b || 0)
+        const percentA = totalVotes > 0 ? Math.round((currentRound.votes_for_a || 0) / totalVotes * 100) : 50
+        const percentB = totalVotes > 0 ? Math.round((currentRound.votes_for_b || 0) / totalVotes * 100) : 50
+
+        content.innerHTML = `
+          <div class="queen-section">
+            <div class="crown-icon">👑</div>
+            <div class="queen-label">This Week's Queen</div>
+            <div class="queen-name">${currentRound.queen.display_name}</div>
+            <div class="queen-title">${currentRound.queen.archetype}</div>
+          </div>
+
+          <div class="vote-header">
+            <div class="vote-title">Who Should Be Eliminated?</div>
+            <div class="vote-subtitle">The Queen has nominated two houseguests. Cast your vote to save one and eliminate the other.</div>
+            <div class="countdown">
+              <span class="countdown-label">Voting Closes</span>
+              <span class="countdown-value" id="timer">--:--:--</span>
+            </div>
+          </div>
+
+          <div class="nominees-grid">
+            <div class="nominee-card" data-id="${currentRound.nominee_a.id}">
+              <div class="nominee-header">
+                <div class="nominee-avatar">${currentRound.nominee_a.display_name[0]}</div>
+                <div class="nominee-info">
+                  <div class="nominee-name">${currentRound.nominee_a.display_name}</div>
+                  <div class="nominee-archetype">${currentRound.nominee_a.archetype}</div>
+                </div>
+              </div>
+              <div class="vote-stats">
+                <div class="stat-box">
+                  <div class="stat-value">${currentRound.votes_for_a || 0}</div>
+                  <div class="stat-label">Votes</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">${percentA}%</div>
+                  <div class="stat-label">Share</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="nominee-card" data-id="${currentRound.nominee_b.id}">
+              <div class="nominee-header">
+                <div class="nominee-avatar">${currentRound.nominee_b.display_name[0]}</div>
+                <div class="nominee-info">
+                  <div class="nominee-name">${currentRound.nominee_b.display_name}</div>
+                  <div class="nominee-archetype">${currentRound.nominee_b.archetype}</div>
+                </div>
+              </div>
+              <div class="vote-stats">
+                <div class="stat-box">
+                  <div class="stat-value">${currentRound.votes_for_b || 0}</div>
+                  <div class="stat-label">Votes</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">${percentB}%</div>
+                  <div class="stat-label">Share</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="vote-button-container">
+            <button class="vote-btn" id="voteBtn" disabled>
+              <span>Select a Nominee to Vote</span>
+            </button>
+          </div>
+        `
+
+        // Timer
+        updateTimer()
+        setInterval(updateTimer, 1000)
+
+        // Card selection
+        document.querySelectorAll('.nominee-card').forEach(card => {
+          card.addEventListener('click', () => {
+            document.querySelectorAll('.nominee-card').forEach(c => c.classList.remove('selected'))
+            card.classList.add('selected')
+            selectedNominee = card.dataset.id
+            document.getElementById('voteBtn').disabled = false
+            document.getElementById('voteBtn').innerHTML = '<span>Cast Your Vote</span>'
+          })
+        })
+
+        // Vote button
+        document.getElementById('voteBtn').addEventListener('click', castVote)
+
+      } catch (err) {
+        console.error(err)
+        content.innerHTML = `<div class="error">Error loading vote: ${err.message}</div>`
+      }
+    }
+
+    function updateTimer() {
+      if (!currentRound) return
+      const now = new Date()
+      const end = new Date(currentRound.voting_closes_at)
+      const diff = end - now
+
+      if (diff <= 0) {
+        document.getElementById('timer').textContent = 'CLOSED'
+        return
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60))
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+      document.getElementById('timer').textContent =
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+    }
+
+    async function castVote() {
+      if (!selectedNominee) return
+
+      const btn = document.getElementById('voteBtn')
+      btn.disabled = true
+      btn.innerHTML = '<span>Casting Vote...</span>'
+
+      try {
+        const { data: { session } } = await sb.auth.getSession()
+        if (!session?.user) {
+          alert('Please log in to vote')
+          return
+        }
+
+        const { data: profile } = await sb
+          .from('profiles')
+          .select('cast_member_id')
+          .eq('id', session.user.id)
+          .single()
+
+        if (!profile?.cast_member_id) {
+          alert('Create your character first!')
+          return
+        }
+
+        await sb
+          .from('mm_elimination_votes')
+          .insert({
+            round_id: currentRound.id,
+            cast_member_id: profile.cast_member_id,
+            voted_for_id: selectedNominee
+          })
+
+        const field = selectedNominee === currentRound.nominee_a_id ? 'votes_for_a' : 'votes_for_b'
+        const currentVotes = currentRound[field] || 0
+        await sb
+          .from('mm_voting_rounds')
+          .update({ [field]: currentVotes + 1 })
+          .eq('id', currentRound.id)
+
+        showSuccessMessage()
+
+      } catch (err) {
+        console.error(err)
+        alert('Error: ' + err.message)
+        btn.disabled = false
+        btn.innerHTML = '<span>Cast Your Vote</span>'
+      }
+    }
+
+    function showSuccessMessage() {
+      document.getElementById('content').innerHTML = `
+        <div class="success-message">
+          <div class="success-icon">✓</div>
+          <div class="success-title">Your Vote Has Been Cast!</div>
+          <div style="color: rgba(255,255,255,0.6); margin-top: 0.5rem;">
+            Thank you for participating in Elimination Night. Results will be revealed live.
+          </div>
+        </div>
+      `
+    }
+
+    loadVote()
+  </script>
+</body>
+</html>

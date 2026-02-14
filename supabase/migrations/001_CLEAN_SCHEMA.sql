@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS public.cast_members (
   full_name TEXT NOT NULL,
   display_name TEXT NOT NULL,
   avatar_url TEXT,
-  archetype TEXT NOT NULL CHECK (archetype IN ('queen', 'villain', 'wildcard', 'sweetheart', 'strategist', 'comedian')),
+  archetype TEXT NOT NULL CHECK (archetype IN ('queen', 'villain', 'wildcard', 'sweetheart', 'strategist', 'comedian', 'troublemaker', 'diva', 'hothead')),
   personality_traits TEXT[] DEFAULT '{}',
   backstory TEXT,
   bio TEXT,
@@ -39,6 +39,15 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'cast_members' AND column_name = 'user_id') THEN
     ALTER TABLE public.cast_members ADD COLUMN user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
   END IF;
+
+  -- Update archetype constraint to include new messy archetypes
+  BEGIN
+    ALTER TABLE public.cast_members DROP CONSTRAINT IF EXISTS cast_members_archetype_check;
+    ALTER TABLE public.cast_members ADD CONSTRAINT cast_members_archetype_check
+      CHECK (archetype IN ('queen', 'villain', 'wildcard', 'sweetheart', 'strategist', 'comedian', 'troublemaker', 'diva', 'hothead'));
+  EXCEPTION
+    WHEN OTHERS THEN NULL;
+  END;
 END $$;
 
 CREATE INDEX IF NOT EXISTS idx_cast_members_user_id ON public.cast_members(user_id) WHERE user_id IS NOT NULL;

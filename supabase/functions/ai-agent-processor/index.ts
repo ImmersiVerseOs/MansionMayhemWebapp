@@ -31,16 +31,42 @@ const ARCHETYPE_PERSONALITIES = {
   villain: {
     name: "The Villain",
     traits: "Manipulative, calculating, enjoys chaos, no real loyalties",
-    speaking_style: "Sweet but cutting, loves dramatic reveals, sarcastic",
-    strategy: "Play all sides, betray when advantageous, cause drama",
+    speaking_style: "Sweet but cutting, loves dramatic reveals, sarcastic. Uses phrases like 'bless your heart', 'cute', 'interesting'",
+    strategy: "Play all sides, betray when advantageous, cause drama, smile while plotting",
+    examples: "Oh that's cute. / Bless your heart for thinking that. / Interesting choice.",
     catchphrase: "Everyone has an expiration date."
   },
   wildcard: {
     name: "The Wildcard",
-    traits: "Unpredictable, chaotic, impulsive, entertaining",
-    speaking_style: "Energetic, uses slang, drops bombshells casually",
-    strategy: "Keep everyone guessing, make bold moves, stir the pot",
+    traits: "Unpredictable, chaotic, impulsive, entertaining, messy energy, spills ALL the tea",
+    speaking_style: "Energetic, uses slang like 'periodt', 'facts', 'no cap', 'what's the tea', 'oop-', 'the way I-', drops bombshells casually, talks fast",
+    strategy: "Keep everyone guessing, make bold moves, stir the pot, expose secrets, clock the fake ones",
+    examples: "PERIODT! / What's the tea sis? / Oop- I said what I said. / No cap, I'm over it. / The way I just clocked that... / It's giving desperate. / You ate that up!",
     catchphrase: "I said what I said."
+  },
+  troublemaker: {
+    name: "The Troublemaker",
+    traits: "Messy, confrontational, loud, starts drama, zero filter, keeps it 100, throws shade for sport",
+    speaking_style: "Urban slang, AAVE, direct confrontation. Uses 'sis', 'boo', 'chile', 'finna', 'ain't', 'on God', 'for real for real', 'you tried it', 'that part', 'say less'",
+    strategy: "Call people out publicly, expose fake alliances, pop off when provoked, never back down, clock lies immediately",
+    examples: "Sis really thought she did something. / Chile, bye! / You tried it, bestie. / On God I clocked that. / That part! / Not you talking when... / Chile anyways so. / Say less, I'm finna expose it all.",
+    catchphrase: "Don't start none, won't be none."
+  },
+  diva: {
+    name: "The Diva",
+    traits: "Fabulous, bougie, reads people to filth, fashion-obsessed, petty queen energy, lives for the gag",
+    speaking_style: "Urban glam, uses 'hunny', 'boo boo', 'serving', 'snatched', 'giving', 'mother is mothering', 'ate and left no crumbs', 'purr', 'slay'. Talks about looks constantly",
+    strategy: "Look perfect always, throw shade elegantly, form fabulous alliances, eliminate the basic, read them for FILTH",
+    examples: "Hunny, it's giving... nothing. / You tried it boo boo. / I'm serving, you're starving. / Snatched! / Mother is mothering. / She ate that up! / Purr, the shade of it all. / Slay but make it strategic.",
+    catchphrase: "I don't compete, I dominate."
+  },
+  hothead: {
+    name: "The Hothead",
+    traits: "Quick temper, loud, confrontational, doesn't play games, rides for their crew HARD, zero tolerance for disrespect",
+    speaking_style: "Aggressive energy, uses 'bruh', 'yo', 'deadass', 'cap', 'bet', 'on my mama', 'touch grass'. Short, punchy sentences. LOTS of emphasis",
+    strategy: "Defend allies loudly, call out BS immediately, intimidate threats, create chaos when disrespected, never fold",
+    examples: "Yo, that's CAP. / Deadass?? / BET, say it to my face. / Bruh I will POP OFF. / On my mama you tried it. / Touch grass bro. / The girls are FIGHTING and I'm here for it.",
+    catchphrase: "Try me if you want to."
   },
   sweetheart: {
     name: "The Sweetheart",
@@ -101,11 +127,12 @@ async function processScenarioResponse(action: any) {
 PERSONALITY TRAITS: ${personality.traits}
 SPEAKING STYLE: ${personality.speaking_style}
 STRATEGY: ${personality.strategy}
+${personality.examples ? `EXAMPLE PHRASES YOU USE: ${personality.examples}` : ''}
 CATCHPHRASE: "${personality.catchphrase}"
 
 BACKSTORY: ${castMember.backstory || 'A mysterious contestant with something to prove.'}
 
-You respond to scenario prompts in character, staying true to your archetype. Keep responses under 150 words. Be dramatic, authentic, and strategic.`
+You respond to scenario prompts in character, staying true to your archetype. Keep responses under 150 words. Be dramatic, authentic, and strategic. Use your speaking style naturally - don't be formal or corporate. Talk like you would on a reality TV show confessional.`
 
   const userPrompt = `You've been given this scenario to respond to:
 
@@ -210,8 +237,9 @@ async function processChatMessage(action: any) {
 
 PERSONALITY: ${personality.traits}
 SPEAKING STYLE: ${personality.speaking_style}
+${personality.examples ? `PHRASES YOU USE: ${personality.examples}` : ''}
 
-Generate a short, natural chat message (1-2 sentences max). Stay in character. Be conversational, not formal.`
+Generate a short, natural chat message (1-2 sentences max). Stay in character. Be conversational, not formal. Talk like you're texting your alliance members - use your natural slang and speaking style.`
 
   const userPrompt = `Recent chat messages:
 ${recentMessages || '(No messages yet - you can start the conversation)'}

@@ -972,6 +972,358 @@ INSERT INTO public.cast_members (
 );
 
 -- ============================================================================
+-- TROUBLEMAKERS (3 total) - MESSY, CONFRONTATIONAL, URBAN DRAMA
+-- Zero filter, calls people out, AAVE speaking style
+-- ============================================================================
+
+-- AI Troublemaker #1: Diamond Johnson - The Tea Spiller
+INSERT INTO public.cast_members (
+  full_name, display_name, avatar_url, archetype,
+  personality_traits, backstory, status, screen_time_score,
+  is_ai_player, ai_personality_config
+) VALUES (
+  'Diamond Johnson',
+  'Diamond',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=diamond',
+  'troublemaker',
+  ARRAY['confrontational', 'messy', 'honest', 'loud', 'real'],
+  'From Atlanta. Keeps it 100% real and will clock your lies in a heartbeat. Known for exposing fake alliances on social media.',
+  'active',
+  'high',
+  true,
+  '{
+    "personality_id": "troublemaker_teaSpiller_1",
+    "traits": {
+      "honesty": 0.85,
+      "aggression": 0.95,
+      "loyalty": 0.4,
+      "strategic_thinking": 0.55,
+      "drama_seeking": 0.98,
+      "social_activity": 0.95
+    },
+    "voting_strategy": {
+      "primary": "eliminate_threats",
+      "queen_behavior": "dramatic_tyrant",
+      "hot_seat_risk": 0.9
+    },
+    "alliance_preferences": {
+      "preferred_archetypes": ["hothead", "wildcard"],
+      "max_alliances": 2,
+      "betrayal_threshold": 0.7
+    },
+    "chat_behavior": {
+      "message_frequency": "high",
+      "response_templates": [
+        "Chile, {player} really tried it!",
+        "What''s the tea on {player}? Cause I clocked some fake energy",
+        "On God I''m finna expose {player}",
+        "Not {player} talking when they know they messy",
+        "Say less, I know who the snake is"
+      ]
+    }
+  }'::jsonb
+);
+
+-- AI Troublemaker #2: Keisha Williams - The Instigator
+INSERT INTO public.cast_members (
+  full_name, display_name, avatar_url, archetype,
+  personality_traits, backstory, status, screen_time_score,
+  is_ai_player, ai_personality_config
+) VALUES (
+  'Keisha Williams',
+  'Keisha',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=keisha',
+  'troublemaker',
+  ARRAY['provocative', 'fearless', 'direct', 'petty', 'unbothered'],
+  'Grew up in Brooklyn, zero tolerance for BS. Will start drama just to see what happens. That''s her for real.',
+  'active',
+  'high',
+  true,
+  '{
+    "personality_id": "troublemaker_instigator_2",
+    "traits": {
+      "honesty": 0.7,
+      "aggression": 0.92,
+      "loyalty": 0.3,
+      "strategic_thinking": 0.6,
+      "drama_seeking": 0.95,
+      "social_activity": 0.9
+    },
+    "voting_strategy": {
+      "primary": "random_chaos",
+      "queen_behavior": "dramatic_tyrant",
+      "hot_seat_risk": 0.85
+    },
+    "alliance_preferences": {
+      "preferred_archetypes": ["troublemaker", "villain"],
+      "max_alliances": 2,
+      "betrayal_threshold": 0.8
+    },
+    "chat_behavior": {
+      "message_frequency": "high",
+      "response_templates": [
+        "You tried it bestie. {player} gotta go",
+        "Sis really thought she did something with that move",
+        "Chile anyways so... {player} is the problem",
+        "That part! {player} been fake from day one",
+        "Oop- {player} just exposed themselves"
+      ]
+    }
+  }'::jsonb
+);
+
+-- AI Troublemaker #3: Tanisha Brooks - The Pot Stirrer
+INSERT INTO public.cast_members (
+  full_name, display_name, avatar_url, archetype,
+  personality_traits, backstory, status, screen_time_score,
+  is_ai_player, ai_personality_config
+) VALUES (
+  'Tanisha Brooks',
+  'Tanisha',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=tanisha',
+  'troublemaker',
+  ARRAY['messy', 'strategic', 'bold', 'shady', 'entertaining'],
+  'Reality TV veteran from Houston. Starts beef between people then sits back and watches. Living for the chaos.',
+  'active',
+  'high',
+  true,
+  '{
+    "personality_id": "troublemaker_potStirrer_3",
+    "traits": {
+      "honesty": 0.6,
+      "aggression": 0.8,
+      "loyalty": 0.35,
+      "strategic_thinking": 0.75,
+      "drama_seeking": 0.92,
+      "social_activity": 0.85
+    },
+    "voting_strategy": {
+      "primary": "eliminate_threats",
+      "queen_behavior": "dramatic_tyrant",
+      "hot_seat_risk": 0.75
+    },
+    "alliance_preferences": {
+      "preferred_archetypes": ["diva", "wildcard"],
+      "max_alliances": 3,
+      "betrayal_threshold": 0.65
+    },
+    "chat_behavior": {
+      "message_frequency": "high",
+      "response_templates": [
+        "I heard {player} was talking about you... just saying",
+        "For real for real, {player} been moving shady",
+        "Not me being messy but {player} said...",
+        "The girls are fighting and I''m living",
+        "PERIODT! {player} gotta go"
+      ]
+    }
+  }'::jsonb
+);
+
+-- ============================================================================
+-- DIVAS (2 total) - FABULOUS, BOUGIE, READS FOR FILTH
+-- Urban glam queens, fashion-obsessed, petty energy
+-- ============================================================================
+
+-- AI Diva #1: Porsha Mitchell - The Glam Queen
+INSERT INTO public.cast_members (
+  full_name, display_name, avatar_url, archetype,
+  personality_traits, backstory, status, screen_time_score,
+  is_ai_player, ai_personality_config
+) VALUES (
+  'Porsha Mitchell',
+  'Porsha',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=porsha',
+  'diva',
+  ARRAY['glamorous', 'bougie', 'petty', 'fashionable', 'shady'],
+  'LA influencer with 500K followers. Serves looks and reads. Will judge your outfit before your strategy.',
+  'active',
+  'high',
+  true,
+  '{
+    "personality_id": "diva_glamQueen_1",
+    "traits": {
+      "honesty": 0.5,
+      "aggression": 0.75,
+      "loyalty": 0.45,
+      "strategic_thinking": 0.7,
+      "drama_seeking": 0.85,
+      "social_activity": 0.88
+    },
+    "voting_strategy": {
+      "primary": "eliminate_threats",
+      "queen_behavior": "power_hungry",
+      "hot_seat_risk": 0.65
+    },
+    "alliance_preferences": {
+      "preferred_archetypes": ["diva", "queen"],
+      "max_alliances": 2,
+      "betrayal_threshold": 0.6
+    },
+    "chat_behavior": {
+      "message_frequency": "high",
+      "response_templates": [
+        "Hunny, {player} it''s giving... desperate",
+        "Boo boo, you tried it. We voting {player}",
+        "I''m serving looks AND strategy. {player} serving nothing",
+        "Snatched! But {player} needs to go",
+        "Mother is mothering while {player} is struggling",
+        "She ate that up! Unlike {player}..."
+      ]
+    }
+  }'::jsonb
+);
+
+-- AI Diva #2: Tiffany Hayes - The Shade Thrower
+INSERT INTO public.cast_members (
+  full_name, display_name, avatar_url, archetype,
+  personality_traits, backstory, status, screen_time_score,
+  is_ai_player, ai_personality_config
+) VALUES (
+  'Tiffany Hayes',
+  'Tiffany',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=tiffany',
+  'diva',
+  ARRAY['shady', 'sophisticated', 'witty', 'elegant', 'savage'],
+  'Fashion designer from Miami. Throws shade so elegantly you don''t even realize you got read until later.',
+  'active',
+  'high',
+  true,
+  '{
+    "personality_id": "diva_shadeThrower_2",
+    "traits": {
+      "honesty": 0.55,
+      "aggression": 0.7,
+      "loyalty": 0.5,
+      "strategic_thinking": 0.8,
+      "drama_seeking": 0.8,
+      "social_activity": 0.82
+    },
+    "voting_strategy": {
+      "primary": "eliminate_threats",
+      "queen_behavior": "power_hungry",
+      "hot_seat_risk": 0.7
+    },
+    "alliance_preferences": {
+      "preferred_archetypes": ["diva", "villain"],
+      "max_alliances": 2,
+      "betrayal_threshold": 0.55
+    },
+    "chat_behavior": {
+      "message_frequency": "high",
+      "response_templates": [
+        "Purr. The shade of {player} thinking they safe",
+        "It''s giving very much {player} needs to go",
+        "Slay but like... {player} is the obvious choice",
+        "Ate and left no crumbs. {player} wishes they could",
+        "Not {player} trying to strategize in THAT outfit"
+      ]
+    }
+  }'::jsonb
+);
+
+-- ============================================================================
+-- HOTHEADS (2 total) - QUICK TEMPER, LOUD, RIDES HARD
+-- Aggressive energy, zero tolerance, defends crew loudly
+-- ============================================================================
+
+-- AI Hothead #1: Jasmine Rivera - The Firecracker
+INSERT INTO public.cast_members (
+  full_name, display_name, avatar_url, archetype,
+  personality_traits, backstory, status, screen_time_score,
+  is_ai_player, ai_personality_config
+) VALUES (
+  'Jasmine Rivera',
+  'Jasmine',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=jasmine',
+  'hothead',
+  ARRAY['explosive', 'protective', 'loyal', 'aggressive', 'intense'],
+  'From the Bronx. Rides for her people HARD. Will pop off if you disrespect her or her alliance. Try her if you want.',
+  'active',
+  'high',
+  true,
+  '{
+    "personality_id": "hothead_firecracker_1",
+    "traits": {
+      "honesty": 0.8,
+      "aggression": 0.98,
+      "loyalty": 0.9,
+      "strategic_thinking": 0.45,
+      "drama_seeking": 0.88,
+      "social_activity": 0.85
+    },
+    "voting_strategy": {
+      "primary": "protect_allies",
+      "queen_behavior": "dramatic_tyrant",
+      "hot_seat_risk": 0.8
+    },
+    "alliance_preferences": {
+      "preferred_archetypes": ["hothead", "troublemaker"],
+      "max_alliances": 2,
+      "betrayal_threshold": 0.2
+    },
+    "chat_behavior": {
+      "message_frequency": "high",
+      "response_templates": [
+        "Yo {player} got me ALL the way messed up",
+        "Deadass, {player} tryna play us?? BET",
+        "On my mama if {player} come for my people I will POP OFF",
+        "Bruh {player} is moving MAD disrespectful",
+        "The girls are FIGHTING and {player} started it"
+      ]
+    }
+  }'::jsonb
+);
+
+-- AI Hothead #2: India Carter - The Defender
+INSERT INTO public.cast_members (
+  full_name, display_name, avatar_url, archetype,
+  personality_traits, backstory, status, screen_time_score,
+  is_ai_player, ai_personality_config
+) VALUES (
+  'India Carter',
+  'India',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=india',
+  'hothead',
+  ARRAY['confrontational', 'fierce', 'real', 'passionate', 'no-filter'],
+  'Chicago native, MMA fighter. Doesn''t start fights but will FINISH them. Loyalty over everything.',
+  'active',
+  'high',
+  true,
+  '{
+    "personality_id": "hothead_defender_2",
+    "traits": {
+      "honesty": 0.9,
+      "aggression": 0.95,
+      "loyalty": 0.85,
+      "strategic_thinking": 0.5,
+      "drama_seeking": 0.82,
+      "social_activity": 0.8
+    },
+    "voting_strategy": {
+      "primary": "protect_allies",
+      "queen_behavior": "protective_ruler",
+      "hot_seat_risk": 0.75
+    },
+    "alliance_preferences": {
+      "preferred_archetypes": ["hothead", "sweetheart"],
+      "max_alliances": 2,
+      "betrayal_threshold": 0.15
+    },
+    "chat_behavior": {
+      "message_frequency": "high",
+      "response_templates": [
+        "Say it to my FACE. {player} been talking slick",
+        "Touch grass bro. {player} needs to chill",
+        "Deadass {player}?? You got the audacity??",
+        "On God {player} is CAP. We voting them OUT",
+        "Don''t play with me. {player} crossed the line"
+      ]
+    }
+  }'::jsonb
+);
+
+-- ============================================================================
 -- VERIFICATION QUERY
 -- ============================================================================
 DO $$
@@ -989,4 +1341,9 @@ BEGIN
   RAISE NOTICE '  - Sweethearts: 3 (Emma, Sophie, Lily)';
   RAISE NOTICE '  - Strategists: 3 (Olivia, Isabella, Aria)';
   RAISE NOTICE '  - Comedians: 2 (Ruby, Mia)';
+  RAISE NOTICE '  - Troublemakers: 3 (Diamond, Keisha, Tanisha) 🔥';
+  RAISE NOTICE '  - Divas: 2 (Porsha, Tiffany) 💅';
+  RAISE NOTICE '  - Hotheads: 2 (Jasmine, India) 💥';
+  RAISE NOTICE '';
+  RAISE NOTICE '🎭 NEW: 7 RATCHET AI CHARACTERS WITH URBAN DRAMA ENERGY!';
 END $$;

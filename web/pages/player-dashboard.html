@@ -1103,11 +1103,30 @@
           timeZoneName: 'short'
         })
 
-        alert(`🎮 Game Created!\n\n✨ Lobby is OPEN NOW\n🔒 Closes: ${lobbyCloses}\n🎬 Launches: ${gameStarts}\n📅 ${daysUntil} days until launch!`)
+        // Show success message
+        const message = `🎮 Game Created!\n\n✨ Lobby is OPEN NOW\n🔒 Closes: ${lobbyCloses}\n🎬 Launches: ${gameStarts}\n📅 ${daysUntil} days until launch!`;
 
-        // Redirect straight to lobby
+        console.log('Game created successfully!')
+        console.log('Game ID:', newGame.id)
+        console.log('Current user still authenticated:', !!currentUser)
+
+        // Store game ID in localStorage in case of redirect issues
+        localStorage.setItem('lastCreatedGameId', newGame.id)
+
+        // Show alert and redirect
+        alert(message)
+
+        // Double-check auth before redirecting
+        const { data: { user: stillAuthed } } = await supabase.auth.getUser()
+        if (!stillAuthed) {
+          console.error('⚠️ User session lost after game creation!')
+          alert('Please sign in again to access your game')
+          window.location.href = `/pages/sign-in.html?redirect=/lobby.html?game=${newGame.id}`
+          return
+        }
+
         console.log('Redirecting to lobby...')
-        window.location.href = `/pages/lobby.html?game=${newGame.id}`
+        window.location.href = `/lobby.html?game=${newGame.id}`
 
       } catch (error) {
         console.error('❌ Error creating game:', error)

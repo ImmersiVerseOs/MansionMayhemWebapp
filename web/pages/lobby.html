@@ -540,6 +540,56 @@
       }
       currentUser = session.user
 
+      // Ensure cast member profile exists
+      try {
+        let { data: castMember, error: castError } = await sb
+          .from('cast_members')
+          .select('id, full_name, display_name')
+          .eq('user_id', currentUser.id)
+          .maybeSingle()
+
+        if (castError && castError.code !== 'PGRST116') {
+          console.error('Error fetching cast member:', castError)
+        }
+
+        // Create cast member if missing
+        if (!castMember) {
+          console.log('Cast member profile missing, creating fallback profile...')
+
+          const { data: profile } = await sb
+            .from('profiles')
+            .select('full_name, display_name')
+            .eq('id', currentUser.id)
+            .maybeSingle()
+
+          const { data: newCastMember, error: createError } = await sb
+            .from('cast_members')
+            .insert({
+              user_id: currentUser.id,
+              full_name: profile?.full_name || currentUser.email?.split('@')[0] || 'Player',
+              display_name: profile?.display_name || profile?.full_name || currentUser.email?.split('@')[0] || 'Player',
+              archetype: 'wildcard',
+              status: 'active',
+              screen_time_score: 'medium',
+              is_ai_player: false
+            })
+            .select()
+            .single()
+
+          if (createError) {
+            console.error('Failed to create cast member:', createError)
+            alert('Unable to create player profile. Please complete sign-up at /pages/casting-call.html')
+            window.location.href = '/pages/casting-call.html'
+            return
+          }
+
+          castMember = newCastMember
+          console.log('✅ Cast member profile created:', castMember)
+        }
+      } catch (error) {
+        console.error('Error in cast member check:', error)
+      }
+
       // Get active game
       const { data: game } = await sb
         .from('mm_games')

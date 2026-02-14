@@ -1049,6 +1049,52 @@
       }
 
       try {
+        console.log('Checking for cast member profile...')
+
+        // Check if user has a cast member profile
+        let { data: castMember, error: castError } = await supabase
+          .from('cast_members')
+          .select('id, full_name, display_name')
+          .eq('user_id', currentUser.id)
+          .maybeSingle()
+
+        if (castError && castError.code !== 'PGRST116') {
+          console.error('❌ Error checking cast member:', castError)
+          throw castError
+        }
+
+        // Create cast member profile if it doesn't exist
+        if (!castMember) {
+          console.log('Creating cast member profile...')
+
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .maybeSingle()
+
+          const { data: newCastMember, error: createError } = await supabase
+            .from('cast_members')
+            .insert({
+              user_id: currentUser.id,
+              full_name: profile?.full_name || currentUser.email.split('@')[0],
+              display_name: profile?.display_name || profile?.full_name || currentUser.email.split('@')[0],
+              status: 'active'
+            })
+            .select()
+            .single()
+
+          if (createError) {
+            console.error('❌ Error creating cast member:', createError)
+            throw createError
+          }
+
+          castMember = newCastMember
+          console.log('✅ Cast member created:', castMember)
+        } else {
+          console.log('✅ Cast member found:', castMember)
+        }
+
         console.log('Creating new game...')
 
         // Create a new game (always 20 cast members)
@@ -1071,6 +1117,24 @@
         }
 
         console.log('✅ Game created:', newGame)
+
+        // Add the user to the game as a cast member
+        console.log('Adding you to the game...')
+        const { error: gameCastError } = await supabase
+          .from('mm_game_cast')
+          .insert({
+            game_id: newGame.id,
+            cast_member_id: castMember.id,
+            status: 'joined',
+            joined_at: new Date().toISOString()
+          })
+
+        if (gameCastError) {
+          console.error('❌ Error joining game:', gameCastError)
+          throw gameCastError
+        }
+
+        console.log('✅ You joined the game!')
         console.log('Initializing week-long lobby with Sunday launch...')
 
         // Initialize week-long lobby (REQUIRED for Sunday schedule)

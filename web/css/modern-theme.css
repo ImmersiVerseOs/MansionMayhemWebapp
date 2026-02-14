@@ -1,0 +1,82 @@
+/**
+ * MANSION MAYHEM - MODERN THEME
+ * Universal color system for all pages
+ * Pink/Purple/Gold palette
+ */
+
+:root {
+  /* ===== PRIMARY COLORS ===== */
+  --bg-primary: #0A0E27;
+  --bg-secondary: #151936;
+  --bg-card: #1E2139;
+  --bg-elevated: #252949;
+
+  --accent-pink: #E91E63;
+  --accent-purple: #9C27B0;
+  --accent-gold: #FFC107;
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #B8B9C5;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+
+  --success: #00C853;
+  --danger: #D32F2F;
+  --warning: #FF9800;
+
+  /* ===== LEGACY COMPATIBILITY ===== */
+  /* Map old variable names to new colors */
+  --color-background: var(--bg-primary);
+  --color-surface: var(--bg-secondary);
+  --color-dark: var(--bg-primary);
+  --color-dark-gray: var(--bg-secondary);
+  --color-light-gray: var(--bg-card);
+  --color-elevated: var(--bg-elevated);
+
+  --color-gold: var(--accent-gold);
+  --color-rose: var(--accent-pink);
+  --color-purple: var(--accent-purple);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border: var(--border-subtle);
+
+  --color-success: var(--success);
+  --color-error: var(--danger);
+  --color-warning: var(--warning);
+
+  /* Old mansion mayhem variables */
+  --mm-background: var(--bg-primary);
+  --mm-surface: var(--bg-secondary);
+  --mm-dark: var(--bg-primary);
+  --mm-dark-gray: var(--bg-secondary);
+  --mm-medium-gray: var(--bg-card);
+  --mm-light-gray: var(--bg-elevated);
+
+  --mm-gold: var(--accent-gold);
+  --mm-rose: var(--accent-pink);
+  --mm-purple: var(--accent-purple);
+
+  --mm-text-primary: var(--text-primary);
+  --mm-text-secondary: var(--text-secondary);
+
+  --mm-success: var(--success);
+  --mm-danger: var(--danger);
+  --mm-warning: var(--warning);
+
+  /* ===== GRADIENTS ===== */
+  --gradient-pink-purple: linear-gradient(135deg, #E91E63 0%, #9C27B0 100%);
+  --gradient-purple-pink: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);
+  --gradient-gold-pink: linear-gradient(135deg, #FFC107 0%, #E91E63 100%);
+  --mm-gradient-gold-rose: linear-gradient(135deg, #FFC107 0%, #E91E63 100%);
+
+  /* ===== SHADOWS ===== */
+  --shadow-pink: 0 4px 12px rgba(233, 30, 99, 0.3);
+  --shadow-purple: 0 4px 12px rgba(156, 39, 176, 0.3);
+  --shadow-gold: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+/* ===== BASE OVERRIDES ===== */
+body {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}

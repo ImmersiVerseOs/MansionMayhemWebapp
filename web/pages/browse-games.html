@@ -530,7 +530,7 @@
     <!-- Hero Header -->
     <div class="hero-header">
       <h1 class="hero-title">Browse Games</h1>
-      <p class="hero-subtitle">Join an open casting call and become a reality TV star</p>
+      <p class="hero-subtitle">Join an open lobby or start a new one • All games launch Sunday 8 PM ET</p>
     </div>
 
     <!-- Stats Bar -->
@@ -711,7 +711,12 @@
     // Update stats bar
     function updateStats() {
       const totalGames = allGames.length
-      const openGames = allGames.filter(g => g.status === 'lobby' || g.status === 'setup').length
+      const openGames = allGames.filter(g =>
+        g.status === 'recruiting' ||
+        g.status === 'waiting_lobby' ||
+        g.status === 'lobby' ||
+        g.status === 'setup'
+      ).length
       const activeGames = allGames.filter(g => g.status === 'active').length
 
       document.getElementById('totalGamesCount').textContent = totalGames
@@ -729,7 +734,12 @@
       // Apply status filter
       if (currentFilter !== 'all') {
         if (currentFilter === 'recruiting') {
-          filteredGames = filteredGames.filter(g => g.status === 'lobby' || g.status === 'setup')
+          filteredGames = filteredGames.filter(g =>
+            g.status === 'recruiting' ||
+            g.status === 'waiting_lobby' ||
+            g.status === 'lobby' ||
+            g.status === 'setup'
+          )
         } else if (currentFilter === 'in-progress') {
           filteredGames = filteredGames.filter(g => g.status === 'active')
         } else if (currentFilter === 'completed') {
@@ -755,23 +765,25 @@
             <h3 class="empty-title">No games found</h3>
             <p class="empty-description">
               ${currentFilter === 'recruiting'
-                ? 'No games are currently recruiting. Be the first to start one!'
+                ? 'No open lobbies right now. Start a new one and players will join throughout the week!'
                 : 'Try adjusting your filters or search query.'}
             </p>
-            <button onclick="startNewGame()" style="
-              margin-top: 2rem;
-              padding: 1rem 2rem;
-              background: linear-gradient(135deg, var(--rose), var(--purple));
-              color: white;
-              border: none;
-              border-radius: 12px;
-              font-size: 1.1rem;
-              font-weight: 600;
-              cursor: pointer;
-              transition: all 0.3s;
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(233, 30, 99, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-              🎮 Start New Game
-            </button>
+            ${currentFilter === 'recruiting' ? `
+              <button onclick="startNewGame()" style="
+                margin-top: 2rem;
+                padding: 1rem 2rem;
+                background: linear-gradient(135deg, var(--rose), var(--purple));
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+              " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(233, 30, 99, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                🎮 Start New Lobby
+              </button>
+            ` : ''}
           </div>
         `
         return
@@ -782,11 +794,12 @@
 
     // Create game card HTML
     function createGameCard(game) {
-      const isRecruiting = game.status === 'lobby' || game.status === 'setup'
+      // Games are recruiting if in any pre-launch status
+      const isRecruiting = ['recruiting', 'waiting_lobby', 'lobby', 'setup'].includes(game.status)
       const isFull = game.slots_available <= 0
       const canJoin = isRecruiting && !isFull
 
-      // Determine status
+      // Determine status badge
       let statusClass = 'recruiting'
       let statusText = 'OPEN CASTING'
       if (game.status === 'active') {
@@ -795,6 +808,12 @@
       } else if (game.status === 'completed') {
         statusClass = 'completed'
         statusText = 'COMPLETED'
+      } else if (game.status === 'waiting_lobby') {
+        statusClass = 'recruiting'
+        statusText = '⏰ LAUNCHING SUNDAY'
+      } else if (game.status === 'recruiting') {
+        statusClass = 'recruiting'
+        statusText = '✨ JOIN NOW'
       } else if (game.status === 'setup') {
         statusClass = 'recruiting'
         statusText = 'SETUP'
@@ -822,14 +841,16 @@
           <div class="game-meta">
             <div class="meta-item">
               <span class="meta-value">${game.cast_count}</span>
-              <span class="meta-label">Cast</span>
+              <span class="meta-label">Players</span>
             </div>
             <div class="meta-item">
-              <span class="meta-value">${game.max_cast_size || '∞'}</span>
-              <span class="meta-label">Max Cast</span>
+              <span class="meta-value">${game.max_players || 20}</span>
+              <span class="meta-label">Max</span>
             </div>
             <div class="meta-item">
-              <span class="meta-value">${game.slots_available > 0 ? game.slots_available : '0'}</span>
+              <span class="meta-value" style="color: ${game.slots_available > 5 ? 'var(--success)' : game.slots_available > 0 ? 'var(--warning)' : 'var(--danger)'}">
+                ${game.slots_available > 0 ? game.slots_available : 'FULL'}
+              </span>
               <span class="meta-label">Spots Left</span>
             </div>
           </div>

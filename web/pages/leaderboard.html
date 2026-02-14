@@ -39,9 +39,12 @@
     .page-title {
       font-family: 'Playfair Display', serif;
       font-size: 56px;
-      color: var(--gold);
+      background: linear-gradient(135deg, #FFC107 0%, #E91E63 50%, #9C27B0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin-bottom: 16px;
-      text-shadow: 0 0 40px rgba(255, 193, 7, 0.6);
+      filter: drop-shadow(0 0 30px rgba(233, 30, 99, 0.6));
     }
 
     .page-subtitle {
@@ -70,9 +73,10 @@
     }
 
     .filter-btn:hover, .filter-btn.active {
-      border-color: var(--gold);
-      background: rgba(255, 193, 7, 0.1);
-      color: var(--gold);
+      border-color: #E91E63;
+      background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(233, 30, 99, 0.15));
+      color: #E91E63;
+      box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
     }
 
     .podium {
@@ -105,22 +109,29 @@
       width: 120px;
       height: 120px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--purple), var(--gold));
+      background: linear-gradient(135deg, #FFC107 0%, #E91E63 50%, #9C27B0 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 48px;
       margin: 0 auto 16px;
-      border: 4px solid var(--border);
+      border: 4px solid rgba(233, 30, 99, 0.3);
       position: relative;
+      box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
     }
 
     .podium-place.first .podium-avatar {
       width: 150px;
       height: 150px;
       font-size: 60px;
-      border-color: var(--gold);
-      box-shadow: 0 0 40px rgba(255, 193, 7, 0.6);
+      border-color: #E91E63;
+      box-shadow: 0 0 40px rgba(233, 30, 99, 0.8), 0 0 60px rgba(255, 193, 7, 0.5);
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 40px rgba(233, 30, 99, 0.8), 0 0 60px rgba(255, 193, 7, 0.5); }
+      50% { box-shadow: 0 0 60px rgba(233, 30, 99, 1), 0 0 80px rgba(255, 193, 7, 0.7); }
     }
 
     .podium-crown {
@@ -138,7 +149,10 @@
     .podium-rank {
       font-size: 32px;
       font-weight: 900;
-      color: var(--gold);
+      background: linear-gradient(90deg, #FFC107, #E91E63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin-bottom: 8px;
     }
 
@@ -151,7 +165,10 @@
     .podium-score {
       font-size: 28px;
       font-weight: 900;
-      color: var(--gold);
+      background: linear-gradient(90deg, #FFC107, #E91E63, #9C27B0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .podium-label {
@@ -172,8 +189,9 @@
 
     .podium-place.first .podium-base {
       min-height: 150px;
-      border-color: var(--gold);
-      background: rgba(255, 193, 7, 0.05);
+      border-color: #E91E63;
+      background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(233, 30, 99, 0.08));
+      box-shadow: 0 10px 30px rgba(233, 30, 99, 0.3);
     }
 
     .podium-place.second .podium-base {
@@ -199,20 +217,25 @@
     }
 
     .leaderboard-item:hover {
-      border-color: var(--gold);
-      transform: translateX(4px);
-      box-shadow: 0 4px 24px rgba(255, 193, 7, 0.2);
+      border-color: #E91E63;
+      transform: translateX(8px);
+      box-shadow: 0 6px 30px rgba(233, 30, 99, 0.4);
+      background: linear-gradient(135deg, rgba(233, 30, 99, 0.05), rgba(156, 39, 176, 0.05));
     }
 
     .leaderboard-item.my-rank {
-      border-color: var(--gold);
-      background: rgba(255, 193, 7, 0.05);
+      border-color: #E91E63;
+      background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(233, 30, 99, 0.08));
+      box-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
     }
 
     .item-rank {
       font-size: 32px;
       font-weight: 900;
-      color: var(--gold);
+      background: linear-gradient(135deg, #FFC107, #E91E63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       min-width: 60px;
       text-align: center;
     }
@@ -470,37 +493,111 @@
       await loadLeaderboard()
     }
 
-    // Load leaderboard
+    // Load leaderboard with real game stats
     async function loadLeaderboard() {
       try {
-        let query = supabase
-          .from('cast_members')
-          .select('*')
+        let players = []
 
-        // Filter by game if specified
         if (gameId) {
-          query = query.eq('game_id', gameId)
+          // Get players from specific game with stats
+          const { data: gameCast, error: castError } = await supabase
+            .from('mm_game_cast')
+            .select(`
+              cast_member_id,
+              status,
+              joined_at,
+              cast_members (
+                id,
+                display_name,
+                full_name,
+                archetype,
+                screen_time_score,
+                status
+              )
+            `)
+            .eq('game_id', gameId)
+            .eq('status', 'active')
+
+          if (castError) throw castError
+
+          if (!gameCast || gameCast.length === 0) {
+            document.getElementById('leaderboardList').innerHTML = `
+              <div class="empty-state">
+                <div class="empty-icon">🏆</div>
+                <div>No players in this game yet</div>
+              </div>
+            `
+            return
+          }
+
+          // Calculate scores for each player based on game activity
+          for (const gc of gameCast) {
+            if (!gc.cast_members) continue
+
+            const castMemberId = gc.cast_members.id
+
+            // Count voice introductions plays
+            const { count: voicePlays } = await supabase
+              .from('voice_introductions')
+              .select('*', { count: 'exact', head: true })
+              .eq('cast_member_id', castMemberId)
+              .eq('game_id', gameId)
+
+            // Count relationships (alliances + rivalries)
+            const { count: relationshipCount } = await supabase
+              .from('mm_relationship_edges')
+              .select('*', { count: 'exact', head: true })
+              .eq('game_id', gameId)
+              .or(`cast_member_a_id.eq.${castMemberId},cast_member_b_id.eq.${castMemberId}`)
+
+            // Count scenario responses
+            const { count: scenarioResponses } = await supabase
+              .from('scenario_responses')
+              .select('*', { count: 'exact', head: true })
+              .eq('cast_member_id', castMemberId)
+
+            // Calculate drama score (relationships * 10 + voice plays * 5 + scenarios * 15)
+            const dramaScore = (relationshipCount || 0) * 10 + (voicePlays || 0) * 5 + (scenarioResponses || 0) * 15
+
+            // Calculate influence (relationships * 8 + scenarios * 12)
+            const influenceScore = (relationshipCount || 0) * 8 + (scenarioResponses || 0) * 12
+
+            // Screen time score (high=3, medium=2, low=1)
+            const screenTimeValue = gc.cast_members.screen_time_score === 'high' ? 3 :
+                                   gc.cast_members.screen_time_score === 'medium' ? 2 : 1
+
+            players.push({
+              ...gc.cast_members,
+              drama_score: dramaScore,
+              influence_score: influenceScore,
+              screen_time_value: screenTimeValue,
+              relationship_count: relationshipCount || 0,
+              voice_plays: voicePlays || 0,
+              scenario_responses: scenarioResponses || 0
+            })
+          }
+        } else {
+          // Show all cast members (no game filter)
+          const { data: allCast, error } = await supabase
+            .from('cast_members')
+            .select('*')
+            .eq('status', 'active')
+            .limit(50)
+
+          if (error) throw error
+
+          players = (allCast || []).map(cm => ({
+            ...cm,
+            drama_score: 0,
+            influence_score: 0,
+            screen_time_value: cm.screen_time_score === 'high' ? 3 : cm.screen_time_score === 'medium' ? 2 : 1,
+            relationship_count: 0,
+            voice_plays: 0,
+            scenario_responses: 0
+          }))
         }
 
-        // Order by selected metric
-        const metricColumn = currentMetric === 'drama' ? 'drama_score' :
-                            currentMetric === 'influence' ? 'influence_score' :
-                            currentMetric === 'screen_time' ? 'screen_time_score' :
-                            'drama_score'
-
-        query = query.order(metricColumn, { ascending: false })
-
-        // Show only active if "all" filter
-        if (currentMetric === 'all') {
-          query = query.eq('status', 'active')
-          query = query.order('drama_score', { ascending: false })
-        }
-
-        const { data: players, error } = await query.limit(50)
-
-        if (error) throw error
-
-        if (!players || players.length === 0) {
+        if (players.length === 0) {
           document.getElementById('leaderboardList').innerHTML = `
             <div class="empty-state">
               <div class="empty-icon">🏆</div>
@@ -509,6 +606,14 @@
           `
           return
         }
+
+        // Sort by selected metric
+        players.sort((a, b) => {
+          if (currentMetric === 'drama') return b.drama_score - a.drama_score
+          if (currentMetric === 'influence') return b.influence_score - a.influence_score
+          if (currentMetric === 'screen_time') return b.screen_time_value - a.screen_time_value
+          return b.drama_score - a.drama_score
+        })
 
         // Render top 3 podium
         renderPodium(players.slice(0, 3))
@@ -526,7 +631,7 @@
         document.getElementById('leaderboardList').innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">⚠️</div>
-            <div>Failed to load leaderboard</div>
+            <div>Failed to load leaderboard: ${error.message}</div>
           </div>
         `
       }

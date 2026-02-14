@@ -745,7 +745,7 @@ async function init() {
     // Load selection history from database
     const { data: selections, error: selectError } = await supabase
       .from('mm_queen_selections')
-      .select('week_number, round_number, selected_queen_id, cast_members(display_name, archetype)')
+      .select('week_number, round_number, selected_queen_id, selected_queen:cast_members!selected_queen_id(display_name, archetype)')
       .eq('game_id', gameId)
       .order('week_number', { ascending: false })
 
@@ -755,8 +755,8 @@ async function init() {
       selectionHistory = selections.map(s => ({
         id: s.selected_queen_id,
         week: s.week_number,
-        name: s.cast_members?.display_name || 'Unknown',
-        archetype: s.cast_members?.archetype || 'Unknown'
+        name: s.selected_queen?.display_name || 'Unknown',
+        archetype: s.selected_queen?.archetype || 'Unknown'
       }))
       currentWeek = (selections[0]?.week_number || 0) + 1
     }

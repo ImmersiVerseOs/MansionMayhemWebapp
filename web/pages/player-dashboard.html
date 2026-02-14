@@ -903,7 +903,7 @@
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        window.location.href = '/auth/login.html'
+        window.location.href = '/pages/sign-in.html'
         return
       }
       currentUser = user
@@ -1013,7 +1013,7 @@
 
       const { data: queen } = await supabase
         .from('mm_queen_selections')
-        .select('*, cast_members(display_name)')
+        .select('*, selected_queen:cast_members!selected_queen_id(display_name)')
         .eq('game_id', currentGame.id)
         .order('selected_at', { ascending: false })
         .limit(1)
@@ -1022,7 +1022,7 @@
       if (queen) {
         document.getElementById('queenInfo').innerHTML = `
           <div class="queen-icon">👑</div>
-          <div class="queen-name">${queen.cast_members.display_name}</div>
+          <div class="queen-name">${queen.selected_queen.display_name}</div>
           <div class="queen-subtitle">Reigning This Week</div>
         `
       }

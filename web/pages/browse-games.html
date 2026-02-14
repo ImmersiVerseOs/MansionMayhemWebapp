@@ -943,13 +943,13 @@
       }
 
       try {
-        // Create a new game with waiting_lobby status
+        // Create a new game with setup status
         const { data: newGame, error: gameError } = await supabase
           .from('mm_games')
           .insert({
-            title: `Game ${new Date().toLocaleDateString()}`,
-            description: 'New Mansion Mayhem game',
-            status: 'waiting_lobby',
+            title: `Mansion Mayhem - ${new Date().toLocaleDateString()}`,
+            description: 'New Mansion Mayhem game launching this Sunday!',
+            status: 'setup',
             max_players: 20,
             created_at: new Date().toISOString()
           })
@@ -958,8 +958,21 @@
 
         if (gameError) throw gameError
 
-        // Redirect to lobby
-        alert('🎮 New game created! Welcome to the lobby!')
+        // Initialize week-long lobby (sets Sunday 8PM launch)
+        const { data: lobbyInfo, error: lobbyError } = await supabase
+          .rpc('initialize_week_long_lobby', { p_game_id: newGame.id })
+
+        if (lobbyError) {
+          console.error('Error initializing lobby:', lobbyError)
+          // Continue anyway - game was created
+        }
+
+        // Calculate days until launch
+        const launchInfo = lobbyInfo || {}
+        const daysUntilLaunch = launchInfo.days_until_launch || 'soon'
+
+        // Redirect to lobby with info
+        alert(`🎮 Game created!\n\n✨ Lobby open NOW\n🔒 Closes: Sunday 7 PM ET\n🎬 Launches: Sunday 8 PM ET\n📅 ${daysUntilLaunch} days until launch!`)
         window.location.href = `/pages/lobby.html?game=${newGame.id}`
 
       } catch (error) {

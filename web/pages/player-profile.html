@@ -646,15 +646,16 @@
 
     // Load stats
     async function loadStats() {
-      // Count alliances
+      // Count alliances (from relationship edges where alliance > rivalry)
       const { count: allianceCount } = await supabase
-        .from('mm_alliance_members')
+        .from('mm_relationship_edges')
         .select('*', { count: 'exact', head: true })
-        .eq('cast_member_id', castId)
+        .or(`cast_member_a_id.eq.${castId},cast_member_b_id.eq.${castId}`)
+        .gt('alliance_strength', 'rivalry_level')
 
       // Count voice notes
       const { count: voiceNoteCount } = await supabase
-        .from('voice_notes')
+        .from('mm_voice_introductions')
         .select('*', { count: 'exact', head: true })
         .eq('cast_member_id', castId)
         .eq('moderation_status', 'approved')
@@ -704,7 +705,7 @@
     async function loadVoiceNotes() {
       try {
         const { data, error } = await supabase
-          .from('voice_notes')
+          .from('mm_voice_introductions')
           .select('*')
           .eq('cast_member_id', castId)
           .eq('moderation_status', 'approved')
@@ -749,10 +750,14 @@
     // Load alliances
     async function loadAlliances() {
       try {
+        // Get relationships where alliance_strength > rivalry_level
         const { data, error } = await supabase
-          .from('mm_alliance_members')
-          .select('*, mm_alliances(alliance_name, status)')
-          .eq('cast_member_id', castId)
+          .from('mm_relationship_edges')
+          .select('*, cast_member_a:cast_members!cast_member_a_id(id, display_name), cast_member_b:cast_members!cast_member_b_id(id, display_name)')
+          .or(`cast_member_a_id.eq.${castId},cast_member_b_id.eq.${castId}`)
+          .gt('alliance_strength', 'rivalry_level')
+          .order('alliance_strength', { ascending: false })
+          .limit(10)
 
         if (error) throw error
 
@@ -768,12 +773,17 @@
           return
         }
 
-        container.innerHTML = data.map(member => `
-          <div class="alliance-badge">
-            <span class="alliance-icon">🤝</span>
-            <span class="alliance-name">${member.mm_alliances?.alliance_name || 'Alliance'}</span>
-          </div>
-        `).join('')
+        container.innerHTML = data.map(rel => {
+          // Get the other cast member (not the current one)
+          const otherMember = rel.cast_member_a_id === castId ? rel.cast_member_b : rel.cast_member_a
+          return `
+            <div class="alliance-badge">
+              <span class="alliance-icon">🤝</span>
+              <span class="alliance-name">${otherMember?.display_name || 'Alliance'}</span>
+              <span style="font-size: 0.75rem; opacity: 0.7; margin-left: 0.5rem;">${rel.alliance_strength || 0}</span>
+            </div>
+          `
+        }).join('')
 
       } catch (error) {
         console.error('Error loading alliances:', error)

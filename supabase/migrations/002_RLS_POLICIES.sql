@@ -74,6 +74,12 @@ CREATE POLICY "admin_write" ON public.mm_games
     )
   );
 
+-- Allow authenticated users to create games
+DROP POLICY IF EXISTS "authenticated_create" ON public.mm_games;
+CREATE POLICY "authenticated_create" ON public.mm_games
+  FOR INSERT TO authenticated
+  WITH CHECK (true);
+
 -- ============================================================================
 -- 4. MM_GAME_CAST - Public read, admin write
 -- ============================================================================

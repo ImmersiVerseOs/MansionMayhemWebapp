@@ -623,7 +623,7 @@
     // Load games from database
     async function loadGames() {
       try {
-        // Fetch games (only public games)
+        // Fetch all games
         const { data: games, error } = await supabase
           .from('mm_games')
           .select(`
@@ -631,12 +631,10 @@
             game_code,
             title,
             description,
-            max_cast_members,
+            max_players,
             status,
-            created_at,
-            created_by_admin_id
+            created_at
           `)
-          .eq('visibility', 'public')
           .order('created_at', { ascending: false })
 
         if (error) throw error

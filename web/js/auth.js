@@ -34,8 +34,7 @@ export async function signUpWithEmail(email, password, displayName) {
       id: authData.user.id,
       email: authData.user.email,
       display_name: displayName,
-      role: 'cast_member',
-      status: 'pending'
+      role: 'player'
     })
 
   if (profileError) {

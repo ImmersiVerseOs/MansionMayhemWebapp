@@ -1079,7 +1079,10 @@
               user_id: currentUser.id,
               full_name: profile?.full_name || currentUser.email.split('@')[0],
               display_name: profile?.display_name || profile?.full_name || currentUser.email.split('@')[0],
-              status: 'active'
+              archetype: 'wildcard', // Default archetype - users can change later
+              status: 'active',
+              screen_time_score: 'medium',
+              is_ai_player: false
             })
             .select()
             .single()

@@ -13,6 +13,9 @@ CREATE EXTENSION IF NOT EXISTS pg_cron;
 -- Checks if waiting lobby or active lobby timers have expired
 -- Automatically advances game to next phase
 -- ============================================================================
+-- Unschedule if exists, then schedule
+SELECT cron.unschedule('check_lobby_timers') WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'check_lobby_timers');
+
 SELECT cron.schedule(
   'check_lobby_timers',
   '* * * * *',
@@ -26,6 +29,9 @@ SELECT cron.schedule(
 -- Respects quota limits: max 5 total, max 3 per day
 -- Each scenario has 24-hour deadline
 -- ============================================================================
+-- Unschedule if exists, then schedule
+SELECT cron.unschedule('distribute_daily_scenarios') WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'distribute_daily_scenarios');
+
 SELECT cron.schedule(
   'distribute_daily_scenarios',
   '0 9 * * *',
@@ -39,6 +45,9 @@ SELECT cron.schedule(
 -- Triggers on Sundays at 20:00 UTC
 -- Queen has 48 hours to nominate two cast members
 -- ============================================================================
+-- Unschedule if exists, then schedule
+SELECT cron.unschedule('weekly_queen_selection') WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'weekly_queen_selection');
+
 SELECT cron.schedule(
   'weekly_queen_selection',
   '0 20 * * 0',

@@ -32,10 +32,10 @@ CREATE TABLE IF NOT EXISTS public.cast_members (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_cast_members_archetype ON public.cast_members(archetype);
-CREATE INDEX idx_cast_members_is_ai ON public.cast_members(is_ai_player);
-CREATE INDEX idx_cast_members_status ON public.cast_members(status);
-CREATE INDEX idx_cast_members_facecast_id ON public.cast_members(facecast_id) WHERE facecast_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_cast_members_archetype ON public.cast_members(archetype);
+CREATE INDEX IF NOT EXISTS idx_cast_members_is_ai ON public.cast_members(is_ai_player);
+CREATE INDEX IF NOT EXISTS idx_cast_members_status ON public.cast_members(status);
+CREATE INDEX IF NOT EXISTS idx_cast_members_facecast_id ON public.cast_members(facecast_id) WHERE facecast_id IS NOT NULL;
 
 -- ============================================================================
 -- 2. PROFILES - Minimal User Profiles
@@ -56,8 +56,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_profiles_email ON public.profiles(email);
-CREATE INDEX idx_profiles_role ON public.profiles(role);
+CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles(email);
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
 
 -- ============================================================================
 -- 3. MM_GAMES - Game Instances
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS public.mm_games (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_mm_games_status ON public.mm_games(status);
+CREATE INDEX IF NOT EXISTS idx_mm_games_status ON public.mm_games(status);
 
 -- ============================================================================
 -- 4. MM_GAME_CAST - Cast Members in Games
@@ -103,8 +103,8 @@ CREATE TABLE IF NOT EXISTS public.mm_game_cast (
   UNIQUE(game_id, cast_member_id)
 );
 
-CREATE INDEX idx_mm_game_cast_game_id ON public.mm_game_cast(game_id);
-CREATE INDEX idx_mm_game_cast_cast_member_id ON public.mm_game_cast(cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_mm_game_cast_game_id ON public.mm_game_cast(game_id);
+CREATE INDEX IF NOT EXISTS idx_mm_game_cast_cast_member_id ON public.mm_game_cast(cast_member_id);
 
 -- ============================================================================
 -- 5. MM_GAME_STAGES - Game Progression Tracking
@@ -127,8 +127,8 @@ CREATE TABLE IF NOT EXISTS public.mm_game_stages (
   UNIQUE(game_id, stage_number)
 );
 
-CREATE INDEX idx_mm_game_stages_game_id ON public.mm_game_stages(game_id);
-CREATE INDEX idx_mm_game_stages_status ON public.mm_game_stages(status);
+CREATE INDEX IF NOT EXISTS idx_mm_game_stages_game_id ON public.mm_game_stages(game_id);
+CREATE INDEX IF NOT EXISTS idx_mm_game_stages_status ON public.mm_game_stages(status);
 
 -- ============================================================================
 -- 6. SCENARIOS - Scenario Prompts
@@ -156,9 +156,9 @@ CREATE TABLE IF NOT EXISTS public.scenarios (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_scenarios_game_id ON public.scenarios(game_id);
-CREATE INDEX idx_scenarios_deadline_at ON public.scenarios(deadline_at);
-CREATE INDEX idx_scenarios_scenario_type ON public.scenarios(scenario_type);
+CREATE INDEX IF NOT EXISTS idx_scenarios_game_id ON public.scenarios(game_id);
+CREATE INDEX IF NOT EXISTS idx_scenarios_deadline_at ON public.scenarios(deadline_at);
+CREATE INDEX IF NOT EXISTS idx_scenarios_scenario_type ON public.scenarios(scenario_type);
 
 -- ============================================================================
 -- 7. SCENARIO_RESPONSES - Player Responses to Scenarios
@@ -175,8 +175,8 @@ CREATE TABLE IF NOT EXISTS public.scenario_responses (
   UNIQUE(scenario_id, cast_member_id)
 );
 
-CREATE INDEX idx_scenario_responses_scenario_id ON public.scenario_responses(scenario_id);
-CREATE INDEX idx_scenario_responses_cast_member_id ON public.scenario_responses(cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_scenario_responses_scenario_id ON public.scenario_responses(scenario_id);
+CREATE INDEX IF NOT EXISTS idx_scenario_responses_cast_member_id ON public.scenario_responses(cast_member_id);
 
 -- ============================================================================
 -- 7A. SCENARIO_TARGETS - Links Scenarios to Specific Cast Members
@@ -191,8 +191,8 @@ CREATE TABLE IF NOT EXISTS public.scenario_targets (
   UNIQUE(scenario_id, cast_member_id)
 );
 
-CREATE INDEX idx_scenario_targets_scenario ON public.scenario_targets(scenario_id);
-CREATE INDEX idx_scenario_targets_cast_member ON public.scenario_targets(cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_scenario_targets_scenario ON public.scenario_targets(scenario_id);
+CREATE INDEX IF NOT EXISTS idx_scenario_targets_cast_member ON public.scenario_targets(cast_member_id);
 
 -- ============================================================================
 -- 7B. MM_SCENARIO_QUOTAS - Scenario Quota Tracking (3-5 max per cast member)
@@ -216,7 +216,7 @@ CREATE TABLE IF NOT EXISTS public.mm_scenario_quotas (
   UNIQUE(game_id, cast_member_id, week_number)
 );
 
-CREATE INDEX idx_mm_scenario_quotas_game_cast ON public.mm_scenario_quotas(game_id, cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_mm_scenario_quotas_game_cast ON public.mm_scenario_quotas(game_id, cast_member_id);
 
 -- ============================================================================
 -- 8. MM_LINK_UP_REQUESTS - Alliance Invitations
@@ -239,10 +239,10 @@ CREATE TABLE IF NOT EXISTS public.mm_link_up_requests (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_mm_link_up_requests_game_id ON public.mm_link_up_requests(game_id);
-CREATE INDEX idx_mm_link_up_requests_from_id ON public.mm_link_up_requests(from_cast_member_id);
-CREATE INDEX idx_mm_link_up_requests_to_id ON public.mm_link_up_requests(to_cast_member_id);
-CREATE INDEX idx_mm_link_up_requests_status ON public.mm_link_up_requests(status);
+CREATE INDEX IF NOT EXISTS idx_mm_link_up_requests_game_id ON public.mm_link_up_requests(game_id);
+CREATE INDEX IF NOT EXISTS idx_mm_link_up_requests_from_id ON public.mm_link_up_requests(from_cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_mm_link_up_requests_to_id ON public.mm_link_up_requests(to_cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_mm_link_up_requests_status ON public.mm_link_up_requests(status);
 
 -- ============================================================================
 -- 9. MM_LINK_UP_RESPONSES - Responses to Alliance Invitations
@@ -259,8 +259,8 @@ CREATE TABLE IF NOT EXISTS public.mm_link_up_responses (
   UNIQUE(request_id, cast_member_id)
 );
 
-CREATE INDEX idx_mm_link_up_responses_request_id ON public.mm_link_up_responses(request_id);
-CREATE INDEX idx_mm_link_up_responses_cast_member_id ON public.mm_link_up_responses(cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_mm_link_up_responses_request_id ON public.mm_link_up_responses(request_id);
+CREATE INDEX IF NOT EXISTS idx_mm_link_up_responses_cast_member_id ON public.mm_link_up_responses(cast_member_id);
 
 -- ============================================================================
 -- 10. MM_ALLIANCE_ROOMS - Active Alliance Chat Rooms
@@ -283,9 +283,9 @@ CREATE TABLE IF NOT EXISTS public.mm_alliance_rooms (
   CONSTRAINT alliance_room_max_members CHECK (array_length(member_ids, 1) <= 5)
 );
 
-CREATE INDEX idx_mm_alliance_rooms_game_id ON public.mm_alliance_rooms(game_id);
-CREATE INDEX idx_mm_alliance_rooms_status ON public.mm_alliance_rooms(status);
-CREATE INDEX idx_mm_alliance_rooms_member_ids ON public.mm_alliance_rooms USING GIN(member_ids);
+CREATE INDEX IF NOT EXISTS idx_mm_alliance_rooms_game_id ON public.mm_alliance_rooms(game_id);
+CREATE INDEX IF NOT EXISTS idx_mm_alliance_rooms_status ON public.mm_alliance_rooms(status);
+CREATE INDEX IF NOT EXISTS idx_mm_alliance_rooms_member_ids ON public.mm_alliance_rooms USING GIN(member_ids);
 
 -- ============================================================================
 -- 11. MM_ALLIANCE_MESSAGES - Chat Messages in Alliances
@@ -303,11 +303,11 @@ CREATE TABLE IF NOT EXISTS public.mm_alliance_messages (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_mm_alliance_messages_room_id ON public.mm_alliance_messages(room_id);
-CREATE INDEX idx_mm_alliance_messages_sender_cast_id ON public.mm_alliance_messages(sender_cast_id);
-CREATE INDEX idx_mm_alliance_messages_created_at ON public.mm_alliance_messages(created_at DESC);
-CREATE INDEX idx_mm_alliance_messages_type ON public.mm_alliance_messages(message_type);
-CREATE INDEX idx_mm_alliance_messages_moderation ON public.mm_alliance_messages(moderation_status);
+CREATE INDEX IF NOT EXISTS idx_mm_alliance_messages_room_id ON public.mm_alliance_messages(room_id);
+CREATE INDEX IF NOT EXISTS idx_mm_alliance_messages_sender_cast_id ON public.mm_alliance_messages(sender_cast_id);
+CREATE INDEX IF NOT EXISTS idx_mm_alliance_messages_created_at ON public.mm_alliance_messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_mm_alliance_messages_type ON public.mm_alliance_messages(message_type);
+CREATE INDEX IF NOT EXISTS idx_mm_alliance_messages_moderation ON public.mm_alliance_messages(moderation_status);
 
 -- ============================================================================
 -- 11A. MM_ALLIANCE_QUOTAS - Track Alliance Participation (Max 5 per player)
@@ -327,7 +327,7 @@ CREATE TABLE IF NOT EXISTS public.mm_alliance_quotas (
   CHECK (active_alliances <= max_alliances)
 );
 
-CREATE INDEX idx_mm_alliance_quotas_game_cast ON public.mm_alliance_quotas(game_id, cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_mm_alliance_quotas_game_cast ON public.mm_alliance_quotas(game_id, cast_member_id);
 
 -- ============================================================================
 -- 12. MM_RELATIONSHIP_EDGES - Player Relationship Scores
@@ -350,9 +350,9 @@ CREATE TABLE IF NOT EXISTS public.mm_relationship_edges (
   UNIQUE(game_id, cast_member_a_id, cast_member_b_id)
 );
 
-CREATE INDEX idx_mm_relationship_edges_game_id ON public.mm_relationship_edges(game_id);
-CREATE INDEX idx_mm_relationship_edges_a_id ON public.mm_relationship_edges(cast_member_a_id);
-CREATE INDEX idx_mm_relationship_edges_b_id ON public.mm_relationship_edges(cast_member_b_id);
+CREATE INDEX IF NOT EXISTS idx_mm_relationship_edges_game_id ON public.mm_relationship_edges(game_id);
+CREATE INDEX IF NOT EXISTS idx_mm_relationship_edges_a_id ON public.mm_relationship_edges(cast_member_a_id);
+CREATE INDEX IF NOT EXISTS idx_mm_relationship_edges_b_id ON public.mm_relationship_edges(cast_member_b_id);
 
 -- ============================================================================
 -- 13. MM_GRAPH_SCORES - Relationship Graph Analytics
@@ -372,8 +372,8 @@ CREATE TABLE IF NOT EXISTS public.mm_graph_scores (
   UNIQUE(game_id, cast_member_id)
 );
 
-CREATE INDEX idx_mm_graph_scores_game_id ON public.mm_graph_scores(game_id);
-CREATE INDEX idx_mm_graph_scores_cast_member_id ON public.mm_graph_scores(cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_mm_graph_scores_game_id ON public.mm_graph_scores(game_id);
+CREATE INDEX IF NOT EXISTS idx_mm_graph_scores_cast_member_id ON public.mm_graph_scores(cast_member_id);
 
 -- ============================================================================
 -- 14. MM_VOTING_ROUNDS - Elimination Voting Rounds
@@ -403,9 +403,9 @@ CREATE TABLE IF NOT EXISTS public.mm_voting_rounds (
   UNIQUE(game_id, round_number)
 );
 
-CREATE INDEX idx_mm_voting_rounds_game_id ON public.mm_voting_rounds(game_id);
-CREATE INDEX idx_mm_voting_rounds_status ON public.mm_voting_rounds(status);
-CREATE INDEX idx_mm_voting_rounds_queen_id ON public.mm_voting_rounds(queen_id);
+CREATE INDEX IF NOT EXISTS idx_mm_voting_rounds_game_id ON public.mm_voting_rounds(game_id);
+CREATE INDEX IF NOT EXISTS idx_mm_voting_rounds_status ON public.mm_voting_rounds(status);
+CREATE INDEX IF NOT EXISTS idx_mm_voting_rounds_queen_id ON public.mm_voting_rounds(queen_id);
 
 -- ============================================================================
 -- 15. MM_ELIMINATION_VOTES - Individual Votes
@@ -422,9 +422,9 @@ CREATE TABLE IF NOT EXISTS public.mm_elimination_votes (
   UNIQUE(round_id, cast_member_id)
 );
 
-CREATE INDEX idx_mm_elimination_votes_round_id ON public.mm_elimination_votes(round_id);
-CREATE INDEX idx_mm_elimination_votes_cast_member_id ON public.mm_elimination_votes(cast_member_id);
-CREATE INDEX idx_mm_elimination_votes_voted_for_id ON public.mm_elimination_votes(voted_for_id);
+CREATE INDEX IF NOT EXISTS idx_mm_elimination_votes_round_id ON public.mm_elimination_votes(round_id);
+CREATE INDEX IF NOT EXISTS idx_mm_elimination_votes_cast_member_id ON public.mm_elimination_votes(cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_mm_elimination_votes_voted_for_id ON public.mm_elimination_votes(voted_for_id);
 
 -- ============================================================================
 -- 16. MM_CONFESSION_CARDS - Confession Card Submissions
@@ -447,8 +447,8 @@ CREATE TABLE IF NOT EXISTS public.mm_confession_cards (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_mm_confession_cards_game_id ON public.mm_confession_cards(game_id);
-CREATE INDEX idx_mm_confession_cards_is_approved ON public.mm_confession_cards(is_approved);
+CREATE INDEX IF NOT EXISTS idx_mm_confession_cards_game_id ON public.mm_confession_cards(game_id);
+CREATE INDEX IF NOT EXISTS idx_mm_confession_cards_is_approved ON public.mm_confession_cards(is_approved);
 
 -- ============================================================================
 -- 17. MM_CONFESSION_REACTIONS - Reactions to Confessions
@@ -464,8 +464,8 @@ CREATE TABLE IF NOT EXISTS public.mm_confession_reactions (
   UNIQUE(confession_id, cast_member_id)
 );
 
-CREATE INDEX idx_mm_confession_reactions_confession_id ON public.mm_confession_reactions(confession_id);
-CREATE INDEX idx_mm_confession_reactions_cast_member_id ON public.mm_confession_reactions(cast_member_id);
+CREATE INDEX IF NOT EXISTS idx_mm_confession_reactions_confession_id ON public.mm_confession_reactions(confession_id);
+CREATE INDEX IF NOT EXISTS idx_mm_confession_reactions_cast_member_id ON public.mm_confession_reactions(cast_member_id);
 
 -- ============================================================================
 -- 17A. MM_QUEEN_SELECTIONS - Weekly Queen Selection History
@@ -488,8 +488,8 @@ CREATE TABLE IF NOT EXISTS public.mm_queen_selections (
   UNIQUE(game_id, week_number)
 );
 
-CREATE INDEX idx_mm_queen_selections_game ON public.mm_queen_selections(game_id);
-CREATE INDEX idx_mm_queen_selections_week ON public.mm_queen_selections(week_number);
+CREATE INDEX IF NOT EXISTS idx_mm_queen_selections_game ON public.mm_queen_selections(game_id);
+CREATE INDEX IF NOT EXISTS idx_mm_queen_selections_week ON public.mm_queen_selections(week_number);
 
 -- ============================================================================
 -- 18. USER_GAME_STATE - User Progress Tracking
@@ -510,8 +510,8 @@ CREATE TABLE IF NOT EXISTS public.user_game_state (
   UNIQUE(user_id, game_id)
 );
 
-CREATE INDEX idx_user_game_state_user_id ON public.user_game_state(user_id);
-CREATE INDEX idx_user_game_state_game_id ON public.user_game_state(game_id);
+CREATE INDEX IF NOT EXISTS idx_user_game_state_user_id ON public.user_game_state(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_game_state_game_id ON public.user_game_state(game_id);
 
 -- ============================================================================
 -- 19. NOTIFICATIONS - In-App Notifications
@@ -533,9 +533,9 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_notifications_user_id ON public.notifications(user_id);
-CREATE INDEX idx_notifications_is_read ON public.notifications(is_read);
-CREATE INDEX idx_notifications_created_at ON public.notifications(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON public.notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at DESC);
 
 -- ============================================================================
 -- 20. USER_SETTINGS - User Preferences
@@ -557,7 +557,7 @@ CREATE TABLE IF NOT EXISTS public.user_settings (
   UNIQUE(user_id)
 );
 
-CREATE INDEX idx_user_settings_user_id ON public.user_settings(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON public.user_settings(user_id);
 
 -- ============================================================================
 -- 21. PAYMENT_TRANSACTIONS - Payment History (Minimal)
@@ -576,8 +576,8 @@ CREATE TABLE IF NOT EXISTS public.payment_transactions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_payment_transactions_user_id ON public.payment_transactions(user_id);
-CREATE INDEX idx_payment_transactions_status ON public.payment_transactions(status);
+CREATE INDEX IF NOT EXISTS idx_payment_transactions_user_id ON public.payment_transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_payment_transactions_status ON public.payment_transactions(status);
 
 -- ============================================================================
 -- TRIGGERS - Auto-update timestamps

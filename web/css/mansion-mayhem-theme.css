@@ -6,35 +6,39 @@
 
 :root {
   /* ===== PRIMARY COLORS ===== */
-  --mm-gold: #D4AF37;
-  --mm-gold-light: #E8D090;
-  --mm-gold-dark: #B8941F;
+  --mm-gold: #FFC107;
+  --mm-gold-light: #FFD54F;
+  --mm-gold-dark: #FFA000;
 
   --mm-rose: #E91E63;
   --mm-rose-light: #F48FB1;
   --mm-rose-dark: #C2185B;
 
+  --mm-purple: #9C27B0;
+  --mm-purple-light: #BA68C8;
+  --mm-purple-dark: #7B1FA2;
+
   /* ===== NEUTRALS ===== */
-  --mm-dark: #0A0A0A;
-  --mm-dark-gray: #1A1A1A;
-  --mm-medium-gray: #2A2A2A;
-  --mm-light-gray: #3A3A3A;
-  --mm-text-gray: #A0A0A0;
+  --mm-dark: #0A0E27;
+  --mm-dark-gray: #151936;
+  --mm-medium-gray: #1E2139;
+  --mm-light-gray: #252949;
+  --mm-text-gray: #B8B9C5;
 
   /* ===== STATUS COLORS ===== */
-  --mm-success: #4CAF50;
+  --mm-success: #00C853;
   --mm-warning: #FF9800;
-  --mm-danger: #F44336;
+  --mm-danger: #D32F2F;
   --mm-info: #2196F3;
 
   /* ===== SEMANTIC COLORS ===== */
-  --mm-background: #0A0A0A;
-  --mm-surface: #1A1A1A;
-  --mm-surface-elevated: #2A2A2A;
+  --mm-background: #0A0E27;
+  --mm-surface: #151936;
+  --mm-surface-elevated: #1E2139;
 
   --mm-text-primary: #FFFFFF;
-  --mm-text-secondary: #A0A0A0;
-  --mm-text-disabled: #666666;
+  --mm-text-secondary: #B8B9C5;
+  --mm-text-disabled: #6B7280;
 
   /* ===== ACCENTS ===== */
   --mm-fire: #FF6B35;
@@ -42,8 +46,10 @@
   --mm-premium-badge: #FFD700;
 
   /* ===== GRADIENTS ===== */
-  --mm-gradient-gold-rose: linear-gradient(135deg, #D4AF37 0%, #E91E63 100%);
-  --mm-gradient-dark-gold: linear-gradient(180deg, #1A1A1A 0%, #2A2A2A 100%);
+  --mm-gradient-gold-rose: linear-gradient(135deg, #FFC107 0%, #E91E63 100%);
+  --mm-gradient-pink-purple: linear-gradient(135deg, #E91E63 0%, #9C27B0 100%);
+  --mm-gradient-purple-pink: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);
+  --mm-gradient-dark: linear-gradient(180deg, #151936 0%, #1E2139 100%);
   --mm-gradient-rose-dark: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
 
   /* ===== TYPOGRAPHY ===== */
@@ -90,7 +96,9 @@
   --mm-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
   --mm-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
   --mm-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
-  --mm-shadow-glow: 0 0 20px rgba(212, 175, 55, 0.3);
+  --mm-shadow-glow-gold: 0 0 20px rgba(255, 193, 7, 0.3);
+  --mm-shadow-glow-pink: 0 0 20px rgba(233, 30, 99, 0.3);
+  --mm-shadow-glow-purple: 0 0 20px rgba(156, 39, 176, 0.3);
 
   /* ===== ANIMATIONS ===== */
   --mm-duration-fast: 150ms;

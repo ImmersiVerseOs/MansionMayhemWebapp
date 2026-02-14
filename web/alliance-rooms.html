@@ -430,9 +430,9 @@
         const { data: roomsData, error: roomsError } = await window.supabaseClient
           .from('mm_alliance_rooms')
           .select('*')
-          .contains('member_cast_ids', [currentCastMemberId])
-          .eq('is_active', true)
-          .order('last_activity_at', { ascending: false });
+          .contains('member_ids', [currentCastMemberId])
+          .eq('status', 'active')
+          .order('updated_at', { ascending: false });
 
         if (roomsError) throw roomsError;
 
@@ -471,8 +471,8 @@
       const grid = document.getElementById('rooms-grid');
 
       grid.innerHTML = rooms.map(room => {
-        const roomMembers = members.filter(m => room.member_cast_ids.includes(m.id));
-        const isRecentlyActive = new Date(room.last_activity_at) > new Date(Date.now() - 60 * 60 * 1000); // 1 hour
+        const roomMembers = members.filter(m => room.member_ids.includes(m.id));
+        const isRecentlyActive = new Date(room.updated_at) > new Date(Date.now() - 60 * 60 * 1000); // 1 hour
 
         const typeBadgeClass = {
           'alliance': 'badge-alliance',
@@ -513,7 +513,7 @@
               </div>
               <div class="room-stat">
                 <span class="room-stat-icon">⏰</span>
-                <span>${getTimeAgo(room.last_activity_at)}</span>
+                <span>${getTimeAgo(room.updated_at)}</span>
               </div>
             </div>
           </div>
@@ -526,7 +526,7 @@
       document.getElementById('total-rooms').textContent = rooms.length;
 
       const activeRooms = rooms.filter(r =>
-        new Date(r.last_activity_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+        new Date(r.updated_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)
       ).length;
       document.getElementById('active-rooms').textContent = activeRooms;
 
@@ -547,7 +547,7 @@
           event: '*',
           schema: 'public',
           table: 'mm_alliance_rooms',
-          filter: `is_active=eq.true`
+          filter: `status=eq.active`
         }, (payload) => {
           loadRooms();
         })

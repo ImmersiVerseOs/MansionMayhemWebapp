@@ -86,6 +86,36 @@ CREATE TABLE IF NOT EXISTS public.mm_games (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Migrate existing mm_games table
+DO $$
+BEGIN
+  -- Add lobby columns if they don't exist
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_games' AND column_name = 'waiting_lobby_starts_at') THEN
+    ALTER TABLE public.mm_games ADD COLUMN waiting_lobby_starts_at TIMESTAMPTZ;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_games' AND column_name = 'waiting_lobby_ends_at') THEN
+    ALTER TABLE public.mm_games ADD COLUMN waiting_lobby_ends_at TIMESTAMPTZ;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_games' AND column_name = 'active_lobby_starts_at') THEN
+    ALTER TABLE public.mm_games ADD COLUMN active_lobby_starts_at TIMESTAMPTZ;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_games' AND column_name = 'active_lobby_ends_at') THEN
+    ALTER TABLE public.mm_games ADD COLUMN active_lobby_ends_at TIMESTAMPTZ;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_games' AND column_name = 'game_starts_at') THEN
+    ALTER TABLE public.mm_games ADD COLUMN game_starts_at TIMESTAMPTZ;
+  END IF;
+
+  -- Update status constraint to include new states
+  ALTER TABLE public.mm_games DROP CONSTRAINT IF EXISTS mm_games_status_check;
+  ALTER TABLE public.mm_games ADD CONSTRAINT mm_games_status_check
+    CHECK (status IN ('recruiting', 'waiting_lobby', 'active_lobby', 'active', 'paused', 'completed', 'cancelled'));
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_mm_games_status ON public.mm_games(status);
 
 -- ============================================================================
@@ -102,6 +132,14 @@ CREATE TABLE IF NOT EXISTS public.mm_game_cast (
 
   UNIQUE(game_id, cast_member_id)
 );
+
+-- Migrate existing mm_game_cast table
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_game_cast' AND column_name = 'status') THEN
+    ALTER TABLE public.mm_game_cast ADD COLUMN status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'eliminated'));
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_mm_game_cast_game_id ON public.mm_game_cast(game_id);
 CREATE INDEX IF NOT EXISTS idx_mm_game_cast_cast_member_id ON public.mm_game_cast(cast_member_id);
@@ -126,6 +164,26 @@ CREATE TABLE IF NOT EXISTS public.mm_game_stages (
 
   UNIQUE(game_id, stage_number)
 );
+
+-- Migrate existing mm_game_stages table
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_game_stages' AND column_name = 'stage_type') THEN
+    ALTER TABLE public.mm_game_stages ADD COLUMN stage_type TEXT CHECK (stage_type IN ('waiting_lobby', 'active_lobby', 'gameplay', 'voting', 'elimination'));
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_game_stages' AND column_name = 'stage_ends_at') THEN
+    ALTER TABLE public.mm_game_stages ADD COLUMN stage_ends_at TIMESTAMPTZ;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_game_stages' AND column_name = 'min_players') THEN
+    ALTER TABLE public.mm_game_stages ADD COLUMN min_players INTEGER DEFAULT 2;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_game_stages' AND column_name = 'auto_advance') THEN
+    ALTER TABLE public.mm_game_stages ADD COLUMN auto_advance BOOLEAN DEFAULT TRUE;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_mm_game_stages_game_id ON public.mm_game_stages(game_id);
 CREATE INDEX IF NOT EXISTS idx_mm_game_stages_status ON public.mm_game_stages(status);
@@ -155,6 +213,22 @@ CREATE TABLE IF NOT EXISTS public.scenarios (
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migrate existing scenarios table
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'scenarios' AND column_name = 'status') THEN
+    ALTER TABLE public.scenarios ADD COLUMN status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'active', 'completed', 'expired'));
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'scenarios' AND column_name = 'distribution_date') THEN
+    ALTER TABLE public.scenarios ADD COLUMN distribution_date DATE;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'scenarios' AND column_name = 'assigned_count') THEN
+    ALTER TABLE public.scenarios ADD COLUMN assigned_count INTEGER DEFAULT 0;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_scenarios_game_id ON public.scenarios(game_id);
 CREATE INDEX IF NOT EXISTS idx_scenarios_deadline_at ON public.scenarios(deadline_at);
@@ -283,6 +357,20 @@ CREATE TABLE IF NOT EXISTS public.mm_alliance_rooms (
   CONSTRAINT alliance_room_max_members CHECK (array_length(member_ids, 1) <= 5)
 );
 
+-- Migrate existing mm_alliance_rooms table
+DO $$
+BEGIN
+  -- Update room_type constraint to support larger alliances
+  ALTER TABLE public.mm_alliance_rooms DROP CONSTRAINT IF EXISTS mm_alliance_rooms_room_type_check;
+  ALTER TABLE public.mm_alliance_rooms ADD CONSTRAINT mm_alliance_rooms_room_type_check
+    CHECK (room_type IN ('duo', 'trio', 'quad', 'quintet'));
+
+  -- Add max members constraint if it doesn't exist
+  ALTER TABLE public.mm_alliance_rooms DROP CONSTRAINT IF EXISTS alliance_room_max_members;
+  ALTER TABLE public.mm_alliance_rooms ADD CONSTRAINT alliance_room_max_members
+    CHECK (array_length(member_ids, 1) <= 5);
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_mm_alliance_rooms_game_id ON public.mm_alliance_rooms(game_id);
 CREATE INDEX IF NOT EXISTS idx_mm_alliance_rooms_status ON public.mm_alliance_rooms(status);
 CREATE INDEX IF NOT EXISTS idx_mm_alliance_rooms_member_ids ON public.mm_alliance_rooms USING GIN(member_ids);
@@ -302,6 +390,63 @@ CREATE TABLE IF NOT EXISTS public.mm_alliance_messages (
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migrate existing column if needed
+DO $$
+BEGIN
+  -- Check if old column name exists and rename it
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'mm_alliance_messages'
+      AND column_name = 'cast_member_id'
+  ) THEN
+    ALTER TABLE public.mm_alliance_messages RENAME COLUMN cast_member_id TO sender_cast_id;
+  END IF;
+
+  -- Add new columns if they don't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'mm_alliance_messages'
+      AND column_name = 'message_type'
+  ) THEN
+    ALTER TABLE public.mm_alliance_messages
+      ADD COLUMN message_type TEXT DEFAULT 'text' CHECK (message_type IN ('text', 'voice', 'system'));
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'mm_alliance_messages'
+      AND column_name = 'voice_note_url'
+  ) THEN
+    ALTER TABLE public.mm_alliance_messages ADD COLUMN voice_note_url TEXT;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'mm_alliance_messages'
+      AND column_name = 'voice_note_duration_seconds'
+  ) THEN
+    ALTER TABLE public.mm_alliance_messages ADD COLUMN voice_note_duration_seconds INTEGER;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'mm_alliance_messages'
+      AND column_name = 'moderation_status'
+  ) THEN
+    ALTER TABLE public.mm_alliance_messages
+      ADD COLUMN moderation_status TEXT DEFAULT 'approved' CHECK (moderation_status IN ('pending', 'approved', 'rejected'));
+  END IF;
+
+  -- Make message column nullable if it isn't already
+  ALTER TABLE public.mm_alliance_messages ALTER COLUMN message DROP NOT NULL;
+
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_mm_alliance_messages_room_id ON public.mm_alliance_messages(room_id);
 CREATE INDEX IF NOT EXISTS idx_mm_alliance_messages_sender_cast_id ON public.mm_alliance_messages(sender_cast_id);
@@ -446,6 +591,29 @@ CREATE TABLE IF NOT EXISTS public.mm_confession_cards (
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migrate existing mm_confession_cards table
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_confession_cards' AND column_name = 'audio_url') THEN
+    ALTER TABLE public.mm_confession_cards ADD COLUMN audio_url TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_confession_cards' AND column_name = 'duration') THEN
+    ALTER TABLE public.mm_confession_cards ADD COLUMN duration INTEGER;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_confession_cards' AND column_name = 'submitter_identity') THEN
+    ALTER TABLE public.mm_confession_cards ADD COLUMN submitter_identity TEXT DEFAULT 'profile_name' CHECK (submitter_identity IN ('profile_name', 'anonymous'));
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mm_confession_cards' AND column_name = 'display_name_override') THEN
+    ALTER TABLE public.mm_confession_cards ADD COLUMN display_name_override TEXT;
+  END IF;
+
+  -- Make confession_text nullable (for voice-only posts)
+  ALTER TABLE public.mm_confession_cards ALTER COLUMN confession_text DROP NOT NULL;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_mm_confession_cards_game_id ON public.mm_confession_cards(game_id);
 CREATE INDEX IF NOT EXISTS idx_mm_confession_cards_is_approved ON public.mm_confession_cards(is_approved);

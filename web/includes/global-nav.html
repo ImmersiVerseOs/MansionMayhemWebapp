@@ -622,12 +622,12 @@
       // Get profile
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, role')
+        .select('display_name, role')
         .eq('id', user.id)
         .single()
 
       if (profile) {
-        const displayName = profile.full_name || user.email?.split('@')[0] || 'User'
+        const displayName = profile.display_name || user.email?.split('@')[0] || 'User'
         userName.textContent = displayName
         userAvatar.textContent = displayName.charAt(0).toUpperCase()
 
@@ -639,18 +639,18 @@
         }
       }
 
-      // Load notification count
-      const { count } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('read', false)
+      // Load notification count (disabled - notifications table not implemented yet)
+      // const { count } = await supabase
+      //   .from('notifications')
+      //   .select('*', { count: 'exact', head: true })
+      //   .eq('user_id', user.id)
+      //   .eq('read', false)
 
-      if (count > 0) {
-        const badge = document.getElementById('notificationBadge')
-        badge.textContent = count
-        badge.style.display = 'flex'
-      }
+      // if (count > 0) {
+      //   const badge = document.getElementById('notificationBadge')
+      //   badge.textContent = count
+      //   badge.style.display = 'flex'
+      // }
 
       // Highlight current page
       const currentPath = window.location.pathname

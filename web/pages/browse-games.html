@@ -936,6 +936,9 @@
 
     // Start new game function
     window.startNewGame = async function() {
+      console.log('🎮 startNewGame() called')
+      console.log('Current user:', currentUser)
+
       if (!currentUser) {
         alert('Please sign in to start a game')
         window.location.href = '/pages/sign-in.html?redirect=/pages/browse-games.html'
@@ -943,6 +946,8 @@
       }
 
       try {
+        console.log('Creating new game...')
+
         // Create a new game with setup status
         const { data: newGame, error: gameError } = await supabase
           .from('mm_games')
@@ -956,16 +961,27 @@
           .select()
           .single()
 
-        if (gameError) throw gameError
+        if (gameError) {
+          console.error('❌ Game creation error:', gameError)
+          throw gameError
+        }
+
+        console.log('✅ Game created:', newGame)
+        console.log('Initializing week-long lobby...')
 
         // Initialize week-long lobby (sets Sunday 8PM launch)
         const { data: lobbyInfo, error: lobbyError } = await supabase
           .rpc('initialize_week_long_lobby', { p_game_id: newGame.id })
 
         if (lobbyError) {
-          console.error('Error initializing lobby:', lobbyError)
+          console.error('⚠️ Lobby initialization error:', lobbyError)
           // Continue anyway - game was created
+          alert(`⚠️ Game created but lobby setup had an issue.\n\nRedirecting to lobby page...`)
+          window.location.href = `/pages/lobby.html?game=${newGame.id}`
+          return
         }
+
+        console.log('✅ Lobby initialized:', lobbyInfo)
 
         // Calculate days until launch
         const launchInfo = lobbyInfo || {}
@@ -976,7 +992,7 @@
         window.location.href = `/pages/lobby.html?game=${newGame.id}`
 
       } catch (error) {
-        console.error('Error creating game:', error)
+        console.error('❌ Error creating game:', error)
         alert('Failed to create game: ' + error.message)
       }
     }

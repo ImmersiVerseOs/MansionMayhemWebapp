@@ -1060,6 +1060,112 @@
       timerInterval = setInterval(updateTimer, 1000)
     }
 
+    // Leave game function
+    async function leaveGame() {
+      if (!currentGameId || !currentCastMemberId) {
+        alert('Cannot leave game - missing game or player information')
+        return
+      }
+
+      if (!confirm('Are you sure you want to leave this game? If you are the last player, the game will be deleted.')) {
+        return
+      }
+
+      try {
+        console.log('🚪 Leaving game:', currentGameId)
+
+        // Remove player from game
+        const { error: removeError } = await supabase
+          .from('mm_game_cast')
+          .delete()
+          .eq('game_id', currentGameId)
+          .eq('cast_member_id', currentCastMemberId)
+
+        if (removeError) {
+          console.error('Error removing from game:', removeError)
+          alert('Failed to leave game. Please try again.')
+          return
+        }
+
+        console.log('✅ Removed from game')
+
+        // Check how many players are left
+        const { count: remainingPlayers } = await supabase
+          .from('mm_game_cast')
+          .select('*', { count: 'exact', head: true })
+          .eq('game_id', currentGameId)
+
+        console.log('👥 Remaining players:', remainingPlayers)
+
+        // If no players left and game hasn't started, delete it
+        if (remainingPlayers === 0) {
+          const { data: game } = await supabase
+            .from('mm_games')
+            .select('status')
+            .eq('id', currentGameId)
+            .single()
+
+          if (game && ['recruiting', 'waiting_lobby', 'lobby'].includes(game.status)) {
+            console.log('🗑️ Deleting abandoned game...')
+
+            const { error: deleteError } = await supabase
+              .from('mm_games')
+              .delete()
+              .eq('id', currentGameId)
+
+            if (deleteError) {
+              console.error('Error deleting game:', deleteError)
+            } else {
+              console.log('✅ Game deleted')
+            }
+          }
+        } else {
+          // Update player count
+          await supabase
+            .from('mm_games')
+            .update({ current_players: remainingPlayers })
+            .eq('id', currentGameId)
+        }
+
+        // Clear localStorage and redirect
+        localStorage.removeItem('currentGameId')
+        alert('✅ You have left the game')
+        window.location.href = '/pages/player-dashboard.html'
+
+      } catch (error) {
+        console.error('Error leaving game:', error)
+        alert('An error occurred. Please try again.')
+      }
+    }
+
+    // Copy invite link
+    function copyInviteLink() {
+      const inviteLink = `${window.location.origin}/lobby.html?game=${currentGameId}`
+      navigator.clipboard.writeText(inviteLink).then(() => {
+        alert('✅ Invite link copied to clipboard!')
+      }).catch(() => {
+        alert('Invite link: ' + inviteLink)
+      })
+    }
+
+    // Share game
+    function shareGame() {
+      const inviteLink = `${window.location.origin}/lobby.html?game=${currentGameId}`
+      const shareText = 'Join my Mansion Mayhem game!'
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'Mansion Mayhem',
+          text: shareText,
+          url: inviteLink
+        }).catch(() => {
+          copyInviteLink()
+        })
+      } else {
+        copyInviteLink()
+      }
+    }
+
     // Initialize on load
     init()
   </script>

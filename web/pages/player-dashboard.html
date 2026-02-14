@@ -118,6 +118,34 @@
       text-align: center;
     }
 
+    /* START GAME BUTTON */
+    .start-game-btn {
+      margin: 0 1rem 2rem;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+    }
+
+    .start-game-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(233, 30, 99, 0.5);
+    }
+
+    .start-game-btn .icon {
+      font-size: 1.5rem;
+    }
+
     /* MAIN CONTENT */
     .main-content {
       margin-left: 280px;
@@ -588,6 +616,11 @@
       <div class="logo-title">MANSION MAYHEM</div>
       <div class="logo-subtitle">Reality TV Game</div>
     </div>
+
+    <a href="/pages/casting-call.html" class="start-game-btn">
+      <span class="icon">🎮</span>
+      Start New Game
+    </a>
 
     <nav class="nav-section">
       <div class="nav-title">Main</div>

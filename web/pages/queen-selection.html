@@ -4,22 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Queen Selection | Mansion Mayhem</title>
+<link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+<link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Cormorant+Garamond:wght@300;400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
 :root {
-  --gold: #D4AF37;
-  --gold-light: #F5D96A;
-  --gold-dark: #8B7020;
+  --gold: #FFC107;
+  --gold-light: #FFD54F;
+  --gold-dark: #FFA000;
+  --pink: #E91E63;
+  --purple: #9C27B0;
   --rose: #E91E63;
   --rose-deep: #AD1457;
-  --black: #050505;
+  --gradient: linear-gradient(135deg, #FFC107 0%, #E91E63 50%, #9C27B0 100%);
+  --black: #0A0E27;
   --surface: #0C0C0C;
-  --card: #111;
+  --card: rgba(255, 255, 255, 0.03);
   --text: #F0EDE5;
-  --text-dim: #8A8478;
-  --border: #1E1D1A;
+  --text-dim: rgba(255, 255, 255, 0.6);
+  --border: rgba(255, 255, 255, 0.1);
 }
 
 body {
@@ -36,10 +45,10 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: 
-    radial-gradient(ellipse 800px 600px at 50% 30%, rgba(212,175,55,0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 400px 400px at 20% 80%, rgba(233,30,99,0.03) 0%, transparent 70%),
-    radial-gradient(ellipse 400px 400px at 80% 70%, rgba(212,175,55,0.03) 0%, transparent 70%);
+  background:
+    radial-gradient(ellipse 800px 600px at 50% 30%, rgba(255,193,7,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 400px at 20% 80%, rgba(233,30,99,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 400px at 80% 70%, rgba(156,39,176,0.04) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -86,11 +95,11 @@ body::after {
   font-weight: 900;
   line-height: 1;
   margin-bottom: 6px;
-  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 40%, var(--gold-dark) 100%);
+  background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 2px 8px rgba(212,175,55,0.3));
+  filter: drop-shadow(0 2px 8px rgba(233,30,99,0.3));
 }
 
 .header-sub {
@@ -176,8 +185,8 @@ body::after {
 
 .queen-cell:hover {
   transform: translateY(-4px) scale(1.03);
-  border-color: var(--gold);
-  box-shadow: 0 8px 32px rgba(212,175,55,0.15), 0 0 0 1px rgba(212,175,55,0.2);
+  border-color: var(--pink);
+  box-shadow: 0 8px 32px rgba(233,30,99,0.2), 0 0 0 1px rgba(233,30,99,0.3);
 }
 
 .queen-cell.eliminated {
@@ -202,17 +211,17 @@ body::after {
 }
 
 .queen-cell.selected {
-  border-color: var(--gold);
-  box-shadow: 
-    0 0 30px rgba(212,175,55,0.3),
-    0 0 60px rgba(212,175,55,0.1),
-    inset 0 0 20px rgba(212,175,55,0.1);
+  border-color: var(--pink);
+  box-shadow:
+    0 0 30px rgba(233,30,99,0.4),
+    0 0 60px rgba(233,30,99,0.2),
+    inset 0 0 20px rgba(233,30,99,0.15);
   animation: selectedPulse 2s ease infinite;
 }
 
 @keyframes selectedPulse {
-  0%, 100% { box-shadow: 0 0 30px rgba(212,175,55,0.3), 0 0 60px rgba(212,175,55,0.1); }
-  50% { box-shadow: 0 0 40px rgba(212,175,55,0.5), 0 0 80px rgba(212,175,55,0.2); }
+  0%, 100% { box-shadow: 0 0 30px rgba(233,30,99,0.4), 0 0 60px rgba(233,30,99,0.2); }
+  50% { box-shadow: 0 0 40px rgba(233,30,99,0.6), 0 0 80px rgba(233,30,99,0.3); }
 }
 
 .queen-cell.cycling {
@@ -389,14 +398,14 @@ body::after {
 }
 
 .btn-select {
-  background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
+  background: var(--gradient);
   color: var(--black);
-  box-shadow: 0 4px 24px rgba(212,175,55,0.3);
+  box-shadow: 0 4px 24px rgba(233,30,99,0.3);
 }
 
 .btn-select:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(212,175,55,0.5);
+  box-shadow: 0 8px 32px rgba(233,30,99,0.5);
 }
 
 .btn-select:active { transform: translateY(0); }
@@ -464,7 +473,7 @@ body::after {
   font-family: 'Playfair Display', serif;
   font-size: clamp(40px, 8vw, 80px);
   font-weight: 900;
-  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+  background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -524,7 +533,7 @@ body::after {
 }
 
 .btn-continue {
-  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  background: var(--gradient);
   color: var(--black);
   font-family: 'Bebas Neue', sans-serif;
   font-size: 16px;
@@ -537,7 +546,7 @@ body::after {
   transition: all 0.2s;
 }
 
-.btn-continue:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,175,55,0.3); }
+.btn-continue:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(233,30,99,0.4); }
 
 /* ========== HISTORY ========== */
 .history-section {
@@ -587,7 +596,7 @@ body::after {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  background: var(--gradient);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -623,7 +632,7 @@ body::after {
   .header { padding: 32px 16px 16px; }
 }
 </style>
-  <link rel="stylesheet" href="css/modern-theme.css">
+  <link rel="stylesheet" href="../css/modern-theme.css">
 </head>
 <body>
 
@@ -1040,7 +1049,8 @@ class Particle {
     this.speedY = burst ? (Math.random() - 0.5) * 8 - 2 : -Math.random() * 0.5 - 0.1;
     this.life = burst ? 1 : 0.3 + Math.random() * 0.4;
     this.decay = burst ? 0.015 : 0.001;
-    this.color = Math.random() > 0.3 ? 'rgba(212,175,55,' : 'rgba(245,217,106,';
+    const rand = Math.random();
+    this.color = rand > 0.6 ? 'rgba(233,30,99,' : rand > 0.3 ? 'rgba(255,193,7,' : 'rgba(156,39,176,';
   }
   
   update() {

@@ -6,5 +6,9 @@
 # Old auth paths to new paths
 /auth/login.html  /pages/sign-in.html  301
 
+# Old alliance paths to new paths
+/alliance-rooms.html  /pages/alliance-rooms.html  301
+/alliance-chat.html  /pages/alliance-chat.html  301
+
 # 404 fallback (don't catch valid pages)
 /404  /landing.html  404

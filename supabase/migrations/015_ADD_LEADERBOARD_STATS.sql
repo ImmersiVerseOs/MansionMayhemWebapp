@@ -36,11 +36,11 @@ BEGIN
   WHERE (cast_member_a_id = p_cast_member_id OR cast_member_b_id = p_cast_member_id)
     AND (p_game_id IS NULL OR game_id = p_game_id);
 
-  -- Count voice introduction plays
-  SELECT COALESCE(SUM(play_count), 0) INTO v_voice_plays
+  -- Count voice introductions (1 if exists, 0 if not)
+  SELECT COUNT(*) INTO v_voice_plays
   FROM mm_voice_introductions
   WHERE cast_member_id = p_cast_member_id
-    AND (p_game_id IS NULL OR game_id = p_game_id);
+    AND moderation_status = 'approved';
 
   -- Count scenario responses
   SELECT COUNT(*) INTO v_scenario_responses
@@ -79,23 +79,24 @@ END;
 $$;
 
 -- =====================================================
--- TRIGGER: Auto-update scores when voice intro is played
+-- TRIGGER: Auto-update scores when voice intro is created/approved
 -- =====================================================
-CREATE OR REPLACE FUNCTION trigger_update_scores_on_voice_play()
+CREATE OR REPLACE FUNCTION trigger_update_scores_on_voice_intro()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  PERFORM update_cast_member_scores(NEW.cast_member_id, NEW.game_id);
+  PERFORM update_cast_member_scores(NEW.cast_member_id, NULL);
   RETURN NEW;
 END;
 $$;
 
-DROP TRIGGER IF EXISTS voice_intro_play_update_scores ON mm_voice_introductions;
-CREATE TRIGGER voice_intro_play_update_scores
-  AFTER INSERT OR UPDATE OF play_count ON mm_voice_introductions
+DROP TRIGGER IF EXISTS voice_intro_update_scores ON mm_voice_introductions;
+CREATE TRIGGER voice_intro_update_scores
+  AFTER INSERT OR UPDATE OF moderation_status ON mm_voice_introductions
   FOR EACH ROW
-  EXECUTE FUNCTION trigger_update_scores_on_voice_play();
+  WHEN (NEW.moderation_status = 'approved')
+  EXECUTE FUNCTION trigger_update_scores_on_voice_intro();
 
 -- =====================================================
 -- TRIGGER: Auto-update scores when relationship is created/updated

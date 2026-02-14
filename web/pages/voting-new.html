@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elimination Vote | Mansion Mayhem</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0612;
+      color: #fafafa;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #d4af37, #f4e4bc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .queen-section {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 228, 188, 0.05));
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+    .queen-title {
+      font-size: 1.5rem;
+      color: #d4af37;
+      margin-bottom: 1rem;
+    }
+    .queen-name {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .vote-section {
+      margin-bottom: 3rem;
+    }
+    .vote-title {
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+      color: #d4af37;
+    }
+    .nominees-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    .nominee-card {
+      background: #151020;
+      border: 2px solid rgba(212, 175, 55, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .nominee-card:hover {
+      border-color: #d4af37;
+      transform: translateY(-4px);
+    }
+    .nominee-card.selected {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+    .nominee-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d4af37, #f4e4bc);
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: 700;
+    }
+    .nominee-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .nominee-archetype {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+    }
+    .vote-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #d4af37;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .vote-btn {
+      background: linear-gradient(135deg, #d4af37, #f4e4bc);
+      color: #0a0612;
+      border: none;
+      padding: 1rem 3rem;
+      border-radius: 12px;
+      font-size: 1.125rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: block;
+      margin: 2rem auto 0;
+    }
+    .vote-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+    }
+    .vote-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .message {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .info { color: #3b82f6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗳️ Elimination Vote</h1>
+
+    <div id="content">
+      <div class="message info">Loading voting round...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabaseClient as supabase, getCurrentUser } from '../js/supabase-module.js'
+
+    let selectedNomineeId = null
+    let currentRound = null
+
+    async function loadVotingRound() {
+      const content = document.getElementById('content')
+
+      try {
+        // Get active voting round
+        const { data: rounds, error: roundError } = await supabase
+          .from('mm_voting_rounds')
+          .select(`
+            *,
+            queen:cast_members!queen_id(id, display_name, archetype, avatar_url),
+            nominee_a:cast_members!nominee_a_id(id, display_name, archetype, avatar_url, bio),
+            nominee_b:cast_members!nominee_b_id(id, display_name, archetype, avatar_url, bio)
+          `)
+          .eq('status', 'active')
+          .order('round_number', { ascending: false })
+          .limit(1)
+
+        if (roundError) throw roundError
+
+        if (!rounds || rounds.length === 0) {
+          content.innerHTML = '<div class="message info">No active voting round at the moment. Check back soon!</div>'
+          return
+        }
+
+        currentRound = rounds[0]
+
+        // Check if user has already voted
+        const user = await getCurrentUser()
+        let hasVoted = false
+        let userVote = null
+
+        if (user) {
+          // Get user's cast member ID
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('cast_member_id')
+            .eq('id', user.id)
+            .single()
+
+          if (profile && profile.cast_member_id) {
+            const { data: vote } = await supabase
+              .from('mm_elimination_votes')
+              .select('voted_for_id')
+              .eq('round_id', currentRound.id)
+              .eq('cast_member_id', profile.cast_member_id)
+              .single()
+
+            if (vote) {
+              hasVoted = true
+              userVote = vote.voted_for_id
+            }
+          }
+        }
+
+        // Render voting UI
+        content.innerHTML = `
+          <div class="queen-section">
+            <div class="queen-title">👑 This Week's Queen</div>
+            <div class="queen-name">${currentRound.queen.display_name}</div>
+            <div class="nominee-archetype">${currentRound.queen.archetype}</div>
+          </div>
+
+          <div class="vote-section">
+            <div class="vote-title">Vote to Eliminate</div>
+            <div class="nominees-grid">
+              <div class="nominee-card" data-nominee-id="${currentRound.nominee_a.id}" ${hasVoted && userVote === currentRound.nominee_a.id ? 'style="border-color: #10b981;"' : ''}>
+                <div class="nominee-avatar">${currentRound.nominee_a.display_name[0]}</div>
+                <div class="nominee-name">${currentRound.nominee_a.display_name}</div>
+                <div class="nominee-archetype">${currentRound.nominee_a.archetype}</div>
+                <div class="vote-stats">
+                  <div class="stat">
+                    <div class="stat-value">${currentRound.votes_for_a || 0}</div>
+                    <div class="stat-label">Votes</div>
+                  </div>
+                  <div class="stat">
+                    <div class="stat-value">${Math.round((currentRound.votes_for_a || 0) / Math.max(1, (currentRound.votes_for_a || 0) + (currentRound.votes_for_b || 0)) * 100)}%</div>
+                    <div class="stat-label">Share</div>
+                  </div>
+                </div>
+                ${hasVoted && userVote === currentRound.nominee_a.id ? '<div style="margin-top: 1rem; color: #10b981; font-weight: 600;">✓ Your Vote</div>' : ''}
+              </div>
+
+              <div class="nominee-card" data-nominee-id="${currentRound.nominee_b.id}" ${hasVoted && userVote === currentRound.nominee_b.id ? 'style="border-color: #10b981;"' : ''}>
+                <div class="nominee-avatar">${currentRound.nominee_b.display_name[0]}</div>
+                <div class="nominee-name">${currentRound.nominee_b.display_name}</div>
+                <div class="nominee-archetype">${currentRound.nominee_b.archetype}</div>
+                <div class="vote-stats">
+                  <div class="stat">
+                    <div class="stat-value">${currentRound.votes_for_b || 0}</div>
+                    <div class="stat-label">Votes</div>
+                  </div>
+                  <div class="stat">
+                    <div class="stat-value">${Math.round((currentRound.votes_for_b || 0) / Math.max(1, (currentRound.votes_for_a || 0) + (currentRound.votes_for_b || 0)) * 100)}%</div>
+                    <div class="stat-label">Share</div>
+                  </div>
+                </div>
+                ${hasVoted && userVote === currentRound.nominee_b.id ? '<div style="margin-top: 1rem; color: #10b981; font-weight: 600;">✓ Your Vote</div>' : ''}
+              </div>
+            </div>
+
+            ${!hasVoted ? `
+              <button class="vote-btn" id="castVoteBtn" disabled>Select a nominee to vote</button>
+            ` : `
+              <div class="message success">You've already voted this round!</div>
+            `}
+          </div>
+
+          <div class="message info">
+            Voting closes: ${new Date(currentRound.voting_closes_at).toLocaleString()}
+          </div>
+        `
+
+        if (!hasVoted) {
+          // Add click handlers for nominee cards
+          document.querySelectorAll('.nominee-card').forEach(card => {
+            card.addEventListener('click', () => {
+              document.querySelectorAll('.nominee-card').forEach(c => c.classList.remove('selected'))
+              card.classList.add('selected')
+              selectedNomineeId = card.dataset.nomineeId
+              document.getElementById('castVoteBtn').disabled = false
+              document.getElementById('castVoteBtn').textContent = 'Cast Your Vote'
+            })
+          })
+
+          // Add vote button handler
+          document.getElementById('castVoteBtn').addEventListener('click', castVote)
+        }
+
+      } catch (error) {
+        console.error('Error loading voting round:', error)
+        content.innerHTML = `<div class="message error">Error loading voting round: ${error.message}</div>`
+      }
+    }
+
+    async function castVote() {
+      if (!selectedNomineeId) return
+
+      const btn = document.getElementById('castVoteBtn')
+      btn.disabled = true
+      btn.textContent = 'Casting vote...'
+
+      try {
+        const user = await getCurrentUser()
+        if (!user) {
+          alert('Please log in to vote')
+          return
+        }
+
+        // Get user's cast member ID
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('cast_member_id')
+          .eq('id', user.id)
+          .single()
+
+        if (!profile || !profile.cast_member_id) {
+          alert('You need to create your character first!')
+          return
+        }
+
+        // Cast vote
+        const { error: voteError } = await supabase
+          .from('mm_elimination_votes')
+          .insert({
+            round_id: currentRound.id,
+            cast_member_id: profile.cast_member_id,
+            voted_for_id: selectedNomineeId
+          })
+
+        if (voteError) throw voteError
+
+        // Update vote counts
+        const field = selectedNomineeId === currentRound.nominee_a_id ? 'votes_for_a' : 'votes_for_b'
+        await supabase.rpc('increment', {
+          table_name: 'mm_voting_rounds',
+          row_id: currentRound.id,
+          column_name: field
+        })
+
+        // Reload to show updated votes
+        loadVotingRound()
+
+      } catch (error) {
+        console.error('Error casting vote:', error)
+        alert('Error casting vote: ' + error.message)
+        btn.disabled = false
+        btn.textContent = 'Cast Your Vote'
+      }
+    }
+
+    // Initialize
+    loadVotingRound()
+  </script>
+</body>
+</html>

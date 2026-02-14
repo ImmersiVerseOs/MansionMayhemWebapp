@@ -6,7 +6,7 @@
 
 [[redirects]]
   from = "/"
-  to = "/landing.html"
+  to = "/intro.html"
   status = 200
 
 # Only redirect actual 404s to landing page (not all routes!)

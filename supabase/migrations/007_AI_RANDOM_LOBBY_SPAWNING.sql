@@ -29,8 +29,8 @@ BEGIN
     FROM mm_game_cast
     WHERE game_id = v_game.id;
 
-    -- Don't spawn if lobby is full or nearly full (leave room for real players)
-    IF v_game.current_players >= (v_game.max_players - 5) THEN
+    -- Don't spawn if lobby is already at 20 (full capacity)
+    IF v_game.current_players >= 20 THEN
       CONTINUE;
     END IF;
 
@@ -181,3 +181,99 @@ COMMENT ON FUNCTION public.spawn_ai_for_game(UUID, INTEGER) IS
   'Manually spawn AI characters into a specific game.
    Usage: SELECT spawn_ai_for_game(''game-uuid-here'', 5);
    Useful for testing or immediately populating new lobbies.';
+
+-- ============================================================================
+-- Pre-Launch Fill Function
+-- Ensures ALL games have exactly 20 cast members before Sunday launch
+-- Runs 30 minutes before Sunday 8 PM ET (7:30 PM ET)
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION public.fill_lobbies_to_20()
+RETURNS JSONB AS $$
+DECLARE
+  v_game RECORD;
+  v_ai_character RECORD;
+  v_current_count INTEGER;
+  v_needed INTEGER;
+  v_filled_games JSONB := '[]'::JSONB;
+  v_total_ai_added INTEGER := 0;
+BEGIN
+
+  -- Find games launching soon (within next hour)
+  FOR v_game IN
+    SELECT id, title, max_players
+    FROM mm_games
+    WHERE status IN ('waiting_lobby', 'recruiting')
+      AND game_starts_at IS NOT NULL
+      AND game_starts_at BETWEEN NOW() AND NOW() + INTERVAL '1 hour'
+  LOOP
+
+    -- Get current player count
+    SELECT COUNT(*) INTO v_current_count
+    FROM mm_game_cast
+    WHERE game_id = v_game.id;
+
+    -- Calculate how many more we need to reach 20
+    v_needed := 20 - v_current_count;
+
+    IF v_needed > 0 THEN
+      -- Fill the remaining spots with AI
+      FOR i IN 1..v_needed LOOP
+        -- Select random AI not in this game
+        SELECT cm.id, cm.display_name, cm.archetype
+        INTO v_ai_character
+        FROM cast_members cm
+        WHERE cm.is_ai_player = true
+          AND cm.status = 'active'
+          AND NOT EXISTS (
+            SELECT 1 FROM mm_game_cast gc
+            WHERE gc.game_id = v_game.id AND gc.cast_member_id = cm.id
+          )
+        ORDER BY RANDOM()
+        LIMIT 1;
+
+        -- Add AI to game
+        IF v_ai_character.id IS NOT NULL THEN
+          INSERT INTO mm_game_cast (game_id, cast_member_id, status, joined_at)
+          VALUES (v_game.id, v_ai_character.id, 'joined', NOW())
+          ON CONFLICT DO NOTHING;
+
+          v_total_ai_added := v_total_ai_added + 1;
+
+          RAISE NOTICE '🎯 Pre-Launch Fill: % joined "%"', v_ai_character.display_name, v_game.title;
+        END IF;
+      END LOOP;
+
+      v_filled_games := v_filled_games || jsonb_build_object(
+        'game_id', v_game.id,
+        'game_title', v_game.title,
+        'previous_count', v_current_count,
+        'ai_added', v_needed,
+        'final_count', 20
+      );
+    END IF;
+
+  END LOOP;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'total_ai_added', v_total_ai_added,
+    'games_filled', v_filled_games
+  );
+
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.fill_lobbies_to_20() TO authenticated;
+
+COMMENT ON FUNCTION public.fill_lobbies_to_20() IS
+  'Pre-launch fill to ensure all games have exactly 20 cast members.
+   Runs 30 minutes before Sunday launch (7:30 PM ET).
+   Fills any remaining spots with AI characters.';
+
+-- Schedule pre-launch fill: Every Sunday at 7:30 PM ET (00:30 Monday UTC)
+SELECT cron.schedule(
+  'pre_launch_fill_to_20',
+  '30 0 * * 1', -- 00:30 UTC Monday = 7:30 PM ET Sunday
+  $$ SELECT public.fill_lobbies_to_20(); $$
+);

@@ -1051,14 +1051,15 @@
       try {
         console.log('Creating new game...')
 
-        // Create a new game (status will be set by initialize_week_long_lobby)
+        // Create a new game (always 20 cast members)
         const { data: newGame, error: gameError } = await supabase
           .from('mm_games')
           .insert({
             title: `Mansion Mayhem - ${new Date().toLocaleDateString()}`,
-            description: 'New Mansion Mayhem game launching this Sunday!',
+            description: 'New Mansion Mayhem game launching this Sunday with 20 cast members!',
             status: 'recruiting',
             max_players: 20,
+            current_players: 0,
             created_at: new Date().toISOString()
           })
           .select()

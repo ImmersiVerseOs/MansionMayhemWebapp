@@ -11,7 +11,7 @@
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.cast_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL, -- NULL for AI players
+  user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL, -- NULL for AI players
   full_name TEXT NOT NULL,
   display_name TEXT NOT NULL,
   avatar_url TEXT,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS public.cast_members (
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'cast_members' AND column_name = 'user_id') THEN
-    ALTER TABLE public.cast_members ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+    ALTER TABLE public.cast_members ADD COLUMN user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
   END IF;
 END $$;
 

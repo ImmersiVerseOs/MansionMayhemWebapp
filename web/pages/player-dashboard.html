@@ -1051,13 +1051,13 @@
       try {
         console.log('Creating new game...')
 
-        // Create a new game with setup status
+        // Create a new game with recruiting status
         const { data: newGame, error: gameError } = await supabase
           .from('mm_games')
           .insert({
             title: `Mansion Mayhem - ${new Date().toLocaleDateString()}`,
             description: 'New Mansion Mayhem game launching this Sunday!',
-            status: 'setup',
+            status: 'recruiting',
             max_players: 20,
             created_at: new Date().toISOString()
           })

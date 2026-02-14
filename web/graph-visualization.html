@@ -352,10 +352,6 @@
           <span>Alliance</span>
         </div>
         <div class="legend-item">
-          <div class="legend-dot" style="background: #E91E63;"></div>
-          <span>Romance</span>
-        </div>
-        <div class="legend-item">
           <div class="legend-dot" style="background: #D32F2F;"></div>
           <span>Rivalry</span>
         </div>
@@ -566,7 +562,6 @@
     function getEdgeColor(type) {
       const colors = {
         'alliance': { color: '#00C853', highlight: '#00E676' },
-        'romance': { color: '#E91E63', highlight: '#FF4081' },
         'rivalry': { color: '#D32F2F', highlight: '#FF5252' },
         'friendship': { color: '#2196F3', highlight: '#448AFF' },
         'neutral': { color: '#FFC107', highlight: '#FFD54F' }
@@ -657,7 +652,6 @@
 
       const alliances = connections.filter(e => e.relationshipType === 'alliance').length;
       const rivalries = connections.filter(e => e.relationshipType === 'rivalry').length;
-      const romances = connections.filter(e => e.relationshipType === 'romance').length;
 
       const html = `
         <h3>${node.label}</h3>
@@ -681,10 +675,6 @@
         <div class="stat-row">
           <span class="stat-label">⚔️ Rivalries</span>
           <span class="stat-value">${rivalries}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">💕 Romances</span>
-          <span class="stat-value">${romances}</span>
         </div>
       `;
 

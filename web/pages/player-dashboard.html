@@ -946,6 +946,14 @@
       if (currentGame) {
         const daysSurvived = Math.floor((new Date() - new Date(gameCast.joined_at)) / (1000 * 60 * 60 * 24))
         document.getElementById('statDays').textContent = daysSurvived + 1
+
+        // Update nav links with gameId
+        const gameId = currentGame.id
+        document.querySelectorAll('a[href*="alliance-rooms"], a[href*="alliance-chat"]').forEach(link => {
+          const url = new URL(link.href, window.location.origin)
+          url.searchParams.set('gameId', gameId)
+          link.href = url.toString()
+        })
       }
     }
 

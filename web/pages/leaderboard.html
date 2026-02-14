@@ -8,19 +8,19 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #0a0a0a;
+      --bg: #0A0E27;
       --bg-card: #111;
       --bg-elevated: #1a1a1a;
       --border: #2a2a2a;
       --text: #fff;
       --text-dim: #888;
-      --gold: #d4af37;
-      --purple: #8b5cf6;
+      --gold: #FFC107;
+      --purple: #9C27B0;
       --success: #4caf50;
     }
     body {
       font-family: 'Montserrat', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%);
+      background: linear-gradient(135deg, #0A0E27 0%, rgba(233, 30, 99, 0.1) 50%, #0A0E27 100%);
       color: var(--text);
       min-height: 100vh;
     }
@@ -41,7 +41,7 @@
       font-size: 56px;
       color: var(--gold);
       margin-bottom: 16px;
-      text-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+      text-shadow: 0 0 40px rgba(255, 193, 7, 0.6);
     }
 
     .page-subtitle {
@@ -71,7 +71,7 @@
 
     .filter-btn:hover, .filter-btn.active {
       border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.1);
+      background: rgba(255, 193, 7, 0.1);
       color: var(--gold);
     }
 
@@ -120,7 +120,7 @@
       height: 150px;
       font-size: 60px;
       border-color: var(--gold);
-      box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+      box-shadow: 0 0 40px rgba(255, 193, 7, 0.6);
     }
 
     .podium-crown {
@@ -173,7 +173,7 @@
     .podium-place.first .podium-base {
       min-height: 150px;
       border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.05);
+      background: rgba(255, 193, 7, 0.05);
     }
 
     .podium-place.second .podium-base {
@@ -201,12 +201,12 @@
     .leaderboard-item:hover {
       border-color: var(--gold);
       transform: translateX(4px);
-      box-shadow: 0 4px 24px rgba(212, 175, 55, 0.2);
+      box-shadow: 0 4px 24px rgba(255, 193, 7, 0.2);
     }
 
     .leaderboard-item.my-rank {
       border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.05);
+      background: rgba(255, 193, 7, 0.05);
     }
 
     .item-rank {
@@ -277,7 +277,7 @@
     }
 
     .my-rank-highlight {
-      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.1), transparent);
       padding: 4px 0;
       margin: 8px 0;
       border-radius: 8px;
@@ -375,7 +375,10 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="css/modern-theme.css">
+  <link rel="stylesheet" href="../css/modern-theme.css">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="container">

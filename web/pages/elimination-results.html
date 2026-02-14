@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elimination Results | Mansion Mayhem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.15) 0%, transparent 60%),
+        linear-gradient(180deg, #000 0%, #0a0612 50%, #000 100%);
+      z-index: -1;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #d4af37 0%, #ffd700 50%, #d4af37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .episode-tag {
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+
+    /* Results Badge */
+    .results-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      letter-spacing: 1px;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Main Results Section */
+    .results-hero {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .results-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .results-subtitle {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.6);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    /* Eliminated Card - Dramatic Reveal */
+    .eliminated-section {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+      border: 3px solid rgba(239, 68, 68, 0.3);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .eliminated-badge {
+      display: inline-block;
+      background: #ef4444;
+      color: #fff;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.6);
+    }
+
+    .eliminated-player {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      margin-bottom: 2rem;
+    }
+
+    .eliminated-avatar {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      font-weight: 900;
+      border: 4px solid rgba(239, 68, 68, 0.5);
+      box-shadow: 0 12px 48px rgba(239, 68, 68, 0.6);
+      opacity: 0.7;
+      filter: grayscale(0.5);
+    }
+
+    .eliminated-info {
+      text-align: left;
+    }
+
+    .eliminated-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      color: #ef4444;
+    }
+
+    .eliminated-archetype {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+
+    .eliminated-votes {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .eliminated-votes strong {
+      color: #ef4444;
+      font-size: 1.75rem;
+    }
+
+    /* Vote Breakdown */
+    .vote-breakdown {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .breakdown-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+
+    .breakdown-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .breakdown-item.winner {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .breakdown-item.eliminated {
+      border-color: rgba(239, 68, 68, 0.5);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .breakdown-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .breakdown-votes {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+    }
+
+    .breakdown-item.winner .breakdown-votes {
+      color: #10b981;
+    }
+
+    .breakdown-item.eliminated .breakdown-votes {
+      color: #ef4444;
+    }
+
+    .breakdown-percent {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .breakdown-status {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .breakdown-item.winner .breakdown-status {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .breakdown-item.eliminated .breakdown-status {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    /* Remaining Houseguests */
+    .remaining-section {
+      margin-bottom: 3rem;
+    }
+
+    .remaining-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 2rem;
+      text-align: center;
+      color: #d4af37;
+    }
+
+    .remaining-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .remaining-card {
+      background: rgba(212, 175, 55, 0.05);
+      border: 2px solid rgba(212, 175, 55, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .remaining-card:hover {
+      border-color: rgba(212, 175, 55, 0.5);
+      transform: translateY(-4px);
+    }
+
+    .remaining-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d4af37, #ffd700);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 900;
+      margin: 0 auto 1rem;
+      border: 3px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .remaining-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .remaining-archetype {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Next Week Teaser */
+    .next-week {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+    }
+
+    .next-week-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      color: #d4af37;
+    }
+
+    .next-week-text {
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 1.5rem;
+    }
+
+    .next-week-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+      color: #000;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 1rem 3rem;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+    }
+
+    .next-week-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(212, 175, 55, 0.6);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 4rem 2rem;
+      font-size: 1.125rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid rgba(239, 68, 68, 0.3);
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      color: #ef4444;
+    }
+
+    @media (max-width: 768px) {
+      .logo { font-size: 2rem; }
+      .results-title { font-size: 2rem; }
+      .eliminated-player { flex-direction: column; gap: 1.5rem; }
+      .eliminated-info { text-align: center; }
+      .eliminated-name { font-size: 2rem; }
+      .breakdown-grid { grid-template-columns: 1fr; }
+      .remaining-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-overlay"></div>
+
+  <div class="header">
+    <div class="logo">MANSION MAYHEM</div>
+    <div class="episode-tag">Elimination Results</div>
+  </div>
+
+  <div class="container">
+    <div style="text-align: center;">
+      <div class="results-badge">
+        RESULTS
+      </div>
+    </div>
+
+    <div id="content" class="loading">
+      Loading elimination results...
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const sb = window.supabase.createClient(
+      'https://fpxbhqibimekjhlumnmc.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
+    )
+
+    async function loadResults() {
+      const content = document.getElementById('content')
+
+      try {
+        // Get completed voting round (most recent)
+        const { data: rounds, error } = await sb
+          .from('mm_voting_rounds')
+          .select(`
+            *,
+            queen:cast_members!queen_id(display_name),
+            nominee_a:cast_members!nominee_a_id(id, display_name, archetype),
+            nominee_b:cast_members!nominee_b_id(id, display_name, archetype),
+            eliminated:cast_members!eliminated_id(id, display_name, archetype)
+          `)
+          .in('status', ['completed', 'active'])
+          .order('round_number', { ascending: false })
+          .limit(1)
+
+        if (error) throw error
+        if (!rounds || rounds.length === 0) {
+          content.innerHTML = '<div class="error">No elimination results available yet.</div>'
+          return
+        }
+
+        const round = rounds[0]
+
+        // Determine eliminated player if not set
+        let eliminatedPlayer, savedPlayer
+        const totalVotes = (round.votes_for_a || 0) + (round.votes_for_b || 0)
+        const percentA = totalVotes > 0 ? Math.round((round.votes_for_a || 0) / totalVotes * 100) : 50
+        const percentB = totalVotes > 0 ? Math.round((round.votes_for_b || 0) / totalVotes * 100) : 50
+
+        if (round.votes_for_a > round.votes_for_b) {
+          eliminatedPlayer = round.nominee_a
+          savedPlayer = round.nominee_b
+        } else {
+          eliminatedPlayer = round.nominee_b
+          savedPlayer = round.nominee_a
+        }
+
+        // Get remaining houseguests
+        const { data: remaining } = await sb
+          .from('mm_game_cast')
+          .select(`
+            cast_members!inner(id, display_name, archetype)
+          `)
+          .eq('game_id', round.game_id)
+          .is('eliminated_at', null)
+
+        const remainingCount = remaining?.length || 0
+
+        content.innerHTML = `
+          <div class="results-hero">
+            <div class="results-title">The Votes Are In</div>
+            <div class="results-subtitle">
+              After ${totalVotes} votes, one houseguest has been eliminated from the mansion.
+            </div>
+          </div>
+
+          <div class="eliminated-section">
+            <div style="text-align: center;">
+              <div class="eliminated-badge">Eliminated</div>
+            </div>
+            <div class="eliminated-player">
+              <div class="eliminated-avatar">${eliminatedPlayer.display_name[0]}</div>
+              <div class="eliminated-info">
+                <div class="eliminated-name">${eliminatedPlayer.display_name}</div>
+                <div class="eliminated-archetype">${eliminatedPlayer.archetype}</div>
+                <div class="eliminated-votes">
+                  Received <strong>${round.votes_for_a > round.votes_for_b ? round.votes_for_a : round.votes_for_b}</strong> votes
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="vote-breakdown">
+            <div class="breakdown-title">Final Vote Count</div>
+            <div class="breakdown-grid">
+              <div class="breakdown-item ${round.votes_for_a > round.votes_for_b ? 'eliminated' : 'winner'}">
+                <div class="breakdown-name">${round.nominee_a.display_name}</div>
+                <div class="breakdown-votes">${round.votes_for_a || 0}</div>
+                <div class="breakdown-percent">${percentA}% of votes</div>
+                <div class="breakdown-status">
+                  ${round.votes_for_a > round.votes_for_b ? 'Eliminated' : 'Safe'}
+                </div>
+              </div>
+
+              <div class="breakdown-item ${round.votes_for_b > round.votes_for_a ? 'eliminated' : 'winner'}">
+                <div class="breakdown-name">${round.nominee_b.display_name}</div>
+                <div class="breakdown-votes">${round.votes_for_b || 0}</div>
+                <div class="breakdown-percent">${percentB}% of votes</div>
+                <div class="breakdown-status">
+                  ${round.votes_for_b > round.votes_for_a ? 'Eliminated' : 'Safe'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="remaining-section">
+            <div class="remaining-title">
+              ${remainingCount} Houseguests Remain
+            </div>
+            <div class="remaining-grid" id="remainingGrid">
+              ${remaining ? remaining.map(r => `
+                <div class="remaining-card">
+                  <div class="remaining-avatar">${r.cast_members.display_name[0]}</div>
+                  <div class="remaining-name">${r.cast_members.display_name}</div>
+                  <div class="remaining-archetype">${r.cast_members.archetype}</div>
+                </div>
+              `).join('') : ''}
+            </div>
+          </div>
+
+          <div class="next-week">
+            <div class="next-week-title">What's Next?</div>
+            <div class="next-week-text">
+              A new Queen will be crowned. New alliances will form. New drama awaits.
+            </div>
+            <a href="/pages/player-dashboard.html" class="next-week-btn">
+              Back to Dashboard
+            </a>
+          </div>
+        `
+
+      } catch (err) {
+        console.error(err)
+        content.innerHTML = `<div class="error">Error loading results: ${err.message}</div>`
+      }
+    }
+
+    loadResults()
+  </script>
+</body>
+</html>

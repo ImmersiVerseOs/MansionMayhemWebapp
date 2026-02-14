@@ -5,8 +5,8 @@
 
 // Mansion Mayhem Supabase Database
 export const SUPABASE_CONFIG = {
-  url: 'https://qnvgmyhnfrhhfsshdhvl.supabase.co',
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFudmdteWhuZnJoaGZzc2hkaHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3OTk5NDUsImV4cCI6MjA1MjM3NTk0NX0.gx_EsjHEDM1v3_kjjhtWBqnNgqVN0wgG7SV9C5bGPkc'
+  url: 'https://mllqzeaxqusorytеaxzg.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sbHF6ZWF4cXVzb3J5dGVheHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODA1NzAsImV4cCI6MjA4NjA1NjU3MH0.s9CAe91gUG8uZ7Nrjd1pIX9YYvpNKa2lOrt6HDUarec'
 };
 
 // Fallback to environment variables if available (for Netlify)

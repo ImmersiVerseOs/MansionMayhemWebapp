@@ -5,9 +5,9 @@
 
 'use strict';
 
-// Supabase configuration - NEW INSTANCE (fpxbhqibimekjhlumnmc)
-const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
+// Supabase configuration - Mansion Mayhem Database
+const SUPABASE_URL = 'https://qnvgmyhnfrhhfsshdhvl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFudmdteWhuZnJoaGZzc2hkaHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3OTk5NDUsImV4cCI6MjA1MjM3NTk0NX0.gx_EsjHEDM1v3_kjjhtWBqnNgqVN0wgG7SV9C5bGPkc';
 
 // Wait for Supabase CDN to load
 async function waitForSupabase() {

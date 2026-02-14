@@ -5,983 +5,988 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Mansion Mayhem</title>
   <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
-  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
-
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
+
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     :root {
-      --color-dark: #0a0a0a;
-      --color-gold: #D4AF37;
-      --color-rose: #C04E63;
-      --color-purple: #8B5CF6;
-      --color-cyan: #06B6D4;
-      --color-success: #10B981;
-      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+      --bg-primary: #0A0E27;
+      --bg-secondary: #151936;
+      --bg-card: #1E2139;
+      --accent-pink: #E91E63;
+      --accent-purple: #9C27B0;
+      --accent-gold: #FFC107;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B8B9C5;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --success: #00C853;
+      --warning: #FF6D00;
+      --danger: #D32F2F;
     }
-    
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--color-dark);
-      color: white;
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
-    
-    .animated-bg {
+
+    /* SIDEBAR */
+    .sidebar {
       position: fixed;
-      inset: 0;
-      z-index: -1;
-      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 20%, rgba(192, 78, 99, 0.1) 0%, transparent 40%);
-      animation: bgShift 20s ease-in-out infinite;
-    }
-    
-    @keyframes bgShift {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
-    }
-
-    .admin-card {
-      text-decoration: none;
-      padding: 1.5rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+      left: 0;
+      top: 0;
+      width: 280px;
+      height: 100vh;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-subtle);
+      padding: 2rem 0;
+      overflow-y: auto;
+      z-index: 100;
     }
 
-    .admin-card:hover {
-      background: rgba(139, 92, 246, 0.1);
-      border-color: rgba(139, 92, 246, 0.5);
-      transform: translateY(-2px);
-    }
-
-    #directorConsoleBtn {
-      background: linear-gradient(135deg, #8B5CF6, #EC4899);
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.3s;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    }
-
-    #directorConsoleBtn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
-    }
-    
-    .main-container {
-      padding: 6rem 2rem 4rem;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    
-    .page-header {
-      margin-bottom: 3rem;
-      animation: fadeInUp 0.6s ease-out;
-    }
-    
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .welcome-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .logo-section {
+      padding: 0 2rem 2rem;
+      border-bottom: 1px solid var(--border-subtle);
       margin-bottom: 2rem;
     }
-    
-    .welcome-text h1 {
-      font-size: 2.5rem;
-      font-weight: 900;
-      margin-bottom: 0.5rem;
-      background: var(--gradient-gold);
+
+    .logo-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      margin-bottom: 0.25rem;
     }
-    
+
+    .logo-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .nav-section {
+      padding: 0 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .nav-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      font-weight: 700;
+      padding: 0 1rem 0.75rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(233, 30, 99, 0.1);
+      color: var(--accent-pink);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(233, 30, 99, 0.2), rgba(156, 39, 176, 0.1));
+      color: var(--text-primary);
+      border-left: 3px solid var(--accent-pink);
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 280px;
+      padding: 2rem 3rem;
+      max-width: 1600px;
+    }
+
+    /* HEADER */
+    .page-header {
+      margin-bottom: 3rem;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+
+    .welcome-text h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
     .welcome-text p {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 1.125rem;
+      color: var(--text-secondary);
+      font-size: 1rem;
     }
-    
-    .quick-actions {
+
+    .header-actions {
       display: flex;
       gap: 1rem;
     }
-    
+
     .btn {
       padding: 0.75rem 1.5rem;
-      font-size: 0.9rem;
-      font-weight: 600;
       border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
       border: none;
       cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      text-decoration: none;
     }
-    
+
     .btn-primary {
-      background: var(--gradient-gold);
-      color: var(--color-dark);
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      color: white;
+      box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
     }
-    
+
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
     }
-    
+
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
     }
-    
+
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--color-gold);
+      background: var(--bg-secondary);
+      border-color: var(--accent-pink);
     }
-    
+
+    /* PLAYER PROFILE BANNER */
+    .player-banner {
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .player-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid var(--accent-pink);
+      object-fit: cover;
+    }
+
+    .player-info h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .player-badges {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .badge-archetype {
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      color: white;
+    }
+
+    .badge-status {
+      background: rgba(0, 200, 83, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(0, 200, 83, 0.3);
+    }
+
+    .badge-rank {
+      background: rgba(255, 193, 7, 0.15);
+      color: var(--accent-gold);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    /* STATS GRID */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1.5rem;
       margin-bottom: 3rem;
     }
-    
+
     .stat-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
       border-radius: 16px;
-      padding: 1.5rem;
-      transition: all 0.3s;
-      animation: fadeInUp 0.8s ease-out;
+      padding: 1.75rem;
+      transition: all 0.2s;
     }
-    
+
     .stat-card:hover {
-      border-color: var(--color-gold);
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+      transform: translateY(-4px);
+      border-color: var(--accent-pink);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     }
-    
+
     .stat-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1rem;
     }
-    
+
     .stat-icon {
-      font-size: 2rem;
+      font-size: 1.75rem;
     }
-    
+
     .stat-trend {
       font-size: 0.75rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-weight: 600;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
     }
-    
+
     .trend-up {
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--color-success);
+      background: rgba(0, 200, 83, 0.15);
+      color: var(--success);
     }
-    
-    .trend-down {
-      background: rgba(239, 68, 68, 0.2);
-      color: #EF4444;
-    }
-    
+
     .stat-value {
-      font-size: 2rem;
+      font-size: 2.5rem;
       font-weight: 900;
-      background: var(--gradient-gold);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 0.25rem;
+      line-height: 1;
+      margin-bottom: 0.5rem;
     }
-    
+
     .stat-label {
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
     }
-    
+
+    /* CONTENT GRID */
     .content-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
       gap: 2rem;
       margin-bottom: 2rem;
     }
-    
-    .section-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+
+    /* CARDS */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
       padding: 2rem;
-      animation: fadeInUp 1s ease-out;
+      margin-bottom: 2rem;
     }
-    
-    .section-header {
+
+    .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
     }
-    
-    .section-title {
+
+    .card-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: var(--color-gold);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
-    
-    .section-link {
-      color: rgba(255, 255, 255, 0.6);
+
+    .card-link {
+      color: var(--accent-pink);
       text-decoration: none;
-      font-size: 0.875rem;
-      transition: color 0.3s;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: color 0.2s;
     }
-    
-    .section-link:hover {
-      color: var(--color-gold);
+
+    .card-link:hover {
+      color: var(--accent-purple);
     }
-    
-    .scenario-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    
+
+    /* SCENARIO ITEMS */
     .scenario-item {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
       border-radius: 12px;
-      padding: 1.25rem;
-      transition: all 0.3s;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
       cursor: pointer;
     }
-    
+
     .scenario-item:hover {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: var(--color-gold);
+      border-color: var(--accent-pink);
+      transform: translateX(4px);
     }
-    
+
     .scenario-header {
       display: flex;
       justify-content: space-between;
       align-items: start;
       margin-bottom: 0.75rem;
     }
-    
+
     .scenario-title {
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 1rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-primary);
     }
-    
-    .scenario-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 50px;
+
+    .scenario-type {
       font-size: 0.75rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+      background: rgba(156, 39, 176, 0.2);
+      color: var(--accent-purple);
       font-weight: 600;
+      text-transform: uppercase;
     }
-    
-    .badge-urgent {
-      background: rgba(239, 68, 68, 0.2);
-      color: #EF4444;
-    }
-    
-    .badge-pending {
-      background: rgba(251, 191, 36, 0.2);
-      color: #F59E0B;
-    }
-    
-    .scenario-meta {
-      display: flex;
-      gap: 1.5rem;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.875rem;
-    }
-    
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .earnings-summary {
-      background: var(--gradient-gold);
-      border-radius: 16px;
-      padding: 2rem;
-      color: var(--color-dark);
-      margin-bottom: 1.5rem;
-    }
-    
-    .earnings-value {
-      font-size: 3rem;
-      font-weight: 900;
-      margin-bottom: 0.5rem;
-    }
-    
-    .earnings-label {
-      font-size: 0.9rem;
-      opacity: 0.8;
+
+    .scenario-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
       margin-bottom: 1rem;
+      line-height: 1.5;
     }
-    
-    .earnings-breakdown {
-      display: grid;
-      gap: 0.75rem;
-    }
-    
-    .breakdown-item {
+
+    .scenario-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.75rem;
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      font-size: 0.875rem;
     }
-    
-    .breakdown-value {
-      font-weight: 700;
-    }
-    
-    .activity-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    
-    .activity-item {
-      display: flex;
-      gap: 1rem;
-      padding: 1rem;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 12px;
-      transition: all 0.3s;
-    }
-    
-    .activity-item:hover {
-      background: rgba(255, 255, 255, 0.04);
-    }
-    
-    .activity-icon {
-      font-size: 1.5rem;
-      width: 40px;
-      height: 40px;
+
+    .deadline {
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: rgba(212, 175, 55, 0.1);
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    
-    .activity-content {
-      flex: 1;
-    }
-    
-    .activity-text {
-      color: rgba(255, 255, 255, 0.9);
+      gap: 0.5rem;
+      color: var(--warning);
+      font-weight: 600;
       font-size: 0.9rem;
+    }
+
+    /* ALLIANCE ITEMS */
+    .alliance-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .alliance-item:hover {
+      border-color: var(--accent-purple);
+      transform: translateY(-2px);
+    }
+
+    .alliance-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .alliance-members {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .member-tag {
+      background: rgba(233, 30, 99, 0.15);
+      color: var(--accent-pink);
+      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    /* QUEEN CARD */
+    .queen-spotlight {
+      background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.05));
+      border: 2px solid rgba(255, 193, 7, 0.3);
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .queen-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .queen-name {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--accent-gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .queen-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* HOT SEAT */
+    .hot-seat-card {
+      background: linear-gradient(135deg, rgba(211, 47, 47, 0.1), rgba(244, 67, 54, 0.05));
+      border: 2px solid rgba(211, 47, 47, 0.3);
+    }
+
+    .nominee {
+      background: var(--bg-secondary);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      border-left: 3px solid var(--danger);
+    }
+
+    .nominee-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-primary);
       margin-bottom: 0.25rem;
     }
-    
-    .activity-time {
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 0.75rem;
+
+    .nominee-reason {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
     }
-    
+
+    /* TEA FEED */
+    .tea-item {
+      background: var(--bg-secondary);
+      border-left: 3px solid var(--accent-purple);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .tea-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .tea-author {
+      font-weight: 700;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .tea-time {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+    }
+
+    .tea-content {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+
+    /* EMPTY STATE */
     .empty-state {
       text-align: center;
-      padding: 3rem 2rem;
-      color: rgba(255, 255, 255, 0.5);
+      padding: 3rem 1rem;
+      color: var(--text-secondary);
     }
-    
+
     .empty-icon {
       font-size: 3rem;
       margin-bottom: 1rem;
       opacity: 0.5;
     }
-    
-    @media (max-width: 1200px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 240px;
       }
-      
+      .main-content {
+        margin-left: 240px;
+        padding: 2rem;
+      }
       .content-grid {
         grid-template-columns: 1fr;
       }
     }
-    
+
     @media (max-width: 768px) {
-      .welcome-section {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+      .player-banner {
         flex-direction: column;
-        align-items: start;
-        gap: 1rem;
+        text-align: center;
       }
-      
-      .quick-actions {
-        width: 100%;
-        flex-direction: column;
-      }
-      
-      .btn {
-        width: 100%;
-        justify-content: center;
-      }
-      
       .stats-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .welcome-text h1 {
-        font-size: 2rem;
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
 </head>
 <body>
-  <div class="animated-bg"></div>
 
-  <!-- Include global nav -->
-  <div id="globalNavContainer"></div>
-  
-  <div class="main-container">
-    <div class="page-header">
-      <div class="welcome-section">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-section">
+      <div class="logo-title">MANSION MAYHEM</div>
+      <div class="logo-subtitle">Reality TV Game</div>
+    </div>
+
+    <nav class="nav-section">
+      <div class="nav-title">Main</div>
+      <a href="/pages/player-dashboard.html" class="nav-item active">
+        <span class="nav-icon">📊</span>
+        Dashboard
+      </a>
+      <a href="/pages/scenarios.html" class="nav-item">
+        <span class="nav-icon">📝</span>
+        Scenarios
+      </a>
+      <a href="/pages/alliances.html" class="nav-item">
+        <span class="nav-icon">🤝</span>
+        Alliances
+      </a>
+      <a href="/lobby.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        Lobby
+      </a>
+    </nav>
+
+    <nav class="nav-section">
+      <div class="nav-title">Social</div>
+      <a href="/pages/tea-room.html" class="nav-item">
+        <span class="nav-icon">☕</span>
+        Tea Room
+      </a>
+      <a href="/queen-selection.html" class="nav-item">
+        <span class="nav-icon">👑</span>
+        Queen Selection
+      </a>
+    </nav>
+
+    <nav class="nav-section">
+      <div class="nav-title">Account</div>
+      <a href="/profile.html" class="nav-item">
+        <span class="nav-icon">👤</span>
+        Profile
+      </a>
+      <a href="#" class="nav-item" onclick="handleLogout()">
+        <span class="nav-icon">🚪</span>
+        Logout
+      </a>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- HEADER -->
+    <header class="page-header">
+      <div class="header-top">
         <div class="welcome-text">
-          <h1 id="welcomeMessage">Loading...</h1>
-          <p id="scenarioCount">Checking for active scenarios...</p>
+          <h1 id="welcomeTitle">Welcome Back</h1>
+          <p id="welcomeSubtitle">Your game is live. Time to make moves.</p>
         </div>
-        <div class="quick-actions">
-          <button id="respondNowBtn" class="btn btn-primary" onclick="handleRespondNow()" style="text-decoration:none;">
-            <span>⚡</span>
-            <span>Respond Now</span>
-          </button>
-          <a href="how-to-play.html" class="btn btn-secondary">
-            <span>📚</span>
-            <span>How to Play</span>
+        <div class="header-actions">
+          <a href="/pages/scenarios.html" class="btn btn-secondary">
+            📝 View Scenarios
+          </a>
+          <a href="/pages/tea-room.html" class="btn btn-primary">
+            ☕ Spill Tea
           </a>
         </div>
       </div>
+    </header>
+
+    <!-- PLAYER BANNER -->
+    <div class="player-banner" id="playerBanner">
+      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=player" alt="Avatar" class="player-avatar" id="playerAvatar">
+      <div class="player-info">
+        <h2 id="playerName">Loading...</h2>
+        <div class="player-badges">
+          <span class="badge badge-archetype" id="playerArchetype">🎭 LOADING</span>
+          <span class="badge badge-status">✅ Active</span>
+          <span class="badge badge-rank" id="playerRank">👑 Rank #--</span>
+        </div>
+      </div>
     </div>
-    
-    <!-- Stats Grid -->
+
+    <!-- STATS GRID -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-header">
-          <span class="stat-icon">💰</span>
+          <span class="stat-icon">📝</span>
+          <span class="stat-trend trend-up">+2</span>
         </div>
-        <div class="stat-value" id="totalEarnings">$0.00</div>
-        <div class="stat-label">Total Earnings</div>
+        <div class="stat-value" id="statScenarios">0</div>
+        <div class="stat-label">Active Scenarios</div>
       </div>
 
       <div class="stat-card">
         <div class="stat-header">
-          <span class="stat-icon">🎬</span>
+          <span class="stat-icon">🤝</span>
         </div>
-        <div class="stat-value" id="totalEpisodes">0</div>
-        <div class="stat-label">Episodes Featured</div>
+        <div class="stat-value" id="statAlliances">0</div>
+        <div class="stat-label">Alliances</div>
       </div>
 
       <div class="stat-card">
         <div class="stat-header">
-          <span class="stat-icon">⏱️</span>
+          <span class="stat-icon">📅</span>
         </div>
-        <div class="stat-value" id="totalScreenTime">0m</div>
-        <div class="stat-label">Total Screen Time</div>
+        <div class="stat-value" id="statDays">1</div>
+        <div class="stat-label">Days Survived</div>
       </div>
 
       <div class="stat-card">
         <div class="stat-header">
-          <span class="stat-icon">🎤</span>
+          <span class="stat-icon">☕</span>
         </div>
-        <div class="stat-value" id="voiceNotesPosted">0</div>
-        <div class="stat-label">Voice Notes Posted</div>
+        <div class="stat-value" id="statTea">0</div>
+        <div class="stat-label">Tea Spilled</div>
       </div>
     </div>
 
-    <!-- Admin Panel (only visible to admins) -->
-    <div id="adminPanel" style="display: block; margin-bottom: 2rem;">
-      <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 40px rgba(139, 92, 246, 0.2);">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-          <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #8B5CF6, #EC4899); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            👑
-          </div>
-          <div>
-            <h2 style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #8B5CF6, #EC4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.25rem;">
-              Admin Control Panel
-            </h2>
-            <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.875rem;">
-              Manage content, moderate voice notes, and view analytics
-            </p>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-          <a href="admin-dashboard.html" class="admin-card">
-            <div style="width: 40px; height: 40px; background: rgba(139, 92, 246, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-              📊
-            </div>
-            <div>
-              <div style="font-weight: 700; color: rgba(255, 255, 255, 0.9); margin-bottom: 0.25rem;">Dashboard</div>
-              <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.6);">Platform overview</div>
-            </div>
-          </a>
-
-          <a href="admin-moderation.html" class="admin-card">
-            <div style="width: 40px; height: 40px; background: rgba(236, 72, 153, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-              🛡️
-            </div>
-            <div>
-              <div style="font-weight: 700; color: rgba(255, 255, 255, 0.9); margin-bottom: 0.25rem;">Moderation</div>
-              <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.6);">Approve voice notes</div>
-            </div>
-          </a>
-
-          <a href="admin-analytics.html" class="admin-card">
-            <div style="width: 40px; height: 40px; background: rgba(6, 182, 212, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-              📈
-            </div>
-            <div>
-              <div style="font-weight: 700; color: rgba(255, 255, 255, 0.9); margin-bottom: 0.25rem;">Analytics</div>
-              <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.6);">View platform stats</div>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Content Grid -->
+    <!-- CONTENT GRID -->
     <div class="content-grid">
-      <!-- Active Scenarios -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-title">
-            <span>⚡</span>
-            <span>Active Scenarios</span>
+
+      <!-- LEFT COLUMN -->
+      <div>
+        <!-- ACTIVE SCENARIOS -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span>📝</span>
+              Active Scenarios
+            </h3>
+            <a href="/pages/scenarios.html" class="card-link">View All →</a>
           </div>
-          <a href="#" class="section-link">View all →</a>
+          <div id="scenarioList">
+            <div class="empty-state">
+              <div class="empty-icon">📝</div>
+              <p>No active scenarios right now</p>
+            </div>
+          </div>
         </div>
-        
-        <div class="scenario-list" id="scenariosList">
-          <div style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">
-            Loading scenarios...
+
+        <!-- YOUR ALLIANCES -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span>🤝</span>
+              Your Alliances
+            </h3>
+            <a href="/pages/alliances.html" class="card-link">View All →</a>
+          </div>
+          <div id="allianceList">
+            <div class="empty-state">
+              <div class="empty-icon">🤝</div>
+              <p>No alliances formed yet</p>
+            </div>
           </div>
         </div>
       </div>
-      
-      <!-- Sidebar -->
-      <div>
-        <!-- Earnings Summary -->
-        <div class="section-card" id="earningsCard">
-          <div class="earnings-summary">
-            <div class="earnings-value" id="monthlyEarnings">$0.00</div>
-            <div class="earnings-label">This Month's Earnings</div>
-            <div class="earnings-breakdown" id="earningsBreakdown">
-              <div class="breakdown-item">
-                <span>Screen Time</span>
-                <span class="breakdown-value">$0.00</span>
-              </div>
-              <div class="breakdown-item">
-                <span>Tips</span>
-                <span class="breakdown-value">$0.00</span>
-              </div>
-              <div class="breakdown-item">
-                <span>Ad Revenue</span>
-                <span class="breakdown-value">$0.00</span>
-              </div>
-            </div>
-          </div>
 
-          <button class="btn btn-primary" style="width: 100%; justify-content: center;" id="payoutBtn" disabled>
-            <span>💸</span>
-            <span>Request Payout</span>
-          </button>
+      <!-- RIGHT COLUMN -->
+      <div>
+        <!-- THIS WEEK'S QUEEN -->
+        <div class="card queen-spotlight">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span>👑</span>
+              This Week's Queen
+            </h3>
+          </div>
+          <div id="queenInfo">
+            <div class="queen-icon">👑</div>
+            <div class="queen-name">TBA</div>
+            <div class="queen-subtitle">Selection Sunday 8 PM ET</div>
+          </div>
         </div>
-        
-        <!-- Recent Activity -->
-        <div class="section-card">
-          <div class="section-header">
-            <div class="section-title">
-              <span>📊</span>
-              <span>Recent Activity</span>
+
+        <!-- HOT SEAT -->
+        <div class="card hot-seat-card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span>🔥</span>
+              On The Hot Seat
+            </h3>
+          </div>
+          <div id="hotSeatList">
+            <div class="empty-state">
+              <div class="empty-icon">🔥</div>
+              <p>No nominees yet</p>
             </div>
           </div>
-          
-          <div class="activity-list" id="activityList">
-            <div class="activity-item">
-              <div class="activity-icon">🎬</div>
-              <div class="activity-content">
-                <div class="activity-text">Episode 3 published</div>
-                <div class="activity-time">2 hours ago</div>
-              </div>
-            </div>
-            
-            <div class="activity-item">
-              <div class="activity-icon">💰</div>
-              <div class="activity-content">
-                <div class="activity-text">Earned $127 from tips</div>
-                <div class="activity-time">5 hours ago</div>
-              </div>
-            </div>
-            
-            <div class="activity-item">
-              <div class="activity-icon">⭐</div>
-              <div class="activity-content">
-                <div class="activity-text">New follower milestone: 10K</div>
-                <div class="activity-time">1 day ago</div>
-              </div>
-            </div>
-            
-            <div class="activity-item">
-              <div class="activity-icon">📝</div>
-              <div class="activity-content">
-                <div class="activity-text">Responded to 3 scenarios</div>
-                <div class="activity-time">2 days ago</div>
-              </div>
+        </div>
+
+        <!-- TEA ROOM FEED -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span>☕</span>
+              Latest Tea
+            </h3>
+            <a href="/pages/tea-room.html" class="card-link">View All →</a>
+          </div>
+          <div id="teaFeed">
+            <div class="empty-state">
+              <div class="empty-icon">☕</div>
+              <p>No tea yet...</p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+
+  </main>
 
   <script type="module">
-    import { requireAuth, handleSignOut as authHandleSignOut } from '../js/auth-handler.js'
-    import { getCharacterDashboard, getActiveScenarios, calculateCharacterEarnings } from '../js/api.js'
     import { supabaseClient as supabase } from '../js/supabase-module.js'
 
-    window.handleSignOut = async function() {
-      if (confirm('Are you sure you want to sign out?')) {
-        const result = await authHandleSignOut()
-        if (result.success) {
-          window.location.href = '/index.html'
-        }
+    let currentUser = null
+    let currentCastMember = null
+    let currentGame = null
+
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        window.location.href = '/auth/login.html'
+        return
+      }
+      currentUser = user
+
+      await loadPlayerData()
+      await loadScenarios()
+      await loadAlliances()
+      await loadQueen()
+      await loadHotSeat()
+      await loadTeaFeed()
+    }
+
+    async function loadPlayerData() {
+      const { data: castMember } = await supabase
+        .from('cast_members')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .single()
+
+      if (!castMember) return
+      currentCastMember = castMember
+
+      const { data: gameCast } = await supabase
+        .from('mm_game_cast')
+        .select('*, mm_games(*)')
+        .eq('cast_member_id', castMember.id)
+        .eq('status', 'active')
+        .single()
+
+      if (gameCast) {
+        currentGame = gameCast.mm_games
+      }
+
+      document.getElementById('welcomeTitle').textContent = `Welcome, ${castMember.display_name}`
+      document.getElementById('playerName').textContent = castMember.display_name
+      document.getElementById('playerArchetype').textContent = `🎭 ${castMember.archetype.toUpperCase()}`
+      document.getElementById('playerAvatar').src = castMember.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${castMember.display_name}`
+
+      if (currentGame) {
+        const daysSurvived = Math.floor((new Date() - new Date(gameCast.joined_at)) / (1000 * 60 * 60 * 24))
+        document.getElementById('statDays').textContent = daysSurvived + 1
       }
     }
 
-    function formatCurrency(amount) {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(amount || 0)
+    async function loadScenarios() {
+      if (!currentCastMember || !currentGame) return
+
+      const { data: scenarios } = await supabase
+        .from('scenario_targets')
+        .select('scenarios(*)')
+        .eq('cast_member_id', currentCastMember.id)
+        .eq('scenarios.status', 'active')
+
+      if (!scenarios || scenarios.length === 0) return
+
+      const html = scenarios.map(s => {
+        const deadline = new Date(s.scenarios.deadline_at)
+        const hoursLeft = Math.floor((deadline - new Date()) / (1000 * 60 * 60))
+
+        return `
+          <div class="scenario-item" onclick="window.location.href='/pages/scenarios.html'">
+            <div class="scenario-header">
+              <div class="scenario-title">${s.scenarios.title}</div>
+              <div class="scenario-type">${s.scenarios.scenario_type}</div>
+            </div>
+            <div class="scenario-desc">${s.scenarios.description}</div>
+            <div class="scenario-footer">
+              <div class="deadline">⏰ ${hoursLeft}h remaining</div>
+              <button class="btn btn-primary btn-sm">Respond</button>
+            </div>
+          </div>
+        `
+      }).join('')
+
+      document.getElementById('scenarioList').innerHTML = html
+      document.getElementById('statScenarios').textContent = scenarios.length
     }
 
-    function formatTime(seconds) {
-      if (!seconds) return '0m'
-      const hours = Math.floor(seconds / 3600)
-      const minutes = Math.floor((seconds % 3600) / 60)
-      if (hours > 0) return `${hours}h ${minutes}m`
-      return `${minutes}m`
+    async function loadAlliances() {
+      if (!currentCastMember) return
+
+      const { data: alliances } = await supabase
+        .from('mm_alliance_rooms')
+        .select('*')
+        .contains('member_ids', [currentCastMember.id])
+        .eq('status', 'active')
+
+      if (!alliances || alliances.length === 0) return
+
+      const html = alliances.map(a => `
+        <div class="alliance-item" onclick="window.location.href='/pages/alliances.html'">
+          <div class="alliance-name">${a.name || 'Secret Alliance'}</div>
+          <div class="alliance-members">
+            ${(a.member_ids || []).slice(0, 5).map(() => `<span class="member-tag">👤 Member</span>`).join('')}
+            ${a.member_ids.length > 5 ? `<span class="member-tag">+${a.member_ids.length - 5} more</span>` : ''}
+          </div>
+        </div>
+      `).join('')
+
+      document.getElementById('allianceList').innerHTML = html
+      document.getElementById('statAlliances').textContent = alliances.length
     }
 
-    async function initDashboard() {
-      const user = await requireAuth()
-      if (!user) return
+    async function loadQueen() {
+      if (!currentGame) return
 
-      const displayName = user.user_metadata?.display_name || user.email.split('@')[0]
-      const userName = document.getElementById('userName')
-      if (userName) userName.textContent = displayName
+      const { data: queen } = await supabase
+        .from('mm_queen_selections')
+        .select('*, cast_members(display_name)')
+        .eq('game_id', currentGame.id)
+        .order('selected_at', { ascending: false })
+        .limit(1)
+        .single()
 
-      // Force scenarios to load after 2 seconds if not loaded yet
-      setTimeout(async () => {
-        const scenariosList = document.getElementById('scenariosList')
-        if (scenariosList && scenariosList.innerHTML.includes('Loading scenarios')) {
-          console.log('⏰ Timeout - forcing scenarios to load...')
-          try {
-            await loadScenarios(user.id, 0)
-          } catch (e) {
-            console.error('❌ Timeout load failed:', e)
-            scenariosList.innerHTML = `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.5);"><div style="margin-bottom:1rem;">⚠️ Unable to load scenarios</div><div style="font-size:0.9rem;">Please refresh the page</div></div>`
-          }
-        }
-      }, 2000)
-
-      // Check if user is admin and show admin features
-      try {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-
-        console.log('🔍 Admin check - Profile:', profile, 'Error:', profileError)
-        console.log('🔍 User role:', profile?.role)
-        console.log('🔍 Is admin?', profile?.role === 'admin')
-
-        if (!profileError && profile?.role === 'admin') {
-          // Show admin panel
-          const adminPanel = document.getElementById('adminPanel')
-          const directorBtn = document.getElementById('directorConsoleBtn')
-
-          console.log('🔍 Admin panel element:', adminPanel)
-          console.log('🔍 Director button element:', directorBtn)
-
-          if (adminPanel) adminPanel.style.display = 'block'
-          if (directorBtn) directorBtn.style.display = 'inline-block'
-
-          console.log('✅ Admin features enabled for admin user')
-        } else {
-          console.log('❌ Not admin or error:', profileError)
-        }
-      } catch (error) {
-        console.error('Error checking admin status:', error)
-      }
-
-      try {
-        const stats = await getCharacterDashboard(user.id)
-        console.log('📊 Dashboard stats:', stats)
-
-        document.getElementById('welcomeMessage').textContent = `Welcome back, ${displayName}! 👋`
-        document.getElementById('totalEarnings').textContent = formatCurrency(stats.total_earnings)
-        document.getElementById('totalEpisodes').textContent = stats.total_episodes || 0
-        document.getElementById('totalScreenTime').textContent = formatTime(stats.total_screen_time)
-        document.getElementById('voiceNotesPosted').textContent = stats.voice_notes_posted || 0
-
-        const pendingCount = stats.pending_scenarios || 0
-        document.getElementById('scenarioCount').textContent =
-          pendingCount === 0 ? 'No active scenarios at the moment' :
-          `You have ${pendingCount} active scenario${pendingCount > 1 ? 's' : ''} waiting for your response`
-
-        await loadScenarios(user.id, pendingCount)
-        // await loadEarnings(user.id, stats)  // Disabled - earnings table not implemented yet
-        // await loadActivity(user.id)  // Disabled - episode_cast/voice_notes tables not implemented yet
-
-      } catch (error) {
-        console.error('❌ Error loading dashboard:', error)
-        document.getElementById('welcomeMessage').textContent = `Welcome back, ${displayName}! 👋`
-        document.getElementById('scenarioCount').textContent = 'Dashboard loaded'
-
-        // Try to load scenarios anyway, even if dashboard stats failed
-        console.log('⚠️ Attempting to load scenarios despite error...')
-        try {
-          await loadScenarios(user.id, 0)
-        } catch (scenarioError) {
-          console.error('❌ Failed to load scenarios:', scenarioError)
-        }
+      if (queen) {
+        document.getElementById('queenInfo').innerHTML = `
+          <div class="queen-icon">👑</div>
+          <div class="queen-name">${queen.cast_members.display_name}</div>
+          <div class="queen-subtitle">Reigning This Week</div>
+        `
       }
     }
 
-    async function loadScenarios(userId, count) {
-      console.log('📋 Loading scenarios for user:', userId, 'Expected count:', count)
-      const scenariosList = document.getElementById('scenariosList')
+    async function loadHotSeat() {
+      if (!currentGame) return
 
-      try {
-        console.log('📋 Fetching active scenarios...')
-        const scenarios = await getActiveScenarios(userId)
-        console.log('📋 Scenarios fetched:', scenarios)
+      const { data: queen } = await supabase
+        .from('mm_queen_selections')
+        .select('*, nominee_a:cast_members!nominee_a_id(display_name), nominee_b:cast_members!nominee_b_id(display_name)')
+        .eq('game_id', currentGame.id)
+        .order('selected_at', { ascending: false })
+        .limit(1)
+        .single()
 
-        if (!scenarios || scenarios.length === 0) {
-          console.log('📋 No scenarios found')
-          scenariosList.innerHTML = `<div style="text-align:center;padding:3rem;color:rgba(255,255,255,0.5);"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.7;">✅</div><div style="font-size:1.1rem;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:0.5rem;">All Clear!</div><div style="font-size:0.9rem;">No active scenarios right now. Check back soon!</div></div>`
-        } else {
-          console.log('📋 Rendering', scenarios.length, 'scenarios')
-          scenariosList.innerHTML = scenarios.map(s => `<div class="scenario-item" onclick="window.location.href='scenario-response.html?id=${s.id}'" style="cursor:pointer;"><div class="scenario-header"><div class="scenario-title">${s.scenario_type === 'confession' ? '💭' : s.scenario_type === 'confrontation' ? '🔥' : s.scenario_type === 'alliance' ? '🤝' : s.scenario_type === 'challenge' ? '⚡' : '📝'} ${s.title}</div><div class="scenario-badge badge-pending">${formatTimeRemaining(s.time_remaining)}</div></div><p style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin-bottom:0.75rem;">${s.description || 'Respond to this scenario'}</p><div class="scenario-meta"><div class="meta-item"><span>${s.has_responded ? '✅' : '⏳'}</span><span>${s.has_responded ? 'Responded' : 'Pending'}</span></div></div></div>`).join('')
-          console.log('✅ Scenarios rendered successfully')
-        }
-      } catch (error) {
-        console.error('❌ Error loading scenarios:', error)
-        scenariosList.innerHTML = `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.5);"><div style="margin-bottom:1rem;">⚠️ Unable to load scenarios</div><div style="font-size:0.9rem;">Error: ${error.message}</div></div>`
+      if (queen && queen.nominee_a && queen.nominee_b) {
+        document.getElementById('hotSeatList').innerHTML = `
+          <div class="nominee">
+            <div class="nominee-name">${queen.nominee_a.display_name}</div>
+            <div class="nominee-reason">Nominated by the Queen</div>
+          </div>
+          <div class="nominee">
+            <div class="nominee-name">${queen.nominee_b.display_name}</div>
+            <div class="nominee-reason">Nominated by the Queen</div>
+          </div>
+        `
       }
     }
 
-    async function loadEarnings(userId, stats) {
-      try {
-        const now = new Date()
-        const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-        const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
-        const earnings = await calculateCharacterEarnings(userId, startDate, endDate)
-        const data = earnings[0] || {}
-        document.getElementById('monthlyEarnings').textContent = formatCurrency(data.total)
-        document.getElementById('earningsBreakdown').innerHTML = `<div class="breakdown-item"><span>Screen Time</span><span class="breakdown-value">${formatCurrency(data.screen_time_revenue)}</span></div><div class="breakdown-item"><span>Tips</span><span class="breakdown-value">${formatCurrency(data.tip_revenue)}</span></div><div class="breakdown-item"><span>Ad Revenue</span><span class="breakdown-value">${formatCurrency(data.ad_revenue)}</span></div>`
-      } catch (error) {
-        console.error('Error loading earnings:', error)
-      }
+    async function loadTeaFeed() {
+      const { data: tea } = await supabase
+        .from('mm_confession_cards')
+        .select('*, cast_members(display_name)')
+        .eq('is_approved', true)
+        .order('created_at', { ascending: false })
+        .limit(3)
+
+      if (!tea || tea.length === 0) return
+
+      const html = tea.map(t => `
+        <div class="tea-item">
+          <div class="tea-header">
+            <div class="tea-author">${t.is_anonymous ? '☕ Anonymous' : t.cast_members?.display_name || 'Someone'}</div>
+            <div class="tea-time">Just now</div>
+          </div>
+          <div class="tea-content">"${t.text_content || 'Listen to the voice note...'}"</div>
+        </div>
+      `).join('')
+
+      document.getElementById('teaFeed').innerHTML = html
+      document.getElementById('statTea').textContent = tea.length
     }
 
-    async function loadActivity(userId) {
-      const activityList = document.getElementById('activityList')
-      try {
-        const { data: episodes } = await supabase.from('episode_cast').select('created_at, episodes(title)').eq('user_id', userId).order('created_at', { ascending: false }).limit(3)
-        const { data: voiceNotes } = await supabase.from('voice_notes').select('created_at, status').eq('user_id', userId).order('created_at', { ascending: false }).limit(3)
-        const { data: earnings } = await supabase.from('earnings').select('amount, source_type, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(3)
-
-        const activities = []
-        if (episodes) episodes.forEach(e => activities.push({ icon: '🎬', text: `Featured in: ${e.episodes?.title || 'Episode'}`, time: getRelativeTime(e.created_at) }))
-        if (voiceNotes) voiceNotes.forEach(v => activities.push({ icon: '🎤', text: `Voice note ${v.status}`, time: getRelativeTime(v.created_at) }))
-        if (earnings) earnings.forEach(e => activities.push({ icon: '💰', text: `Earned ${formatCurrency(e.amount)}`, time: getRelativeTime(e.created_at) }))
-
-        if (activities.length === 0) {
-          activityList.innerHTML = `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.5);"><div style="font-size:2rem;margin-bottom:0.5rem;">🎬</div><div style="font-size:0.9rem;">No activity yet</div></div>`
-        } else {
-          activityList.innerHTML = activities.slice(0, 5).map(a => `<div class="activity-item"><div class="activity-icon">${a.icon}</div><div class="activity-content"><div class="activity-text">${a.text}</div><div class="activity-time">${a.time}</div></div></div>`).join('')
-        }
-      } catch (error) {
-        console.error('Error loading activity:', error)
-      }
+    window.handleLogout = async () => {
+      await supabase.auth.signOut()
+      window.location.href = '/auth/login.html'
     }
 
-    function getRelativeTime(timestamp) {
-      if (!timestamp) return 'Recently'
-      const diff = new Date() - new Date(timestamp)
-      const minutes = Math.floor(diff / 60000)
-      const hours = Math.floor(diff / 3600000)
-      const days = Math.floor(diff / 86400000)
-      if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`
-      if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`
-      return `${days} day${days !== 1 ? 's' : ''} ago`
-    }
-
-    function formatTimeRemaining(timeRemaining) {
-      // timeRemaining can be ms (number) or PostgreSQL interval object
-      if (!timeRemaining) return 'Expired'
-
-      // If it's an interval object from PostgreSQL, convert to ms
-      let ms = timeRemaining
-      if (typeof timeRemaining === 'object' && timeRemaining.milliseconds) {
-        ms = timeRemaining.milliseconds
-      } else if (typeof timeRemaining === 'string') {
-        // Parse PostgreSQL interval format if needed
-        return timeRemaining
-      }
-
-      if (ms < 0) return 'Expired'
-      const hours = Math.floor(ms / 3600000)
-      const minutes = Math.floor((ms % 3600000) / 60000)
-      if (hours > 24) return `${Math.floor(hours / 24)}d remaining`
-      if (hours > 0) return `${hours}h remaining`
-      return `${minutes}m remaining`
-    }
-
-    // Handle Respond Now button click
-    async function handleRespondNow() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          window.location.href = '/index.html'
-          return
-        }
-
-        // Find active game cast membership
-        const { data: membership } = await supabase
-          .from('mm_game_cast')
-          .select('game_id, cast_member_id')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .limit(1)
-          .maybeSingle()
-
-        if (!membership) {
-          alert('Join a game first to respond to scenarios!')
-          window.location.href = '/pages/browse-games.html'
-          return
-        }
-
-        // Get oldest unanswered scenario in active game
-        const { data: scenario } = await supabase
-          .from('scenarios')
-          .select('id, title, deadline_at')
-          .eq('game_id', membership.game_id)
-          .eq('status', 'active')
-          .not('id', 'in', `(
-            SELECT scenario_id FROM scenario_responses
-            WHERE user_id = '${user.id}'
-          )`)
-          .order('created_at', { ascending: true })
-          .limit(1)
-          .maybeSingle()
-
-        if (scenario) {
-          // Navigate to oldest unanswered scenario
-          window.location.href = `/pages/scenario-response.html?id=${scenario.id}`
-        } else {
-          alert('✅ All caught up! No scenarios awaiting your response.')
-        }
-
-      } catch (error) {
-        console.error('Error handling respond now:', error)
-        alert('Error finding scenarios. Please try again.')
-      }
-    }
-
-    // Expose to global scope for inline onclick handler
-    window.handleRespondNow = handleRespondNow
-
-    // Helper function to make current user an admin
-    window.makeAdmin = async function() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          console.error('No user logged in')
-          return
-        }
-
-        const { error } = await supabase
-          .from('profiles')
-          .update({ role: 'admin' })
-          .eq('id', user.id)
-
-        if (error) {
-          console.error('Error setting admin role:', error)
-        } else {
-          console.log('✅ Admin role set! Refreshing page...')
-          setTimeout(() => window.location.reload(), 1000)
-        }
-      } catch (error) {
-        console.error('Error:', error)
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', initDashboard)
+    init()
   </script>
-
-  <!-- Load global nav -->
-  <script type="module">
-    fetch('/includes/global-nav.html')
-      .then(res => res.text())
-      .then(html => {
-        const container = document.getElementById('globalNavContainer')
-        container.innerHTML = html
-
-        // Execute scripts manually since innerHTML doesn't run them
-        const scripts = container.querySelectorAll('script')
-        scripts.forEach(script => {
-          const newScript = document.createElement('script')
-          if (script.type) newScript.type = script.type
-          if (script.src) {
-            newScript.src = script.src
-          } else {
-            newScript.textContent = script.textContent
-          }
-          document.body.appendChild(newScript)
-          script.remove() // Remove the non-executing script
-        })
-      })
-      .catch(err => console.error('Failed to load navigation:', err))
-  </script>
-
 </body>
 </html>

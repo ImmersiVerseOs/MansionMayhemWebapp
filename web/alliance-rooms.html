@@ -287,9 +287,14 @@
   <div class="container">
     <a href="/lobby-dashboard.html" class="back-btn">← Back to Lobby</a>
 
-    <div class="page-header">
-      <h1 class="page-title">💬 Alliance Rooms</h1>
-      <p class="page-subtitle">Private spaces for strategic conversations and alliances</p>
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <h1 class="page-title">💬 Alliance Rooms</h1>
+        <p class="page-subtitle">Private spaces for strategic conversations and alliances</p>
+      </div>
+      <a href="/link-up-requests.html" id="createAllianceBtn" class="btn btn-primary" style="text-decoration: none; white-space: nowrap;">
+        🤝 Create Alliance Room
+      </a>
     </div>
 
     <!-- Cast Member Info (auto-detected) -->
@@ -327,7 +332,7 @@
       <div class="empty-icon">💬</div>
       <h3 style="color: var(--text); margin-bottom: 8px;">No Alliance Rooms Yet</h3>
       <p>Form alliances through link-up requests to create private rooms</p>
-      <a href="/link-up-requests.html" class="btn btn-primary" style="margin-top: 24px; display: inline-block; text-decoration: none;">
+      <a href="/link-up-requests.html" id="emptyStateBtn" class="btn btn-primary" style="margin-top: 24px; display: inline-block; text-decoration: none;">
         🤝 Send Link-Up Request
       </a>
     </div>
@@ -349,6 +354,16 @@
     const gameId = new URLSearchParams(window.location.search).get('gameId') ||
                    localStorage.getItem('currentGameId') ||
                    '7ca5f4eb-4443-4167-b6e0-a9fe1be00ac1';
+
+    // Update create alliance buttons with game ID
+    const createAllianceBtn = document.getElementById('createAllianceBtn');
+    const emptyStateBtn = document.getElementById('emptyStateBtn');
+    if (createAllianceBtn && gameId) {
+      createAllianceBtn.href = `/link-up-requests.html?game=${gameId}`;
+    }
+    if (emptyStateBtn && gameId) {
+      emptyStateBtn.href = `/link-up-requests.html?game=${gameId}`;
+    }
 
     let currentCastMemberId = null;
     let rooms = [];

@@ -454,12 +454,6 @@
       </div>
     </div>
 
-    <!-- Debug Info -->
-    <div id="debugInfo" style="background: rgba(255,193,7,0.1); border: 2px solid rgba(255,193,7,0.3); border-radius: 12px; padding: 1rem; margin-bottom: 2rem; font-family: monospace; font-size: 0.9rem;">
-      <div style="color: var(--gold); font-weight: bold; margin-bottom: 0.5rem;">🔍 Debug Info:</div>
-      <div id="debugContent">Initializing...</div>
-    </div>
-
     <!-- Cast Grid -->
     <div class="cast-grid" id="castGrid">
       <div class="empty-state">
@@ -485,30 +479,17 @@
     const urlParams = new URLSearchParams(window.location.search)
     gameId = urlParams.get('game')
 
-    // Debug helper
-    function debug(msg) {
-      const el = document.getElementById('debugContent')
-      if (el) {
-        el.innerHTML += `<div>${msg}</div>`
-      }
-      console.log(msg)
-    }
-
     // Initialize
     async function init() {
-      debug('🚀 Init started')
-
       // Optional auth - page works without login
       try {
-        const user = await requireAuth()
-        debug(`✅ Logged in as: ${user?.email || 'Unknown'}`)
+        await requireAuth()
       } catch (error) {
-        debug('⚠️ Not logged in (showing public roster)')
+        console.log('Not logged in, showing public cast roster')
       }
 
       // Load game info if specified
       if (gameId) {
-        debug(`🎮 Game ID: ${gameId}`)
         const { data: game } = await supabase
           .from('mm_games')
           .select('game_name')
@@ -517,10 +498,7 @@
 
         if (game) {
           document.getElementById('gameTitle').textContent = `Cast of ${game.game_name}`
-          debug(`✅ Loaded game: ${game.game_name}`)
         }
-      } else {
-        debug('📋 Loading all cast members (no game filter)')
       }
 
       await loadCastMembers()
@@ -529,11 +507,9 @@
     // Load cast members
     async function loadCastMembers() {
       try {
-        debug('📡 Starting to load cast members...')
         let data = []
 
         if (gameId) {
-          debug(`🎯 Loading cast for game: ${gameId}`)
           // Load cast members for specific game via mm_game_cast join
           const { data: gameCast, error: castError } = await supabase
             .from('mm_game_cast')
@@ -558,10 +534,7 @@
             `)
             .eq('game_id', gameId)
 
-          if (castError) {
-            debug(`❌ Error loading game cast: ${castError.message}`)
-            throw castError
-          }
+          if (castError) throw castError
 
           // Flatten the nested structure
           data = gameCast
@@ -570,9 +543,7 @@
               ...gc.cast_members,
               game_status: gc.status
             }))
-          debug(`✅ Loaded ${data.length} cast members for game`)
         } else {
-          debug('🌐 Loading ALL cast members...')
           // Load all cast members
           const { data: allMembers, error } = await supabase
             .from('cast_members')
@@ -580,26 +551,15 @@
             .eq('status', 'active')
             .order('drama_score', { ascending: false })
 
-          if (error) {
-            debug(`❌ Query error: ${error.message}`)
-            debug(`❌ Error code: ${error.code}`)
-            debug(`❌ Error details: ${error.details}`)
-            throw error
-          }
-
-          debug(`✅ Query successful! Found ${allMembers?.length || 0} cast members`)
+          if (error) throw error
           data = allMembers || []
         }
 
         allCastMembers = data
         filteredCastMembers = [...allCastMembers]
-
-        debug(`🎨 Rendering ${filteredCastMembers.length} cast members...`)
         renderCastGrid()
-        debug('✅ Render complete!')
 
       } catch (error) {
-        debug(`💥 ERROR: ${error.message}`)
         console.error('Error loading cast members:', error)
         document.getElementById('castGrid').innerHTML = `
           <div class="empty-state">

@@ -761,38 +761,47 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Apply to tables with updated_at
+DROP TRIGGER IF EXISTS update_cast_members_updated_at ON public.cast_members;
 CREATE TRIGGER update_cast_members_updated_at
   BEFORE UPDATE ON public.cast_members
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_mm_games_updated_at ON public.mm_games;
 CREATE TRIGGER update_mm_games_updated_at
   BEFORE UPDATE ON public.mm_games
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_mm_link_up_requests_updated_at ON public.mm_link_up_requests;
 CREATE TRIGGER update_mm_link_up_requests_updated_at
   BEFORE UPDATE ON public.mm_link_up_requests
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_mm_alliance_rooms_updated_at ON public.mm_alliance_rooms;
 CREATE TRIGGER update_mm_alliance_rooms_updated_at
   BEFORE UPDATE ON public.mm_alliance_rooms
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_user_game_state_updated_at ON public.user_game_state;
 CREATE TRIGGER update_user_game_state_updated_at
   BEFORE UPDATE ON public.user_game_state
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_user_settings_updated_at ON public.user_settings;
 CREATE TRIGGER update_user_settings_updated_at
   BEFORE UPDATE ON public.user_settings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_mm_scenario_quotas_updated_at ON public.mm_scenario_quotas;
 CREATE TRIGGER update_mm_scenario_quotas_updated_at
   BEFORE UPDATE ON public.mm_scenario_quotas
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_mm_alliance_quotas_updated_at ON public.mm_alliance_quotas;
 CREATE TRIGGER update_mm_alliance_quotas_updated_at
   BEFORE UPDATE ON public.mm_alliance_quotas
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

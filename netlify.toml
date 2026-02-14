@@ -6,14 +6,14 @@
 
 [[redirects]]
   from = "/"
-  to = "/intro.html"
+  to = "/landing.html"
   status = 200
 
-# Only redirect actual 404s to intro page (not all routes!)
+# Only redirect actual 404s to landing page (not all routes!)
 # This allows /pages/player-dashboard.html and other pages to work
 [[redirects]]
   from = "/*"
-  to = "/intro.html"
+  to = "/landing.html"
   status = 404
 
 [[headers]]

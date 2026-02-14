@@ -11,6 +11,7 @@
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.cast_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL, -- NULL for AI players
   full_name TEXT NOT NULL,
   display_name TEXT NOT NULL,
   avatar_url TEXT,
@@ -32,6 +33,15 @@ CREATE TABLE IF NOT EXISTS public.cast_members (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Migrate existing cast_members table
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'cast_members' AND column_name = 'user_id') THEN
+    ALTER TABLE public.cast_members ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_cast_members_user_id ON public.cast_members(user_id) WHERE user_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_cast_members_archetype ON public.cast_members(archetype);
 CREATE INDEX IF NOT EXISTS idx_cast_members_is_ai ON public.cast_members(is_ai_player);
 CREATE INDEX IF NOT EXISTS idx_cast_members_status ON public.cast_members(status);

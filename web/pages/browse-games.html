@@ -934,9 +934,9 @@
       }
     }
 
-    // Start new game function
+    // Start new game with synchronized Sunday launch schedule
     window.startNewGame = async function() {
-      console.log('🎮 startNewGame() called')
+      console.log('🎮 Starting new game with Sunday launch schedule...')
       console.log('Current user:', currentUser)
 
       if (!currentUser) {
@@ -948,7 +948,7 @@
       try {
         console.log('Creating new game...')
 
-        // Create a new game with recruiting status
+        // Create a new game (status will be set by initialize_week_long_lobby)
         const { data: newGame, error: gameError } = await supabase
           .from('mm_games')
           .insert({
@@ -967,28 +967,41 @@
         }
 
         console.log('✅ Game created:', newGame)
-        console.log('Initializing week-long lobby...')
+        console.log('Initializing week-long lobby with Sunday launch...')
 
-        // Initialize week-long lobby (sets Sunday 8PM launch)
+        // Initialize week-long lobby (REQUIRED for Sunday schedule)
         const { data: lobbyInfo, error: lobbyError } = await supabase
           .rpc('initialize_week_long_lobby', { p_game_id: newGame.id })
 
         if (lobbyError) {
-          console.error('⚠️ Lobby initialization error:', lobbyError)
-          // Continue anyway - game was created
-          alert(`⚠️ Game created but lobby setup had an issue.\n\nRedirecting to lobby page...`)
-          window.location.href = `/pages/lobby.html?game=${newGame.id}`
-          return
+          console.error('❌ Lobby initialization error:', lobbyError)
+          throw new Error('Failed to set up Sunday launch schedule: ' + lobbyError.message)
         }
 
-        console.log('✅ Lobby initialized:', lobbyInfo)
+        console.log('✅ Sunday launch schedule set:', lobbyInfo)
 
-        // Calculate days until launch
-        const launchInfo = lobbyInfo || {}
-        const daysUntilLaunch = launchInfo.days_until_launch || 'soon'
+        // Show launch info
+        const daysUntil = Math.floor(lobbyInfo.days_until_launch)
+        const lobbyCloses = new Date(lobbyInfo.lobby_closes).toLocaleString('en-US', {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short'
+        })
+        const gameStarts = new Date(lobbyInfo.queen_selection).toLocaleString('en-US', {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short'
+        })
 
-        // Redirect to lobby with info
-        alert(`🎮 Game created!\n\n✨ Lobby open NOW\n🔒 Closes: Sunday 7 PM ET\n🎬 Launches: Sunday 8 PM ET\n📅 ${daysUntilLaunch} days until launch!`)
+        alert(`🎮 Game Created!\n\n✨ Lobby is OPEN NOW\n🔒 Closes: ${lobbyCloses}\n🎬 Launches: ${gameStarts}\n📅 ${daysUntil} days until launch!`)
+
+        // Redirect to lobby
         window.location.href = `/pages/lobby.html?game=${newGame.id}`
 
       } catch (error) {

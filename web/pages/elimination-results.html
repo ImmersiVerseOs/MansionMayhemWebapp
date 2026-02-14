@@ -447,6 +447,17 @@
 
         const round = rounds[0]
 
+        // Validate that all required data is present
+        if (!round.queen || !round.nominee_a || !round.nominee_b) {
+          content.innerHTML = '<div class="error">Incomplete results data. Please contact an admin.</div>'
+          console.error('Missing data:', {
+            queen: round.queen,
+            nominee_a: round.nominee_a,
+            nominee_b: round.nominee_b
+          })
+          return
+        }
+
         // Determine eliminated player if not set
         let eliminatedPlayer, savedPlayer
         const totalVotes = (round.votes_for_a || 0) + (round.votes_for_b || 0)

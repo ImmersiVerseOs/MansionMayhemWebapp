@@ -508,6 +508,17 @@
 
         currentRound = rounds[0]
 
+        // Validate that all required data is present
+        if (!currentRound.queen || !currentRound.nominee_a || !currentRound.nominee_b) {
+          content.innerHTML = '<div class="error">Incomplete voting round data. Please contact an admin.</div>'
+          console.error('Missing data:', {
+            queen: currentRound.queen,
+            nominee_a: currentRound.nominee_a,
+            nominee_b: currentRound.nominee_b
+          })
+          return
+        }
+
         // Check if user voted
         const { data: { session } } = await sb.auth.getSession()
         let hasVoted = false

@@ -55,6 +55,30 @@ SELECT cron.schedule(
 );
 
 -- ============================================================================
+-- 4. AI AGENT PROCESSOR (Every 3 minutes)
+-- ============================================================================
+-- Processes queued AI actions (chat, scenarios, alliances)
+-- Runs frequently to make AI feel responsive
+-- ============================================================================
+SELECT cron.unschedule('ai_agent_processor') WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'ai_agent_processor');
+
+SELECT cron.schedule(
+  'ai_agent_processor',
+  '*/3 * * * *', -- Every 3 minutes
+  $$
+  SELECT
+    net.http_post(
+      url := current_setting('app.supabase_url') || '/functions/v1/ai-agent-processor',
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'Authorization', 'Bearer ' || current_setting('app.supabase_anon_key')
+      ),
+      body := '{}'::jsonb
+    );
+  $$
+);
+
+-- ============================================================================
 -- VERIFICATION
 -- ============================================================================
 DO $$

@@ -19,15 +19,19 @@
     }
     
     :root {
-      --color-dark: #0a0a0a;
-      --color-gold: #D4AF37;
-      --color-rose: #C04E63;
-      --color-purple: #8B5CF6;
-      --color-success: #10B981;
-      --color-error: #EF4444;
-      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
-      --gradient-hero: linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.85) 100%);
-      --shadow-glow: 0 0 30px rgba(212, 175, 55, 0.3);
+      --color-dark: #0A0E27;
+      --color-card: #1E2139;
+      --color-elevated: #252949;
+      --color-gold: #FFC107;
+      --color-rose: #E91E63;
+      --color-purple: #9C27B0;
+      --color-success: #00C853;
+      --color-error: #D32F2F;
+      --color-text-secondary: #B8B9C5;
+      --gradient-gold: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);
+      --gradient-pink-purple: linear-gradient(135deg, #E91E63 0%, #9C27B0 100%);
+      --gradient-hero: linear-gradient(180deg, rgba(10,14,39,0.95) 0%, rgba(10,14,39,0.85) 100%);
+      --shadow-glow: 0 0 30px rgba(255, 193, 7, 0.3);
     }
     
     body {
@@ -47,9 +51,9 @@
       width: 100%;
       height: 100%;
       z-index: -1;
-      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 20%, rgba(192, 78, 99, 0.1) 0%, transparent 40%),
-                  radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+      background: radial-gradient(circle at 50% 50%, rgba(255, 193, 7, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(233, 30, 99, 0.1) 0%, transparent 40%),
+                  radial-gradient(circle at 20% 80%, rgba(156, 39, 176, 0.1) 0%, transparent 40%);
       animation: bgShift 20s ease-in-out infinite;
     }
     
@@ -70,8 +74,8 @@
       justify-content: space-between;
       align-items: center;
       backdrop-filter: blur(10px);
-      background: rgba(10, 10, 10, 0.8);
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      background: rgba(10, 14, 39, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .nav-logo {

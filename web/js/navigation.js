@@ -55,7 +55,7 @@ async function initNavigation() {
     // Get user profile and role
     const { data: profile, error: profileError } = await window.supabaseClient
       .from('profiles')
-      .select('display_name, role, avatar_url, subscription_tier')
+      .select('display_name, role, avatar_url')
       .eq('id', user.id)
       .single();
 

@@ -288,7 +288,7 @@
 <nav class="global-nav" id="globalNav">
   <div class="global-nav-container">
     <!-- Logo -->
-    <a href="/index.html" class="nav-logo">
+    <a href="/index.html" class="nav-logo" id="navLogo">
       <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
       <span>MANSION MAYHEM</span>
     </a>
@@ -604,12 +604,14 @@
       const signInBtn = document.getElementById('signInBtn')
       const notificationsBtn = document.getElementById('notificationsBtn')
       const userMenuDropdown = document.getElementById('userMenuDropdown')
+      const navLogo = document.getElementById('navLogo')
 
       if (!user) {
-        // User is logged out - show Sign In button
+        // User is logged out - show Sign In button, logo goes to index
         if (signInBtn) signInBtn.style.display = 'flex'
         if (notificationsBtn) notificationsBtn.style.display = 'none'
         if (userMenuDropdown) userMenuDropdown.style.display = 'none'
+        if (navLogo) navLogo.href = '/index.html'
         return
       }
 
@@ -617,6 +619,9 @@
       if (signInBtn) signInBtn.style.display = 'none'
       if (notificationsBtn) notificationsBtn.style.display = 'flex'
       if (userMenuDropdown) userMenuDropdown.style.display = 'flex'
+
+      // Logo goes to dashboard when logged in
+      if (navLogo) navLogo.href = '/pages/player-dashboard.html'
 
       // Show dashboard link in main nav when logged in
       const dashboardNav = document.getElementById('dashboardNav')

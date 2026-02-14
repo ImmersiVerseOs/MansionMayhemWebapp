@@ -475,8 +475,12 @@
 
     // Initialize
     async function init() {
-      const user = await requireAuth()
-      if (!user) return
+      // Optional auth - page works without login
+      try {
+        const user = await requireAuth()
+      } catch (error) {
+        console.log('Not logged in, showing public cast roster')
+      }
 
       // Load game info if specified
       if (gameId) {
@@ -538,14 +542,22 @@
           const { data: allMembers, error } = await supabase
             .from('cast_members')
             .select('*')
+            .eq('status', 'active')
             .order('drama_score', { ascending: false })
 
-          if (error) throw error
+          if (error) {
+            console.error('Error loading all cast members:', error)
+            throw error
+          }
+
+          console.log('Loaded cast members:', allMembers?.length || 0)
           data = allMembers || []
         }
 
         allCastMembers = data
         filteredCastMembers = [...allCastMembers]
+
+        console.log('Rendering cast grid with', filteredCastMembers.length, 'members')
         renderCastGrid()
 
       } catch (error) {
@@ -553,7 +565,8 @@
         document.getElementById('castGrid').innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">⚠️</div>
-            <div>Failed to load cast members: ${error.message}</div>
+            <div style="color: rgba(255,255,255,0.9); margin-bottom: 1rem;">Failed to load cast members</div>
+            <div style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">${error.message}</div>
           </div>
         `
       }

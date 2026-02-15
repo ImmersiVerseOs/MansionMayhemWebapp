@@ -136,6 +136,14 @@ function getUrlForStage(stage, gameId, gameStatus) {
     case 'voting':
       return `/voting.html?game=${gameId}`
 
+    case 'final_three':
+      // Final 3 week - still uses voting but only 1 nominee
+      return `/voting.html?game=${gameId}`
+
+    case 'finale':
+      // Finale - fan voting page
+      return `/pages/finale-fan-vote.html?game=${gameId}`
+
     case 'episodes':
     case 'episode_viewing':
       return `/pages/gallery.html?game=${gameId}`
@@ -183,12 +191,13 @@ export async function hasAccessToPage(pageType, gameId) {
 
       // Map page types to allowed stages
       const stageAccess = {
-        'voting': ['voting'],
+        'voting': ['voting', 'final_three'],
+        'finale': ['finale'],
         'results': ['results', 'completed'],
         'scenarios': ['scenarios', 'active'],
         'gallery': ['episodes', 'episode_viewing', 'completed'],
-        'leaderboard': ['scenarios', 'active', 'episodes', 'voting', 'results', 'completed'],
-        'cast-portal': ['scenarios', 'active', 'episodes', 'voting', 'results']
+        'leaderboard': ['scenarios', 'active', 'episodes', 'voting', 'final_three', 'finale', 'results', 'completed'],
+        'cast-portal': ['scenarios', 'active', 'episodes', 'voting', 'final_three', 'finale', 'results']
       }
 
       const allowedStages = stageAccess[pageType] || []
@@ -283,6 +292,8 @@ function getPhaseLabel(stage) {
     'scenarios': 'Active Scenarios',
     'active': 'Game in Progress',
     'voting': 'Elimination Voting',
+    'final_three': 'Final Three',
+    'finale': 'Finale Fan Vote',
     'episodes': 'Episode Viewing',
     'episode_viewing': 'Watching Episodes',
     'results': 'Episode Results',
@@ -305,6 +316,8 @@ function getPhaseDescription(stage) {
     'scenarios': 'Respond to dramatic scenarios',
     'active': 'Drama is unfolding',
     'voting': 'Vote to eliminate a cast member',
+    'final_three': 'Queen eliminates 1 cast member',
+    'finale': 'Vote for your winner!',
     'episodes': 'Watch the episode compilation',
     'episode_viewing': 'View completed episodes',
     'results': 'See who was eliminated',
@@ -413,9 +426,11 @@ function getPhaseIcon(stage) {
     'introductions': '🎙️',
     'scenarios': '📝',
     'voting': '🗳️',
+    'final_three': '🔥',
+    'finale': '👑',
     'episodes': '🎬',
     'results': '📊',
-    'completed': '👑'
+    'completed': '✨'
   }
   return icons[stage] || '🎭'
 }

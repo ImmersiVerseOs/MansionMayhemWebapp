@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finale Fan Vote - Mansion Mayhem</title>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Mansion Mayhem Theme -->
+    <link rel="stylesheet" href="../css/mansion-mayhem-theme.css">
+    <link rel="stylesheet" href="../css/global.css">
+
+    <style>
+        body {
+            font-family: var(--mm-font-body);
+            background: var(--mm-background);
+            color: var(--mm-text-primary);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .finale-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--mm-space-2xl) var(--mm-space-lg);
+        }
+
+        .finale-header {
+            text-align: center;
+            margin-bottom: var(--mm-space-3xl);
+        }
+
+        .finale-header h1 {
+            font-family: var(--mm-font-heading);
+            font-size: var(--mm-font-5xl);
+            font-weight: var(--mm-weight-bold);
+            background: var(--mm-gradient-gold-rose);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--mm-space-md);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .finale-subtitle {
+            font-size: var(--mm-font-xl);
+            color: var(--mm-text-secondary);
+            font-weight: var(--mm-weight-medium);
+        }
+
+        .countdown {
+            display: inline-block;
+            background: var(--mm-surface-elevated);
+            padding: var(--mm-space-md) var(--mm-space-xl);
+            border-radius: var(--mm-radius-full);
+            margin-top: var(--mm-space-lg);
+            font-weight: var(--mm-weight-semibold);
+            color: var(--mm-gold);
+            border: 2px solid var(--mm-gold);
+            font-size: var(--mm-font-lg);
+        }
+
+        .finalists-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: var(--mm-space-2xl);
+            margin-bottom: var(--mm-space-3xl);
+            align-items: stretch;
+        }
+
+        .finalist-card {
+            background: var(--mm-surface);
+            border-radius: var(--mm-radius-xl);
+            padding: var(--mm-space-2xl);
+            text-align: center;
+            transition: all var(--mm-duration-normal) var(--mm-ease-default);
+            cursor: pointer;
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .finalist-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--mm-gradient-gold-rose);
+        }
+
+        .finalist-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--mm-shadow-glow-gold);
+            border-color: var(--mm-gold);
+        }
+
+        .finalist-card.selected {
+            border-color: var(--mm-gold);
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(233, 30, 99, 0.1));
+            box-shadow: var(--mm-shadow-glow-gold);
+        }
+
+        .finalist-avatar {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            margin: 0 auto var(--mm-space-lg);
+            background: var(--mm-gradient-pink-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            font-weight: var(--mm-weight-bold);
+            color: white;
+            border: 4px solid var(--mm-gold);
+            box-shadow: var(--mm-shadow-lg);
+        }
+
+        .finalist-name {
+            font-family: var(--mm-font-heading);
+            font-size: var(--mm-font-4xl);
+            font-weight: var(--mm-weight-bold);
+            margin-bottom: var(--mm-space-sm);
+            color: var(--mm-gold);
+        }
+
+        .finalist-archetype {
+            color: var(--mm-text-secondary);
+            font-size: var(--mm-font-lg);
+            margin-bottom: var(--mm-space-xl);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: var(--mm-weight-medium);
+        }
+
+        .finalist-stats {
+            background: var(--mm-surface-elevated);
+            border-radius: var(--mm-radius-lg);
+            padding: var(--mm-space-lg);
+            margin: var(--mm-space-lg) 0;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--mm-space-sm) 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--mm-text-secondary);
+            font-size: var(--mm-font-sm);
+        }
+
+        .stat-value {
+            font-weight: var(--mm-weight-semibold);
+            color: var(--mm-rose);
+            font-size: var(--mm-font-sm);
+        }
+
+        .finalist-score {
+            font-size: var(--mm-font-5xl);
+            font-weight: var(--mm-weight-bold);
+            margin: var(--mm-space-lg) 0;
+            background: var(--mm-gradient-gold-rose);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-breakdown {
+            font-size: var(--mm-font-sm);
+            color: var(--mm-text-secondary);
+            margin-top: var(--mm-space-sm);
+        }
+
+        .vote-btn {
+            width: 100%;
+            padding: var(--mm-space-md) var(--mm-space-lg);
+            font-size: var(--mm-font-lg);
+            font-weight: var(--mm-weight-bold);
+            border-radius: var(--mm-radius-lg);
+            border: none;
+            background: var(--mm-gradient-gold-rose);
+            color: white;
+            cursor: pointer;
+            transition: all var(--mm-duration-normal) var(--mm-ease-default);
+            margin-top: var(--mm-space-lg);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--mm-shadow-glow-pink);
+        }
+
+        .vote-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mm-font-heading);
+            font-size: var(--mm-font-5xl);
+            font-weight: var(--mm-weight-bold);
+            color: var(--mm-gold);
+            opacity: 0.8;
+            text-shadow: var(--mm-shadow-glow-gold);
+        }
+
+        .voting-closed {
+            background: var(--mm-surface);
+            padding: var(--mm-space-3xl);
+            border-radius: var(--mm-radius-xl);
+            text-align: center;
+            margin-top: var(--mm-space-2xl);
+            border: 2px solid var(--mm-gold);
+        }
+
+        .voting-closed h2 {
+            font-family: var(--mm-font-heading);
+            font-size: var(--mm-font-3xl);
+            color: var(--mm-gold);
+            margin-bottom: var(--mm-space-md);
+        }
+
+        .results-container {
+            margin-top: var(--mm-space-3xl);
+        }
+
+        .winner-announcement {
+            background: var(--mm-gradient-gold-rose);
+            padding: var(--mm-space-3xl);
+            border-radius: var(--mm-radius-xl);
+            text-align: center;
+            margin-bottom: var(--mm-space-2xl);
+            box-shadow: var(--mm-shadow-glow-gold);
+        }
+
+        .winner-announcement h2 {
+            font-family: var(--mm-font-heading);
+            font-size: var(--mm-font-5xl);
+            color: white;
+            margin-bottom: var(--mm-space-lg);
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .crown {
+            font-size: 100px;
+            margin-bottom: var(--mm-space-lg);
+            animation: mm-pulse 2s infinite;
+        }
+
+        .thank-you {
+            text-align: center;
+            padding: var(--mm-space-3xl);
+            color: var(--mm-text-secondary);
+        }
+
+        .thank-you h3 {
+            font-family: var(--mm-font-heading);
+            font-size: var(--mm-font-2xl);
+            color: var(--mm-gold);
+            margin-bottom: var(--mm-space-md);
+        }
+
+        @media (max-width: 1024px) {
+            .finalists-container {
+                grid-template-columns: 1fr;
+                gap: var(--mm-space-xl);
+            }
+
+            .vs-divider {
+                transform: rotate(90deg);
+                margin: var(--mm-space-lg) 0;
+            }
+        }
+
+        @media (max-width: 428px) {
+            .finale-header h1 {
+                font-size: var(--mm-font-3xl);
+            }
+
+            .finalist-avatar {
+                width: 140px;
+                height: 140px;
+                font-size: 56px;
+            }
+
+            .finalist-name {
+                font-size: var(--mm-font-2xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="finale-container">
+        <div class="finale-header">
+            <h1>👑 Finale: Fan Vote 👑</h1>
+            <p class="finale-subtitle">Vote for who you think should win Mansion Mayhem!</p>
+            <div id="countdown" class="countdown">Loading...</div>
+        </div>
+
+        <div id="votingSection">
+            <div class="finalists-container">
+                <div class="finalist-card" id="finalistA">
+                    <div class="finalist-avatar" id="avatarA">?</div>
+                    <div class="finalist-name" id="nameA">Loading...</div>
+                    <div class="finalist-archetype" id="archetypeA"></div>
+
+                    <div class="finalist-stats">
+                        <div class="stat-row">
+                            <span class="stat-label">Drama Score</span>
+                            <span class="stat-value" id="dramaA">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Influence</span>
+                            <span class="stat-value" id="influenceA">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Alliances</span>
+                            <span class="stat-value" id="alliancesA">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Tea Spot Posts</span>
+                            <span class="stat-value" id="postsA">-</span>
+                        </div>
+                    </div>
+
+                    <div class="finalist-score" id="scoreA">-</div>
+                    <div class="score-breakdown">Leaderboard Score</div>
+
+                    <button class="vote-btn" onclick="castVote('A')">Vote for <span id="voteNameA">Finalist A</span></button>
+                </div>
+
+                <div class="vs-divider">VS</div>
+
+                <div class="finalist-card" id="finalistB">
+                    <div class="finalist-avatar" id="avatarB">?</div>
+                    <div class="finalist-name" id="nameB">Loading...</div>
+                    <div class="finalist-archetype" id="archetypeB"></div>
+
+                    <div class="finalist-stats">
+                        <div class="stat-row">
+                            <span class="stat-label">Drama Score</span>
+                            <span class="stat-value" id="dramaB">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Influence</span>
+                            <span class="stat-value" id="influenceB">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Alliances</span>
+                            <span class="stat-value" id="alliancesB">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Tea Spot Posts</span>
+                            <span class="stat-value" id="postsB">-</span>
+                        </div>
+                    </div>
+
+                    <div class="finalist-score" id="scoreB">-</div>
+                    <div class="score-breakdown">Leaderboard Score</div>
+
+                    <button class="vote-btn" onclick="castVote('B')">Vote for <span id="voteNameB">Finalist B</span></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="votingClosed" class="voting-closed" style="display: none;">
+            <h2>🔒 Voting Has Closed</h2>
+            <p>Thank you for participating! The winner will be announced soon.</p>
+        </div>
+
+        <div id="resultsSection" class="results-container" style="display: none;">
+            <div class="winner-announcement">
+                <div class="crown">👑</div>
+                <h2 id="winnerName">Winner Name</h2>
+                <p style="color: rgba(255,255,255,0.95); font-size: 20px; font-weight: 600;">
+                    Mansion Mayhem Champion!
+                </p>
+            </div>
+
+            <div class="finalists-container">
+                <div class="finalist-card">
+                    <div class="finalist-name" id="resultNameA">Finalist A</div>
+                    <div class="finalist-score" id="resultScoreA">-</div>
+                    <div class="score-breakdown">
+                        Leaderboard: <span id="resultLeaderboardA">-</span> |
+                        Fan Votes: <span id="resultFanVotesA">-</span>
+                    </div>
+                </div>
+
+                <div class="vs-divider">—</div>
+
+                <div class="finalist-card">
+                    <div class="finalist-name" id="resultNameB">Finalist B</div>
+                    <div class="finalist-score" id="resultScoreB">-</div>
+                    <div class="score-breakdown">
+                        Leaderboard: <span id="resultLeaderboardB">-</span> |
+                        Fan Votes: <span id="resultFanVotesB">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="thank-you">
+                <h3>Thank you for being part of Mansion Mayhem!</h3>
+                <p>Stay tuned for the next season...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabaseClient as supabase } from '../js/supabase-module.js';
+
+        let finaleRound = null;
+        let finalistAData = null;
+        let finalistBData = null;
+
+        // Load finale data
+        async function loadFinaleData() {
+            try {
+                // Get active finale round
+                const { data: finale, error } = await supabase
+                    .from('mm_finale_rounds')
+                    .select('*')
+                    .eq('status', 'voting_open')
+                    .single();
+
+                if (error || !finale) {
+                    console.error('No active finale:', error);
+                    document.getElementById('votingSection').innerHTML =
+                        '<div class="voting-closed"><h2>No active finale voting</h2><p>Check back soon!</p></div>';
+                    return;
+                }
+
+                finaleRound = finale;
+
+                // Get finalists data
+                const { data: finalists } = await supabase
+                    .from('cast_members')
+                    .select('*')
+                    .in('id', [finale.finalist_a_id, finale.finalist_b_id]);
+
+                finalistAData = finalists.find(f => f.id === finale.finalist_a_id);
+                finalistBData = finalists.find(f => f.id === finale.finalist_b_id);
+
+                // Get alliance counts
+                const { count: alliancesA } = await supabase
+                    .from('mm_alliance_rooms')
+                    .select('*', { count: 'exact', head: true })
+                    .contains('member_ids', [finale.finalist_a_id])
+                    .eq('game_id', finale.game_id);
+
+                const { count: alliancesB } = await supabase
+                    .from('mm_alliance_rooms')
+                    .select('*', { count: 'exact', head: true })
+                    .contains('member_ids', [finale.finalist_b_id])
+                    .eq('game_id', finale.game_id);
+
+                // Get post counts
+                const { count: postsA } = await supabase
+                    .from('mm_tea_room_posts')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('cast_member_id', finale.finalist_a_id)
+                    .eq('game_id', finale.game_id);
+
+                const { count: postsB } = await supabase
+                    .from('mm_tea_room_posts')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('cast_member_id', finale.finalist_b_id)
+                    .eq('game_id', finale.game_id);
+
+                // Populate UI
+                populateFinalist('A', finalistAData, finale.finalist_a_leaderboard_score, alliancesA || 0, postsA || 0);
+                populateFinalist('B', finalistBData, finale.finalist_b_leaderboard_score, alliancesB || 0, postsB || 0);
+
+                // Update countdown
+                updateCountdown(finale.voting_closes_at);
+
+                // Check if user already voted
+                await checkIfVoted();
+
+            } catch (err) {
+                console.error('Error loading finale:', err);
+            }
+        }
+
+        function populateFinalist(side, data, leaderboardScore, alliances, posts) {
+            const initial = data.display_name.charAt(0);
+            document.getElementById(`avatar${side}`).textContent = initial;
+            document.getElementById(`name${side}`).textContent = data.display_name;
+            document.getElementById(`voteName${side}`).textContent = data.display_name;
+            document.getElementById(`archetype${side}`).textContent = data.archetype || '';
+            document.getElementById(`drama${side}`).textContent = data.drama_score || 0;
+            document.getElementById(`influence${side}`).textContent = data.influence_score || 0;
+            document.getElementById(`score${side}`).textContent = leaderboardScore.toFixed(1);
+            document.getElementById(`alliances${side}`).textContent = alliances;
+            document.getElementById(`posts${side}`).textContent = posts;
+        }
+
+        function updateCountdown(closesAt) {
+            const closes = new Date(closesAt);
+            const now = new Date();
+            const diff = closes - now;
+
+            if (diff <= 0) {
+                document.getElementById('countdown').textContent = '⏰ Voting Closed';
+                document.getElementById('votingSection').style.display = 'none';
+                document.getElementById('votingClosed').style.display = 'block';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            document.getElementById('countdown').textContent =
+                `⏰ ${days}d ${hours}h ${mins}m remaining`;
+
+            setTimeout(() => updateCountdown(closesAt), 60000);
+        }
+
+        async function checkIfVoted() {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) return;
+
+            const { data: vote } = await supabase
+                .from('mm_finale_fan_votes')
+                .select('*')
+                .eq('finale_round_id', finaleRound.id)
+                .eq('voter_user_id', user.id)
+                .single();
+
+            if (vote) {
+                alert('You have already voted!');
+                document.querySelectorAll('.vote-btn').forEach(btn => btn.disabled = true);
+            }
+        }
+
+        window.castVote = async function(finalist) {
+            const castMemberId = finalist === 'A' ? finaleRound.finalist_a_id : finaleRound.finalist_b_id;
+            const name = finalist === 'A' ? finalistAData.display_name : finalistBData.display_name;
+
+            if (!confirm(`Cast your vote for ${name}?`)) return;
+
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+
+                const { data, error } = await supabase.rpc('cast_finale_fan_vote', {
+                    p_finale_round_id: finaleRound.id,
+                    p_voted_for_cast_member_id: castMemberId,
+                    p_voter_user_id: user?.id || null,
+                    p_voter_ip_address: null
+                });
+
+                if (error) throw error;
+
+                if (data.success) {
+                    alert(`✅ Vote cast for ${name}!`);
+                    document.querySelectorAll('.vote-btn').forEach(btn => btn.disabled = true);
+                } else {
+                    alert('❌ ' + data.error);
+                }
+
+            } catch (err) {
+                console.error('Vote error:', err);
+                alert('Failed to cast vote: ' + err.message);
+            }
+        };
+
+        // Load on page load
+        window.addEventListener('DOMContentLoaded', loadFinaleData);
+    </script>
+</body>
+</html>

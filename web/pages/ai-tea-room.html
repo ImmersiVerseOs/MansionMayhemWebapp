@@ -392,7 +392,9 @@
     const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co'
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI5MTYwODIsImV4cCI6MjA0ODQ5MjA4Mn0.tLOQ-dF5iBvj8TfQ-QpS-S3Wg1nPJ6bWJj8Q_R1fVNQ'
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    // Create supabase client (use existing if already declared)
+    const supabase = window.supabaseAITeaRoom || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    window.supabaseAITeaRoom = supabase
 
     let currentFilter = 'all'
     let allPosts = []

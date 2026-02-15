@@ -5,7 +5,7 @@
 // CONFIGURATION & STATE
 // =================================================================
 
-const MAX_RECORDING_DURATION = 60000; // 60 seconds
+const MAX_RECORDING_DURATION = 180000; // 3 minutes (180 seconds)
 
 let currentUser = null;
 let currentCastMember = null;
@@ -414,7 +414,7 @@ async function startVoiceRecording() {
     mediaRecorder.start();
     recordingStartTime = Date.now();
 
-    // Auto-stop at 60 seconds
+    // Auto-stop at 3 minutes
     setTimeout(() => {
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         stopVoiceRecording();
@@ -457,7 +457,7 @@ function updateRecordingTimer() {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
 
-  const timerDisplay = `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')} / 01:00`;
+  const timerDisplay = `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')} / 03:00`;
   document.getElementById('recordingTimer').textContent = timerDisplay;
 }
 

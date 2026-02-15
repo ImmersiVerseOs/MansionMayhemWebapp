@@ -164,14 +164,16 @@ BEGIN
     -- Voting/elimination history
     'eliminations', (
       SELECT COALESCE(jsonb_agg(jsonb_build_object(
-        'week', e.week_number,
+        'round', vr.round_number,
         'eliminated_player', cm.display_name,
-        'vote_count', e.vote_count,
-        'elimination_date', e.created_at
-      ) ORDER BY e.week_number DESC), '[]'::jsonb)
-      FROM mm_eliminations e
-      JOIN cast_members cm ON e.cast_member_id = cm.id
-      WHERE e.game_id = p_game_id
+        'votes_for_a', vr.votes_for_a,
+        'votes_for_b', vr.votes_for_b,
+        'elimination_date', vr.created_at
+      ) ORDER BY vr.round_number DESC), '[]'::jsonb)
+      FROM mm_voting_rounds vr
+      LEFT JOIN cast_members cm ON vr.eliminated_id = cm.id
+      WHERE vr.game_id = p_game_id
+        AND vr.eliminated_id IS NOT NULL
       LIMIT 5
     ),
 

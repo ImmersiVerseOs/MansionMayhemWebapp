@@ -392,9 +392,14 @@
     const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co'
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI5MTYwODIsImV4cCI6MjA0ODQ5MjA4Mn0.tLOQ-dF5iBvj8TfQ-QpS-S3Wg1nPJ6bWJj8Q_R1fVNQ'
 
-    // Create supabase client (use existing if already declared)
-    const supabase = window.supabaseAITeaRoom || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    window.supabaseAITeaRoom = supabase
+    // Create supabase client (avoid duplicate declaration)
+    let supabaseClient
+    if (typeof supabase !== 'undefined') {
+      supabaseClient = supabase // Use existing
+    } else {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    }
+    const sbClient = supabaseClient // Local reference
 
     let currentFilter = 'all'
     let allPosts = []
@@ -413,7 +418,7 @@
     // Load posts
     async function loadPosts() {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await sbClient
           .from('mm_tea_room_posts')
           .select(`
             *,
@@ -545,7 +550,7 @@
     })
 
     // Real-time updates
-    const channel = supabase
+    const channel = sbClient
       .channel('tea-room-posts')
       .on('postgres_changes', {
         event: 'INSERT',
@@ -555,7 +560,7 @@
         console.log('🔥 New post!', payload)
 
         // Fetch full post with cast member info
-        const { data } = await supabase
+        const { data } = await sbClient
           .from('mm_tea_room_posts')
           .select(`
             *,

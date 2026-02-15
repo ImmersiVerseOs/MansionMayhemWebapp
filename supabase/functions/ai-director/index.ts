@@ -29,6 +29,51 @@ serve(async (req) => {
 
     console.log('🎬 AI Director analyzing game:', gameId)
 
+    // Check configuration first
+    const { data: config } = await supabase
+      .from('ai_director_config')
+      .select('*')
+      .eq('game_id', gameId)
+      .single()
+
+    // If auto-run and config disables it, skip
+    if (!manualTrigger && config && !config.auto_enabled) {
+      console.log('⏸️ Auto-run disabled for this game')
+      return new Response(JSON.stringify({
+        success: true,
+        created: false,
+        reason: 'Auto-run disabled in configuration'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Check if minimum time between scenarios has passed
+    if (!manualTrigger && config) {
+      const minHours = config.min_hours_between_scenarios || 12
+      const { data: lastScenario } = await supabase
+        .from('scenarios')
+        .select('created_at')
+        .eq('game_id', gameId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (lastScenario) {
+        const hoursSince = (Date.now() - new Date(lastScenario.created_at).getTime()) / (1000 * 60 * 60)
+        if (hoursSince < minHours) {
+          console.log(`⏳ Only ${hoursSince.toFixed(1)}h since last scenario (minimum: ${minHours}h)`)
+          return new Response(JSON.stringify({
+            success: true,
+            created: false,
+            reason: `Too soon - only ${hoursSince.toFixed(1)}h since last scenario`
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+      }
+    }
+
     // Get comprehensive game context using our director context function
     const { data: context, error: contextError } = await supabase
       .rpc('get_director_context', { p_game_id: gameId })
@@ -379,7 +424,7 @@ Return a JSON object with this EXACT structure:
   "scenario": {
     "title": "Catchy title referencing recent events",
     "description": "2-3 sentences describing the situation. Reference specific cast members and recent drama.",
-    "scenario_type": "alliance|conflict|strategy|personal|wildcard",
+    "scenario_type": "One of: alliance, conflict, strategy, personal, wildcard, betrayal, revelation, confession, confrontation, challenge, loyalty_test, power_shift, reputation, gossip, immunity, nomination, vote, elimination, redemption, downfall, underdog, romance, friendship, twist, reward, punishment, sacrifice",
     "target_cast_members": ["Name 1", "Name 2", "Name 3"],
     "dramatic_purpose": "What this achieves for the show (break up alliance, expose secret, create conflict, etc.)",
     "deadline_hours": 24

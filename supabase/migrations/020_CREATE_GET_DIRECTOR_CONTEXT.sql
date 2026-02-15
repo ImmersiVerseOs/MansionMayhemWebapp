@@ -163,18 +163,43 @@ BEGIN
 
     -- Voting/elimination history
     'eliminations', (
-      SELECT COALESCE(jsonb_agg(jsonb_build_object(
-        'round', vr.round_number,
-        'eliminated_player', cm.display_name,
-        'votes_for_a', vr.votes_for_a,
-        'votes_for_b', vr.votes_for_b,
-        'elimination_date', vr.created_at
-      ) ORDER BY vr.round_number DESC), '[]'::jsonb)
-      FROM mm_voting_rounds vr
-      LEFT JOIN cast_members cm ON vr.eliminated_id = cm.id
-      WHERE vr.game_id = p_game_id
-        AND vr.eliminated_id IS NOT NULL
-      LIMIT 5
+      SELECT COALESCE(jsonb_agg(elimination_data ORDER BY round_number DESC), '[]'::jsonb)
+      FROM (
+        -- Queen direct eliminations
+        SELECT
+          vr.round_number,
+          jsonb_build_object(
+            'round', vr.round_number,
+            'eliminated_player', cm.display_name,
+            'elimination_type', 'queen_direct',
+            'votes_for_a', vr.votes_for_a,
+            'votes_for_b', vr.votes_for_b,
+            'elimination_date', vr.created_at
+          ) as elimination_data
+        FROM mm_voting_rounds vr
+        JOIN cast_members cm ON vr.queen_direct_elimination_id = cm.id
+        WHERE vr.game_id = p_game_id
+
+        UNION ALL
+
+        -- House vote eliminations
+        SELECT
+          vr.round_number,
+          jsonb_build_object(
+            'round', vr.round_number,
+            'eliminated_player', cm.display_name,
+            'elimination_type', 'house_vote',
+            'votes_for_a', vr.votes_for_a,
+            'votes_for_b', vr.votes_for_b,
+            'elimination_date', vr.created_at
+          ) as elimination_data
+        FROM mm_voting_rounds vr
+        JOIN cast_members cm ON vr.house_vote_eliminated_id = cm.id
+        WHERE vr.game_id = p_game_id
+
+        ORDER BY round_number DESC
+        LIMIT 10
+      ) eliminations_subquery
     ),
 
     -- Pacing metrics (scenarios per week, last scenario time)

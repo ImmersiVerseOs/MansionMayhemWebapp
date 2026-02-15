@@ -379,7 +379,7 @@ Return a JSON object with this EXACT structure:
   "scenario": {
     "title": "Catchy title referencing recent events",
     "description": "2-3 sentences describing the situation. Reference specific cast members and recent drama.",
-    "scenario_type": "confrontation|alliance|revelation|betrayal|challenge",
+    "scenario_type": "alliance|conflict|strategy|personal|wildcard",
     "target_cast_members": ["Name 1", "Name 2", "Name 3"],
     "dramatic_purpose": "What this achieves for the show (break up alliance, expose secret, create conflict, etc.)",
     "deadline_hours": 24

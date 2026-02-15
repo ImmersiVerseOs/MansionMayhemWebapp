@@ -424,7 +424,7 @@ Return a JSON object with this EXACT structure:
   "scenario": {
     "title": "Catchy title referencing recent events",
     "description": "2-3 sentences describing the situation. Reference specific cast members and recent drama.",
-    "scenario_type": "One of: alliance, conflict, strategy, personal, wildcard, betrayal, revelation, confession, confrontation, challenge, loyalty_test, power_shift, reputation, gossip, immunity, nomination, vote, elimination, redemption, downfall, underdog, romance, friendship, twist, reward, punishment, sacrifice",
+    "scenario_type": "One of: alliance, conflict, strategy, personal, wildcard, betrayal, revelation, confession, confrontation, challenge, loyalty_test, power_shift, reputation, gossip, immunity, nomination, vote, elimination, redemption, downfall, underdog, friendship, twist, reward, punishment, sacrifice",
     "target_cast_members": ["Name 1", "Name 2", "Name 3"],
     "dramatic_purpose": "What this achieves for the show (break up alliance, expose secret, create conflict, etc.)",
     "deadline_hours": 24

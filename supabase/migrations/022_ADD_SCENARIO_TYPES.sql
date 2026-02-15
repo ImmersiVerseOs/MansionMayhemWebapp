@@ -40,7 +40,6 @@ CHECK (scenario_type IN (
   'redemption',    -- Redemption opportunities
   'downfall',      -- Villain downfalls
   'underdog',      -- Underdog moments
-  'romance',       -- Romantic tension
   'friendship',    -- Friendship tests
 
   -- Production twists

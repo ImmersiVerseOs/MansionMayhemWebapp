@@ -102,13 +102,16 @@ async function processScenarioResponse(action: any) {
   console.log(`🎭 Processing scenario response for cast member ${cast_member_id}`)
 
   // Get cast member details
-  const { data: castMember } = await supabase
+  const { data: castMember, error: memberError } = await supabase
     .from('cast_members')
-    .select('*, ai_personality_state(*)')
+    .select('*')
     .eq('id', cast_member_id)
     .single()
 
-  if (!castMember) throw new Error('Cast member not found')
+  if (memberError || !castMember) {
+    console.error('Cast member fetch error:', memberError)
+    throw new Error('Cast member not found')
+  }
 
   // Get scenario details
   const { data: scenario } = await supabase
@@ -146,7 +149,7 @@ Respond as ${castMember.display_name} would. This will be recorded as a voice no
   // Call Claude API (Sonnet for important scenario responses)
   const startTime = Date.now()
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-5-20250929',
     max_tokens: 300,
     system: systemPrompt,
     messages: [{
@@ -160,11 +163,16 @@ Respond as ${castMember.display_name} would. This will be recorded as a voice no
 
   console.log(`✅ Generated response: "${responseText.substring(0, 100)}..."`)
 
-  // Generate voice note using ElevenLabs (if API key available)
+  // Generate voice note using ElevenLabs (50% chance for scenario responses)
   let voiceNoteUrl = null
-  if (ELEVENLABS_API_KEY) {
+  const shouldGenerateVoice = ELEVENLABS_API_KEY && Math.random() < 0.5
+  if (shouldGenerateVoice) {
     try {
-      voiceNoteUrl = await generateVoiceNote(responseText, castMember.archetype)
+      console.log('Generating voice note for scenario response...')
+      const voicePath = await generateVoiceNote(responseText, castMember.archetype)
+      if (voicePath) {
+        voiceNoteUrl = `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/voice-notes/${voicePath}`
+      }
     } catch (error) {
       console.warn('Voice note generation failed:', error.message)
     }
@@ -249,7 +257,7 @@ Send a message that fits your personality and the conversation flow.`
   // Call Claude API (Haiku for quick chat)
   const startTime = Date.now()
   const response = await anthropic.messages.create({
-    model: 'claude-haiku-4-20250514',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 100,
     system: systemPrompt,
     messages: [{
@@ -360,7 +368,7 @@ Based on your archetype and strategy, who would you want to ally with? Respond i
   // Call Claude API (Sonnet for strategic decisions)
   const startTime = Date.now()
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-5-20250929',
     max_tokens: 200,
     system: systemPrompt,
     messages: [{
@@ -400,6 +408,129 @@ Based on your archetype and strategy, who would you want to ally with? Respond i
   // TODO: Actually create alliance request (implement link_up_request logic)
 
   return { success: true, decision }
+}
+
+async function processTeaRoomPost(action: any) {
+  const { cast_member_id, game_id, context } = action
+
+  console.log(`☕ Processing tea room post for ${cast_member_id}`)
+
+  // Get cast member
+  const { data: castMember } = await supabase
+    .from('cast_members')
+    .select('*')
+    .eq('id', cast_member_id)
+    .single()
+
+  if (!castMember) throw new Error('Cast member not found')
+
+  // Get recent tea room drama for context
+  const { data: recentPosts } = await supabase
+    .from('mm_tea_room_posts')
+    .select(`
+      *,
+      cast_members(display_name)
+    `)
+    .eq('game_id', game_id)
+    .order('created_at', { ascending: false })
+    .limit(5)
+
+  const recentDrama = recentPosts
+    ?.map((p: any) => `${p.cast_members.display_name}: ${p.post_text}`)
+    .join('\n') || 'No recent posts yet - be the first to spill tea'
+
+  // Get personality
+  const personality = ARCHETYPE_PERSONALITIES[castMember.archetype] || ARCHETYPE_PERSONALITIES.wildcard
+
+  const systemPrompt = `You are ${castMember.display_name}, a ${personality.name} making a PUBLIC post in the Tea Room.
+
+**Your Traits:** ${personality.traits}
+**Your Style:** ${personality.speaking_style}
+**Your Strategy:** ${personality.strategy}
+${personality.examples ? `**Your Phrases:** ${personality.examples}` : ''}
+
+Recent Tea Room Drama:
+${recentDrama}
+
+Create a DRAMATIC, SHADE-FILLED public post (1-3 sentences max). This is PUBLIC - everyone sees it. Make it:
+- Messy and entertaining
+- Call someone out OR spill tea OR throw shade OR react to drama
+- Stay in character with your archetype
+- Use your speaking style and slang naturally
+
+DO NOT use hashtags, emojis, or "Posted by" signatures. Just raw drama. Sound like you're on a reality TV show confessional.`
+
+  const startTime = Date.now()
+  const response = await anthropic.messages.create({
+    model: 'claude-haiku-4-5-20251001', // Use Haiku 4.5 for quick social posts
+    max_tokens: 150,
+    system: systemPrompt,
+    messages: [{
+      role: 'user',
+      content: 'Post your tea in the Tea Room:'
+    }]
+  })
+
+  const processingTime = Date.now() - startTime
+  const postText = response.content[0].type === 'text' ? response.content[0].text.trim() : ''
+
+  // Determine post type from content
+  const postType = postText.toLowerCase().includes('strategy') ? 'strategy' :
+                   postText.toLowerCase().includes('shade') ? 'shade' :
+                   postText.toLowerCase().includes('sorry') || postText.toLowerCase().includes('confess') ? 'confession' :
+                   'drama'
+
+  // Generate voice note (35% for production - good balance of cost vs engagement)
+  let voiceNoteUrl = null
+  let voiceNoteDuration = null
+  const shouldGenerateVoice = ELEVENLABS_API_KEY && Math.random() < 0.35  // 35% chance
+  if (shouldGenerateVoice) {
+    try {
+      console.log('Generating voice note for tea room post...')
+      const voicePath = await generateVoiceNote(postText, castMember.archetype)
+      if (voicePath) {
+        voiceNoteUrl = `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/voice-notes/${voicePath}`
+        // Estimate duration (rough: ~150 words per minute = 2.5 words per second)
+        const wordCount = postText.split(/\s+/).length
+        voiceNoteDuration = Math.ceil(wordCount / 2.5)
+      }
+    } catch (error) {
+      console.warn('Voice note generation failed:', error.message)
+    }
+  }
+
+  // Insert tea room post
+  const { data: post, error: insertError } = await supabase
+    .from('mm_tea_room_posts')
+    .insert({
+      game_id,
+      cast_member_id,
+      post_text: postText,
+      post_type: postType,
+      voice_note_url: voiceNoteUrl,
+      voice_note_duration_seconds: voiceNoteDuration
+    })
+    .select()
+    .single()
+
+  if (insertError) throw insertError
+
+  console.log(`✅ Tea room post created: "${postText.substring(0, 50)}..."`)
+
+  // Log activity
+  await logAIActivity({
+    cast_member_id,
+    game_id,
+    action_type: 'tea_room_post',
+    ai_model: 'haiku',
+    input_tokens: response.usage.input_tokens,
+    output_tokens: response.usage.output_tokens,
+    response_id: post.id,
+    response_preview: postText.substring(0, 100),
+    processing_time_ms: processingTime
+  })
+
+  return { success: true, post_id: post.id }
 }
 
 // ============================================================================
@@ -519,6 +650,7 @@ serve(async (req) => {
         let result
         switch (action.action_type) {
           case 'respond_scenario':
+          case 'respond_to_scenario':
             result = await processScenarioResponse(action)
             break
           case 'send_chat_message':
@@ -526,6 +658,14 @@ serve(async (req) => {
             break
           case 'form_alliance':
             result = await processAllianceDecision(action)
+            break
+          case 'tea_room_post':
+            result = await processTeaRoomPost(action)
+            break
+          case 'create_voice_introduction':
+            // Skip voice for now - requires ElevenLabs integration
+            console.log(`Skipping voice introduction for ${action.cast_member_id}`)
+            result = { success: true, skipped: true, reason: 'Voice generation not yet implemented' }
             break
           default:
             console.warn(`Unknown action type: ${action.action_type}`)

@@ -111,15 +111,18 @@ BEGIN
         'engagement_score', (trp.likes_count + trp.comments_count * 2),
         'created_at', trp.created_at,
         'top_comments', (
-          SELECT jsonb_agg(jsonb_build_object(
-            'commenter', cm2.display_name,
-            'text', tsc.comment_text
-          ))
-          FROM mm_tea_spot_comments tsc
-          JOIN cast_members cm2 ON tsc.cast_member_id = cm2.id
-          WHERE tsc.post_id = trp.id
-          ORDER BY tsc.created_at
-          LIMIT 3
+          SELECT COALESCE(jsonb_agg(comment_obj), '[]'::jsonb)
+          FROM (
+            SELECT jsonb_build_object(
+              'commenter', cm2.display_name,
+              'text', tsc.comment_text
+            ) as comment_obj
+            FROM mm_tea_spot_comments tsc
+            JOIN cast_members cm2 ON tsc.cast_member_id = cm2.id
+            WHERE tsc.post_id = trp.id
+            ORDER BY tsc.created_at
+            LIMIT 3
+          ) comments
         )
       ) ORDER BY (trp.likes_count + trp.comments_count * 2) DESC), '[]'::jsonb)
       FROM mm_tea_room_posts trp

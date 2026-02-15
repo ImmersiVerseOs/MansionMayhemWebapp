@@ -115,21 +115,12 @@ serve(async (req) => {
       .insert({
         game_id: gameId,
         title: scenario.title,
-        scenario_type: scenario.scenario_type || 'drama',
-        prompt_text: scenario.description,
-        deadline_hours: scenario.deadline_hours || 24,
+        scenario_type: scenario.scenario_type || 'conflict',
+        description: scenario.description,
         deadline_at: deadlineAt.toISOString(),
-        voice_note_setting: 'encouraged',
         status: 'active',
-        launched_at: new Date().toISOString(),
-        is_ai_generated: true,
-        context_notes: scenario.dramatic_purpose,
-        ai_generation_metadata: {
-          model: 'claude-sonnet-4-5-20250929',
-          temperature: 0.8,
-          generated_at: new Date().toISOString(),
-          director_reasoning: decision.reasoning
-        }
+        context_notes: `[AI DIRECTOR] ${scenario.dramatic_purpose}\n\nReasoning: ${decision.reasoning}\n\nModel: claude-sonnet-4-5-20250929`,
+        assigned_count: scenario.target_cast_members?.length || 0
       })
       .select()
       .single()

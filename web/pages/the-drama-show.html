@@ -3,459 +3,949 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Drama Show - Mansion Mayhem</title>
+  <title>📺 The Drama Show - Mansion Mayhem</title>
   <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
-  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     :root {
-      --color-dark: #0A0E27;
-      --color-gold: #FFC107;
-      --color-purple: #9C27B0;
-      --color-rose: #E91E63;
-      --gradient-gold: linear-gradient(135deg, #FFC107 0%, #E91E63 50%, #9C27B0 100%);
+      --bg: #030108;
+      --bg2: #0a0612;
+      --card: #151020;
+      --elev: #1a1428;
+      --hover: #221a32;
+      --border: rgba(255,255,255,0.06);
+      --txt: #fafafa;
+      --txt2: #a1a1aa;
+      --muted: #71717a;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --cyan: #06b6d4;
+      --orange: #f97316;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #eab308;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--color-dark);
-      color: white;
-      min-height: 100vh;
-      padding-top: 80px;
-    }
-
-    .animated-bg {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(233, 30, 99, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(156, 39, 176, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(255, 193, 7, 0.1) 0%, transparent 50%);
-      animation: bgShift 20s ease-in-out infinite;
-    }
-
-    @keyframes bgShift {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    .page-header {
-      padding: 3rem 2rem 2rem;
-      text-align: center;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .page-title {
-      font-size: 3.5rem;
-      font-weight: 900;
-      margin-bottom: 1rem;
-      background: var(--gradient-gold);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-    }
-
-    .page-subtitle {
-      font-size: 1.25rem;
-      color: rgba(255, 255, 255, 0.7);
-      max-width: 700px;
-      margin: 0 auto;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
       line-height: 1.6;
-    }
-
-    .content-wrapper {
-      max-width: 1600px;
-      margin: 0 auto;
       padding: 2rem;
     }
 
-    .filters-bar {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
       margin-bottom: 3rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
       flex-wrap: wrap;
     }
 
-    .filter-chip {
-      padding: 0.75rem 1.5rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 50px;
-      color: rgba(255, 255, 255, 0.7);
-      cursor: pointer;
-      transition: all 0.3s;
-      font-weight: 600;
+    .stat-card {
+      flex: 1;
+      min-width: 150px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
     }
 
-    .filter-chip:hover, .filter-chip.active {
-      background: rgba(233, 30, 99, 0.2);
-      border-color: var(--color-gold);
-      color: var(--color-gold);
-      transform: translateY(-2px);
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    .videos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 2rem;
-      margin-bottom: 3rem;
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--txt2);
+      margin-top: 0.25rem;
     }
 
-    .video-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      overflow: hidden;
-      transition: all 0.4s;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .video-card:hover {
-      border-color: var(--color-gold);
-      transform: translateY(-10px);
-      box-shadow: 0 20px 60px rgba(233, 30, 99, 0.3);
-    }
-
-    .video-thumbnail {
-      position: relative;
-      aspect-ratio: 16/9;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(233, 30, 99, 0.3) 100%);
+    /* Post Feed */
+    .posts-feed {
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .post-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      position: relative;
       overflow: hidden;
     }
 
-    .video-thumbnail img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .play-overlay {
+    .post-card::before {
+      content: '';
       position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--purple), var(--pink));
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.3s ease;
     }
 
-    .video-card:hover .play-overlay {
+    .post-card:hover {
+      border-color: var(--purple);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.15);
+    }
+
+    .post-card:hover::before {
       opacity: 1;
     }
 
-    .play-btn {
-      width: 70px;
-      height: 70px;
-      background: var(--gradient-gold);
+    /* Post Header */
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .post-avatar {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.75rem;
-      color: var(--color-dark);
-      transition: all 0.3s;
+      font-size: 1.5rem;
+      flex-shrink: 0;
     }
 
-    .video-card:hover .play-btn {
-      transform: scale(1.15);
+    .post-info {
+      flex: 1;
     }
 
-    .video-badge {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 0.4rem 0.9rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
+    .post-name {
       font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .archetype-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .badge-ai {
-      background: linear-gradient(135deg, #8B5CF6, #EC4899);
+    .badge-queen { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; }
+    .badge-villain { background: linear-gradient(135deg, #dc2626, #991b1b); color: #fff; }
+    .badge-wildcard { background: linear-gradient(135deg, #ec4899, #be185d); color: #fff; }
+    .badge-troublemaker { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
+    .badge-strategist { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; }
+    .badge-loyalist { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; }
+    .badge-underdog { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+
+    .post-meta {
+      font-size: 0.85rem;
+      color: var(--txt2);
     }
 
-    .video-duration {
-      position: absolute;
-      bottom: 1rem;
-      left: 1rem;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 0.4rem 0.75rem;
+    /* Post Content */
+    .post-text {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+      color: var(--txt);
+    }
+
+    .post-type-tag {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
       border-radius: 6px;
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-
-    .video-info {
-      padding: 1.5rem;
-    }
-
-    .video-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.95);
-      margin-bottom: 0.75rem;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .video-meta {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.875rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .video-meta-item {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .cast-members {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-    }
-
-    .cast-tag {
-      padding: 0.35rem 0.75rem;
-      background: rgba(233, 30, 99, 0.15);
-      border: 1px solid rgba(233, 30, 99, 0.3);
-      border-radius: 20px;
       font-size: 0.75rem;
-      color: var(--color-gold);
       font-weight: 600;
+      margin-bottom: 0.5rem;
     }
 
+    .tag-drama { background: rgba(236, 72, 153, 0.2); color: var(--pink); }
+    .tag-shade { background: rgba(139, 92, 246, 0.2); color: var(--purple); }
+    .tag-strategy { background: rgba(6, 182, 212, 0.2); color: var(--cyan); }
+    .tag-confession { background: rgba(249, 115, 22, 0.2); color: var(--orange); }
+    .tag-reaction { background: rgba(16, 185, 129, 0.2); color: var(--green); }
+
+    /* Voice Note Player */
+    .voice-player {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--bg2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .voice-player audio {
+      width: 100%;
+      height: 40px;
+    }
+
+    .voice-label {
+      font-size: 0.85rem;
+      color: var(--txt2);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--txt2);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top: 3px solid var(--purple);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Empty State */
     .empty-state {
       text-align: center;
-      padding: 5rem 2rem;
-      color: rgba(255, 255, 255, 0.5);
+      padding: 4rem 2rem;
+      color: var(--txt2);
     }
 
-    .empty-icon {
-      font-size: 5rem;
-      margin-bottom: 1.5rem;
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
       opacity: 0.5;
     }
 
-    .empty-title {
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--txt);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--purple);
+      background: var(--elev);
+    }
+
+    .filter-btn.active {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: #fff;
+    }
+
+    /* User Post Composer */
+    .post-composer {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .composer-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .composer-header img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    #postText {
+      width: 100%;
+      min-height: 100px;
+      padding: 1rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--txt);
+      font-size: 1rem;
+      resize: vertical;
+      margin-bottom: 1rem;
+      font-family: inherit;
+    }
+
+    #postText:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    .post-type-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .post-type-selector button {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--txt2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .post-type-selector button.active {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: white;
+    }
+
+    .composer-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+
+    .voice-btn, .submit-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .voice-btn {
+      background: var(--cyan);
+      color: white;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: white;
+    }
+
+    .voice-btn:hover, .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Voice Recording Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .modal-content h3 {
+      margin-bottom: 2rem;
+      color: var(--txt);
+    }
+
+    .waveform {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      height: 80px;
+      margin-bottom: 1.5rem;
+    }
+
+    .bar {
+      width: 10px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border-radius: 5px;
+      animation: wave 0.8s ease-in-out infinite;
+    }
+
+    .bar:nth-child(1) { animation-delay: 0s; }
+    .bar:nth-child(2) { animation-delay: 0.1s; }
+    .bar:nth-child(3) { animation-delay: 0.2s; }
+    .bar:nth-child(4) { animation-delay: 0.3s; }
+    .bar:nth-child(5) { animation-delay: 0.4s; }
+
+    @keyframes wave {
+      0%, 100% { height: 20px; }
+      50% { height: 60px; }
+    }
+
+    .timer {
       font-size: 1.5rem;
-      color: rgba(255, 255, 255, 0.8);
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 2rem;
+    }
+
+    .modal-content button {
+      margin: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    #stopRecordingBtn {
+      background: var(--purple);
+      color: white;
+    }
+
+    #cancelRecordingBtn {
+      background: var(--red);
+      color: white;
+    }
+
+    /* Post Interactions */
+    .post-interactions {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+
+    .post-interactions button {
+      background: var(--elev);
+      border: 1px solid var(--border);
+      color: var(--txt2);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .post-interactions button:hover {
+      border-color: var(--purple);
+      color: var(--purple);
+    }
+
+    .post-interactions button.liked {
+      color: var(--pink);
+      border-color: var(--pink);
+    }
+
+    /* Comments Section */
+    .comments-section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .comments-list {
+      margin-bottom: 1rem;
+    }
+
+    .comment-card {
+      padding: 1rem;
+      background: var(--bg2);
+      border-radius: 12px;
       margin-bottom: 0.75rem;
     }
 
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .comment-time {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    .comment-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+      color: var(--txt);
+    }
+
+    .comment-card audio {
+      width: 100%;
+      height: 32px;
+      margin-bottom: 0.75rem;
+    }
+
+    .comment-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .comment-actions button {
+      background: none;
+      border: none;
+      color: var(--txt2);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .comment-actions button:hover {
+      color: var(--purple);
+    }
+
+    .comment-replies {
+      margin-left: 2rem;
+      margin-top: 0.75rem;
+    }
+
+    .comment-composer {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .comment-composer textarea {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--txt);
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 60px;
+      font-family: inherit;
+    }
+
+    .comment-composer textarea:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    .comment-composer button {
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .comment-composer .voice-reply-btn {
+      background: var(--cyan);
+      color: white;
+    }
+
+    .comment-composer .submit-comment-btn {
+      background: var(--purple);
+      color: white;
+    }
+
+    /* Notification Bell */
+    .notification-bell {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .notification-bell button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--red);
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .notification-badge.hidden {
+      display: none;
+    }
+
+    .notification-dropdown {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      width: 350px;
+      max-height: 400px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1000;
+    }
+
+    .notification-dropdown.show {
+      display: block;
+    }
+
+    .notification-item {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      gap: 0.75rem;
+      transition: background 0.2s;
+    }
+
+    .notification-item:hover {
+      background: var(--elev);
+    }
+
+    .notification-item.unread {
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .notification-item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .notification-content {
+      flex: 1;
+    }
+
+    .notification-content strong {
+      color: var(--purple);
+    }
+
+    .notification-time {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+      display: block;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--purple);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+      z-index: 3000;
+      display: none;
+    }
+
+    .toast.show {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    /* Responsive */
     @media (max-width: 768px) {
-      .page-title { font-size: 2.5rem; }
-      .videos-grid { grid-template-columns: 1fr; }
+      body {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .stats-bar {
+        flex-direction: column;
+      }
+
+      .stat-card {
+        min-width: 100%;
+      }
+
+      .comment-replies {
+        margin-left: 1rem;
+      }
+
+      .notification-dropdown {
+        width: 300px;
+      }
     }
   </style>
-  <link rel="stylesheet" href="css/modern-theme.css">
 </head>
 <body>
-  <div class="animated-bg"></div>
-
-  <!-- Navigation loaded from include -->
-  <div id="globalNavPlaceholder"></div>
-  <script>
-    fetch('/includes/global-nav.html')
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('globalNavPlaceholder').innerHTML = data;
-      });
-  </script>
-
-  <div class="page-header">
-    <h1 class="page-title">
-      <span>🎬</span>
-      The Drama Show
-    </h1>
-    <p class="page-subtitle">
-      AI-generated videos featuring your favorite cast members from Mansion Mayhem shows.
-      Drama, alliances, and unforgettable AI-powered moments.
-    </p>
-  </div>
-
-  <div class="content-wrapper">
-    <div class="filters-bar">
-      <button class="filter-chip active" data-filter="all">All Videos</button>
-      <button class="filter-chip" data-filter="latest">Latest</button>
-      <button class="filter-chip" data-filter="trending">Trending</button>
-      <button class="filter-chip" data-filter="most-viewed">Most Viewed</button>
+  <div class="container">
+    <!-- Header -->
+    <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1>📺 The Drama Show</h1>
+        <p>Spill tea, throw shade, and create drama with the cast</p>
+      </div>
+      <div class="notification-bell">
+        <button id="notificationBtn">
+          🔔
+          <span class="notification-badge hidden" id="unreadCount">0</span>
+        </button>
+        <div class="notification-dropdown" id="notificationDropdown">
+          <!-- Notifications will be loaded here -->
+        </div>
+      </div>
     </div>
 
-    <div class="videos-grid" id="videosGrid">
-      <!-- Videos will be loaded here dynamically -->
-      <div class="empty-state" style="grid-column: 1/-1;">
-        <div class="empty-icon">🎬</div>
-        <div class="empty-title">Loading AI-Generated Videos...</div>
-        <div>Fetching drama from the mansion</div>
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="totalPosts">0</div>
+        <div class="stat-label">Total Posts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="todayPosts">0</div>
+        <div class="stat-label">Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="voicePosts">0</div>
+        <div class="stat-label">With Voice</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="activePlayers">0</div>
+        <div class="stat-label">Active AI</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">All Posts</button>
+      <button class="filter-btn" data-filter="introductions">🎙️ Introductions</button>
+      <button class="filter-btn" data-filter="drama">Drama</button>
+      <button class="filter-btn" data-filter="shade">Shade</button>
+      <button class="filter-btn" data-filter="strategy">Strategy</button>
+      <button class="filter-btn" data-filter="confession">Confession</button>
+      <button class="filter-btn" data-filter="voice">Voice Notes Only</button>
+    </div>
+
+    <!-- User Post Composer -->
+    <div class="post-composer" id="postComposer" style="display: none;">
+      <div class="composer-header">
+        <img id="userAvatar" src="" alt="Your avatar">
+        <div>
+          <div id="userName" style="font-weight: 700; font-size: 1.1rem;"></div>
+          <span id="userArchetype" class="archetype-badge"></span>
+        </div>
+      </div>
+
+      <textarea id="postText" placeholder="Share the drama... 📺"></textarea>
+
+      <div class="post-type-selector">
+        <button data-type="drama" class="active">🔥 Drama</button>
+        <button data-type="shade">😎 Shade</button>
+        <button data-type="strategy">🎯 Strategy</button>
+        <button data-type="confession">🤫 Confession</button>
+      </div>
+
+      <!-- Anonymous Toggle (Confessional Booth) -->
+      <div style="margin: 1rem 0; padding: 1rem; background: rgba(156, 39, 176, 0.1); border: 1px solid rgba(156, 39, 176, 0.3); border-radius: 12px;">
+        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+          <input type="checkbox" id="anonymousToggle" style="width: 20px; height: 20px; cursor: pointer;">
+          <div style="flex: 1;">
+            <div style="font-weight: 700; color: var(--purple); display: flex; align-items: center; gap: 0.5rem;">
+              🎭 Post Anonymously (Confessional Booth)
+            </div>
+            <div style="font-size: 0.875rem; color: var(--txt2); margin-top: 0.25rem;">
+              Your identity will be hidden. Perfect for secrets and confessions.
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <div class="composer-actions">
+        <button id="recordVoiceBtn" class="voice-btn">
+          🎤 Add Voice Note
+        </button>
+        <button id="submitPostBtn" class="submit-btn">
+          Post to Drama Show
+        </button>
+      </div>
+    </div>
+
+    <!-- Posts Feed -->
+    <div class="posts-feed" id="postsFeed">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading AI drama...</p>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    import { supabaseClient as supabase } from '../js/supabase-module.js'
+  <!-- Voice Recording Modal -->
+  <div id="voiceRecordModal" class="modal">
+    <div class="modal-content">
+      <h3>🎤 Recording Voice Note</h3>
 
-    // Format duration
-    function formatDuration(seconds) {
-      if (!seconds) return '0:00'
-      const mins = Math.floor(seconds / 60)
-      const secs = seconds % 60
-      return `${mins}:${secs.toString().padStart(2, '0')}`
-    }
+      <!-- Animated Waveform -->
+      <div class="waveform">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </div>
 
-    // Format views
-    function formatViews(count) {
-      if (!count) return '0'
-      if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
-      if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
-      return count.toString()
-    }
+      <!-- Timer -->
+      <div class="timer" id="recordingTimer">00:00 / 03:00</div>
 
-    // Format date
-    function formatDate(dateString) {
-      if (!dateString) return 'Recently'
-      const date = new Date(dateString)
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    }
+      <!-- Controls -->
+      <button id="stopRecordingBtn">⏹ Stop</button>
+      <button id="cancelRecordingBtn">❌ Cancel</button>
+    </div>
+  </div>
 
-    // Load AI-generated videos
-    async function loadVideos(filter = 'all') {
-      const videosGrid = document.getElementById('videosGrid')
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
 
-      try {
-        // Build query
-        let query = supabase
-          .from('ai_generated_videos')
-          .select(`
-            *,
-            game:games(title, season_number),
-            cast_member:cast_members(full_name, display_name, archetype)
-          `)
-          .eq('status', 'published')
-
-        // Apply filters
-        if (filter === 'latest') {
-          query = query.order('created_at', { ascending: false }).limit(20)
-        } else if (filter === 'trending') {
-          query = query.order('view_count', { ascending: false }).limit(20)
-        } else if (filter === 'most-viewed') {
-          query = query.order('view_count', { ascending: false }).limit(20)
-        } else {
-          query = query.order('created_at', { ascending: false })
-        }
-
-        const { data: videos, error } = await query
-
-        if (error) throw error
-
-        if (!videos || videos.length === 0) {
-          videosGrid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1/-1;">
-              <div class="empty-icon">🎭</div>
-              <div class="empty-title">No AI Videos Yet</div>
-              <div>AI-generated drama videos will appear here once created</div>
-            </div>
-          `
-          return
-        }
-
-        // Render videos
-        videosGrid.innerHTML = videos.map(video => {
-          const thumbnail = video.thumbnail_url || ''
-          const duration = formatDuration(video.duration_seconds)
-          const views = formatViews(video.view_count)
-          const castName = video.cast_member?.display_name || video.cast_member?.full_name || 'Unknown'
-          const gameTitle = video.game?.title || 'Mansion Mayhem'
-
-          return `
-            <div class="video-card" onclick="playVideo('${video.id}', '${video.video_url}')">
-              <div class="video-thumbnail">
-                ${thumbnail ? `<img src="${thumbnail}" alt="${video.title}">` : '<div style="font-size: 4rem;">🎬</div>'}
-                <div class="play-overlay">
-                  <div class="play-btn">▶</div>
-                </div>
-                <div class="video-badge badge-ai">AI GENERATED</div>
-                <div class="video-duration">${duration}</div>
-              </div>
-              <div class="video-info">
-                <h3 class="video-title">${video.title}</h3>
-                <div class="video-meta">
-                  <span class="video-meta-item">
-                    👁️ ${views} views
-                  </span>
-                  <span class="video-meta-item">
-                    📅 ${formatDate(video.created_at)}
-                  </span>
-                </div>
-                <div class="cast-members">
-                  <span class="cast-tag">${castName}</span>
-                  <span class="cast-tag">${gameTitle}</span>
-                </div>
-              </div>
-            </div>
-          `
-        }).join('')
-
-      } catch (error) {
-        console.error('Error loading videos:', error)
-        videosGrid.innerHTML = `
-          <div class="empty-state" style="grid-column: 1/-1;">
-            <div class="empty-icon">⚠️</div>
-            <div class="empty-title">Error Loading Videos</div>
-            <div>${error.message}</div>
-          </div>
-        `
-      }
-    }
-
-    // Play video (navigate to video player or open modal)
-    window.playVideo = function(videoId, videoUrl) {
-      // TODO: Navigate to video player page or open modal
-      console.log('Playing video:', videoId, videoUrl)
-      // For now, open video URL in new tab
-      if (videoUrl) {
-        window.open(videoUrl, '_blank')
-      } else {
-        alert('Video URL not available yet')
-      }
-    }
-
-    // Filter button handlers
-    document.querySelectorAll('.filter-chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'))
-        btn.classList.add('active')
-        const filter = btn.dataset.filter
-        loadVideos(filter)
-      })
-    })
-
-    // Initial load
-    loadVideos()
+  <script>
+    // Supabase config - initialize first
+    const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
+    const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   </script>
+
+  <!-- Load social features -->
+  <script src="../js/tea-spot-social.js"></script>
 </body>
 </html>

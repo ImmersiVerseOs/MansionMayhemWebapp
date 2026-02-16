@@ -1201,23 +1201,40 @@
           console.log('✅ New game created:', newGame)
         }
 
-        // Add the user to the game as a cast member
-        console.log('Adding you to the game...')
-        const { error: gameCastError } = await supabase
+        // Check if already in game (avoid duplicate key error)
+        const { data: existingMember, error: checkError } = await supabase
           .from('mm_game_cast')
-          .insert({
-            game_id: newGame.id,
-            cast_member_id: castMember.id,
-            status: 'active',
-            joined_at: new Date().toISOString()
-          })
+          .select('id')
+          .eq('game_id', newGame.id)
+          .eq('cast_member_id', castMember.id)
+          .maybeSingle()
 
-        if (gameCastError) {
-          console.error('❌ Error joining game:', gameCastError)
-          throw gameCastError
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error('❌ Error checking membership:', checkError)
+          throw checkError
         }
 
-        console.log('✅ You joined the game!')
+        if (existingMember) {
+          console.log('✅ Already in this game!')
+        } else {
+          // Add the user to the game as a cast member
+          console.log('Adding you to the game...')
+          const { error: gameCastError } = await supabase
+            .from('mm_game_cast')
+            .insert({
+              game_id: newGame.id,
+              cast_member_id: castMember.id,
+              status: 'active',
+              joined_at: new Date().toISOString()
+            })
+
+          if (gameCastError) {
+            console.error('❌ Error joining game:', gameCastError)
+            throw gameCastError
+          }
+
+          console.log('✅ You joined the game!')
+        }
 
         let lobbyInfo
         let message

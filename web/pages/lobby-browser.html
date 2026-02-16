@@ -457,9 +457,14 @@
         <span id="currentLobbyTitle"></span>
         <code id="currentLobbyId" style="margin-left: 1rem; opacity: 0.8;"></code>
       </div>
-      <button class="btn btn-secondary" onclick="goToCurrentLobby()" style="background: white; color: #8b5cf6;">
-        🏠 Return to My Lobby
-      </button>
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-secondary" onclick="goToCurrentLobby()" style="background: white; color: #8b5cf6;">
+          🏠 Return to My Lobby
+        </button>
+        <button class="btn btn-secondary" onclick="leaveCurrentGame()" style="background: #dc2626; color: white;">
+          🚪 Leave Game
+        </button>
+      </div>
     </div>
 
     <!-- Lobby Grid -->
@@ -649,7 +654,38 @@
       alert('✅ Lobby link copied to clipboard!')
     }
 
+    function leaveCurrentGame() {
+      if (!confirm('Are you sure you want to leave this game? You can always rejoin later.')) {
+        return
+      }
+
+      // Clear current game from localStorage
+      localStorage.removeItem('current_game_id')
+      localStorage.removeItem('current_cast_member_id')
+      currentGameId = null
+
+      // Reload page to show updated state
+      window.location.reload()
+    }
+
     async function createNewGame() {
+      // Check if user already has a game
+      if (currentGameId) {
+        const goToCurrent = confirm('You\'re already in a game! Do you want to go to your current lobby instead of creating a new one?')
+        if (goToCurrent) {
+          goToCurrentLobby()
+          return
+        }
+
+        const leaveAndCreate = confirm('Create a new game anyway? This will leave your current game.')
+        if (!leaveAndCreate) return
+
+        // Leave current game
+        localStorage.removeItem('current_game_id')
+        localStorage.removeItem('current_cast_member_id')
+        currentGameId = null
+      }
+
       const title = prompt('Enter lobby name:', 'Mansion Mayhem - ' + new Date().toLocaleDateString())
       if (!title) return
 

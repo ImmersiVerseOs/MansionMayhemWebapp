@@ -1165,14 +1165,41 @@
           console.log('✅ Cast member found:', castMember)
         }
 
-        // Check if a joinable game already exists
+        // FIRST: Check if user is already in a recruiting/waiting_lobby game
+        console.log('Checking if already in a lobby...')
+        const { data: currentGameCast, error: currentGameError } = await supabase
+          .from('mm_game_cast')
+          .select('game_id, mm_games(*)')
+          .eq('cast_member_id', castMember.id)
+          .in('mm_games.status', ['recruiting', 'waiting_lobby'])
+          .single()
+
+        if (currentGameCast && currentGameCast.mm_games) {
+          // Already in a lobby - just go there!
+          console.log('✅ Already in lobby:', currentGameCast.mm_games.title)
+          alert(`You're already in a lobby!\n\nTaking you there now...`)
+          window.location.href = `/lobby.html?game=${currentGameCast.game_id}`
+          return
+        }
+
+        // Check if a joinable game already exists (with space available)
         console.log('Checking for existing games to join...')
         const { data: existingGames, error: findError } = await supabase
           .from('mm_games')
-          .select('*')
+          .select(`
+            *,
+            mm_game_cast(count)
+          `)
           .in('status', ['recruiting', 'waiting_lobby'])
           .order('created_at', { ascending: false })
-          .limit(1)
+
+        // Filter for games with space (client-side since we need to count)
+        const gamesWithSpace = existingGames?.filter(game => {
+          const currentCount = game.mm_game_cast?.[0]?.count || 0
+          return currentCount < (game.max_players || 20)
+        }) || []
+
+        console.log(`Found ${gamesWithSpace.length} games with space`)
 
         if (findError) {
           console.error('❌ Error finding games:', findError)
@@ -1181,14 +1208,16 @@
 
         let newGame
 
-        if (existingGames && existingGames.length > 0) {
-          // JOIN EXISTING GAME
-          newGame = existingGames[0]
-          console.log('✅ Found existing game to join:', newGame.title)
-          console.log('Game ID:', newGame.id)
+        if (gamesWithSpace.length > 0) {
+          // JOIN EXISTING GAME WITH AVAILABLE SPACE
+          newGame = gamesWithSpace[0]
+          const currentCount = newGame.mm_game_cast?.[0]?.count || 0
+          const maxPlayers = newGame.max_players || 20
+          console.log('✅ Found existing game with space:', newGame.title)
+          console.log(`Game ID: ${newGame.id} (${currentCount}/${maxPlayers} players)`)
         } else {
-          // CREATE NEW GAME (only if no joinable games exist)
-          console.log('No existing games found. Creating new game...')
+          // CREATE NEW GAME (no games exist OR all games are full)
+          console.log('No games with available space. Creating new game...')
 
           const { data: createdGame, error: gameError } = await supabase
             .from('mm_games')

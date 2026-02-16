@@ -4,121 +4,307 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎮 Browse Lobbies - Mansion Mayhem</title>
-  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0A0E27;
+      --bg-secondary: #151936;
+      --bg-card: #1E2139;
+      --accent-pink: #E91E63;
+      --accent-purple: #9C27B0;
+      --accent-gold: #FFC107;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B8B9C5;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --success: #00C853;
+      --warning: #FF6D00;
+      --danger: #D32F2F;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(156, 39, 176, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(233, 30, 99, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 90%, rgba(255, 193, 7, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .lobby-browser {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header Section */
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+      border-radius: 20px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink), var(--accent-gold));
+    }
+
+    .page-header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 30px rgba(156, 39, 176, 0.5);
+    }
+
+    .page-header p {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      margin-bottom: 2rem;
     }
 
     .header-actions {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
+      justify-content: center;
       gap: 1rem;
       flex-wrap: wrap;
     }
 
+    /* Buttons */
     .btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
+      padding: 0.875rem 2rem;
+      border-radius: 12px;
       border: none;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.2s;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
       color: white;
     }
 
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(156, 39, 176, 0.4);
+    }
+
     .btn-secondary {
-      background: rgba(139, 92, 246, 0.1);
-      color: #8b5cf6;
-      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--accent-purple);
+      border: 2px solid rgba(139, 92, 246, 0.3);
     }
 
-    .btn:hover {
+    .btn-secondary:hover {
+      background: rgba(139, 92, 246, 0.25);
+      border-color: rgba(139, 92, 246, 0.5);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
     }
 
+    /* Current Lobby Banner */
+    .current-lobby-banner {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      color: white;
+      padding: 1.5rem 2rem;
+      border-radius: 16px;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(156, 39, 176, 0.3);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .current-lobby-banner strong {
+      font-size: 1.125rem;
+    }
+
+    .current-lobby-banner code {
+      font-family: 'Courier New', monospace;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      margin-left: 1rem;
+    }
+
+    .current-lobby-banner .btn {
+      background: white;
+      color: var(--accent-purple);
+      padding: 0.75rem 1.5rem;
+    }
+
+    /* Lobby Grid */
     .lobby-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 2rem;
     }
 
     .lobby-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      transition: all 0.3s;
+      background: var(--bg-card);
+      border: 2px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .lobby-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink));
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .lobby-card:hover {
-      border-color: #8b5cf6;
-      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2);
-      transform: translateY(-4px);
+      border-color: var(--accent-purple);
+      box-shadow: 0 12px 40px rgba(156, 39, 176, 0.3);
+      transform: translateY(-8px);
+    }
+
+    .lobby-card:hover::before {
+      opacity: 1;
+    }
+
+    .lobby-card.current {
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
+      background: linear-gradient(135deg, rgba(156, 39, 176, 0.05), rgba(233, 30, 99, 0.05));
+    }
+
+    .lobby-card.current::before {
+      opacity: 1;
     }
 
     .lobby-header {
       display: flex;
       justify-content: space-between;
-      align-items: start;
-      margin-bottom: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
     }
 
     .lobby-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--txt);
-      margin: 0 0 0.5rem 0;
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 0.75rem 0;
+      line-height: 1.3;
     }
 
     .game-id-badge {
-      font-size: 0.75rem;
-      color: var(--muted);
-      font-family: 'JetBrains Mono', monospace;
-      background: rgba(139, 92, 246, 0.1);
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: 'Courier New', monospace;
+      background: rgba(139, 92, 246, 0.15);
+      padding: 0.375rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      display: inline-block;
     }
 
     .status-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
+      padding: 0.375rem 1rem;
+      border-radius: 20px;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
     }
 
     .status-recruiting {
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
+      background: rgba(0, 200, 83, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(0, 200, 83, 0.3);
     }
 
     .status-waiting {
-      background: rgba(234, 179, 8, 0.1);
-      color: #eab308;
+      background: rgba(255, 193, 7, 0.15);
+      color: var(--accent-gold);
+      border: 1px solid rgba(255, 193, 7, 0.3);
     }
 
     .status-active {
-      background: rgba(139, 92, 246, 0.1);
-      color: #8b5cf6;
+      background: rgba(156, 39, 176, 0.15);
+      color: var(--accent-purple);
+      border: 1px solid rgba(156, 39, 176, 0.3);
+    }
+
+    .current-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent-purple);
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding: 0.5rem 1rem;
+      background: rgba(156, 39, 176, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(156, 39, 176, 0.3);
     }
 
     .lobby-stats {
-      display: flex;
-      gap: 1.5rem;
-      margin: 1rem 0;
-      padding: 1rem;
-      background: rgba(139, 92, 246, 0.05);
-      border-radius: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: rgba(139, 92, 246, 0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(139, 92, 246, 0.2);
     }
 
     .stat {
@@ -126,56 +312,141 @@
     }
 
     .stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #8b5cf6;
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 0.5rem;
     }
 
     .stat-label {
       font-size: 0.75rem;
-      color: var(--muted);
+      color: var(--text-secondary);
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .lobby-meta {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin: 1rem 0;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      line-height: 1.6;
     }
 
     .lobby-actions {
-      display: flex;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
       gap: 0.75rem;
-      margin-top: 1rem;
+      margin-top: 1.5rem;
     }
 
+    .lobby-actions .btn {
+      padding: 0.875rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    /* Empty State */
     .empty-state {
       text-align: center;
-      padding: 4rem 2rem;
-      color: var(--muted);
+      padding: 6rem 2rem;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      border-radius: 20px;
+      border: 2px dashed var(--border-subtle);
     }
 
     .empty-state-icon {
-      font-size: 4rem;
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 1.75rem;
+      color: var(--text-primary);
       margin-bottom: 1rem;
     }
 
-    .current-lobby-banner {
-      background: linear-gradient(135deg, #8b5cf6, #ec4899);
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 12px;
+    .empty-state p {
+      font-size: 1.125rem;
       margin-bottom: 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 1rem;
+      border: 4px solid rgba(156, 39, 176, 0.1);
+      border-top-color: var(--accent-purple);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .lobby-browser {
+        padding: 1rem;
+      }
+
+      .page-header h1 {
+        font-size: 2rem;
+      }
+
+      .lobby-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .header-actions {
+        flex-direction: column;
+      }
+
+      .header-actions .btn {
+        width: 100%;
+      }
+
+      .current-lobby-banner {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .lobby-actions {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <div class="lobby-browser">
-    <div class="header-actions">
-      <div>
-        <h1 style="margin: 0 0 0.5rem 0;">🎮 Browse Lobbies</h1>
-        <p style="color: var(--muted); margin: 0;">Join an existing lobby or create a new one</p>
-      </div>
-      <div style="display: flex; gap: 1rem;">
-        <button class="btn btn-secondary" onclick="refreshLobbies()">🔄 Refresh</button>
-        <button class="btn btn-primary" onclick="createNewGame()">➕ Create New Lobby</button>
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>🎮 Browse Game Lobbies</h1>
+      <p>Join an active lobby or create your own Mansion Mayhem experience</p>
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="refreshLobbies()">
+          <span>🔄</span> Refresh
+        </button>
+        <button class="btn btn-primary" onclick="createNewGame()">
+          <span>➕</span> Create New Lobby
+        </button>
       </div>
     </div>
 
@@ -273,19 +544,19 @@
         const shortId = game.id.slice(0, 8)
         const isCurrent = game.id === currentGameId
         const statusClass = game.status.replace('_', '-')
-        const statusLabel = game.status.replace('_', ' ')
+        const statusLabel = game.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 
         return `
-          <div class="lobby-card" ${isCurrent ? 'style="border-color: #8b5cf6; box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);"' : ''}>
+          <div class="lobby-card ${isCurrent ? 'current' : ''}">
             <div class="lobby-header">
               <div>
                 <h3 class="lobby-title">${game.title}</h3>
-                <div class="game-id-badge">ID: ${shortId}</div>
+                <div class="game-id-badge">🆔 ${shortId}</div>
               </div>
               <span class="status-badge status-${statusClass}">${statusLabel}</span>
             </div>
 
-            ${isCurrent ? '<div style="color: #8b5cf6; font-size: 0.875rem; margin-bottom: 0.5rem;">⭐ Your Current Lobby</div>' : ''}
+            ${isCurrent ? '<div class="current-badge">⭐ Your Current Lobby</div>' : ''}
 
             <div class="lobby-stats">
               <div class="stat">
@@ -294,21 +565,21 @@
               </div>
               <div class="stat">
                 <div class="stat-value">${game.max_players - game.current_players}</div>
-                <div class="stat-label">Spots Left</div>
+                <div class="stat-label">Spots Open</div>
               </div>
             </div>
 
-            <div style="font-size: 0.875rem; color: var(--muted); margin-bottom: 1rem;">
-              Created ${formatTimeAgo(game.created_at)}
-              ${game.game_starts_at ? `<br>Starts ${formatTime(game.game_starts_at)}` : ''}
+            <div class="lobby-meta">
+              📅 Created ${formatTimeAgo(game.created_at)}
+              ${game.game_starts_at ? `<br>🕐 Starts ${formatTime(game.game_starts_at)}` : ''}
             </div>
 
             <div class="lobby-actions">
-              <button class="btn btn-primary" onclick="joinLobby('${game.id}')" style="flex: 1;">
-                ${isCurrent ? '🏠 Return' : '🎮 Join'}
+              <button class="btn btn-primary" onclick="joinLobby('${game.id}')">
+                ${isCurrent ? '🏠 Return to Lobby' : '🎮 Join Game'}
               </button>
               <button class="btn btn-secondary" onclick="copyLobbyUrl('${game.id}')">
-                📋 Copy Link
+                📋
               </button>
             </div>
           </div>

@@ -137,7 +137,15 @@ BACKSTORY: ${castMember.backstory || 'A mysterious contestant with something to 
 
 You respond to scenario prompts in character, staying true to your archetype. Keep responses under 150 words. Be dramatic, authentic, and strategic. Use your speaking style naturally - don't be formal or corporate. Talk like you would on a reality TV show confessional.
 
-IMPORTANT: Write ONLY spoken dialogue - no asterisks, no action descriptions, no stage directions. This will be converted to voice, so only include words that should be spoken aloud.`
+CRITICAL VOICE NOTE RULES:
+- Write ONLY words that will be SPOKEN ALOUD
+- NO visual actions: no "flips hair", "sits back", "rolls eyes", "crosses arms", "leans in"
+- NO asterisks, no action descriptions, no stage directions, no parentheticals
+- Think: "What would I actually SAY in an audio recording?" not "What would I describe in a script?"
+- Example WRONG: "*flips hair* Girl, please, *sits back* I saw that coming"
+- Example RIGHT: "Girl, please, I saw that coming a mile away"
+
+This will be converted to voice audio, so every word you write will be spoken by text-to-speech.`
 
   const userPrompt = `You've been given this scenario to respond to:
 
@@ -251,7 +259,15 @@ ${personality.examples ? `PHRASES YOU USE: ${personality.examples}` : ''}
 
 Generate a short, natural chat message (1-2 sentences max). Stay in character. Be conversational, not formal. Talk like you're texting your alliance members - use your natural slang and speaking style.
 
-IMPORTANT: Write only text that would appear in a message. Do NOT use asterisks (*), underscores (_), or action descriptions like *laughs* or *rolls eyes*. Just write what you would actually type in a text message.`
+CRITICAL TEXT MESSAGE RULES:
+- Write only TEXT that would appear in a real text message
+- NO visual actions: no "flips hair", "sits back", "rolls eyes", "crosses arms"
+- NO asterisks (*), underscores (_), or action descriptions like *laughs* or *rolls eyes*
+- NO stage directions or parentheticals
+- Example WRONG: "*flips hair* we need to vote them out *crosses arms*"
+- Example RIGHT: "we need to vote them out, periodt"
+
+Just write what you would actually TYPE in a group chat.`
 
   const userPrompt = `Recent chat messages:
 ${recentMessages || '(No messages yet - you can start the conversation)'}
@@ -462,7 +478,15 @@ Create a DRAMATIC, SHADE-FILLED public post (1-3 sentences max). This is PUBLIC 
 - Stay in character with your archetype
 - Use your speaking style and slang naturally
 
-IMPORTANT: Write ONLY spoken text that would be in a voice note. Do NOT use asterisks (*), underscores (_), or action descriptions like *laughs* or *rolls eyes*. Just write what you would actually say out loud in a reality TV confessional. DO NOT use hashtags or "Posted by" signatures. Just raw drama.`
+CRITICAL VOICE NOTE RULES:
+- Write ONLY words you would SPEAK ALOUD in a reality TV confessional
+- NO visual actions: no "flips hair", "sits back in chair", "rolls eyes", "crosses arms", "leans in"
+- NO asterisks (*), underscores (_), action descriptions, stage directions, or parentheticals
+- NO hashtags or "Posted by" signatures
+- Example WRONG: "*flips hair* Chile, she really tried it *sits back and crosses arms*"
+- Example RIGHT: "Chile, she really tried it and I am NOT here for it"
+
+This becomes an AUDIO recording - every word will be spoken by text-to-speech. Just raw spoken drama.`
 
   const startTime = Date.now()
   const response = await anthropic.messages.create({
@@ -541,22 +565,73 @@ IMPORTANT: Write ONLY spoken text that would be in a voice note. Do NOT use aste
 // TEXT CLEANING FOR VOICE SYNTHESIS
 // ============================================================================
 /**
- * Removes markdown formatting and symbols that would be read aloud by TTS
- * Fixes: "asterisk rips hat asterisk" → "rips hat"
+ * Removes markdown formatting, symbols, and visual actions that would be read aloud by TTS
+ * Fixes: "asterisk flips hair asterisk Girl please" → "Girl please"
  */
 function cleanTextForVoice(text: string): string {
-  return text
-    // Remove action text in asterisks: *rips hat* → (removed entirely)
-    .replace(/\*[^*]+\*/g, '')
-    // Remove emphasis asterisks: *word* → word
-    .replace(/\*/g, '')
-    // Remove underscores used for emphasis: _word_ → word
-    .replace(/_/g, '')
-    // Remove markdown bold: **word** → word
-    .replace(/\*\*/g, '')
-    // Remove extra spaces left by removals
-    .replace(/\s+/g, ' ')
-    .trim()
+  // Common visual/physical action phrases to remove
+  const visualActions = [
+    'flips? hair',
+    'sits? back( in chair)?',
+    'leans? (in|forward|back)',
+    'rolls? eyes?',
+    'crosses? arms?',
+    'raises? eyebrow',
+    'shrugs?',
+    'smirks?',
+    'grins?',
+    'winks?',
+    'nods?',
+    'shakes? head',
+    'stands? up',
+    'walks? away',
+    'turns? around',
+    'looks? away',
+    'stares?',
+    'glances?',
+    'gestures?',
+    'points?( at)?',
+    'waves? hand',
+    'snaps? fingers?',
+    'claps? hands?',
+    'puts? hands? on hips?',
+    'folds? arms?',
+    'adjusts? (hair|outfit|collar)',
+    'fixes? (hair|makeup)',
+    'checks? (nails|phone)',
+    'sips? (tea|drink|coffee)',
+    'takes? (a )?sip'
+  ]
+
+  let cleaned = text
+
+  // Remove action text in asterisks: *flips hair* → (removed entirely)
+  cleaned = cleaned.replace(/\*[^*]+\*/g, '')
+
+  // Remove action text in parentheses: (flips hair) → (removed entirely)
+  cleaned = cleaned.replace(/\([^)]*(?:flips?|sits?|leans?|rolls?|crosses?|raises?|shrugs?|smirks?|grins?|winks?|nods?|shakes?|stands?|walks?|turns?|looks?|stares?|glances?|gestures?|points?|waves?|snaps?|claps?|puts?|folds?|adjusts?|fixes?|checks?|sips?|takes?)[^)]*\)/gi, '')
+
+  // Remove standalone visual action phrases (case-insensitive)
+  for (const action of visualActions) {
+    const regex = new RegExp(`\\b${action}\\b`, 'gi')
+    cleaned = cleaned.replace(regex, '')
+  }
+
+  // Remove emphasis asterisks: *word* → word (any remaining)
+  cleaned = cleaned.replace(/\*/g, '')
+
+  // Remove underscores used for emphasis: _word_ → word
+  cleaned = cleaned.replace(/_/g, '')
+
+  // Remove markdown bold: **word** → word
+  cleaned = cleaned.replace(/\*\*/g, '')
+
+  // Remove extra commas, spaces, and punctuation left by removals
+  cleaned = cleaned.replace(/\s*,\s*,\s*/g, ', ')  // Double commas
+  cleaned = cleaned.replace(/\s+/g, ' ')            // Multiple spaces
+  cleaned = cleaned.replace(/^[,\s]+|[,\s]+$/g, '') // Leading/trailing commas and spaces
+
+  return cleaned.trim()
 }
 
 // ============================================================================

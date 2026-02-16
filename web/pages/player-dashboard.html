@@ -1154,28 +1154,52 @@
           console.log('✅ Cast member found:', castMember)
         }
 
-        console.log('Creating new game...')
-
-        // Create a new game (always 20 cast members)
-        const { data: newGame, error: gameError } = await supabase
+        // Check if a joinable game already exists
+        console.log('Checking for existing games to join...')
+        const { data: existingGames, error: findError } = await supabase
           .from('mm_games')
-          .insert({
-            title: `Mansion Mayhem - ${new Date().toLocaleDateString()}`,
-            description: 'New Mansion Mayhem game launching this Sunday with 20 cast members!',
-            status: 'recruiting',
-            max_players: 20,
-            current_players: 0,
-            created_at: new Date().toISOString()
-          })
-          .select()
-          .single()
+          .select('*')
+          .in('status', ['recruiting', 'waiting_lobby'])
+          .order('created_at', { ascending: false })
+          .limit(1)
 
-        if (gameError) {
-          console.error('❌ Game creation error:', gameError)
-          throw gameError
+        if (findError) {
+          console.error('❌ Error finding games:', findError)
+          throw findError
         }
 
-        console.log('✅ Game created:', newGame)
+        let newGame
+
+        if (existingGames && existingGames.length > 0) {
+          // JOIN EXISTING GAME
+          newGame = existingGames[0]
+          console.log('✅ Found existing game to join:', newGame.title)
+          console.log('Game ID:', newGame.id)
+        } else {
+          // CREATE NEW GAME (only if no joinable games exist)
+          console.log('No existing games found. Creating new game...')
+
+          const { data: createdGame, error: gameError } = await supabase
+            .from('mm_games')
+            .insert({
+              title: `Mansion Mayhem - ${new Date().toLocaleDateString()}`,
+              description: 'New Mansion Mayhem game launching this Sunday with 20 cast members!',
+              status: 'recruiting',
+              max_players: 20,
+              current_players: 0,
+              created_at: new Date().toISOString()
+            })
+            .select()
+            .single()
+
+          if (gameError) {
+            console.error('❌ Game creation error:', gameError)
+            throw gameError
+          }
+
+          newGame = createdGame
+          console.log('✅ New game created:', newGame)
+        }
 
         // Add the user to the game as a cast member
         console.log('Adding you to the game...')
@@ -1194,40 +1218,50 @@
         }
 
         console.log('✅ You joined the game!')
-        console.log('Initializing week-long lobby with Sunday launch...')
 
-        // Initialize week-long lobby (REQUIRED for Sunday schedule)
-        const { data: lobbyInfo, error: lobbyError } = await supabase
-          .rpc('initialize_week_long_lobby', { p_game_id: newGame.id })
+        let lobbyInfo
+        let message
 
-        if (lobbyError) {
-          console.error('❌ Lobby initialization error:', lobbyError)
-          throw new Error('Failed to set up Sunday launch schedule: ' + lobbyError.message)
+        // Only initialize lobby if this is a NEW game (status = recruiting)
+        if (newGame.status === 'recruiting') {
+          console.log('Initializing week-long lobby with Sunday launch...')
+
+          // Initialize week-long lobby (REQUIRED for Sunday schedule)
+          const { data: info, error: lobbyError } = await supabase
+            .rpc('initialize_week_long_lobby', { p_game_id: newGame.id })
+
+          if (lobbyError) {
+            console.error('❌ Lobby initialization error:', lobbyError)
+            throw new Error('Failed to set up Sunday launch schedule: ' + lobbyError.message)
+          }
+
+          lobbyInfo = info
+          console.log('✅ Sunday launch schedule set:', lobbyInfo)
+
+          // Show launch info for NEW game
+          const daysUntil = Math.floor(lobbyInfo.days_until_launch)
+          const lobbyCloses = new Date(lobbyInfo.lobby_closes).toLocaleString('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZoneName: 'short'
+          })
+          const gameStarts = new Date(lobbyInfo.queen_selection).toLocaleString('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZoneName: 'short'
+          })
+
+          message = `🎮 Game Created!\n\n✨ Lobby is OPEN NOW\n🔒 Closes: ${lobbyCloses}\n🎬 Launches: ${gameStarts}\n📅 ${daysUntil} days until launch!`;
+        } else {
+          // Joined existing game
+          message = `✅ Joined Existing Game!\n\n🎭 "${newGame.title}"\n\nHead to the lobby to meet other cast members!`;
         }
-
-        console.log('✅ Sunday launch schedule set:', lobbyInfo)
-
-        // Show launch info
-        const daysUntil = Math.floor(lobbyInfo.days_until_launch)
-        const lobbyCloses = new Date(lobbyInfo.lobby_closes).toLocaleString('en-US', {
-          weekday: 'long',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          timeZoneName: 'short'
-        })
-        const gameStarts = new Date(lobbyInfo.queen_selection).toLocaleString('en-US', {
-          weekday: 'long',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          timeZoneName: 'short'
-        })
-
-        // Show success message
-        const message = `🎮 Game Created!\n\n✨ Lobby is OPEN NOW\n🔒 Closes: ${lobbyCloses}\n🎬 Launches: ${gameStarts}\n📅 ${daysUntil} days until launch!`;
 
         console.log('Game created successfully!')
         console.log('Game ID:', newGame.id)

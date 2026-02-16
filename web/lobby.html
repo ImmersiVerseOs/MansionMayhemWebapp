@@ -597,19 +597,39 @@
             </p>
           </div>
 
+          <!-- Invite Friends Section -->
+          <div style="background: rgba(212, 175, 55, 0.1); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <h3 style="color: var(--gold); margin-bottom: 0.75rem; font-size: 1.125rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>👥</span>
+              <span>Invite Friends to Play!</span>
+            </h3>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9375rem; margin-bottom: 1rem;">
+              Share this link with friends so they can join your lobby:
+            </p>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+              <input
+                id="inviteLinkInput"
+                type="text"
+                readonly
+                style="flex: 1; padding: 0.75rem; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white; font-size: 0.875rem;"
+              />
+              <button onclick="copyInviteLinkFromInput()" style="padding: 0.75rem 1.5rem; background: var(--gradient-gold); color: var(--color-dark); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                📋 Copy
+              </button>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn btn-secondary" onclick="shareGame()" style="font-size: 0.9375rem;">
+                <span>📤</span>
+                <span>Share via...</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Actions -->
           <div class="actions-section">
-            <button class="btn btn-primary" onclick="copyInviteLink()">
-              <span>📋</span>
-              <span>Copy Invite Link</span>
-            </button>
-            <button class="btn btn-secondary" onclick="shareGame()">
-              <span>📤</span>
-              <span>Share</span>
-            </button>
             <button class="btn btn-danger" onclick="leaveGame()">
               <span>🚪</span>
-              <span>Leave</span>
+              <span>Leave Lobby</span>
             </button>
           </div>
         </div>
@@ -722,6 +742,7 @@
 
       await loadLobby()
       await loadVoiceIntros()
+      populateInviteLink()
       setupRealtimeSubscription()
     }
 
@@ -1049,6 +1070,24 @@
       }
     }
 
+    // Copy from input field
+    window.copyInviteLinkFromInput = async function() {
+      const input = document.getElementById('inviteLinkInput')
+      try {
+        await navigator.clipboard.writeText(input.value)
+        const btn = event.target.closest('button')
+        const originalText = btn.innerHTML
+        btn.innerHTML = '✅ Copied!'
+        setTimeout(() => {
+          btn.innerHTML = originalText
+        }, 2000)
+      } catch (err) {
+        input.select()
+        document.execCommand('copy')
+        alert('Link copied!')
+      }
+    }
+
     // Share game
     window.shareGame = async function() {
       const inviteUrl = `${window.location.origin}/join.html?game=${currentGameId}`
@@ -1066,6 +1105,15 @@
         }
       } else {
         copyInviteLink()
+      }
+    }
+
+    // Populate invite link input
+    function populateInviteLink() {
+      const inviteUrl = `${window.location.origin}/join.html?game=${currentGameId}`
+      const input = document.getElementById('inviteLinkInput')
+      if (input) {
+        input.value = inviteUrl
       }
     }
 

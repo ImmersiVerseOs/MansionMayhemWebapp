@@ -449,14 +449,24 @@
         return;
       }
 
+      // Wait for gameContext to be initialized
+      let gcAttempts = 0;
+      while (!window.gameContext && gcAttempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        gcAttempts++;
+      }
+
       // Check game context
       try {
-        // Wait for gameContext to be initialized by game-context.js
         if (!window.gameContext) {
           throw new Error('GameContext not loaded');
         }
 
+        // Wait a bit more for gameContext to finish its async initialization
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         const castMemberId = window.gameContext.getCastMemberId();
+        console.log('🎭 Cast Member ID:', castMemberId);
 
         if (!castMemberId) {
           // No cast member - show friendly message

@@ -510,7 +510,8 @@
         room = data;
 
         // Check if current user is a member
-        if (!room.member_cast_ids.includes(currentCastMemberId)) {
+        const memberIds = room.member_ids || room.member_cast_ids || [];
+        if (!memberIds.includes(currentCastMemberId)) {
           alert('You are not a member of this room');
           window.location.href = '/alliance-rooms.html';
           return;
@@ -520,7 +521,7 @@
         const { data: memberData, error: memberError } = await window.supabaseClient
           .from('cast_members')
           .select('id, full_name, display_name, avatar_url')
-          .in('id', room.member_cast_ids);
+          .in('id', memberIds);
 
         if (!memberError) {
           members = memberData || [];

@@ -407,10 +407,13 @@
           .eq('status', 'active')
           .maybeSingle();
 
+        console.log('🔍 Game Cast Query:', { gameId, userId: user.id, gameCast, error });
+
         if (error || !gameCast || !gameCast.cast_members) {
-          alert('Cast member profile not found. Please join a game first.');
+          console.error('❌ Cast member not found in game:', { error, gameCast, gameId, userId: user.id });
+          alert('No cast member found for this game. Please join the game first.');
           setTimeout(() => {
-            window.location.href = '/pages/browse-games.html';
+            window.location.href = '/pages/lobby-browser.html';
           }, 2000);
           return;
         }

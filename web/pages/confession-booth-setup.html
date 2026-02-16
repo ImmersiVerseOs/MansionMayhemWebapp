@@ -606,13 +606,13 @@
 
           if (error) throw error;
 
-          avatarUrl = supabase.storage
+          avatarUrl = window.supabaseClient.storage
             .from('confession-booth-avatars')
             .getPublicUrl(fileName).data.publicUrl;
 
         } else if (selectedSource === 'facecast_still') {
           // Get FaceCast photo from cast_members
-          const { data } = await supabase
+          const { data } = await window.supabaseClient
             .from('cast_members')
             .select('avatar_url')
             .eq('id', castMemberId)
@@ -622,7 +622,7 @@
 
         } else if (selectedSource === 'cameo_character') {
           // Get Cameo character image
-          const { data } = await supabase
+          const { data } = await window.supabaseClient
             .from('cast_members')
             .select('avatar_url')
             .eq('id', castMemberId)
@@ -639,7 +639,7 @@
         }
 
         // Update cast_members table
-        const { error: updateError } = await supabase
+        const { error: updateError } = await window.supabaseClient
           .from('cast_members')
           .update({
             confession_booth_avatar_url: avatarUrl,

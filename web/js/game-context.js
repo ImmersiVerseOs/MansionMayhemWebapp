@@ -16,6 +16,13 @@ class GameContext {
    * Call this at the top of every page
    */
   async init() {
+    // Migrate old localStorage key to new key
+    const oldGameId = localStorage.getItem('currentGameId')
+    if (oldGameId && !localStorage.getItem('current_game_id')) {
+      localStorage.setItem('current_game_id', oldGameId)
+      console.log('🔄 Migrated currentGameId to current_game_id')
+    }
+
     // Try URL first (highest priority)
     const urlParams = new URLSearchParams(window.location.search)
     const urlGameId = urlParams.get('game') || urlParams.get('gameId')

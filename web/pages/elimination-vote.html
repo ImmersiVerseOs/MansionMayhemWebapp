@@ -477,19 +477,33 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/game-context.js"></script>
   <script>
     const sb = window.supabase.createClient(
       'https://fpxbhqibimekjhlumnmc.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
     )
 
+    // Set game context to use the inline client
+    window.supabaseClient = sb
+
     let selectedNominee = null
     let currentRound = null
+    let gameId = null
 
     async function loadVote() {
       const content = document.getElementById('content')
 
       try {
+        // Initialize game context
+        await window.gameContext.init()
+        gameId = window.gameContext.getGameId()
+
+        if (!gameId) {
+          window.gameContext.showWarningBanner()
+          return
+        }
+
         const { data: rounds, error } = await sb
           .from('mm_voting_rounds')
           .select(`
@@ -498,6 +512,7 @@
             nominee_a:cast_members!nominee_a_id(id, display_name, archetype),
             nominee_b:cast_members!nominee_b_id(id, display_name, archetype)
           `)
+          .eq('game_id', gameId)
           .eq('status', 'active')
           .order('round_number', { ascending: false })
           .limit(1)

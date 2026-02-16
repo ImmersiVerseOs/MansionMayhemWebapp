@@ -285,14 +285,14 @@
   </script>
 
   <div class="container">
-    <a href="/lobby-dashboard.html" class="back-btn">← Back to Lobby</a>
+    <a href="/pages/player-dashboard.html" class="back-btn">← Back to Dashboard</a>
 
     <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
       <div>
         <h1 class="page-title">💬 Alliance Rooms</h1>
         <p class="page-subtitle">Private spaces for strategic conversations and alliances</p>
       </div>
-      <a href="/link-up-requests.html" id="createAllianceBtn" class="btn btn-primary" style="text-decoration: none; white-space: nowrap;">
+      <a href="#" id="createAllianceBtn" class="btn btn-primary" style="text-decoration: none; white-space: nowrap;">
         🤝 Create Alliance Room
       </a>
     </div>
@@ -332,7 +332,7 @@
       <div class="empty-icon">💬</div>
       <h3 style="color: var(--text); margin-bottom: 8px;">No Alliance Rooms Yet</h3>
       <p>Form alliances through link-up requests to create private rooms</p>
-      <a href="/link-up-requests.html" id="emptyStateBtn" class="btn btn-primary" style="margin-top: 24px; display: inline-block; text-decoration: none;">
+      <a href="#" id="emptyStateBtn" class="btn btn-primary" style="margin-top: 24px; display: inline-block; text-decoration: none;">
         🤝 Send Link-Up Request
       </a>
     </div>
@@ -349,22 +349,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module" src="/js/supabase-client.js"></script>
   <script src="/js/navigation.js"></script>
+  <script src="/js/game-context.js"></script>
 
   <script>
-    const gameId = new URLSearchParams(window.location.search).get('gameId') ||
-                   localStorage.getItem('currentGameId') ||
-                   '7ca5f4eb-4443-4167-b6e0-a9fe1be00ac1';
-
-    // Update create alliance buttons with game ID
-    const createAllianceBtn = document.getElementById('createAllianceBtn');
-    const emptyStateBtn = document.getElementById('emptyStateBtn');
-    if (createAllianceBtn && gameId) {
-      createAllianceBtn.href = `/link-up-requests.html?game=${gameId}`;
-    }
-    if (emptyStateBtn && gameId) {
-      emptyStateBtn.href = `/link-up-requests.html?game=${gameId}`;
-    }
-
+    let gameId = null;
     let currentCastMemberId = null;
     let rooms = [];
     let members = [];
@@ -373,6 +361,25 @@
     // Load current user's cast member (SECURE - auth-based)
     async function loadCurrentCastMember() {
       try {
+        // Initialize game context
+        await window.gameContext.init();
+        gameId = window.gameContext.getGameId();
+
+        if (!gameId) {
+          window.gameContext.showWarningBanner();
+          return;
+        }
+
+        // Update navigation links with game context
+        const createAllianceBtn = document.getElementById('createAllianceBtn');
+        const emptyStateBtn = document.getElementById('emptyStateBtn');
+        if (createAllianceBtn) {
+          createAllianceBtn.href = `/link-up-requests.html?game=${gameId}`;
+        }
+        if (emptyStateBtn) {
+          emptyStateBtn.href = `/link-up-requests.html?game=${gameId}`;
+        }
+
         // Get authenticated user
         const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
 
@@ -382,11 +389,12 @@
           return;
         }
 
-        // Get user's cast member record
+        // Get user's cast member record for THIS game
         const { data: castMember, error } = await window.supabaseClient
           .from('cast_members')
           .select('id, full_name, display_name, status')
           .eq('user_id', user.id)
+          .eq('game_id', gameId)
           .single();
 
         if (error || !castMember) {
@@ -426,10 +434,11 @@
         document.getElementById('empty-state').style.display = 'none';
         document.getElementById('rooms-container').style.display = 'none';
 
-        // Load rooms where current user is a member
+        // Load rooms where current user is a member (filtered by game)
         const { data: roomsData, error: roomsError } = await window.supabaseClient
           .from('mm_alliance_rooms')
           .select('*')
+          .eq('game_id', gameId)
           .contains('member_ids', [currentCastMemberId])
           .eq('status', 'active')
           .order('updated_at', { ascending: false });
@@ -438,10 +447,11 @@
 
         rooms = roomsData || [];
 
-        // Load all cast members for avatars
+        // Load cast members for THIS game only
         const { data: membersData, error: membersError } = await window.supabaseClient
           .from('cast_members')
           .select('id, full_name, display_name, avatar_url')
+          .eq('game_id', gameId)
           .eq('status', 'active');
 
         if (!membersError) {
@@ -536,7 +546,7 @@
 
     // Enter room
     function enterRoom(roomId) {
-      window.location.href = `/alliance-chat.html?roomId=${roomId}&castMemberId=${currentCastMemberId}`;
+      window.location.href = `/pages/alliance-chat.html?game=${gameId}&roomId=${roomId}&castMemberId=${currentCastMemberId}`;
     }
 
     // Subscribe to room changes

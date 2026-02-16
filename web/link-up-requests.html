@@ -369,7 +369,7 @@
   </script>
 
   <div class="container">
-    <a href="/lobby.html" class="back-link">← Back to Lobby</a>
+    <a href="/pages/player-dashboard.html" class="back-link">← Back to Dashboard</a>
 
     <h1 class="page-title">🤝 Link-Up Requests</h1>
     <p style="color: var(--text-secondary); margin-bottom: 32px; font-size: 1.1rem;">Connect with other cast members to form powerful alliances</p>
@@ -459,13 +459,11 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module" src="/js/supabase-client.js"></script>
   <script src="/js/navigation.js"></script>
+  <script src="/js/game-context.js"></script>
 
   <script>
-    const gameId = new URLSearchParams(window.location.search).get('gameId') ||
-                   localStorage.getItem('currentGameId') ||
-                   '7ca5f4eb-4443-4167-b6e0-a9fe1be00ac1';
-
-    let currentCastMemberId = localStorage.getItem('currentCastMemberId');
+    let gameId = null;
+    let currentCastMemberId = null;
     let allCastMembers = [];
     let subscriptions = [];
 
@@ -485,6 +483,15 @@
     // Load cast members and authenticate current user
     async function loadCastMembers() {
       try {
+        // Initialize game context
+        await window.gameContext.init();
+        gameId = window.gameContext.getGameId();
+
+        if (!gameId) {
+          window.gameContext.showWarningBanner();
+          return;
+        }
+
         // Get current authenticated user
         const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
 
@@ -494,11 +501,12 @@
           return;
         }
 
-        // Get user's cast member for this game
+        // Get user's cast member for THIS game only
         const { data: userCastMember, error: castError } = await window.supabaseClient
           .from('cast_members')
           .select('id, full_name, display_name')
           .eq('user_id', user.id)
+          .eq('game_id', gameId)
           .single();
 
         if (castError || !userCastMember) {
@@ -511,14 +519,18 @@
         currentCastMemberId = userCastMember.id;
         localStorage.setItem('currentCastMemberId', currentCastMemberId);
 
+        // Set current cast member (security: only user's own cast member)
+        currentCastMemberId = userCastMember.id;
+
         // Display current cast member
         document.getElementById('current-cast-display').textContent = userCastMember.display_name;
         document.getElementById('cast-selector').style.display = 'block';
 
-        // Load all cast members for display purposes (but can't act as them)
+        // Load all cast members for THIS game only
         const { data: allMembers, error: membersError } = await window.supabaseClient
           .from('cast_members')
           .select('id, full_name, display_name, avatar_url, status')
+          .eq('game_id', gameId)
           .eq('status', 'active')
           .order('display_name');
 
@@ -554,6 +566,7 @@
         const { data, error } = await window.supabaseClient
           .from('mm_link_up_requests')
           .select('*')
+          .eq('game_id', gameId)
           .contains('invited_cast_ids', [currentCastMemberId])
           .eq('status', 'pending')
           .gt('expires_at', new Date().toISOString())
@@ -861,6 +874,7 @@
         const { data, error } = await window.supabaseClient
           .from('mm_link_up_requests')
           .select('*')
+          .eq('game_id', gameId)
           .eq('from_cast_member_id', currentCastMemberId)
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
@@ -923,6 +937,7 @@
         const { data, error } = await window.supabaseClient
           .from('mm_alliance_rooms')
           .select('*')
+          .eq('game_id', gameId)
           .contains('member_ids', [currentCastMemberId])
           .eq('status', 'active')
           .order('created_at', { ascending: false });

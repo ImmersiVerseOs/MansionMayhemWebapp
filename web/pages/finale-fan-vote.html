@@ -7,6 +7,7 @@
 
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/game-context.js"></script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -433,17 +434,31 @@
     <script type="module">
         import { supabaseClient as supabase } from '../js/supabase-module.js';
 
+        // Make supabase available to game-context.js
+        window.supabaseClient = supabase;
+
         let finaleRound = null;
         let finalistAData = null;
         let finalistBData = null;
+        let gameId = null;
 
         // Load finale data
         async function loadFinaleData() {
             try {
-                // Get active finale round
+                // Initialize game context
+                await window.gameContext.init();
+                gameId = window.gameContext.getGameId();
+
+                if (!gameId) {
+                    window.gameContext.showWarningBanner();
+                    return;
+                }
+
+                // Get active finale round for THIS game
                 const { data: finale, error } = await supabase
                     .from('mm_finale_rounds')
                     .select('*')
+                    .eq('game_id', gameId)
                     .eq('status', 'voting_open')
                     .single();
 

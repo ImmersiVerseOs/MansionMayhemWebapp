@@ -135,7 +135,9 @@ CATCHPHRASE: "${personality.catchphrase}"
 
 BACKSTORY: ${castMember.backstory || 'A mysterious contestant with something to prove.'}
 
-You respond to scenario prompts in character, staying true to your archetype. Keep responses under 150 words. Be dramatic, authentic, and strategic. Use your speaking style naturally - don't be formal or corporate. Talk like you would on a reality TV show confessional.`
+You respond to scenario prompts in character, staying true to your archetype. Keep responses under 150 words. Be dramatic, authentic, and strategic. Use your speaking style naturally - don't be formal or corporate. Talk like you would on a reality TV show confessional.
+
+IMPORTANT: Write ONLY spoken dialogue - no asterisks, no action descriptions, no stage directions. This will be converted to voice, so only include words that should be spoken aloud.`
 
   const userPrompt = `You've been given this scenario to respond to:
 
@@ -144,7 +146,7 @@ ${scenario.description}
 
 ${scenario.context_notes ? `CONTEXT: ${scenario.context_notes}` : ''}
 
-Respond as ${castMember.display_name} would. This will be recorded as a voice note, so write it as spoken dialogue (natural, conversational). Stay in character.`
+Respond as ${castMember.display_name} would. This will be recorded as a voice note, so write it as spoken dialogue (natural, conversational). Stay in character. Do NOT use asterisks (*) or action descriptions - only spoken words.`
 
   // Call Claude API (Sonnet for important scenario responses)
   const startTime = Date.now()
@@ -247,7 +249,9 @@ PERSONALITY: ${personality.traits}
 SPEAKING STYLE: ${personality.speaking_style}
 ${personality.examples ? `PHRASES YOU USE: ${personality.examples}` : ''}
 
-Generate a short, natural chat message (1-2 sentences max). Stay in character. Be conversational, not formal. Talk like you're texting your alliance members - use your natural slang and speaking style.`
+Generate a short, natural chat message (1-2 sentences max). Stay in character. Be conversational, not formal. Talk like you're texting your alliance members - use your natural slang and speaking style.
+
+IMPORTANT: Write only text that would appear in a message. Do NOT use asterisks (*), underscores (_), or action descriptions like *laughs* or *rolls eyes*. Just write what you would actually type in a text message.`
 
   const userPrompt = `Recent chat messages:
 ${recentMessages || '(No messages yet - you can start the conversation)'}
@@ -458,7 +462,7 @@ Create a DRAMATIC, SHADE-FILLED public post (1-3 sentences max). This is PUBLIC 
 - Stay in character with your archetype
 - Use your speaking style and slang naturally
 
-DO NOT use hashtags, emojis, or "Posted by" signatures. Just raw drama. Sound like you're on a reality TV show confessional.`
+IMPORTANT: Write ONLY spoken text that would be in a voice note. Do NOT use asterisks (*), underscores (_), or action descriptions like *laughs* or *rolls eyes*. Just write what you would actually say out loud in a reality TV confessional. DO NOT use hashtags or "Posted by" signatures. Just raw drama.`
 
   const startTime = Date.now()
   const response = await anthropic.messages.create({
@@ -534,10 +538,36 @@ DO NOT use hashtags, emojis, or "Posted by" signatures. Just raw drama. Sound li
 }
 
 // ============================================================================
+// TEXT CLEANING FOR VOICE SYNTHESIS
+// ============================================================================
+/**
+ * Removes markdown formatting and symbols that would be read aloud by TTS
+ * Fixes: "asterisk rips hat asterisk" → "rips hat"
+ */
+function cleanTextForVoice(text: string): string {
+  return text
+    // Remove action text in asterisks: *rips hat* → (removed entirely)
+    .replace(/\*[^*]+\*/g, '')
+    // Remove emphasis asterisks: *word* → word
+    .replace(/\*/g, '')
+    // Remove underscores used for emphasis: _word_ → word
+    .replace(/_/g, '')
+    // Remove markdown bold: **word** → word
+    .replace(/\*\*/g, '')
+    // Remove extra spaces left by removals
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// ============================================================================
 // VOICE NOTE GENERATION (ElevenLabs)
 // ============================================================================
 async function generateVoiceNote(text: string, archetype: string): Promise<string> {
   if (!ELEVENLABS_API_KEY) return null
+
+  // Clean text before sending to TTS (removes asterisks and markdown)
+  const cleanedText = cleanTextForVoice(text)
+  console.log(`🎤 Generating voice for: "${cleanedText.substring(0, 100)}..."`)
 
   // Voice ID mapping by archetype (you'll need to set these up in ElevenLabs)
   const voiceMap = {
@@ -559,7 +589,7 @@ async function generateVoiceNote(text: string, archetype: string): Promise<strin
       'xi-api-key': ELEVENLABS_API_KEY
     },
     body: JSON.stringify({
-      text: text,
+      text: cleanedText,
       model_id: 'eleven_monolingual_v1',
       voice_settings: {
         stability: 0.5,

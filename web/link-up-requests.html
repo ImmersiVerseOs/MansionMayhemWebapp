@@ -902,6 +902,8 @@
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
 
+        console.log('📤 Sent Requests Query:', { gameId, currentCastMemberId, data, error });
+
         if (error) throw error;
 
         renderSentRequests(data || []);

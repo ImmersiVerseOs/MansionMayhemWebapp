@@ -41,6 +41,9 @@ WITH CHECK (
   )
 );
 
+-- Drop existing function if it exists (to allow changing return type)
+DROP FUNCTION IF EXISTS get_lobby_voice_intros(UUID);
+
 -- Create RPC function to get voice intros for a game
 CREATE OR REPLACE FUNCTION get_lobby_voice_intros(p_game_id UUID)
 RETURNS TABLE (

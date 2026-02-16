@@ -42,13 +42,17 @@
             }
           });
           console.log('✅ Supabase client initialized before game-context.js');
+
+          // Load game-context.js AFTER client is ready
+          const script = document.createElement('script');
+          script.src = '/js/game-context.js';
+          document.head.appendChild(script);
         })
         .catch(err => {
           console.error('❌ Failed to initialize Supabase:', err);
         });
     })();
   </script>
-  <script src="/js/game-context.js"></script>
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }

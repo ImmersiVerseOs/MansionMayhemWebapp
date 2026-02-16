@@ -469,11 +469,16 @@
       </p>
 
       <div class="cta-buttons">
-        <a href="how-to-play.html" class="cta-btn cta-primary">
-          HOW TO PLAY
-        </a>
-        <a href="#features" class="cta-btn cta-secondary">
-          EXPLORE FEATURES
+        <button onclick="createNewGame()" class="cta-btn cta-primary" style="border: none; cursor: pointer;">
+          🎮 CREATE NEW GAME
+        </button>
+        <button onclick="joinWithCode()" class="cta-btn cta-secondary" style="border: none; cursor: pointer;">
+          🔑 JOIN WITH CODE
+        </button>
+      </div>
+      <div style="text-align: center; margin-top: 1rem;">
+        <a href="/pages/lobby-browser.html" style="color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem;">
+          or browse public games →
         </a>
       </div>
     </section>
@@ -565,9 +570,12 @@
         The mansion doors are open. Drama awaits. Will you survive the mayhem?
       </p>
       <div class="cta-buttons">
-        <a href="how-to-play.html" class="cta-btn cta-primary">
-          START YOUR JOURNEY
-        </a>
+        <button onclick="createNewGame()" class="cta-btn cta-primary" style="border: none; cursor: pointer;">
+          🎮 CREATE NEW GAME
+        </button>
+        <button onclick="joinWithCode()" class="cta-btn cta-secondary" style="border: none; cursor: pointer; background: rgba(255,255,255,0.2);">
+          🔑 JOIN WITH CODE
+        </button>
       </div>
     </section>
 
@@ -653,6 +661,67 @@
         }
       });
     });
+
+    // ========================================================================
+    // GAME ONBOARDING
+    // ========================================================================
+
+    async function createNewGame() {
+      // Check if already in a game
+      const currentGameId = localStorage.getItem('current_game_id');
+      if (currentGameId) {
+        const goToCurrent = confirm('You\'re already in a game! Go to your current lobby?');
+        if (goToCurrent) {
+          window.location.href = `/lobby.html?game=${currentGameId}`;
+          return;
+        }
+      }
+
+      // Create new game
+      const title = prompt('Enter your game name:', 'Mansion Mayhem - ' + new Date().toLocaleDateString());
+      if (!title) return;
+
+      try {
+        const response = await fetch('https://fpxbhqibimekjhlumnmc.supabase.co/rest/v1/mm_games', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({
+            title: title,
+            status: 'recruiting',
+            max_players: 20,
+            current_players: 0
+          })
+        });
+
+        const [game] = await response.json();
+        localStorage.setItem('current_game_id', game.id);
+        window.location.href = `/lobby.html?game=${game.id}`;
+      } catch (error) {
+        alert('Error creating game. Please try again.');
+        console.error(error);
+      }
+    }
+
+    function joinWithCode() {
+      const code = prompt('Enter game code (from invite link):');
+      if (!code) return;
+
+      // Clean up code (remove hyphens, spaces, make uppercase)
+      const gameId = code.trim();
+
+      // Validate UUID format (basic check)
+      if (gameId.length < 30) {
+        alert('Invalid game code. Please check and try again.');
+        return;
+      }
+
+      localStorage.setItem('current_game_id', gameId);
+      window.location.href = `/lobby.html?game=${gameId}`;
+    }
 
     // ========================================================================
     // INITIALIZATION

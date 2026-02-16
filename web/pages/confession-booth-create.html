@@ -483,14 +483,19 @@
         attempts++;
       }
 
-      // Create Supabase client
-      if (window.supabase && window.supabase.createClient) {
-        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('✅ Supabase client initialized');
-      } else {
-        console.error('❌ Supabase CDN failed to load');
+      // Wait for Supabase client from head script
+      let sbAttempts = 0;
+      while (!window.supabaseClient && sbAttempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        sbAttempts++;
+      }
+
+      if (!window.supabaseClient) {
+        console.error('❌ Supabase client not initialized');
         return;
       }
+
+      console.log('✅ Using Supabase client from head script');
 
       // Wait for gameContext to be initialized
       let gcAttempts = 0;

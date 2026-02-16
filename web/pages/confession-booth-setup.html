@@ -439,21 +439,19 @@
       const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
 
-      // Wait for Supabase CDN to load
+      // Wait for Supabase client to be created by head script
       let attempts = 0;
-      while (!window.supabase && attempts < 50) {
+      while (!window.supabaseClient && attempts < 50) {
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
       }
 
-      // Create Supabase client
-      if (window.supabase && window.supabase.createClient) {
-        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('✅ Supabase client initialized');
-      } else {
-        console.error('❌ Supabase CDN failed to load');
+      if (!window.supabaseClient) {
+        console.error('❌ Supabase client not initialized');
         return;
       }
+
+      console.log('✅ Using Supabase client from head script');
 
       // Wait for gameContext to be initialized
       let gcAttempts = 0;

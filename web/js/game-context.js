@@ -37,20 +37,29 @@ class GameContext {
       console.log('🎮 Game context from localStorage:', this.gameId)
     }
 
-    // Get current cast member
+    // Get current cast member (through mm_game_cast junction table)
     const user = await window.supabaseClient.auth.getUser()
-    if (user.data.user) {
-      const { data: castMember } = await window.supabaseClient
-        .from('cast_members')
-        .select('id, display_name, game_id')
-        .eq('user_id', user.data.user.id)
+    if (user.data.user && this.gameId) {
+      const { data: gameCast } = await window.supabaseClient
+        .from('mm_game_cast')
+        .select(`
+          cast_member_id,
+          status,
+          cast_members (
+            id,
+            display_name,
+            user_id
+          )
+        `)
         .eq('game_id', this.gameId)
-        .single()
+        .eq('cast_members.user_id', user.data.user.id)
+        .eq('status', 'active')
+        .maybeSingle()
 
-      if (castMember) {
-        this.castMemberId = castMember.id
-        localStorage.setItem('current_cast_member_id', castMember.id)
-        console.log('👤 Cast member:', castMember.display_name)
+      if (gameCast && gameCast.cast_members) {
+        this.castMemberId = gameCast.cast_members.id
+        localStorage.setItem('current_cast_member_id', gameCast.cast_members.id)
+        console.log('👤 Cast member:', gameCast.cast_members.display_name)
       }
     }
 

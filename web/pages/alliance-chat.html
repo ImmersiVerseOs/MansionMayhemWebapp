@@ -666,7 +666,7 @@
           .from('mm_alliance_rooms')
           .update({
             message_count: (room.message_count || 0) + 1,
-            last_activity_at: new Date().toISOString()
+            updated_at: new Date().toISOString()
           })
           .eq('id', roomId);
 
@@ -805,7 +805,7 @@
           .update({
             voice_note_count: (room.voice_note_count || 0) + 1,
             message_count: (room.message_count || 0) + 1,
-            last_activity_at: new Date().toISOString()
+            updated_at: new Date().toISOString()
           })
           .eq('id', roomId);
 

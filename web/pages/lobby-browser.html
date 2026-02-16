@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 Browse Lobbies - Mansion Mayhem</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <style>
+    .lobby-browser {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+
+    .lobby-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .lobby-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .lobby-card:hover {
+      border-color: #8b5cf6;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2);
+      transform: translateY(-4px);
+    }
+
+    .lobby-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+
+    .lobby-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--txt);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .game-id-badge {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(139, 92, 246, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-recruiting {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+
+    .status-waiting {
+      background: rgba(234, 179, 8, 0.1);
+      color: #eab308;
+    }
+
+    .status-active {
+      background: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+    }
+
+    .lobby-stats {
+      display: flex;
+      gap: 1.5rem;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: rgba(139, 92, 246, 0.05);
+      border-radius: 8px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #8b5cf6;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .lobby-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .current-lobby-banner {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="lobby-browser">
+    <div class="header-actions">
+      <div>
+        <h1 style="margin: 0 0 0.5rem 0;">🎮 Browse Lobbies</h1>
+        <p style="color: var(--muted); margin: 0;">Join an existing lobby or create a new one</p>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <button class="btn btn-secondary" onclick="refreshLobbies()">🔄 Refresh</button>
+        <button class="btn btn-primary" onclick="createNewGame()">➕ Create New Lobby</button>
+      </div>
+    </div>
+
+    <!-- Current Lobby Banner -->
+    <div id="currentLobbyBanner" style="display: none;" class="current-lobby-banner">
+      <div>
+        <strong>Your Current Lobby:</strong>
+        <span id="currentLobbyTitle"></span>
+        <code id="currentLobbyId" style="margin-left: 1rem; opacity: 0.8;"></code>
+      </div>
+      <button class="btn btn-secondary" onclick="goToCurrentLobby()" style="background: white; color: #8b5cf6;">
+        🏠 Return to My Lobby
+      </button>
+    </div>
+
+    <!-- Lobby Grid -->
+    <div id="lobbyGrid" class="lobby-grid">
+      <!-- Lobbies will be inserted here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-state-icon">🎮</div>
+      <h3>No Active Lobbies</h3>
+      <p>Be the first to create a new lobby!</p>
+      <button class="btn btn-primary" onclick="createNewGame()" style="margin-top: 1rem;">
+        ➕ Create New Lobby
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+    let currentGameId = localStorage.getItem('current_game_id')
+
+    async function init() {
+      await loadCurrentLobby()
+      await loadLobbies()
+    }
+
+    async function loadCurrentLobby() {
+      if (!currentGameId) return
+
+      const { data: game, error } = await supabase
+        .from('mm_games')
+        .select('id, title')
+        .eq('id', currentGameId)
+        .single()
+
+      if (!error && game) {
+        document.getElementById('currentLobbyBanner').style.display = 'flex'
+        document.getElementById('currentLobbyTitle').textContent = game.title
+        document.getElementById('currentLobbyId').textContent = `(${game.id.slice(0, 8)}...)`
+      }
+    }
+
+    async function loadLobbies() {
+      const { data: games, error } = await supabase
+        .from('mm_games')
+        .select(`
+          id,
+          title,
+          status,
+          current_players,
+          max_players,
+          created_at,
+          game_starts_at
+        `)
+        .in('status', ['recruiting', 'waiting_lobby', 'active_lobby'])
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error loading lobbies:', error)
+        return
+      }
+
+      const grid = document.getElementById('lobbyGrid')
+      const emptyState = document.getElementById('emptyState')
+
+      if (!games || games.length === 0) {
+        grid.style.display = 'none'
+        emptyState.style.display = 'block'
+        return
+      }
+
+      grid.style.display = 'grid'
+      emptyState.style.display = 'none'
+
+      grid.innerHTML = games.map(game => {
+        const shortId = game.id.slice(0, 8)
+        const isCurrent = game.id === currentGameId
+        const statusClass = game.status.replace('_', '-')
+        const statusLabel = game.status.replace('_', ' ')
+
+        return `
+          <div class="lobby-card" ${isCurrent ? 'style="border-color: #8b5cf6; box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);"' : ''}>
+            <div class="lobby-header">
+              <div>
+                <h3 class="lobby-title">${game.title}</h3>
+                <div class="game-id-badge">ID: ${shortId}</div>
+              </div>
+              <span class="status-badge status-${statusClass}">${statusLabel}</span>
+            </div>
+
+            ${isCurrent ? '<div style="color: #8b5cf6; font-size: 0.875rem; margin-bottom: 0.5rem;">⭐ Your Current Lobby</div>' : ''}
+
+            <div class="lobby-stats">
+              <div class="stat">
+                <div class="stat-value">${game.current_players}/${game.max_players}</div>
+                <div class="stat-label">Players</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">${game.max_players - game.current_players}</div>
+                <div class="stat-label">Spots Left</div>
+              </div>
+            </div>
+
+            <div style="font-size: 0.875rem; color: var(--muted); margin-bottom: 1rem;">
+              Created ${formatTimeAgo(game.created_at)}
+              ${game.game_starts_at ? `<br>Starts ${formatTime(game.game_starts_at)}` : ''}
+            </div>
+
+            <div class="lobby-actions">
+              <button class="btn btn-primary" onclick="joinLobby('${game.id}')" style="flex: 1;">
+                ${isCurrent ? '🏠 Return' : '🎮 Join'}
+              </button>
+              <button class="btn btn-secondary" onclick="copyLobbyUrl('${game.id}')">
+                📋 Copy Link
+              </button>
+            </div>
+          </div>
+        `
+      }).join('')
+    }
+
+    function formatTimeAgo(timestamp) {
+      const now = new Date()
+      const then = new Date(timestamp)
+      const seconds = Math.floor((now - then) / 1000)
+
+      if (seconds < 60) return 'just now'
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
+      return `${Math.floor(seconds / 86400)}d ago`
+    }
+
+    function formatTime(timestamp) {
+      return new Date(timestamp).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      })
+    }
+
+    function joinLobby(gameId) {
+      localStorage.setItem('current_game_id', gameId)
+      window.location.href = `/lobby.html?game=${gameId}`
+    }
+
+    function goToCurrentLobby() {
+      if (currentGameId) {
+        window.location.href = `/lobby.html?game=${currentGameId}`
+      }
+    }
+
+    function copyLobbyUrl(gameId) {
+      const url = `${window.location.origin}/lobby.html?game=${gameId}`
+      navigator.clipboard.writeText(url)
+      alert('✅ Lobby link copied to clipboard!')
+    }
+
+    async function createNewGame() {
+      const title = prompt('Enter lobby name:', 'Mansion Mayhem - ' + new Date().toLocaleDateString())
+      if (!title) return
+
+      const { data: game, error } = await supabase
+        .from('mm_games')
+        .insert({
+          title: title,
+          status: 'recruiting',
+          max_players: 20,
+          current_players: 0
+        })
+        .select()
+        .single()
+
+      if (error) {
+        alert('Error creating lobby: ' + error.message)
+        return
+      }
+
+      localStorage.setItem('current_game_id', game.id)
+      window.location.href = `/lobby.html?game=${game.id}`
+    }
+
+    function refreshLobbies() {
+      loadLobbies()
+    }
+
+    // Initialize
+    init()
+
+    // Auto-refresh every 30 seconds
+    setInterval(loadLobbies, 30000)
+  </script>
+</body>
+</html>

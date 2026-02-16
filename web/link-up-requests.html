@@ -899,7 +899,7 @@
           .select('*')
           .eq('game_id', gameId)
           .eq('from_cast_member_id', currentCastMemberId)
-          .eq('status', 'pending')
+          .in('status', ['pending', 'accepted', 'declined', 'expired'])
           .order('created_at', { ascending: false });
 
         console.log('📤 Sent Requests Query:', { gameId, currentCastMemberId, data, error });
@@ -937,11 +937,31 @@
 
         const expiresAt = new Date(request.expires_at).toLocaleString();
 
+        // Status badge styling
+        const statusColors = {
+          'pending': 'background: linear-gradient(135deg, #FFC107, #FF9800); color: white;',
+          'accepted': 'background: linear-gradient(135deg, #4CAF50, #00C853); color: white;',
+          'declined': 'background: linear-gradient(135deg, #F44336, #D32F2F); color: white;',
+          'expired': 'background: rgba(255,255,255,0.1); color: var(--text-dim);'
+        };
+        const statusStyle = statusColors[request.status] || statusColors['pending'];
+        const statusEmoji = {
+          'pending': '⏳',
+          'accepted': '✅',
+          'declined': '❌',
+          'expired': '⏰'
+        };
+
         return `
           <div class="request-card">
             <div class="request-header">
               <div class="requester-name">To: ${inviteeNames}</div>
-              <div class="link-type-badge">${request.link_up_type}</div>
+              <div style="display: flex; gap: 8px;">
+                <div class="link-type-badge">${request.link_up_type}</div>
+                <div style="padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; ${statusStyle}">
+                  ${statusEmoji[request.status]} ${request.status}
+                </div>
+              </div>
             </div>
             ${request.custom_name ? `<div style="color: var(--gold); font-weight: 600; margin-bottom: 8px;">"${request.custom_name}"</div>` : ''}
             <div class="progress-indicator">
@@ -950,7 +970,9 @@
                 <div class="progress-bar-fill" style="width: ${(request.accept_count / request.required_accepts) * 100}%"></div>
               </div>
             </div>
-            <div class="expires-at">Expires: ${expiresAt}</div>
+            <div class="expires-at">
+              ${request.status === 'accepted' ? '✅ Alliance room created!' : `Expires: ${expiresAt}`}
+            </div>
           </div>
         `;
       }).join('');

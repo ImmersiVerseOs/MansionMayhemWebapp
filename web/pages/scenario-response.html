@@ -1452,10 +1452,14 @@
 
   <!-- Supabase CDN (must load BEFORE modules) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/game-context.js"></script>
 
   <script type="module">
     import { supabaseClient as supabase, getCurrentUser } from '../js/supabase-module.js'
     import { requireAuth } from '../js/auth.js'
+
+    // Make supabase available to game-context.js
+    window.supabaseClient = supabase
 
     // ============================================================================
     // STATE MANAGEMENT
@@ -1466,6 +1470,7 @@
     let manualResponse = ''
     let scenario = null
     let currentUser = null
+    let gameId = null
     let audioChunks = []
     let mediaRecorder = null
     let isRecording = false
@@ -2119,6 +2124,15 @@
     // ============================================================================
 
     async function init() {
+      // Initialize game context
+      await window.gameContext.init()
+      gameId = window.gameContext.getGameId()
+
+      if (!gameId) {
+        window.gameContext.showWarningBanner()
+        return
+      }
+
       // Require authentication
       currentUser = await requireAuth()
       if (!currentUser) return
@@ -2174,17 +2188,18 @@
           return
         }
 
-        // Load scenario
+        // Load scenario (filtered by game)
         const { data, error } = await supabase
           .from('scenarios')
           .select('*')
           .eq('id', scenarioId)
+          .eq('game_id', gameId)
           .single()
 
         if (error) throw error
 
         if (!data) {
-          alert('Scenario not found')
+          alert('Scenario not found in this game')
           window.location.href = '../cast-portal.html'
           return
         }

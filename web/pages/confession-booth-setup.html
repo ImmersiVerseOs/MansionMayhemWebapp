@@ -395,19 +395,28 @@
   </div>
 
   <script>
-    // Initialize Supabase client
-    const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
+    // Initialize everything after Supabase CDN loads
+    (async function initAndCheck() {
+      const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
 
-    // Create Supabase client
-    if (window.supabase && window.supabase.createClient) {
-      window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-      console.error('Supabase CDN not loaded');
-    }
+      // Wait for Supabase CDN to load
+      let attempts = 0;
+      while (!window.supabase && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
 
-    // Check game context on page load
-    (async function checkGameContext() {
+      // Create Supabase client
+      if (window.supabase && window.supabase.createClient) {
+        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase client initialized');
+      } else {
+        console.error('❌ Supabase CDN failed to load');
+        return;
+      }
+
+      // Check game context
       try {
         if (!window.GameContext) {
           window.GameContext = new GameContext();

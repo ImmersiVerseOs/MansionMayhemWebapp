@@ -662,13 +662,17 @@
         input.value = '';
 
         // Update room activity
-        await window.supabaseClient
+        const { error: updateError } = await window.supabaseClient
           .from('mm_alliance_rooms')
           .update({
             message_count: (room.message_count || 0) + 1,
             updated_at: new Date().toISOString()
           })
           .eq('id', roomId);
+
+        if (updateError) {
+          console.error('❌ Failed to update room activity:', updateError);
+        }
 
       } catch (error) {
         console.error('Error sending message:', error);

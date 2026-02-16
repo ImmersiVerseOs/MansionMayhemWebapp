@@ -408,9 +408,19 @@
           .maybeSingle();
 
         console.log('🔍 Game Cast Query:', { gameId, userId: user.id, gameCast, error });
+        if (error) {
+          console.error('🔴 Query Error Details:', error.message, error);
+        }
 
         if (error || !gameCast || !gameCast.cast_members) {
-          console.error('❌ Cast member not found in game:', { error, gameCast, gameId, userId: user.id });
+          console.error('❌ Cast member not found in game:', {
+            error,
+            errorMessage: error?.message,
+            errorCode: error?.code,
+            gameCast,
+            gameId,
+            userId: user.id
+          });
           alert('No cast member found for this game. Please join the game first.');
           setTimeout(() => {
             window.location.href = '/pages/lobby-browser.html';

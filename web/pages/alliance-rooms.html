@@ -486,6 +486,26 @@
 
         rooms = roomsData || [];
 
+        // Load message counts for each room
+        for (const room of rooms) {
+          // Count total messages
+          const { count: totalMessages } = await window.supabaseClient
+            .from('mm_alliance_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('room_id', room.id);
+
+          // Count voice notes
+          const { count: voiceNotes } = await window.supabaseClient
+            .from('mm_alliance_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('room_id', room.id)
+            .eq('message_type', 'voice');
+
+          // Add counts to room object
+          room.message_count = totalMessages || 0;
+          room.voice_note_count = voiceNotes || 0;
+        }
+
         // Load cast members for THIS game only (using gameContext helper)
         const castMembers = await window.gameContext.getCastMembers();
         members = castMembers;

@@ -34,7 +34,13 @@
 
       waitForSupabase()
         .then(() => {
-          window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+              autoRefreshToken: true,
+              persistSession: true,
+              storage: window.localStorage
+            }
+          });
           console.log('✅ Supabase client initialized before game-context.js');
         })
         .catch(err => {

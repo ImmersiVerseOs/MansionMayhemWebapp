@@ -651,10 +651,9 @@
           .from('mm_alliance_messages')
           .insert({
             room_id: roomId,
-            game_id: room.game_id,
             sender_cast_id: currentCastMemberId,
             message_type: 'text',
-            text_content: text
+            message: text
           });
 
         if (error) throw error;
@@ -768,7 +767,6 @@
           .from('mm_alliance_messages')
           .insert({
             room_id: roomId,
-            game_id: room.game_id,
             sender_cast_id: currentCastMemberId,
             message_type: 'voice',
             voice_note_url: urlData.publicUrl,
@@ -886,24 +884,24 @@
 
       try {
         // Remove current user from members
-        const newMembers = room.member_cast_ids.filter(id => id !== currentCastMemberId);
+        const memberIds = room.member_ids || room.member_cast_ids || [];
+        const newMembers = memberIds.filter(id => id !== currentCastMemberId);
 
         // Post system message
         await window.supabaseClient
           .from('mm_alliance_messages')
           .insert({
             room_id: roomId,
-            game_id: room.game_id,
             sender_cast_id: currentCastMemberId,
             message_type: 'system',
-            text_content: `${members.find(m => m.id === currentCastMemberId)?.display_name} left the room`
+            message: `${members.find(m => m.id === currentCastMemberId)?.display_name} left the room`
           });
 
         // Update room
         await window.supabaseClient
           .from('mm_alliance_rooms')
           .update({
-            member_cast_ids: newMembers,
+            member_ids: newMembers,
             is_active: newMembers.length >= 2
           })
           .eq('id', roomId);

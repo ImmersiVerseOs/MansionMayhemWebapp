@@ -652,10 +652,17 @@
       <div class="logo-subtitle">Reality TV Game</div>
     </div>
 
-    <button onclick="startNewGame()" class="start-game-btn" style="border: none; cursor: pointer; width: calc(100% - 2rem);">
-      <span class="icon">🎮</span>
-      Start New Game
-    </button>
+    <!-- Game Quick Actions -->
+    <div style="padding: 0 1rem; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+      <button onclick="createNewGame()" class="start-game-btn" style="border: none; cursor: pointer; width: 100%; background: linear-gradient(135deg, #8b5cf6, #ec4899); padding: 0.75rem; border-radius: 12px; font-weight: 600;">
+        <span class="icon">🎮</span>
+        Create New Game
+      </button>
+      <button onclick="joinWithCode()" style="border: none; cursor: pointer; width: 100%; background: rgba(255,255,255,0.1); color: white; padding: 0.75rem; border-radius: 12px; font-weight: 600;">
+        <span class="icon">🔑</span>
+        Join with Code
+      </button>
+    </div>
 
     <nav class="nav-section">
       <div class="nav-title">Main</div>
@@ -664,8 +671,8 @@
         Dashboard
       </a>
       <a href="/pages/lobby-browser.html" class="nav-item">
-        <span class="nav-icon">🎮</span>
-        Browse Lobbies
+        <span class="nav-icon">🌐</span>
+        Browse Public Games
       </a>
       <a id="lobbyNavLink" href="/lobby.html" class="nav-item" style="display: none; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1)); border-left: 3px solid #8b5cf6;">
         <span class="nav-icon">🏠</span>
@@ -1547,6 +1554,64 @@
       // Reset input
       event.target.value = ''
     }
+
+    // ========================================================================
+    // GAME ONBOARDING - Global functions
+    // ========================================================================
+
+    window.createNewGame = async function() {
+      // Check if already in a game
+      const currentGameId = localStorage.getItem('current_game_id');
+      if (currentGameId) {
+        const goToCurrent = confirm('You\'re already in a game! Go to your current lobby?');
+        if (goToCurrent) {
+          window.location.href = `/lobby.html?game=${currentGameId}`;
+          return;
+        }
+      }
+
+      // Create new game
+      const title = prompt('Enter your game name:', 'Mansion Mayhem - ' + new Date().toLocaleDateString());
+      if (!title) return;
+
+      try {
+        const { data: game, error } = await supabase
+          .from('mm_games')
+          .insert({
+            title: title,
+            status: 'recruiting',
+            max_players: 20,
+            current_players: 0
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        localStorage.setItem('current_game_id', game.id);
+        window.location.href = `/lobby.html?game=${game.id}`;
+      } catch (error) {
+        alert('Error creating game: ' + error.message);
+        console.error(error);
+      }
+    };
+
+    window.joinWithCode = function() {
+      const code = prompt('Enter game code (from invite link):');
+      if (!code) return;
+
+      // Clean up code
+      const gameId = code.trim();
+
+      // Validate UUID format
+      if (gameId.length < 30) {
+        alert('Invalid game code. Please check and try again.');
+        return;
+      }
+
+      localStorage.setItem('current_game_id', gameId);
+      window.location.href = `/lobby.html?game=${gameId}`;
+    };
 
     init()
   </script>

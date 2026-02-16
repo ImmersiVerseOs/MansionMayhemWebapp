@@ -40,26 +40,36 @@ class GameContext {
     // Get current cast member (through mm_game_cast junction table)
     const user = await window.supabaseClient.auth.getUser()
     if (user.data.user && this.gameId) {
-      const { data: gameCast } = await window.supabaseClient
-        .from('mm_game_cast')
-        .select(`
-          cast_member_id,
-          status,
-          cast_members (
-            id,
-            display_name,
-            user_id
-          )
-        `)
-        .eq('game_id', this.gameId)
-        .eq('cast_members.user_id', user.data.user.id)
-        .eq('status', 'active')
+      // First get user's cast member ID
+      const { data: castMember } = await window.supabaseClient
+        .from('cast_members')
+        .select('id')
+        .eq('user_id', user.data.user.id)
         .maybeSingle()
 
-      if (gameCast && gameCast.cast_members) {
-        this.castMemberId = gameCast.cast_members.id
-        localStorage.setItem('current_cast_member_id', gameCast.cast_members.id)
-        console.log('👤 Cast member:', gameCast.cast_members.display_name)
+      if (castMember) {
+        // Then check if that cast member is in this game
+        const { data: gameCast } = await window.supabaseClient
+          .from('mm_game_cast')
+          .select(`
+            cast_member_id,
+            status,
+            cast_members (
+              id,
+              display_name,
+              user_id
+            )
+          `)
+          .eq('game_id', this.gameId)
+          .eq('cast_member_id', castMember.id)
+          .eq('status', 'active')
+          .maybeSingle()
+
+        if (gameCast && gameCast.cast_members) {
+          this.castMemberId = gameCast.cast_members.id
+          localStorage.setItem('current_cast_member_id', gameCast.cast_members.id)
+          console.log('👤 Cast member:', gameCast.cast_members.display_name)
+        }
       }
     }
 

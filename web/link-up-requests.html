@@ -502,6 +502,20 @@
         }
 
         // Get user's cast member for THIS game only (through mm_game_cast)
+        // First, get user's cast member ID
+        const { data: userCastMemberData } = await window.supabaseClient
+          .from('cast_members')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!userCastMemberData) {
+          showToast('No cast member profile found', 'error');
+          window.location.href = '/pages/casting-call.html';
+          return;
+        }
+
+        // Then check if that cast member is in this game
         const { data: gameCast, error: castError } = await window.supabaseClient
           .from('mm_game_cast')
           .select(`
@@ -515,7 +529,7 @@
             )
           `)
           .eq('game_id', gameId)
-          .eq('cast_members.user_id', user.id)
+          .eq('cast_member_id', userCastMemberData.id)
           .eq('status', 'active')
           .maybeSingle();
 

@@ -390,6 +390,20 @@
         }
 
         // Get user's cast member record for THIS game (through mm_game_cast)
+        // First, get user's cast member ID
+        const { data: userCastMember } = await window.supabaseClient
+          .from('cast_members')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!userCastMember) {
+          alert('No cast member profile found. Please create a character first.');
+          window.location.href = '/pages/lobby-browser.html';
+          return;
+        }
+
+        // Then check if that cast member is in this game
         const { data: gameCast, error } = await window.supabaseClient
           .from('mm_game_cast')
           .select(`
@@ -403,7 +417,7 @@
             )
           `)
           .eq('game_id', gameId)
-          .eq('cast_members.user_id', user.id)
+          .eq('cast_member_id', userCastMember.id)
           .eq('status', 'active')
           .maybeSingle();
 

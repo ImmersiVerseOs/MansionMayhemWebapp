@@ -268,20 +268,30 @@ function renderPosts() {
 
 function renderPost(post) {
   const member = post.cast_members;
-  const archetype = member.archetype || 'wildcard';
-  const emoji = archetypeEmoji[archetype] || '🎭';
+  const isAnonymous = post.is_anonymous;
+
+  // If anonymous, use mask emoji and "Anonymous" name
+  const displayName = isAnonymous ? 'Anonymous' : member.display_name;
+  const archetype = isAnonymous ? 'confessional' : (member.archetype || 'wildcard');
+  const emoji = isAnonymous ? '🎭' : (archetypeEmoji[archetype] || '🎭');
   const timeAgo = formatTimeAgo(post.created_at);
 
   return `
-    <div class="post-card" data-post-id="${post.id}" data-post-type="${post.post_type}">
+    <div class="post-card" data-post-id="${post.id}" data-post-type="${post.post_type}" ${isAnonymous ? 'style="border-color: rgba(156, 39, 176, 0.3);"' : ''}>
       <div class="post-header">
         <div class="post-avatar">${emoji}</div>
         <div class="post-info">
           <div class="post-name">
-            ${member.display_name}
-            <span class="archetype-badge badge-${archetype}">
-              ${emoji} ${archetype}
-            </span>
+            ${displayName}
+            ${isAnonymous ? `
+              <span class="archetype-badge" style="background: rgba(156, 39, 176, 0.2); color: var(--purple);">
+                🎭 anonymous
+              </span>
+            ` : `
+              <span class="archetype-badge badge-${archetype}">
+                ${emoji} ${archetype}
+              </span>
+            `}
           </div>
           <div class="post-meta">${timeAgo}</div>
         </div>
@@ -466,6 +476,7 @@ async function submitPost() {
   const postText = document.getElementById('postText').value.trim();
   const postType = document.querySelector('.post-type-selector button.active').dataset.type;
   const voiceNote = recordedVoiceNote;
+  const isAnonymous = document.getElementById('anonymousToggle').checked;
 
   if (!postText && !voiceNote) {
     showToast('Please add text or a voice note');
@@ -485,7 +496,8 @@ async function submitPost() {
         post_text: postText || null,
         post_type: postType,
         voice_note_url: voiceNote?.url || null,
-        voice_note_duration_seconds: voiceNote?.duration || null
+        voice_note_duration_seconds: voiceNote?.duration || null,
+        is_anonymous: isAnonymous
       })
       .select()
       .single();
@@ -494,9 +506,13 @@ async function submitPost() {
 
     // Clear form
     document.getElementById('postText').value = '';
+    document.getElementById('anonymousToggle').checked = false;
     recordedVoiceNote = null;
 
-    showToast('Posted to The Tea Spot! ☕');
+    const message = isAnonymous
+      ? 'Posted anonymously to The Tea Spot! 🎭'
+      : 'Posted to The Tea Spot! ☕';
+    showToast(message);
 
   } catch (error) {
     console.error('Error posting:', error);
@@ -692,14 +708,16 @@ function renderComments(postId, comments) {
 
 function renderComment(comment, postId) {
   const member = comment.cast_members;
-  const archetype = member.archetype || 'wildcard';
-  const emoji = archetypeEmoji[archetype] || '🎭';
+  const isAnonymous = comment.is_anonymous;
+
+  const displayName = isAnonymous ? 'Anonymous' : member.display_name;
+  const emoji = isAnonymous ? '🎭' : (archetypeEmoji[member.archetype] || '🎭');
 
   return `
     <div class="comment-card" data-comment-id="${comment.id}">
       <div class="comment-header">
         <div class="comment-avatar">${emoji}</div>
-        <span class="comment-author">${member.display_name}</span>
+        <span class="comment-author">${displayName}</span>
         <span class="comment-time">${formatTimeAgo(comment.created_at)}</span>
       </div>
 
@@ -727,14 +745,16 @@ function renderComment(comment, postId) {
 
 function renderReply(reply) {
   const member = reply.cast_members;
-  const archetype = member.archetype || 'wildcard';
-  const emoji = archetypeEmoji[archetype] || '🎭';
+  const isAnonymous = reply.is_anonymous;
+
+  const displayName = isAnonymous ? 'Anonymous' : member.display_name;
+  const emoji = isAnonymous ? '🎭' : (archetypeEmoji[member.archetype] || '🎭');
 
   return `
     <div class="comment-card" data-comment-id="${reply.id}">
       <div class="comment-header">
         <div class="comment-avatar">${emoji}</div>
-        <span class="comment-author">${member.display_name}</span>
+        <span class="comment-author">${displayName}</span>
         <span class="comment-time">${formatTimeAgo(reply.created_at)}</span>
       </div>
 
@@ -774,7 +794,7 @@ function setupCommentInteractions() {
   });
 }
 
-async function submitComment(postId, commentText = null, voiceNote = null, parentId = null) {
+async function submitComment(postId, commentText = null, voiceNote = null, parentId = null, isAnonymous = false) {
   if (!currentCastMember) {
     showToast('Please log in to comment');
     return;
@@ -799,7 +819,8 @@ async function submitComment(postId, commentText = null, voiceNote = null, paren
         parent_id: parentId,
         comment_text: commentText || null,
         voice_note_url: voiceNote?.url || null,
-        voice_note_duration_seconds: voiceNote?.duration || null
+        voice_note_duration_seconds: voiceNote?.duration || null,
+        is_anonymous: isAnonymous
       })
       .select()
       .single();
@@ -810,7 +831,8 @@ async function submitComment(postId, commentText = null, voiceNote = null, paren
     const textarea = document.getElementById(`comment-text-${postId}`);
     if (textarea) textarea.value = '';
 
-    showToast('Comment added! 💬');
+    const message = isAnonymous ? 'Comment added anonymously! 🎭' : 'Comment added! 💬';
+    showToast(message);
 
     // Reload comments
     await loadComments(postId);

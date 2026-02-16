@@ -18,6 +18,7 @@ let recordedVoiceNote = null;
 let currentRecordingContext = null;
 let currentFilter = 'all';
 let allPosts = [];
+let voiceIntros = [];
 
 // Archetype emojis
 const archetypeEmoji = {
@@ -59,6 +60,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Load posts (works for everyone)
     await loadPosts();
+
+    // Load voice introductions
+    await loadVoiceIntros();
 
     // Set up realtime subscriptions
     setupRealtimeSubscriptions();
@@ -177,6 +181,32 @@ async function loadPosts() {
   }
 }
 
+async function loadVoiceIntros() {
+  try {
+    // Get game ID from URL or current game
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get('game') || currentGameId;
+
+    if (!gameId) {
+      console.log('No game ID found for voice intros');
+      return;
+    }
+
+    const { data, error } = await sbClient.rpc('get_lobby_voice_intros', {
+      p_game_id: gameId
+    });
+
+    if (error) throw error;
+
+    voiceIntros = data || [];
+    console.log(`✅ Loaded ${voiceIntros.length} voice introductions`);
+
+  } catch (error) {
+    console.error('Error loading voice intros:', error);
+    voiceIntros = [];
+  }
+}
+
 function updateStats() {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -187,12 +217,30 @@ function updateStats() {
 
   document.getElementById('totalPosts').textContent = allPosts.length;
   document.getElementById('todayPosts').textContent = todayPosts.length;
-  document.getElementById('voicePosts').textContent = voicePosts.length;
+  document.getElementById('voicePosts').textContent = voicePosts.length + voiceIntros.length;
   document.getElementById('activePlayers').textContent = uniquePlayers.size;
 }
 
 function renderPosts() {
   const feed = document.getElementById('postsFeed');
+
+  // Handle Introductions filter separately
+  if (currentFilter === 'introductions') {
+    if (voiceIntros.length === 0) {
+      feed.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🎙️</div>
+          <h3>No introductions yet...</h3>
+          <p>Cast members can record voice introductions in the lobby!</p>
+        </div>
+      `;
+      return;
+    }
+
+    feed.innerHTML = voiceIntros.map(intro => renderVoiceIntro(intro)).join('');
+    setupIntroInteractions();
+    return;
+  }
 
   let filteredPosts = allPosts;
 
@@ -279,6 +327,79 @@ function renderPost(post) {
       ` : ''}
     </div>
   `;
+}
+
+function renderVoiceIntro(intro) {
+  const member = intro.cast_member;
+  const archetype = member.archetype || 'wildcard';
+  const emoji = archetypeEmoji[archetype] || '🎭';
+  const duration = Math.floor(intro.duration);
+  const playCount = intro.play_count || 0;
+
+  return `
+    <div class="post-card" data-intro-id="${intro.id}">
+      <div class="post-header">
+        <div class="post-avatar">${emoji}</div>
+        <div class="post-info">
+          <div class="post-name">
+            ${member.display_name}
+            <span class="archetype-badge badge-${archetype}">
+              ${emoji} ${archetype}
+            </span>
+          </div>
+          <div class="post-meta">🎙️ Introduction</div>
+        </div>
+      </div>
+
+      <div class="post-type-tag" style="background: rgba(236, 72, 153, 0.2); color: var(--pink);">
+        introduction
+      </div>
+
+      ${intro.caption ? `<div class="post-text">${escapeHtml(intro.caption)}</div>` : ''}
+
+      <div class="voice-player">
+        <div class="voice-label">
+          🎤 Voice Introduction (${duration}s) • ${playCount} plays
+        </div>
+        <audio controls src="${intro.audio_url}" onplay="incrementIntroPlays('${intro.id}')">
+          <source src="${intro.audio_url}" type="audio/webm">
+          Your browser does not support audio playback.
+        </audio>
+      </div>
+
+      ${member.personality_traits ? `
+        <div style="margin-top: 1rem; padding: 0.75rem; background: var(--bg2); border-radius: 8px;">
+          <div style="font-size: 0.875rem; color: var(--txt2); margin-bottom: 0.5rem;">Personality Traits:</div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            ${member.personality_traits.slice(0, 4).map(trait => `
+              <span style="padding: 0.25rem 0.75rem; background: rgba(139, 92, 246, 0.2); color: var(--purple); border-radius: 12px; font-size: 0.75rem;">
+                ${trait}
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function setupIntroInteractions() {
+  // Add play tracking for voice intros
+  document.querySelectorAll('audio[onplay]').forEach(audio => {
+    // Already has onplay handler in HTML
+  });
+}
+
+// Increment play count for voice intro
+window.incrementIntroPlays = async function(introId) {
+  try {
+    await sbClient.rpc('increment_voice_note_plays', {
+      p_voice_note_id: introId
+    });
+    console.log('✅ Incremented play count for intro:', introId);
+  } catch (error) {
+    console.error('Error incrementing plays:', error);
+  }
 }
 
 function setupPostInteractions() {

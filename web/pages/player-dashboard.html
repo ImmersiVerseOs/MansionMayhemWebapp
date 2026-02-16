@@ -629,6 +629,10 @@
         <span class="nav-icon">📊</span>
         Dashboard
       </a>
+      <a id="lobbyNavLink" href="/lobby.html" class="nav-item" style="display: none;">
+        <span class="nav-icon">🎭</span>
+        Lobby
+      </a>
       <a href="/pages/scenario-response.html" class="nav-item">
         <span class="nav-icon">📝</span>
         Scenarios
@@ -958,6 +962,13 @@
           url.searchParams.set('gameId', gameId)
           link.href = url.toString()
         })
+
+        // Show and update lobby link
+        const lobbyLink = document.getElementById('lobbyNavLink')
+        if (lobbyLink) {
+          lobbyLink.href = `/lobby.html?game=${gameId}`
+          lobbyLink.style.display = 'flex'
+        }
       }
     }
 

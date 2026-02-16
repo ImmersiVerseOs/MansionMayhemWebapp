@@ -504,10 +504,10 @@
 
       // Initialize GameContext
       try {
-        if (!window.GameContext) {
-          window.GameContext = new GameContext();
+        // Wait for gameContext to be initialized by game-context.js
+        if (!window.gameContext) {
+          throw new Error('GameContext not loaded');
         }
-        await window.GameContext.init();
         console.log('✅ GameContext initialized');
       } catch (error) {
         console.error('Error initializing game context:', error);
@@ -532,7 +532,7 @@
     // Load videos
     async function loadVideos(filter = 'all') {
       try {
-        const gameId = GameContext.getGameId();
+        const gameId = window.gameContext.getGameId();
 
         let query = window.supabaseClient
           .from('mm_confession_booth_videos')
@@ -664,7 +664,7 @@
       if (!currentVideo) return;
 
       try {
-        const castMemberId = GameContext.getCastMemberId();
+        const castMemberId = window.gameContext.getCastMemberId();
 
         // Check if already liked
         const { data: existing } = await window.supabaseClient

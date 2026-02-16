@@ -488,12 +488,12 @@
 
       // Check game context
       try {
-        if (!window.GameContext) {
-          window.GameContext = new GameContext();
+        // Wait for gameContext to be initialized by game-context.js
+        if (!window.gameContext) {
+          throw new Error('GameContext not loaded');
         }
-        await window.GameContext.init();
 
-        const castMemberId = window.GameContext.getCastMemberId();
+        const castMemberId = window.gameContext.getCastMemberId();
 
         if (!castMemberId) {
           document.querySelector('.container').innerHTML = `
@@ -529,7 +529,7 @@
     // Load avatar
     async function loadAvatar() {
       try {
-        const castMemberId = GameContext.getCastMemberId();
+        const castMemberId = window.gameContext.getCastMemberId();
 
         const { data, error } = await supabase
           .from('cast_members')
@@ -588,8 +588,8 @@
       createBtn.disabled = true;
 
       try {
-        const castMemberId = GameContext.getCastMemberId();
-        const gameId = GameContext.getGameId();
+        const castMemberId = window.gameContext.getCastMemberId();
+        const gameId = window.gameContext.getGameId();
 
         // Step 1: Generate audio (simulated for now)
         document.getElementById('step1').classList.add('active');

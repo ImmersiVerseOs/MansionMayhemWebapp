@@ -451,12 +451,12 @@
 
       // Check game context
       try {
-        if (!window.GameContext) {
-          window.GameContext = new GameContext();
+        // Wait for gameContext to be initialized by game-context.js
+        if (!window.gameContext) {
+          throw new Error('GameContext not loaded');
         }
-        await window.GameContext.init();
 
-        const castMemberId = window.GameContext.getCastMemberId();
+        const castMemberId = window.gameContext.getCastMemberId();
 
         if (!castMemberId) {
           // No cast member - show friendly message
@@ -576,7 +576,7 @@
 
       try {
         // Get cast member ID from session
-        const castMemberId = GameContext.getCastMemberId();
+        const castMemberId = window.gameContext.getCastMemberId();
 
         let avatarUrl = null;
 

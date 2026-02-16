@@ -438,33 +438,28 @@
   <div class="lobby-browser">
     <!-- Page Header -->
     <div class="page-header">
-      <h1>🎮 Browse Game Lobbies</h1>
-      <p>Join an active lobby or create your own Mansion Mayhem experience</p>
+      <h1>🌐 Public Game Lobbies</h1>
+      <p>Join an active lobby and start playing</p>
       <div class="header-actions">
         <button class="btn btn-secondary" onclick="refreshLobbies()">
           <span>🔄</span> Refresh
         </button>
-        <button class="btn btn-primary" onclick="createNewGame()">
-          <span>➕</span> Create New Lobby
-        </button>
+        <a href="/pages/player-dashboard.html" class="btn btn-secondary" style="text-decoration: none;">
+          <span>🏠</span> Back to Dashboard
+        </a>
       </div>
     </div>
 
     <!-- Current Lobby Banner -->
     <div id="currentLobbyBanner" style="display: none;" class="current-lobby-banner">
       <div>
-        <strong>Your Current Lobby:</strong>
+        <strong>✅ You're in a lobby:</strong>
         <span id="currentLobbyTitle"></span>
         <code id="currentLobbyId" style="margin-left: 1rem; opacity: 0.8;"></code>
       </div>
-      <div style="display: flex; gap: 0.75rem;">
-        <button class="btn btn-secondary" onclick="goToCurrentLobby()" style="background: white; color: #8b5cf6;">
-          🏠 Return to My Lobby
-        </button>
-        <button class="btn btn-secondary" onclick="leaveCurrentGame()" style="background: #dc2626; color: white;">
-          🚪 Leave Game
-        </button>
-      </div>
+      <button class="btn btn-secondary" onclick="goToCurrentLobby()" style="background: white; color: #8b5cf6;">
+        🏠 Return to My Lobby
+      </button>
     </div>
 
     <!-- Lobby Grid -->
@@ -475,11 +470,11 @@
     <!-- Empty State -->
     <div id="emptyState" class="empty-state" style="display: none;">
       <div class="empty-state-icon">🎮</div>
-      <h3>No Active Lobbies</h3>
-      <p>Be the first to create a new lobby!</p>
-      <button class="btn btn-primary" onclick="createNewGame()" style="margin-top: 1rem;">
-        ➕ Create New Lobby
-      </button>
+      <h3>No Public Lobbies Available</h3>
+      <p>Check back later or create your own game from the dashboard</p>
+      <a href="/pages/player-dashboard.html" class="btn btn-primary" style="margin-top: 1rem; text-decoration: none;">
+        🏠 Back to Dashboard
+      </a>
     </div>
   </div>
 

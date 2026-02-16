@@ -661,18 +661,8 @@
 
         input.value = '';
 
-        // Update room activity
-        const { error: updateError } = await window.supabaseClient
-          .from('mm_alliance_rooms')
-          .update({
-            message_count: (room.message_count || 0) + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', roomId);
-
-        if (updateError) {
-          console.error('❌ Failed to update room activity:', updateError);
-        }
+        // Note: updated_at is automatically updated by database trigger
+        // No need to manually update room stats - message counts are derived from mm_alliance_messages table
 
       } catch (error) {
         console.error('Error sending message:', error);
@@ -803,15 +793,8 @@
           // Continue anyway - message was saved
         }
 
-        // Update room stats
-        await window.supabaseClient
-          .from('mm_alliance_rooms')
-          .update({
-            voice_note_count: (room.voice_note_count || 0) + 1,
-            message_count: (room.message_count || 0) + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', roomId);
+        // Note: updated_at is automatically updated by database trigger
+        // Voice note counts are derived from mm_alliance_messages table
 
         // Hide modal and show confirmation
         document.getElementById('voice-modal').classList.remove('active');

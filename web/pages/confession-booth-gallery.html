@@ -8,7 +8,7 @@
   <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
 
   <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@window.supabaseClient/window.supabaseClient-js@2"></script>
   <script src="/js/game-context.js"></script>
 
   <style>
@@ -449,12 +449,15 @@
 
   <script>
     // Initialize Supabase client
-    const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';
+    const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.window.supabaseClient.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
 
-    const { createClient } = supabase;
-    window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const supabase = window.supabaseClient; // Alias for convenience
+    // Create Supabase client
+    if (window.supabase && window.supabase.createClient) {
+      window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+      console.error('Supabase CDN not loaded');
+    }
 
     // Initialize GameContext
     (async function initGameContext() {
@@ -488,7 +491,7 @@
       try {
         const gameId = GameContext.getGameId();
 
-        let query = supabase
+        let query = window.supabaseClient
           .from('mm_confession_booth_videos')
           .select(`
             *,
@@ -621,7 +624,7 @@
         const castMemberId = GameContext.getCastMemberId();
 
         // Check if already liked
-        const { data: existing } = await supabase
+        const { data: existing } = await window.supabaseClient
           .from('mm_confession_booth_reactions')
           .select('id')
           .eq('video_id', currentVideo.id)
@@ -630,7 +633,7 @@
 
         if (existing) {
           // Unlike
-          await supabase
+          await window.supabaseClient
             .from('mm_confession_booth_reactions')
             .delete()
             .eq('id', existing.id);
@@ -639,7 +642,7 @@
           currentVideo.likes_count--;
         } else {
           // Like
-          await supabase
+          await window.supabaseClient
             .from('mm_confession_booth_reactions')
             .insert({
               video_id: currentVideo.id,
@@ -661,7 +664,7 @@
     // Update view count
     async function updateViewCount(videoId) {
       try {
-        await supabase.rpc('increment_confession_video_views', { video_id: videoId });
+        await window.supabaseClient.rpc('increment_confession_video_views', { video_id: videoId });
       } catch (error) {
         console.error('Error updating view count:', error);
       }

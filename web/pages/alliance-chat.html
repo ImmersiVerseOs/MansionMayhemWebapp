@@ -582,7 +582,7 @@
           return `
             <div class="message system">
               <div class="message-content">
-                <div class="message-bubble">${msg.text_content}</div>
+                <div class="message-bubble">${msg.message}</div>
               </div>
             </div>
           `;
@@ -595,7 +595,7 @@
               <div class="message-content">
                 ${!isOwn ? `<div class="message-sender">${senderName}</div>` : ''}
                 <div class="message-bubble">
-                  <div class="message-text">${escapeHtml(msg.text_content)}</div>
+                  <div class="message-text">${escapeHtml(msg.message)}</div>
                   <div class="message-time">${timestamp}</div>
                 </div>
               </div>

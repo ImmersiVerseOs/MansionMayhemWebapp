@@ -389,21 +389,33 @@
           return;
         }
 
-        // Get user's cast member record for THIS game
-        const { data: castMember, error } = await window.supabaseClient
-          .from('cast_members')
-          .select('id, full_name, display_name, status')
-          .eq('user_id', user.id)
+        // Get user's cast member record for THIS game (through mm_game_cast)
+        const { data: gameCast, error } = await window.supabaseClient
+          .from('mm_game_cast')
+          .select(`
+            cast_member_id,
+            status,
+            cast_members (
+              id,
+              full_name,
+              display_name,
+              user_id
+            )
+          `)
           .eq('game_id', gameId)
-          .single();
+          .eq('cast_members.user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
 
-        if (error || !castMember) {
+        if (error || !gameCast || !gameCast.cast_members) {
           alert('Cast member profile not found. Please join a game first.');
           setTimeout(() => {
             window.location.href = '/pages/browse-games.html';
           }, 2000);
           return;
         }
+
+        const castMember = gameCast.cast_members;
 
         // Set current cast member (secure - from auth)
         currentCastMemberId = castMember.id;
@@ -447,16 +459,9 @@
 
         rooms = roomsData || [];
 
-        // Load cast members for THIS game only
-        const { data: membersData, error: membersError } = await window.supabaseClient
-          .from('cast_members')
-          .select('id, full_name, display_name, avatar_url')
-          .eq('game_id', gameId)
-          .eq('status', 'active');
-
-        if (!membersError) {
-          members = membersData || [];
-        }
+        // Load cast members for THIS game only (using gameContext helper)
+        const castMembers = await window.gameContext.getCastMembers();
+        members = castMembers;
 
         document.getElementById('loading-state').style.display = 'none';
 

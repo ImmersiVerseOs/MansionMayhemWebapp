@@ -501,19 +501,31 @@
           return;
         }
 
-        // Get user's cast member for THIS game only
-        const { data: userCastMember, error: castError } = await window.supabaseClient
-          .from('cast_members')
-          .select('id, full_name, display_name')
-          .eq('user_id', user.id)
+        // Get user's cast member for THIS game only (through mm_game_cast)
+        const { data: gameCast, error: castError } = await window.supabaseClient
+          .from('mm_game_cast')
+          .select(`
+            cast_member_id,
+            status,
+            cast_members (
+              id,
+              full_name,
+              display_name,
+              user_id
+            )
+          `)
           .eq('game_id', gameId)
-          .single();
+          .eq('cast_members.user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
 
-        if (castError || !userCastMember) {
+        if (castError || !gameCast || !gameCast.cast_members) {
           showToast('You need to create a cast member profile first', 'error');
           window.location.href = '/pages/casting-call.html';
           return;
         }
+
+        const userCastMember = gameCast.cast_members;
 
         // Set current cast member (security: only user's own cast member)
         currentCastMemberId = userCastMember.id;
@@ -526,16 +538,8 @@
         document.getElementById('current-cast-display').textContent = userCastMember.display_name;
         document.getElementById('cast-selector').style.display = 'block';
 
-        // Load all cast members for THIS game only
-        const { data: allMembers, error: membersError } = await window.supabaseClient
-          .from('cast_members')
-          .select('id, full_name, display_name, avatar_url, status')
-          .eq('game_id', gameId)
-          .eq('status', 'active')
-          .order('display_name');
-
-        if (membersError) throw membersError;
-        allCastMembers = allMembers;
+        // Load all cast members for THIS game only (using gameContext helper)
+        allCastMembers = await window.gameContext.getCastMembers();
 
         // Load all data for current user
         await loadAllData();

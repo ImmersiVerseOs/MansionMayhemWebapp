@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎭 Confession Booth - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/game-context.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --color-dark: #0A0E27;
+      --color-gold: #FFC107;
+      --color-purple: #9C27B0;
+      --color-rose: #E91E63;
+      --gradient-gold: linear-gradient(135deg, #FFC107 0%, #E91E63 50%, #9C27B0 100%);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+      padding-top: 80px;
+    }
+
+    /* Confession booth themed background */
+    .confession-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 30% 50%, rgba(156, 39, 176, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 50%, rgba(233, 30, 99, 0.15) 0%, transparent 50%),
+        linear-gradient(180deg, #0A0E27 0%, #0A0E27 100%);
+      animation: confessionPulse 15s ease-in-out infinite;
+    }
+
+    @keyframes confessionPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    .page-header {
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .page-header::before {
+      content: '🎭';
+      position: absolute;
+      top: 1rem;
+      left: 2rem;
+      font-size: 3rem;
+      opacity: 0.3;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .page-header::after {
+      content: '🎭';
+      position: absolute;
+      top: 1rem;
+      right: 2rem;
+      font-size: 3rem;
+      opacity: 0.3;
+      animation: float 3s ease-in-out infinite 1.5s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .page-title {
+      font-size: 4rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 40px rgba(255, 193, 7, 0.3);
+    }
+
+    .page-subtitle {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 800px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    .create-btn-container {
+      margin: 2rem 0;
+    }
+
+    .create-confession-btn {
+      padding: 1.25rem 3rem;
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      border: none;
+      border-radius: 50px;
+      font-weight: 900;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 10px 30px rgba(255, 193, 7, 0.2);
+    }
+
+    .create-confession-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px rgba(255, 193, 7, 0.4);
+    }
+
+    .content-wrapper {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .filters-bar {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+
+    .filter-chip:hover, .filter-chip.active {
+      background: rgba(139, 0, 0, 0.3);
+      border-color: var(--color-rose);
+      color: white;
+    }
+
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .video-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .video-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--color-gold);
+      box-shadow: 0 20px 40px rgba(255, 193, 7, 0.2);
+    }
+
+    .video-thumbnail {
+      width: 100%;
+      aspect-ratio: 9/16;
+      object-fit: cover;
+      background: linear-gradient(135deg, rgba(139, 0, 0, 0.3), rgba(156, 39, 176, 0.3));
+      position: relative;
+    }
+
+    .video-thumbnail video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+    }
+
+    .video-card:hover .play-overlay {
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .play-icon {
+      font-size: 4rem;
+      opacity: 0.9;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+    }
+
+    .video-info {
+      padding: 1.5rem;
+    }
+
+    .video-author {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--color-gold);
+    }
+
+    .author-name {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .author-anonymous {
+      font-style: italic;
+      opacity: 0.7;
+    }
+
+    .video-dialogue {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .video-meta {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 5rem 2rem;
+      opacity: 0.6;
+    }
+
+    .empty-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-text {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Video Player Modal */
+    .video-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .video-modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      max-width: 600px;
+      width: 100%;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: -3rem;
+      right: 0;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 2.5rem;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+
+    .modal-close:hover {
+      opacity: 1;
+    }
+
+    .modal-video {
+      width: 100%;
+      aspect-ratio: 9/16;
+      border-radius: 20px;
+      background: black;
+    }
+
+    .modal-info {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-dialogue {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .action-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .action-btn.liked {
+      background: rgba(233, 30, 99, 0.3);
+      border-color: var(--color-rose);
+    }
+
+    @media (max-width: 768px) {
+      .page-title { font-size: 2.5rem; }
+      .videos-grid { grid-template-columns: 1fr; }
+      .modal-content { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="confession-bg"></div>
+
+  <div class="page-header">
+    <h1 class="page-title">🎭 The Confession Booth</h1>
+    <p class="page-subtitle">
+      Step into the confessional. Watch as houseguests spill their deepest secrets, shade, and drama in video form.
+    </p>
+
+    <div class="create-btn-container">
+      <button class="create-confession-btn" onclick="createConfession()">
+        🎬 Create Your Confession
+      </button>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Filters -->
+    <div class="filters-bar">
+      <div class="filter-chip active" data-filter="all">All Confessions</div>
+      <div class="filter-chip" data-filter="recent">Most Recent</div>
+      <div class="filter-chip" data-filter="popular">Most Popular</div>
+      <div class="filter-chip" data-filter="anonymous">Anonymous</div>
+    </div>
+
+    <!-- Videos Grid -->
+    <div class="videos-grid" id="videosGrid">
+      <!-- Videos will be loaded here -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <div class="empty-icon">🎭</div>
+      <div class="empty-text">No confessions yet. Be the first to spill the tea!</div>
+    </div>
+  </div>
+
+  <!-- Video Player Modal -->
+  <div class="video-modal" id="videoModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">×</button>
+
+      <video class="modal-video" id="modalVideo" controls autoplay>
+        <source src="" type="video/mp4">
+      </video>
+
+      <div class="modal-info">
+        <div class="video-author" id="modalAuthor">
+          <!-- Author info will be inserted here -->
+        </div>
+
+        <div class="modal-dialogue" id="modalDialogue">
+          <!-- Dialogue will be inserted here -->
+        </div>
+
+        <div class="modal-actions">
+          <button class="action-btn" id="likeBtn" onclick="toggleLike()">
+            ❤️ <span id="likeCount">0</span>
+          </button>
+          <button class="action-btn" onclick="shareVideo()">
+            🔗 Share
+          </button>
+          <button class="action-btn" onclick="reportVideo()">
+            🚩 Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize GameContext
+    (async function initGameContext() {
+      try {
+        if (!window.GameContext) {
+          window.GameContext = new GameContext();
+        }
+        await window.GameContext.init();
+      } catch (error) {
+        console.error('Error initializing game context:', error);
+      }
+    })();
+
+    // State
+    let currentVideo = null;
+    let videos = [];
+    let currentFilter = 'all';
+
+    // Elements
+    const videosGrid = document.getElementById('videosGrid');
+    const emptyState = document.getElementById('emptyState');
+    const videoModal = document.getElementById('videoModal');
+    const modalVideo = document.getElementById('modalVideo');
+    const modalAuthor = document.getElementById('modalAuthor');
+    const modalDialogue = document.getElementById('modalDialogue');
+    const likeBtn = document.getElementById('likeBtn');
+    const likeCount = document.getElementById('likeCount');
+
+    // Load videos
+    async function loadVideos(filter = 'all') {
+      try {
+        const gameId = GameContext.getGameId();
+
+        let query = supabase
+          .from('mm_confession_booth_videos')
+          .select(`
+            *,
+            cast_members!inner(display_name, avatar_url)
+          `)
+          .eq('game_id', gameId)
+          .eq('is_approved', true)
+          .eq('moderation_status', 'approved');
+
+        // Apply filter
+        if (filter === 'recent') {
+          query = query.order('published_at', { ascending: false });
+        } else if (filter === 'popular') {
+          query = query.order('likes_count', { ascending: false });
+        } else if (filter === 'anonymous') {
+          query = query.eq('is_anonymous', true);
+        } else {
+          query = query.order('published_at', { ascending: false });
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        videos = data;
+        renderVideos();
+
+      } catch (error) {
+        console.error('Error loading videos:', error);
+      }
+    }
+
+    // Render videos
+    function renderVideos() {
+      if (videos.length === 0) {
+        videosGrid.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      videosGrid.innerHTML = videos.map((video, index) => `
+        <div class="video-card" onclick="openVideo(${index})">
+          <div class="video-thumbnail">
+            <video>
+              <source src="${video.video_url}" type="video/mp4">
+            </video>
+            <div class="play-overlay">
+              <div class="play-icon">▶️</div>
+            </div>
+          </div>
+
+          <div class="video-info">
+            <div class="video-author">
+              ${video.is_anonymous ? `
+                <div class="author-avatar" style="background: linear-gradient(135deg, var(--color-rose), var(--color-purple)); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                  🎭
+                </div>
+                <div class="author-name author-anonymous">Anonymous Confession</div>
+              ` : `
+                <img class="author-avatar" src="${video.cast_members.avatar_url}" alt="${video.cast_members.display_name}">
+                <div class="author-name">${video.cast_members.display_name}</div>
+              `}
+            </div>
+
+            <div class="video-dialogue">
+              ${video.dialogue_text}
+            </div>
+
+            <div class="video-meta">
+              <div class="meta-item">
+                ❤️ ${video.likes_count}
+              </div>
+              <div class="meta-item">
+                💬 ${video.comments_count}
+              </div>
+              <div class="meta-item">
+                👁️ ${video.views_count}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Open video modal
+    function openVideo(index) {
+      currentVideo = videos[index];
+
+      modalVideo.querySelector('source').src = currentVideo.video_url;
+      modalVideo.load();
+
+      modalDialogue.textContent = currentVideo.dialogue_text;
+
+      if (currentVideo.is_anonymous) {
+        modalAuthor.innerHTML = `
+          <div class="author-avatar" style="background: linear-gradient(135deg, var(--color-rose), var(--color-purple)); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            🎭
+          </div>
+          <div class="author-name author-anonymous">Anonymous Confession</div>
+        `;
+      } else {
+        modalAuthor.innerHTML = `
+          <img class="author-avatar" src="${currentVideo.cast_members.avatar_url}" alt="${currentVideo.cast_members.display_name}">
+          <div class="author-name">${currentVideo.cast_members.display_name}</div>
+        `;
+      }
+
+      likeCount.textContent = currentVideo.likes_count;
+
+      // Update view count
+      updateViewCount(currentVideo.id);
+
+      videoModal.classList.add('active');
+    }
+
+    // Close modal
+    function closeModal() {
+      modalVideo.pause();
+      videoModal.classList.remove('active');
+      currentVideo = null;
+    }
+
+    // Toggle like
+    async function toggleLike() {
+      if (!currentVideo) return;
+
+      try {
+        const castMemberId = GameContext.getCastMemberId();
+
+        // Check if already liked
+        const { data: existing } = await supabase
+          .from('mm_confession_booth_reactions')
+          .select('id')
+          .eq('video_id', currentVideo.id)
+          .eq('cast_member_id', castMemberId)
+          .single();
+
+        if (existing) {
+          // Unlike
+          await supabase
+            .from('mm_confession_booth_reactions')
+            .delete()
+            .eq('id', existing.id);
+
+          likeBtn.classList.remove('liked');
+          currentVideo.likes_count--;
+        } else {
+          // Like
+          await supabase
+            .from('mm_confession_booth_reactions')
+            .insert({
+              video_id: currentVideo.id,
+              cast_member_id: castMemberId,
+              reaction_type: 'like'
+            });
+
+          likeBtn.classList.add('liked');
+          currentVideo.likes_count++;
+        }
+
+        likeCount.textContent = currentVideo.likes_count;
+
+      } catch (error) {
+        console.error('Error toggling like:', error);
+      }
+    }
+
+    // Update view count
+    async function updateViewCount(videoId) {
+      try {
+        await supabase.rpc('increment_confession_video_views', { video_id: videoId });
+      } catch (error) {
+        console.error('Error updating view count:', error);
+      }
+    }
+
+    // Create confession
+    function createConfession() {
+      window.location.href = '/pages/confession-booth-create.html';
+    }
+
+    // Share video
+    function shareVideo() {
+      if (navigator.share && currentVideo) {
+        navigator.share({
+          title: 'Confession from Mansion Mayhem',
+          text: currentVideo.dialogue_text,
+          url: window.location.href
+        });
+      } else {
+        alert('Sharing not supported on this device');
+      }
+    }
+
+    // Report video
+    function reportVideo() {
+      alert('This confession has been flagged for moderation. Thank you for reporting!');
+    }
+
+    // Filter handling
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+
+        const filter = chip.dataset.filter;
+        currentFilter = filter;
+        loadVideos(filter);
+      });
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Close modal on background click
+    videoModal.addEventListener('click', (e) => {
+      if (e.target === videoModal) closeModal();
+    });
+
+    // Load videos on page load
+    loadVideos();
+  </script>
+</body>
+</html>

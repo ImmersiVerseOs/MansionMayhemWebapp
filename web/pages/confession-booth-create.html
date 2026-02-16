@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 Create Confession - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/game-context.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --color-dark: #0A0E27;
+      --color-gold: #FFC107;
+      --color-purple: #9C27B0;
+      --color-rose: #E91E63;
+      --gradient-gold: linear-gradient(135deg, #FFC107 0%, #E91E63 50%, #9C27B0 100%);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+      padding-top: 80px;
+      padding-bottom: 3rem;
+    }
+
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(233, 30, 99, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(156, 39, 176, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 193, 7, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInDown 0.8s ease;
+    }
+
+    .page-title {
+      font-size: 3.5rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .confession-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 2.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.8s ease;
+    }
+
+    .avatar-preview {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .avatar-image {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--color-gold);
+      margin-bottom: 1rem;
+    }
+
+    .avatar-label {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .form-group {
+      margin-bottom: 2rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: var(--color-gold);
+    }
+
+    .form-help {
+      display: block;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 1rem;
+    }
+
+    .textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      color: white;
+      font-size: 1.1rem;
+      font-family: inherit;
+      resize: vertical;
+      transition: all 0.3s;
+    }
+
+    .textarea:focus {
+      outline: none;
+      border-color: var(--color-gold);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .char-counter {
+      text-align: right;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .char-counter.warning {
+      color: var(--color-rose);
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .checkbox-group:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .checkbox {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      font-size: 1rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+      margin-top: 2.5rem;
+    }
+
+    .btn {
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+      flex: 1;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .progress-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .progress-modal.active {
+      display: flex;
+    }
+
+    .progress-content {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      text-align: center;
+      max-width: 500px;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .progress-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .progress-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .progress-description {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--gradient-gold);
+      transition: width 0.5s;
+      width: 0%;
+    }
+
+    .progress-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-align: left;
+      margin-top: 2rem;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      opacity: 0.4;
+      transition: all 0.3s;
+    }
+
+    .progress-step.active {
+      opacity: 1;
+      background: rgba(255, 193, 7, 0.1);
+    }
+
+    .progress-step.completed {
+      opacity: 1;
+      background: rgba(76, 175, 80, 0.1);
+    }
+
+    .step-icon {
+      font-size: 1.25rem;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .page-title { font-size: 2.5rem; }
+      .action-buttons { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">🎬 Confession Booth</h1>
+      <p class="page-subtitle">
+        Spill the tea in video form. Your confession will be generated with your avatar and posted to the gallery.
+      </p>
+    </div>
+
+    <div class="confession-card">
+      <!-- Avatar Preview -->
+      <div class="avatar-preview">
+        <img id="avatarImage" class="avatar-image" src="" alt="Your avatar">
+        <div class="avatar-label">Your Confession Booth Avatar</div>
+      </div>
+
+      <!-- Dialogue Input -->
+      <div class="form-group">
+        <label class="form-label">What do you want to confess?</label>
+        <span class="form-help">Keep it under 50 words (~20 seconds). Make it juicy! 🫖</span>
+        <textarea
+          id="dialogueText"
+          class="textarea"
+          placeholder="Type your confession here..."
+          maxlength="500"
+        ></textarea>
+        <div class="char-counter">
+          <span id="wordCount">0</span> / 50 words
+          <span style="margin-left: 1rem;"><span id="charCount">0</span> / 500 characters</span>
+        </div>
+      </div>
+
+      <!-- Anonymous Option -->
+      <div class="form-group">
+        <label class="checkbox-group">
+          <input type="checkbox" id="anonymousCheckbox" class="checkbox">
+          <span class="checkbox-label">Post anonymously (hide my name)</span>
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-secondary" onclick="history.back()">
+          ← Back
+        </button>
+        <button class="btn btn-primary" id="createBtn" disabled>
+          🎬 Create Video Confession
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Modal -->
+  <div class="progress-modal" id="progressModal">
+    <div class="progress-content">
+      <div class="progress-icon">🎬</div>
+      <h2 class="progress-title">Creating Your Confession...</h2>
+      <p class="progress-description">
+        Sit tight! We're generating your confession booth video with AI magic.
+      </p>
+
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="progress-steps">
+        <div class="progress-step" id="step1">
+          <span class="step-icon">🎤</span>
+          <span>Generating audio...</span>
+        </div>
+        <div class="progress-step" id="step2">
+          <span class="step-icon">🎭</span>
+          <span>Creating video with avatar...</span>
+        </div>
+        <div class="progress-step" id="step3">
+          <span class="step-icon">✨</span>
+          <span>Finalizing confession...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check game context on page load
+    (async function checkGameContext() {
+      try {
+        if (!window.GameContext) {
+          window.GameContext = new GameContext();
+        }
+        await window.GameContext.init();
+
+        const castMemberId = window.GameContext.getCastMemberId();
+
+        if (!castMemberId) {
+          document.querySelector('.container').innerHTML = `
+            <div style="text-align: center; padding: 4rem 2rem;">
+              <div style="font-size: 5rem; margin-bottom: 2rem;">🎮</div>
+              <h1 style="font-size: 2.5rem; margin-bottom: 1rem; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Join a Game First!
+              </h1>
+              <p style="font-size: 1.25rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+                You need to join a Mansion Mayhem game and set up your confession booth avatar first.
+              </p>
+              <a href="/pages/lobby-browser.html" style="display: inline-block; padding: 1rem 2.5rem; background: var(--gradient-gold); color: var(--color-dark); border-radius: 50px; font-weight: 700; font-size: 1.1rem; text-decoration: none; transition: all 0.3s; margin-right: 1rem;">
+                Browse Games →
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error checking game context:', error);
+      }
+    })();
+
+    // Elements
+    const avatarImage = document.getElementById('avatarImage');
+    const dialogueText = document.getElementById('dialogueText');
+    const wordCount = document.getElementById('wordCount');
+    const charCount = document.getElementById('charCount');
+    const anonymousCheckbox = document.getElementById('anonymousCheckbox');
+    const createBtn = document.getElementById('createBtn');
+    const progressModal = document.getElementById('progressModal');
+    const progressBar = document.getElementById('progressBar');
+
+    // Load avatar
+    async function loadAvatar() {
+      try {
+        const castMemberId = GameContext.getCastMemberId();
+
+        const { data, error } = await supabase
+          .from('cast_members')
+          .select('confession_booth_avatar_url')
+          .eq('id', castMemberId)
+          .single();
+
+        if (error) throw error;
+
+        if (!data.confession_booth_avatar_url) {
+          // Redirect to setup if no avatar
+          window.location.href = '/pages/confession-booth-setup.html';
+          return;
+        }
+
+        avatarImage.src = data.confession_booth_avatar_url;
+      } catch (error) {
+        console.error('Error loading avatar:', error);
+        alert('Failed to load avatar. Please try again.');
+      }
+    }
+
+    // Update character/word count
+    dialogueText.addEventListener('input', () => {
+      const text = dialogueText.value;
+      const chars = text.length;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+
+      charCount.textContent = chars;
+      wordCount.textContent = words;
+
+      // Warning if too many words
+      const counter = document.querySelector('.char-counter');
+      if (words > 50) {
+        counter.classList.add('warning');
+      } else {
+        counter.classList.remove('warning');
+      }
+
+      // Enable button if there's text
+      createBtn.disabled = !text.trim() || words < 5 || words > 50;
+    });
+
+    // Create confession video
+    createBtn.addEventListener('click', async () => {
+      const dialogue = dialogueText.value.trim();
+      const isAnonymous = anonymousCheckbox.checked;
+
+      if (!dialogue) {
+        alert('Please write your confession first!');
+        return;
+      }
+
+      // Show progress modal
+      progressModal.classList.add('active');
+      createBtn.disabled = true;
+
+      try {
+        const castMemberId = GameContext.getCastMemberId();
+        const gameId = GameContext.getGameId();
+
+        // Step 1: Generate audio (simulated for now)
+        document.getElementById('step1').classList.add('active');
+        progressBar.style.width = '33%';
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step1').classList.add('completed');
+
+        // Step 2: Create video with HeyGen
+        document.getElementById('step2').classList.add('active');
+        progressBar.style.width = '66%';
+
+        // Call backend function to generate video
+        const response = await fetch('/functions/v1/generate-confession-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cast_member_id: castMemberId,
+            game_id: gameId,
+            dialogue_text: dialogue,
+            is_anonymous: isAnonymous
+          })
+        });
+
+        if (!response.ok) throw new Error('Video generation failed');
+
+        const { video_id } = await response.json();
+
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step2').classList.add('completed');
+
+        // Step 3: Finalize
+        document.getElementById('step3').classList.add('active');
+        progressBar.style.width = '100%';
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        document.getElementById('step3').classList.remove('active');
+        document.getElementById('step3').classList.add('completed');
+
+        // Success! Redirect to gallery
+        await new Promise(resolve => setTimeout(resolve, 500));
+        window.location.href = '/pages/confession-booth-gallery.html';
+
+      } catch (error) {
+        console.error('Error creating confession:', error);
+        alert('Failed to create confession video. Please try again.');
+        progressModal.classList.remove('active');
+        createBtn.disabled = false;
+
+        // Reset progress
+        progressBar.style.width = '0%';
+        document.querySelectorAll('.progress-step').forEach(step => {
+          step.classList.remove('active', 'completed');
+        });
+      }
+    });
+
+    // Load avatar on page load
+    loadAvatar();
+  </script>
+</body>
+</html>

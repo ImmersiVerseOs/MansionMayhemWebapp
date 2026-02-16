@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎭 Confession Booth Setup - Mansion Mayhem</title>
+  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/game-context.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --color-dark: #0A0E27;
+      --color-gold: #FFC107;
+      --color-purple: #9C27B0;
+      --color-rose: #E91E63;
+      --gradient-gold: linear-gradient(135deg, #FFC107 0%, #E91E63 50%, #9C27B0 100%);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--color-dark);
+      color: white;
+      min-height: 100vh;
+      padding-top: 80px;
+      padding-bottom: 3rem;
+    }
+
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(233, 30, 99, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(156, 39, 176, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 193, 7, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+
+    @keyframes bgShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInDown 0.8s ease;
+    }
+
+    .page-title {
+      font-size: 3.5rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .setup-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 2.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.8s ease;
+    }
+
+    .setup-step {
+      margin-bottom: 2rem;
+    }
+
+    .step-number {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-gold);
+      border-radius: 50%;
+      text-align: center;
+      line-height: 40px;
+      font-weight: 900;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .step-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--color-gold);
+    }
+
+    .step-description {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .avatar-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .avatar-option {
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar-option::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient-gold);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .avatar-option:hover {
+      border-color: var(--color-gold);
+      transform: translateY(-5px);
+    }
+
+    .avatar-option:hover::before {
+      opacity: 0.1;
+    }
+
+    .avatar-option.selected {
+      border-color: var(--color-gold);
+      background: rgba(255, 193, 7, 0.1);
+    }
+
+    .avatar-option-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      filter: grayscale(0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .avatar-option-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .avatar-option-description {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.4;
+      position: relative;
+      z-index: 1;
+    }
+
+    .upload-area {
+      display: none;
+      margin-top: 1.5rem;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .upload-area.active {
+      display: block;
+    }
+
+    .upload-area:hover {
+      border-color: var(--color-gold);
+      background: rgba(255, 193, 7, 0.05);
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .preview-container {
+      display: none;
+      margin-top: 1.5rem;
+    }
+
+    .preview-container.active {
+      display: block;
+    }
+
+    .preview-image {
+      width: 100%;
+      max-width: 400px;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin: 0 auto;
+      display: block;
+      border: 2px solid var(--color-gold);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2.5rem;
+    }
+
+    .btn {
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-primary {
+      background: var(--gradient-gold);
+      color: var(--color-dark);
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top: 4px solid var(--color-gold);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .page-title { font-size: 2.5rem; }
+      .avatar-options { grid-template-columns: 1fr; }
+      .action-buttons { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">🎭 Confession Booth Setup</h1>
+      <p class="page-subtitle">
+        Choose your avatar for the confession booth. This will be used to create your confession videos.
+      </p>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-step">
+        <div class="step-number">1</div>
+        <h2 class="step-title">Choose Your Avatar Source</h2>
+        <p class="step-description">
+          Select how you want to create your confession booth avatar. This will be the face that appears in your confessional videos.
+        </p>
+
+        <div class="avatar-options">
+          <div class="avatar-option" data-source="facecast_still">
+            <div class="avatar-option-icon">📸</div>
+            <div class="avatar-option-title">FaceCast Photo</div>
+            <div class="avatar-option-description">Use your verified FaceCast profile photo</div>
+          </div>
+
+          <div class="avatar-option" data-source="cameo_character">
+            <div class="avatar-option-icon">🎨</div>
+            <div class="avatar-option-title">Cameo Character</div>
+            <div class="avatar-option-description">Use your existing Cameo character</div>
+          </div>
+
+          <div class="avatar-option" data-source="user_upload">
+            <div class="avatar-option-icon">⬆️</div>
+            <div class="avatar-option-title">Upload Photo</div>
+            <div class="avatar-option-description">Upload your own photo (moderated)</div>
+          </div>
+
+          <div class="avatar-option" data-source="flow_generated">
+            <div class="avatar-option-icon">🤖</div>
+            <div class="avatar-option-title">AI Generated</div>
+            <div class="avatar-option-description">Generate an AI avatar on Flow</div>
+          </div>
+        </div>
+
+        <!-- Upload Area (shown when user_upload is selected) -->
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">📷</div>
+          <h3>Click or Drag Photo Here</h3>
+          <p style="color: rgba(255,255,255,0.6); margin-top: 0.5rem;">JPG or PNG, max 5MB</p>
+          <input type="file" id="fileInput" accept="image/jpeg,image/png" style="display: none;">
+        </div>
+
+        <!-- Preview Container -->
+        <div class="preview-container" id="previewContainer">
+          <img id="previewImage" class="preview-image" alt="Avatar preview">
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p>Setting up your confession booth avatar...</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-secondary" onclick="history.back()">
+          ← Back
+        </button>
+        <button class="btn btn-primary" id="saveBtn" disabled>
+          Save & Continue →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check game context on page load
+    (async function checkGameContext() {
+      try {
+        if (!window.GameContext) {
+          window.GameContext = new GameContext();
+        }
+        await window.GameContext.init();
+
+        const castMemberId = window.GameContext.getCastMemberId();
+
+        if (!castMemberId) {
+          // No cast member - show friendly message
+          document.querySelector('.container').innerHTML = `
+            <div style="text-align: center; padding: 4rem 2rem;">
+              <div style="font-size: 5rem; margin-bottom: 2rem;">🎮</div>
+              <h1 style="font-size: 2.5rem; margin-bottom: 1rem; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Join a Game First!
+              </h1>
+              <p style="font-size: 1.25rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+                You need to join a Mansion Mayhem game before you can set up your confession booth avatar.
+              </p>
+              <a href="/pages/lobby-browser.html" style="display: inline-block; padding: 1rem 2.5rem; background: var(--gradient-gold); color: var(--color-dark); border-radius: 50px; font-weight: 700; font-size: 1.1rem; text-decoration: none; transition: all 0.3s;">
+                Browse Games →
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error checking game context:', error);
+      }
+    })();
+
+    // State
+    let selectedSource = null;
+    let selectedFile = null;
+
+    // Elements
+    const avatarOptions = document.querySelectorAll('.avatar-option');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImage = document.getElementById('previewImage');
+    const saveBtn = document.getElementById('saveBtn');
+    const loadingState = document.getElementById('loadingState');
+
+    // Avatar Option Selection
+    avatarOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        // Remove previous selection
+        avatarOptions.forEach(opt => opt.classList.remove('selected'));
+
+        // Select this option
+        option.classList.add('selected');
+        selectedSource = option.dataset.source;
+
+        // Show upload area if user_upload
+        if (selectedSource === 'user_upload') {
+          uploadArea.classList.add('active');
+        } else {
+          uploadArea.classList.remove('active');
+          previewContainer.classList.remove('active');
+          selectedFile = null;
+        }
+
+        // Enable save button
+        saveBtn.disabled = selectedSource === 'user_upload' && !selectedFile;
+      });
+    });
+
+    // File Upload
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--color-gold)';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+      const file = e.dataTransfer.files[0];
+      handleFileSelect(file);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      handleFileSelect(file);
+    });
+
+    function handleFileSelect(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        alert('Please upload a valid image file (JPG or PNG)');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+
+      selectedFile = file;
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImage.src = e.target.result;
+        previewContainer.classList.add('active');
+        saveBtn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Save Avatar
+    saveBtn.addEventListener('click', async () => {
+      if (!selectedSource) {
+        alert('Please select an avatar source');
+        return;
+      }
+
+      loadingState.classList.add('active');
+      saveBtn.disabled = true;
+
+      try {
+        // Get cast member ID from session
+        const castMemberId = GameContext.getCastMemberId();
+
+        let avatarUrl = null;
+
+        // Handle different sources
+        if (selectedSource === 'user_upload' && selectedFile) {
+          // Upload to Supabase storage
+          const fileName = `${castMemberId}/avatar-${Date.now()}.jpg`;
+          const { data, error } = await supabase.storage
+            .from('confession-booth-avatars')
+            .upload(fileName, selectedFile);
+
+          if (error) throw error;
+
+          avatarUrl = supabase.storage
+            .from('confession-booth-avatars')
+            .getPublicUrl(fileName).data.publicUrl;
+
+        } else if (selectedSource === 'facecast_still') {
+          // Get FaceCast photo from cast_members
+          const { data } = await supabase
+            .from('cast_members')
+            .select('avatar_url')
+            .eq('id', castMemberId)
+            .single();
+
+          avatarUrl = data.avatar_url;
+
+        } else if (selectedSource === 'cameo_character') {
+          // Get Cameo character image
+          const { data } = await supabase
+            .from('cast_members')
+            .select('avatar_url')
+            .eq('id', castMemberId)
+            .single();
+
+          avatarUrl = data.avatar_url;
+
+        } else if (selectedSource === 'flow_generated') {
+          // TODO: Call Flow API to generate avatar
+          alert('AI generation coming soon!');
+          loadingState.classList.remove('active');
+          saveBtn.disabled = false;
+          return;
+        }
+
+        // Update cast_members table
+        const { error: updateError } = await supabase
+          .from('cast_members')
+          .update({
+            confession_booth_avatar_url: avatarUrl,
+            confession_avatar_source: selectedSource,
+            confession_avatar_set_at: new Date().toISOString()
+          })
+          .eq('id', castMemberId);
+
+        if (updateError) throw updateError;
+
+        // Redirect to confession creation page
+        window.location.href = '/pages/confession-booth-create.html';
+
+      } catch (error) {
+        console.error('Error saving avatar:', error);
+        alert('Failed to save avatar. Please try again.');
+        loadingState.classList.remove('active');
+        saveBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

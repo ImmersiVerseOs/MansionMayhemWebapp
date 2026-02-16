@@ -567,6 +567,14 @@
             </div>
           </div>
 
+          <!-- Meet the Cast - Voice Intros -->
+          <div id="voiceIntrosSection" style="margin-top: 2rem; display: none;">
+            <h3 style="color: var(--gold); margin-bottom: 1rem; font-size: 1.25rem;">🎙️ Meet the Cast</h3>
+            <div id="voiceIntrosList" style="display: grid; gap: 1rem;">
+              <!-- Voice intros will load here -->
+            </div>
+          </div>
+
           <!-- Lobby Timer -->
           <div id="lobbyTimer" class="lobby-timer" style="margin-top: 2rem; display: none;">
             <div style="text-align: center;">
@@ -713,6 +721,7 @@
       }
 
       await loadLobby()
+      await loadVoiceIntros()
       setupRealtimeSubscription()
     }
 
@@ -805,6 +814,103 @@
         console.error('Error loading lobby:', error)
         alert('Failed to load lobby')
       }
+    }
+
+    // Load voice intros
+    async function loadVoiceIntros() {
+      try {
+        console.log('🎙️ Loading voice intros for game:', currentGameId)
+
+        const { data: intros, error } = await supabase.rpc('get_lobby_voice_intros', {
+          p_game_id: currentGameId
+        })
+
+        if (error) {
+          console.error('Error loading voice intros:', error)
+          return
+        }
+
+        console.log('Voice intros loaded:', intros)
+
+        const voiceIntrosSection = document.getElementById('voiceIntrosSection')
+        const voiceIntrosList = document.getElementById('voiceIntrosList')
+
+        if (!intros || intros.length === 0) {
+          voiceIntrosSection.style.display = 'none'
+          return
+        }
+
+        voiceIntrosSection.style.display = 'block'
+
+        voiceIntrosList.innerHTML = intros.map(intro => `
+          <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px; padding: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--gradient-gold); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                ${getArchetypeEmoji(intro.cast_member.archetype)}
+              </div>
+              <div style="flex: 1;">
+                <div style="font-weight: 700; color: var(--gold); font-size: 1rem;">
+                  ${intro.cast_member.display_name}
+                </div>
+                <div style="font-size: 0.875rem; color: var(--text-muted); text-transform: capitalize;">
+                  ${intro.cast_member.archetype}
+                </div>
+              </div>
+              <div style="font-size: 0.875rem; color: var(--text-dim);">
+                ${formatDuration(intro.duration)}
+              </div>
+            </div>
+            ${intro.caption ? `<div style="margin-bottom: 0.75rem; color: var(--text-secondary); font-size: 0.9375rem;">${intro.caption}</div>` : ''}
+            <audio controls style="width: 100%; height: 40px; border-radius: 8px;" preload="metadata"
+                   onplay="incrementPlays('${intro.id}')">
+              <source src="${intro.audio_url}" type="audio/webm">
+              <source src="${intro.audio_url}" type="audio/mp4">
+              Your browser does not support audio playback.
+            </audio>
+            <div style="margin-top: 0.5rem; display: flex; gap: 1rem; font-size: 0.875rem; color: var(--text-dim);">
+              <span>▶️ ${intro.plays_count} plays</span>
+              <span>❤️ ${intro.likes_count} likes</span>
+            </div>
+          </div>
+        `).join('')
+
+      } catch (error) {
+        console.error('Error in loadVoiceIntros:', error)
+      }
+    }
+
+    // Helper function to increment play count
+    async function incrementPlays(voiceNoteId) {
+      try {
+        await supabase.rpc('increment_voice_note_plays', {
+          p_voice_note_id: voiceNoteId
+        })
+      } catch (error) {
+        console.error('Error incrementing plays:', error)
+      }
+    }
+
+    // Helper function to get archetype emoji
+    function getArchetypeEmoji(archetype) {
+      const emojis = {
+        'queen': '👑',
+        'villain': '😈',
+        'wildcard': '🃏',
+        'sweetheart': '💖',
+        'strategist': '🧠',
+        'comedian': '😂',
+        'troublemaker': '🔥',
+        'diva': '💅',
+        'hothead': '💢'
+      }
+      return emojis[archetype?.toLowerCase()] || '🎭'
+    }
+
+    // Helper function to format duration
+    function formatDuration(seconds) {
+      const mins = Math.floor(seconds / 60)
+      const secs = seconds % 60
+      return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `0:${secs.toString().padStart(2, '0')}`
     }
 
     // Load cast list

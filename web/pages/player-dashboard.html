@@ -1070,12 +1070,22 @@
 
       if (!alliances || alliances.length === 0) return
 
-      const html = alliances.map(a => `
-        <div class="alliance-item" onclick="window.location.href='/pages/alliances.html'">
+      // Fetch member names for each alliance
+      const alliancesWithMembers = await Promise.all(alliances.map(async (a) => {
+        const { data: members } = await supabase
+          .from('cast_members')
+          .select('id, display_name')
+          .in('id', a.member_ids || [])
+
+        return { ...a, members }
+      }))
+
+      const html = alliancesWithMembers.map(a => `
+        <div class="alliance-item" onclick="window.location.href='/pages/alliance-rooms.html'">
           <div class="alliance-name">${a.name || 'Secret Alliance'}</div>
           <div class="alliance-members">
-            ${(a.member_ids || []).slice(0, 5).map(() => `<span class="member-tag">👤 Member</span>`).join('')}
-            ${a.member_ids.length > 5 ? `<span class="member-tag">+${a.member_ids.length - 5} more</span>` : ''}
+            ${(a.members || []).slice(0, 5).map(m => `<span class="member-tag">👤 ${m.display_name}</span>`).join('')}
+            ${a.members.length > 5 ? `<span class="member-tag">+${a.members.length - 5} more</span>` : ''}
           </div>
         </div>
       `).join('')
@@ -1129,25 +1139,42 @@
       }
     }
 
+    function getTimeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000)
+      if (seconds < 60) return 'Just now'
+      const minutes = Math.floor(seconds / 60)
+      if (minutes < 60) return `${minutes}m ago`
+      const hours = Math.floor(minutes / 60)
+      if (hours < 24) return `${hours}h ago`
+      const days = Math.floor(hours / 24)
+      return `${days}d ago`
+    }
+
     async function loadTeaFeed() {
+      if (!currentGame) return
+
       const { data: tea } = await supabase
-        .from('mm_confession_cards')
-        .select('*, cast_members(display_name)')
-        .eq('is_approved', true)
+        .from('mm_tea_room_posts')
+        .select('*, cast_members(display_name, avatar_url)')
+        .eq('game_id', currentGame.id)
+        .eq('moderation_status', 'approved')
         .order('created_at', { ascending: false })
         .limit(3)
 
       if (!tea || tea.length === 0) return
 
-      const html = tea.map(t => `
-        <div class="tea-item">
-          <div class="tea-header">
-            <div class="tea-author">${t.is_anonymous ? '☕ Anonymous' : t.cast_members?.display_name || 'Someone'}</div>
-            <div class="tea-time">Just now</div>
+      const html = tea.map(t => {
+        const timeAgo = getTimeAgo(new Date(t.created_at))
+        return `
+          <div class="tea-item" onclick="window.location.href='/pages/tea-room.html'">
+            <div class="tea-header">
+              <div class="tea-author">${t.is_anonymous ? '☕ Anonymous' : t.cast_members?.display_name || 'Someone'}</div>
+              <div class="tea-time">${timeAgo}</div>
+            </div>
+            <div class="tea-content">"${t.text_content || 'Listen to the voice note...'}"</div>
           </div>
-          <div class="tea-content">"${t.text_content || 'Listen to the voice note...'}"</div>
-        </div>
-      `).join('')
+        `
+      }).join('')
 
       document.getElementById('teaFeed').innerHTML = html
       document.getElementById('statTea').textContent = tea.length

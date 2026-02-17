@@ -663,39 +663,73 @@
 
     // Load stats
     async function loadStats() {
-      // Count alliances (from relationship edges - filter client-side)
-      const { data: allRelationships } = await supabase
-        .from('mm_relationship_edges')
-        .select('alliance_strength, rivalry_level')
-        .or(`cast_member_a_id.eq.${castId},cast_member_b_id.eq.${castId}`)
+      // Count alliances from alliance rooms (actual alliances, not just relationships)
+      const { data: allianceRooms } = await supabase
+        .from('mm_alliance_rooms')
+        .select('member_ids')
+        .contains('member_ids', [castId])
+        .eq('status', 'active')
 
-      const allianceCount = allRelationships?.filter(r =>
-        (r.alliance_strength || 0) > (r.rivalry_level || 0)
-      ).length || 0
+      const allianceCount = allianceRooms?.length || 0
 
-      // Count voice notes
-      const { count: voiceNoteCount } = await supabase
+      // Count ALL voice notes (tea room posts + confession booth + voice introductions)
+      const { count: teaVoiceCount } = await supabase
+        .from('mm_tea_room_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('cast_member_id', castId)
+        .not('voice_note_url', 'is', null)
+
+      const { count: confessionVoiceCount } = await supabase
+        .from('mm_confession_booth_videos')
+        .select('*', { count: 'exact', head: true })
+        .eq('cast_member_id', castId)
+        .eq('heygen_status', 'completed')
+
+      const { count: introVoiceCount } = await supabase
         .from('mm_voice_introductions')
         .select('*', { count: 'exact', head: true })
         .eq('cast_member_id', castId)
-        .eq('moderation_status', 'approved')
 
-      // Count scenario responses
+      const voiceNoteCount = (teaVoiceCount || 0) + (confessionVoiceCount || 0) + (introVoiceCount || 0)
+
+      // Count scenario responses (correct column name)
       const { count: responseCount } = await supabase
         .from('scenario_responses')
         .select('*', { count: 'exact', head: true })
-        .eq('responder_cast_id', castId)
+        .eq('cast_member_id', castId)
+
+      // Calculate Drama Score (tea room posts + confession videos + drama show posts)
+      const { count: teaPostCount } = await supabase
+        .from('mm_tea_room_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('cast_member_id', castId)
+
+      const { count: dramaShowCount } = await supabase
+        .from('mm_tea_room_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('cast_member_id', castId)
+        .eq('post_type', 'drama')
+
+      const dramaScore = (teaPostCount || 0) + (dramaShowCount || 0) * 2 // Drama posts worth 2x
+
+      // Calculate Influence (alliances + queen wins + votes received)
+      const { count: queenWins } = await supabase
+        .from('mm_queen_selections')
+        .select('*', { count: 'exact', head: true })
+        .eq('selected_queen_id', castId)
+
+      const influenceScore = (allianceCount * 10) + (queenWins || 0) * 50
 
       const dashboard = document.getElementById('statsDashboard')
       dashboard.innerHTML = `
         <div class="stat-card">
           <div class="stat-icon">🔥</div>
-          <div class="stat-value">${castMember.drama_score || 0}</div>
+          <div class="stat-value">${dramaScore}</div>
           <div class="stat-label">Drama Score</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">👑</div>
-          <div class="stat-value">${castMember.influence_score || 0}</div>
+          <div class="stat-value">${influenceScore}</div>
           <div class="stat-label">Influence</div>
         </div>
         <div class="stat-card">

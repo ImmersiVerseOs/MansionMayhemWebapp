@@ -742,7 +742,7 @@
 
     <nav class="nav-section">
       <div class="nav-title">Account</div>
-      <a href="/pages/player-profile.html" class="nav-item">
+      <a href="#" id="profileNavLink" class="nav-item" onclick="openMyProfile(); return false;">
         <span class="nav-icon">👤</span>
         Profile
       </a>
@@ -1580,6 +1580,18 @@
 
       // Reset input
       event.target.value = ''
+    }
+
+    // ========================================================================
+    // NAVIGATION - Global functions
+    // ========================================================================
+
+    window.openMyProfile = function() {
+      if (!currentCastMember) {
+        alert('Profile loading... please wait a moment and try again.');
+        return;
+      }
+      window.location.href = `/pages/player-profile.html?cast_member_id=${currentCastMember.id}`;
     }
 
     // ========================================================================

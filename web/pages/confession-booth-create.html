@@ -627,28 +627,30 @@
         document.getElementById('step2').classList.add('active');
         progressBar.style.width = '66%';
 
-        // Call Supabase Edge Function to generate video
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
-        const { data: { session } } = await window.supabaseClient.auth.getSession();
+        // Call Supabase Edge Function to generate video using invoke()
+        const { data: result, error: invokeError } = await window.supabaseClient.functions.invoke(
+          'generate-confession-video',
+          {
+            body: {
+              cast_member_id: castMemberId,
+              game_id: gameId,
+              dialogue_text: dialogue,
+              is_anonymous: isAnonymous
+            }
+          }
+        );
 
-        const response = await fetch(`https://fpxbhqibimekjhlumnmc.supabase.co/functions/v1/generate-confession-video`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({
-            cast_member_id: castMemberId,
-            game_id: gameId,
-            dialogue_text: dialogue,
-            is_anonymous: isAnonymous
-          })
-        });
+        if (invokeError) {
+          console.error('Function invoke error:', invokeError);
+          throw new Error(`Video generation failed: ${invokeError.message}`);
+        }
 
-        if (!response.ok) throw new Error('Video generation failed');
+        if (!result || result.error) {
+          console.error('Function returned error:', result);
+          throw new Error(result?.error || 'Video generation failed');
+        }
 
-        const { video_id } = await response.json();
+        const { video_id } = result;
 
         document.getElementById('step2').classList.remove('active');
         document.getElementById('step2').classList.add('completed');

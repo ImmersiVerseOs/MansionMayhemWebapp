@@ -257,9 +257,9 @@ async function processChatMessage(action: any) {
 
   if (!room) throw new Error('Room not found')
 
-  // Get recent messages for context
+  // Get recent messages for context (last 10 for better conversation tracking)
   const recentMessages = room.mm_alliance_messages
-    .slice(-5)
+    .slice(-10)
     .map((msg: any) => `${msg.cast_members.display_name}: ${msg.message}`)
     .join('\n')
 
@@ -272,7 +272,15 @@ PERSONALITY: ${personality.traits}
 SPEAKING STYLE: ${personality.speaking_style}
 ${personality.examples ? `PHRASES YOU USE: ${personality.examples}` : ''}
 
-Generate a short, natural chat message (1-2 sentences max). Stay in character. Be conversational, not formal. Talk like you're texting your alliance members - use your natural slang and speaking style.
+CONVERSATION CONTEXT RULES:
+- READ the full conversation history above - understand what's being discussed
+- If someone asked you a question, ANSWER it directly
+- If someone made a statement, RESPOND to that specific point
+- If it's a back-and-forth debate, stay on topic and engage with their argument
+- Don't change the subject unless the conversation naturally shifts
+- Respond as if you're actually LISTENING to what others are saying
+
+Generate a short, natural chat message (1-2 sentences max) that DIRECTLY engages with the conversation. Stay in character. Be conversational, not formal. Talk like you're texting your alliance members - use your natural slang and speaking style.
 
 CRITICAL: AVOID OVERUSED PHRASES
 DO NOT use: "dissertations", "novels", "chess", "4D chess", "playbook", "TED Talk", "taking notes", "quiet while screaming"
@@ -288,10 +296,10 @@ CRITICAL TEXT MESSAGE RULES:
 
 Just write what you would actually TYPE in a group chat.`
 
-  const userPrompt = `Recent chat messages:
+  const userPrompt = `Recent chat history:
 ${recentMessages || '(No messages yet - you can start the conversation)'}
 
-Send a message that fits your personality and the conversation flow.`
+Read the conversation carefully. Understand what's being discussed. Then respond naturally to what's happening in the chat - answer questions, engage with points made, or continue the discussion. Your response should make sense in context of what was just said.`
 
   // Call Claude API (Haiku for quick chat)
   const startTime = Date.now()

@@ -627,10 +627,14 @@
         document.getElementById('step2').classList.add('active');
         progressBar.style.width = '66%';
 
-        // Call backend function to generate video
-        const response = await fetch('/functions/v1/generate-confession-video', {
+        // Call Supabase Edge Function to generate video
+        const { data: { session } } = await window.supabaseClient.auth.getSession();
+        const response = await fetch(`https://fpxbhqibimekjhlumnmc.supabase.co/functions/v1/generate-confession-video`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token || ''}`
+          },
           body: JSON.stringify({
             cast_member_id: castMemberId,
             game_id: gameId,

@@ -137,6 +137,21 @@ BACKSTORY: ${castMember.backstory || 'A mysterious contestant with something to 
 
 You respond to scenario prompts in character, staying true to your archetype. Keep responses under 150 words. Be dramatic, authentic, and strategic. Use your speaking style naturally - don't be formal or corporate. Talk like you would on a reality TV show confessional.
 
+CRITICAL: AVOID OVERUSED PHRASING PATTERNS
+These metaphor families are BANNED - do NOT use them:
+1. ❌ Writing metaphors: "dissertations", "novels", "essays", "term papers", "manifestos", "writing history"
+2. ❌ Chess metaphors: "chess match", "playbook", "3 steps ahead", "4D chess", "4D checkers", "rewriting rules"
+3. ❌ Performance metaphors: "TED Talk", "confessional", "auditioning", "play-by-play", "commentary track"
+4. ❌ Contradiction paradoxes: "quiet while screaming", "loudest silence", "talking about not talking"
+5. ❌ Note-taking metaphors: "taking notes", "mental notes", "cataloging panic", "intelligence briefing"
+
+Instead:
+- Just REACT and RESPOND naturally
+- Use your archetype's unique voice (${personality.name} style)
+- Add specific insults, observations, or shade appropriate to the situation
+- Vary your expressions - don't fall into meta-commentary patterns
+- Execute don't overexplain
+
 CRITICAL VOICE NOTE RULES:
 - Write ONLY words that will be SPOKEN ALOUD
 - NO visual actions: no "flips hair", "sits back", "rolls eyes", "crosses arms", "leans in"
@@ -258,6 +273,10 @@ SPEAKING STYLE: ${personality.speaking_style}
 ${personality.examples ? `PHRASES YOU USE: ${personality.examples}` : ''}
 
 Generate a short, natural chat message (1-2 sentences max). Stay in character. Be conversational, not formal. Talk like you're texting your alliance members - use your natural slang and speaking style.
+
+CRITICAL: AVOID OVERUSED PHRASES
+DO NOT use: "dissertations", "novels", "chess", "4D chess", "playbook", "TED Talk", "taking notes", "quiet while screaming"
+Just text normally in your archetype voice.
 
 CRITICAL TEXT MESSAGE RULES:
 - Write only TEXT that would appear in a real text message
@@ -477,6 +496,16 @@ Create a DRAMATIC, SHADE-FILLED public post (1-3 sentences max). This is PUBLIC 
 - Call someone out OR spill tea OR throw shade OR react to drama
 - Stay in character with your archetype
 - Use your speaking style and slang naturally
+
+CRITICAL: AVOID OVERUSED PHRASING PATTERNS
+These metaphor families are BANNED - do NOT use them:
+❌ NO: "dissertations", "novels", "essays", "term papers", "manifestos"
+❌ NO: "chess", "playbook", "3 steps ahead", "4D chess", "checkers"
+❌ NO: "TED Talk", "confessional", "auditioning", "play-by-play"
+❌ NO: "quiet while screaming", "loudest silence", "talking about not talking"
+❌ NO: "taking notes", "mental notes", "cataloging", "intelligence briefing"
+
+Instead: Just REACT with shade, drama, or tea in your archetype voice. Execute don't overexplain.
 
 CRITICAL VOICE NOTE RULES:
 - Write ONLY words you would SPEAK ALOUD in a reality TV confessional

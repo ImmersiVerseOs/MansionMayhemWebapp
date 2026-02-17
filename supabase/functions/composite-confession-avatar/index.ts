@@ -76,8 +76,8 @@ function findPersonBoundaries(image: any): { top: number; bottom: number; left: 
   // Scan image to find non-transparent pixels
   for (let y = 0; y < image.height; y++) {
     for (let x = 0; x < image.width; x++) {
-      const pixelIndex = (y * image.width + x) * 4;
-      const alpha = image.bitmap[pixelIndex + 3];
+      const rgba = image.getRGBAAt(x, y);
+      const alpha = rgba[3];
 
       // If pixel is not transparent
       if (alpha > 10) {

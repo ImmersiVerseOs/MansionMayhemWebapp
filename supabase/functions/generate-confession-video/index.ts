@@ -110,14 +110,14 @@ async function generateAudio(text: string, voiceId: string): Promise<ElevenLabsR
 async function uploadAvatarToHeyGen(avatarUrl: string): Promise<string> {
   console.log('📤 Uploading avatar to HeyGen...');
 
-  const response = await fetch('https://api.heygen.com/v1/talking_photo', {
+  const response = await fetch('https://api.heygen.com/v2/photo_avatar', {
     method: 'POST',
     headers: {
       'X-API-KEY': HEYGEN_API_KEY,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      image_url: avatarUrl,
+      photo_url: avatarUrl,
     }),
   });
 
@@ -132,14 +132,16 @@ async function uploadAvatarToHeyGen(avatarUrl: string): Promise<string> {
     throw new Error(`HeyGen avatar upload error: ${result.error}`);
   }
 
-  const talkingPhotoId = result.data?.talking_photo_id || result.data?.id;
+  // HeyGen v2 API returns photo_id or avatar_id
+  const photoId = result.data?.photo_id || result.data?.avatar_id || result.data?.id;
 
-  if (!talkingPhotoId) {
-    throw new Error('HeyGen did not return a talking_photo_id');
+  if (!photoId) {
+    console.error('HeyGen response:', JSON.stringify(result));
+    throw new Error('HeyGen did not return a photo_id');
   }
 
-  console.log('✅ Avatar uploaded to HeyGen:', talkingPhotoId);
-  return talkingPhotoId;
+  console.log('✅ Avatar uploaded to HeyGen:', photoId);
+  return photoId;
 }
 
 // ============================================================================

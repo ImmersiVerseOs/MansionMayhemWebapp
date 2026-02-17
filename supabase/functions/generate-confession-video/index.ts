@@ -104,11 +104,50 @@ async function generateAudio(text: string, voiceId: string): Promise<ElevenLabsR
 }
 
 // ============================================================================
+// Helper: Upload Avatar to HeyGen and Get ID
+// ============================================================================
+
+async function uploadAvatarToHeyGen(avatarUrl: string): Promise<string> {
+  console.log('📤 Uploading avatar to HeyGen...');
+
+  const response = await fetch('https://api.heygen.com/v1/talking_photo', {
+    method: 'POST',
+    headers: {
+      'X-API-KEY': HEYGEN_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      image_url: avatarUrl,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`HeyGen avatar upload error: ${error}`);
+  }
+
+  const result = await response.json();
+
+  if (result.error) {
+    throw new Error(`HeyGen avatar upload error: ${result.error}`);
+  }
+
+  const talkingPhotoId = result.data?.talking_photo_id || result.data?.id;
+
+  if (!talkingPhotoId) {
+    throw new Error('HeyGen did not return a talking_photo_id');
+  }
+
+  console.log('✅ Avatar uploaded to HeyGen:', talkingPhotoId);
+  return talkingPhotoId;
+}
+
+// ============================================================================
 // Helper: Generate Video with HeyGen
 // ============================================================================
 
 async function generateVideo(
-  avatarUrl: string,
+  talkingPhotoId: string,
   audioUrl: string,
   backgroundUrl: string
 ): Promise<string> {
@@ -125,7 +164,7 @@ async function generateVideo(
         {
           character: {
             type: 'talking_photo',
-            talking_photo_url: avatarUrl,
+            talking_photo_id: talkingPhotoId,
             talking_style: 'expressive',
             expression: 'default',
             super_resolution: true,
@@ -302,14 +341,17 @@ serve(async (req) => {
 
     console.log('💾 Video record created:', videoRecord.id);
 
-    // 7. Generate video with HeyGen
+    // 7. Upload avatar to HeyGen and get talking_photo_id
+    const talkingPhotoId = await uploadAvatarToHeyGen(castMember.confession_booth_avatar_url);
+
+    // 8. Generate video with HeyGen
     const heygenVideoId = await generateVideo(
-      castMember.confession_booth_avatar_url,
+      talkingPhotoId,
       audio_url,
       backgroundUrl
     );
 
-    // 8. Update record with HeyGen video ID
+    // 9. Update record with HeyGen video ID
     const { error: updateError } = await supabase
       .from('mm_confession_booth_videos')
       .update({

@@ -215,10 +215,16 @@ function updateStats() {
   const voicePosts = allPosts.filter(p => p.voice_note_url);
   const uniquePlayers = new Set(allPosts.map(p => p.cast_member_id));
 
-  document.getElementById('totalPosts').textContent = allPosts.length;
-  document.getElementById('todayPosts').textContent = todayPosts.length;
-  document.getElementById('voicePosts').textContent = voicePosts.length + voiceIntros.length;
-  document.getElementById('activePlayers').textContent = uniquePlayers.size;
+  // Update stats (check if elements exist first)
+  const totalPostsEl = document.getElementById('totalPosts');
+  const todayPostsEl = document.getElementById('todayPosts');
+  const voicePostsEl = document.getElementById('voicePosts');
+  const activePlayersEl = document.getElementById('activePlayers');
+
+  if (totalPostsEl) totalPostsEl.textContent = allPosts.length;
+  if (todayPostsEl) todayPostsEl.textContent = todayPosts.length;
+  if (voicePostsEl) voicePostsEl.textContent = voicePosts.length + voiceIntros.length;
+  if (activePlayersEl) activePlayersEl.textContent = uniquePlayers.size;
 }
 
 function renderPosts() {

@@ -327,7 +327,7 @@ serve(async (req) => {
     // 5. Get default confession booth background
     const backgroundUrl = await getDefaultBackground();
 
-    // 6. Create database record (pending status)
+    // 6. Create database record (auto-approved for immediate visibility)
     const { data: videoRecord, error: insertError } = await supabase
       .from('mm_confession_booth_videos')
       .insert({
@@ -340,7 +340,9 @@ serve(async (req) => {
         booth_background_url: backgroundUrl,
         is_anonymous,
         heygen_status: 'pending',
-        moderation_status: 'pending',
+        is_approved: true,
+        moderation_status: 'approved',
+        moderated_at: new Date().toISOString(),
         dialogue_word_count: wordCount,
       })
       .select()

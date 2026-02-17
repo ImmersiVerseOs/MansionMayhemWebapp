@@ -1,3 +1,10 @@
+/*
+ * TRADE SECRET - CONFIDENTIAL
+ * Proprietary AI decision processing system
+ * © 2026 ImmersiVerse OS Inc.
+ * Unauthorized disclosure prohibited by law.
+ */
+
 // AI Decision Processor Edge Function
 // Processes AI alliance requests, responses, and chat messages
 // Triggered by cron job or manual invocation

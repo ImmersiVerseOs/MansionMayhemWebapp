@@ -12,10 +12,27 @@ class GameContext {
   }
 
   /**
+   * Wait for Supabase client to be initialized
+   */
+  async waitForSupabase() {
+    let attempts = 0
+    while (!window.supabaseClient && attempts < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      attempts++
+    }
+    if (!window.supabaseClient) {
+      throw new Error('Supabase client not initialized after 5 seconds')
+    }
+  }
+
+  /**
    * Initialize game context from URL or localStorage
    * Call this at the top of every page
    */
   async init() {
+    // Wait for Supabase to be ready first
+    await this.waitForSupabase()
+
     // Migrate old localStorage key to new key
     const oldGameId = localStorage.getItem('currentGameId')
     if (oldGameId && !localStorage.getItem('current_game_id')) {

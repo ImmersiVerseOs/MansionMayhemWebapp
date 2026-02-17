@@ -1,3 +1,10 @@
+/*
+ * TRADE SECRET - CONFIDENTIAL
+ * Proprietary AI agent processing system
+ * © 2026 ImmersiVerse OS Inc.
+ * Unauthorized disclosure prohibited by law.
+ */
+
 // ============================================================================
 // AI AGENT PROCESSOR - Mansion Mayhem
 // ============================================================================

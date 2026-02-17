@@ -641,29 +641,47 @@
         }
 
         // Composite avatar into confession booth background using Stability AI
-        console.log('🎨 Compositing avatar into confession booth...');
+        console.log('🎨 Starting Stability AI composition...');
+        console.log('📸 Uploaded photo URL:', avatarUrl);
+        console.log('👤 Cast member ID:', castMemberId);
+
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
 
-        const compositeResponse = await fetch('https://fpxbhqibimekjhlumnmc.supabase.co/functions/v1/composite-confession-avatar', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({
-            cast_member_id: castMemberId,
-            uploaded_photo_url: avatarUrl
-          })
-        });
+        try {
+          const compositeResponse = await fetch('https://fpxbhqibimekjhlumnmc.supabase.co/functions/v1/composite-confession-avatar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+              cast_member_id: castMemberId,
+              uploaded_photo_url: avatarUrl
+            })
+          });
 
-        if (!compositeResponse.ok) {
-          const errorText = await compositeResponse.text();
-          throw new Error(`Composition failed: ${errorText}`);
+          console.log('📡 Composition response status:', compositeResponse.status);
+
+          if (!compositeResponse.ok) {
+            const errorText = await compositeResponse.text();
+            console.error('❌ Composition failed:', errorText);
+            throw new Error(`Composition failed: ${errorText}`);
+          }
+
+          const compositeResult = await compositeResponse.json();
+          console.log('✅ Avatar composited successfully:', compositeResult);
+
+          if (compositeResult.error) {
+            console.error('❌ Composition returned error:', compositeResult.error);
+            throw new Error(compositeResult.error);
+          }
+
+        } catch (compError) {
+          console.error('❌ Composition error:', compError);
+          // Still continue even if composition fails - use original photo
+          alert('Note: AI composition failed, using original photo. Video may look less realistic.');
         }
-
-        const compositeResult = await compositeResponse.json();
-        console.log('✅ Avatar composited:', compositeResult);
 
         // The function already updates cast_members with composite URL
         // So we can redirect directly

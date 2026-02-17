@@ -7,6 +7,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { Image } from 'https://deno.land/x/imagescript@1.2.15/mod.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
@@ -63,49 +64,50 @@ async function removeBackground(imageUrl: string): Promise<Blob> {
 }
 
 // ============================================================================
-// Helper: Composite Person into Confession Booth Background
+// Helper: Simple Image Overlay - Person on Booth Background
 // ============================================================================
 
-async function compositeIntoBoothBackground(
+async function overlayPersonOnBoothBackground(
   personNoBackgroundBlob: Blob,
   boothBackgroundUrl: string
 ): Promise<Blob> {
-  console.log('🎬 Compositing person into confession booth...');
+  console.log('🎬 Overlaying person onto confession booth background...');
 
   // Download booth background
   const bgResponse = await fetch(boothBackgroundUrl);
-  const bgBlob = await bgResponse.blob();
+  const bgArrayBuffer = await bgResponse.arrayBuffer();
+  const bgImage = await Image.decode(new Uint8Array(bgArrayBuffer));
 
-  // Use Stability AI Image-to-Image with ControlNet for realistic composition
-  const formData = new FormData();
-  formData.append('image', bgBlob); // Background as base
-  formData.append('control_image', personNoBackgroundBlob); // Person to composite
-  formData.append('control_strength', '0.8'); // How much to preserve person
-  formData.append('prompt', 'A person sitting in a confession booth, realistic lighting, photorealistic, professional photography, natural shadows, ambient lighting from confession booth');
-  formData.append('negative_prompt', 'blurry, low quality, distorted, unrealistic, cartoon, artificial, fake lighting, cut out, pasted');
-  formData.append('output_format', 'jpeg');
-  formData.append('seed', '0');
-  formData.append('style_preset', 'photographic');
+  console.log('📐 Background size:', bgImage.width, 'x', bgImage.height);
 
-  const response = await fetch(
-    'https://api.stability.ai/v2beta/stable-image/control/structure',
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${STABILITY_API_KEY}`,
-        'Accept': 'image/*',
-      },
-      body: formData,
-    }
-  );
+  // Get person PNG
+  const personArrayBuffer = await personNoBackgroundBlob.arrayBuffer();
+  const personImage = await Image.decode(new Uint8Array(personArrayBuffer));
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Stability AI composition failed: ${error}`);
-  }
+  console.log('📐 Person size:', personImage.width, 'x', personImage.height);
 
-  const compositeBlob = await response.blob();
-  console.log('✅ Person composited into booth background');
+  // Resize person to fit nicely in the booth (about 60% of background height)
+  const targetHeight = Math.floor(bgImage.height * 0.6);
+  const scaleFactor = targetHeight / personImage.height;
+  const targetWidth = Math.floor(personImage.width * scaleFactor);
+
+  const personResized = personImage.resize(targetWidth, targetHeight);
+  console.log('📐 Person resized to:', targetWidth, 'x', targetHeight);
+
+  // Calculate position to center person in lower portion of booth
+  const x = Math.floor((bgImage.width - targetWidth) / 2);
+  const y = Math.floor(bgImage.height * 0.25); // Position in upper-middle area
+
+  console.log('📍 Overlay position:', x, ',', y);
+
+  // Composite person onto background
+  bgImage.composite(personResized, x, y);
+
+  // Encode as JPEG
+  const compositeBytes = await bgImage.encodeJPEG(95);
+  const compositeBlob = new Blob([compositeBytes], { type: 'image/jpeg' });
+
+  console.log('✅ Person overlaid onto booth background');
 
   return compositeBlob;
 }
@@ -187,8 +189,8 @@ serve(async (req) => {
     // Step 1: Remove background from person photo
     const personNoBackground = await removeBackground(uploaded_photo_url);
 
-    // Step 2: Composite person into confession booth background
-    const composite = await compositeIntoBoothBackground(
+    // Step 2: Overlay person onto confession booth background (simple composite)
+    const composite = await overlayPersonOnBoothBackground(
       personNoBackground,
       boothBackgroundUrl
     );

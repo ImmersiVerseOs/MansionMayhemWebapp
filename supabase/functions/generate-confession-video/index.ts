@@ -104,21 +104,31 @@ async function generateAudio(text: string, voiceId: string): Promise<ElevenLabsR
 }
 
 // ============================================================================
-// Helper: Create Talking Photo with HeyGen
+// Helper: Upload Talking Photo to HeyGen
 // ============================================================================
 
-async function createTalkingPhoto(avatarUrl: string): Promise<string> {
-  console.log('📤 Creating talking photo with HeyGen...');
+async function uploadTalkingPhoto(avatarUrl: string): Promise<string> {
+  console.log('📤 Uploading talking photo to HeyGen...');
 
-  const response = await fetch('https://api.heygen.com/v1/talking_photo.create', {
+  // First, download the image
+  const imageResponse = await fetch(avatarUrl);
+  if (!imageResponse.ok) {
+    throw new Error(`Failed to download avatar image: ${imageResponse.statusText}`);
+  }
+
+  const imageBlob = await imageResponse.blob();
+  const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';
+
+  console.log('📷 Downloaded image:', contentType, 'Size:', imageBlob.size);
+
+  // Upload raw binary data to HeyGen
+  const response = await fetch('https://upload.heygen.com/v1/talking_photo', {
     method: 'POST',
     headers: {
-      'X-API-KEY': HEYGEN_API_KEY,
-      'Content-Type': 'application/json',
+      'x-api-key': HEYGEN_API_KEY,
+      'Content-Type': contentType,
     },
-    body: JSON.stringify({
-      image_url: avatarUrl,
-    }),
+    body: imageBlob,
   });
 
   if (!response.ok) {
@@ -342,8 +352,8 @@ serve(async (req) => {
 
     console.log('💾 Video record created:', videoRecord.id);
 
-    // 7. Create talking photo with HeyGen and get talking_photo_id
-    const talkingPhotoId = await createTalkingPhoto(castMember.confession_booth_avatar_url);
+    // 7. Upload talking photo to HeyGen and get talking_photo_id
+    const talkingPhotoId = await uploadTalkingPhoto(castMember.confession_booth_avatar_url);
 
     // 8. Generate video with HeyGen
     const heygenVideoId = await generateVideo(

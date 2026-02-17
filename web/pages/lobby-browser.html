@@ -543,8 +543,10 @@
           current_players,
           max_players,
           created_at,
-          game_starts_at
+          game_starts_at,
+          is_public
         `)
+        .eq('is_public', true)  // Only show public lobbies
         .in('status', ['recruiting', 'waiting_lobby', 'active_lobby'])
         .order('created_at', { ascending: false })
 

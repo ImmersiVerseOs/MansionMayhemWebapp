@@ -1570,9 +1570,16 @@
         }
       }
 
-      // Create new game
+      // Get game name
       const title = prompt('Enter your game name:', 'Mansion Mayhem - ' + new Date().toLocaleDateString());
       if (!title) return;
+
+      // Ask if public or private
+      const makePublic = confirm(
+        '🌐 Make this lobby PUBLIC?\n\n' +
+        '✅ YES = Anyone can find and join via lobby browser\n' +
+        '❌ NO = Private (invite-only, share link with friends)'
+      );
 
       try {
         const { data: game, error } = await supabase
@@ -1581,7 +1588,8 @@
             title: title,
             status: 'recruiting',
             max_players: 20,
-            current_players: 0
+            current_players: 0,
+            is_public: makePublic
           })
           .select()
           .single();
@@ -1589,6 +1597,14 @@
         if (error) throw error;
 
         localStorage.setItem('current_game_id', game.id);
+
+        // Show success message with visibility info
+        const visibilityMsg = makePublic
+          ? '🌐 Public lobby created! Others can find it in lobby browser.'
+          : '🔒 Private lobby created! Share the invite link with friends.';
+
+        alert(`✅ Game created!\n\n${visibilityMsg}`);
+
         window.location.href = `/lobby.html?game=${game.id}`;
       } catch (error) {
         alert('Error creating game: ' + error.message);

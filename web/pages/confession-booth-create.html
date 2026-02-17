@@ -650,13 +650,21 @@
 
         if (invokeError) {
           console.error('Function invoke error:', invokeError);
+          console.error('Full error details:', JSON.stringify(invokeError, null, 2));
           throw new Error(`Video generation failed: ${invokeError.message}`);
         }
 
-        if (!result || result.error) {
-          console.error('Function returned error:', result);
-          throw new Error(result?.error || 'Video generation failed');
+        if (!result) {
+          console.error('No result returned from function');
+          throw new Error('No response from video generation function');
         }
+
+        if (result.error) {
+          console.error('Function returned error:', result);
+          throw new Error(result.error);
+        }
+
+        console.log('✅ Function success:', result);
 
         const { video_id } = result;
 

@@ -70,8 +70,86 @@
       background: var(--color-dark);
       color: white;
       min-height: 100vh;
-      padding-top: 80px;
+      padding-top: 140px;
       padding-bottom: 3rem;
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: rgba(10, 14, 39, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--color-gold);
+      transform: translateX(-5px);
+    }
+
+    .nav-title-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--color-gold);
+      transform: scale(1.05);
     }
 
     .animated-bg {
@@ -392,6 +470,24 @@
 </head>
 <body>
   <div class="animated-bg"></div>
+
+  <!-- Top Navigation Bar -->
+  <nav class="top-nav">
+    <div class="nav-left">
+      <a href="/pages/confession-booth-gallery.html" class="back-btn">
+        ← Back to Gallery
+      </a>
+      <div class="nav-title-text">🎬 Create Confession</div>
+    </div>
+    <div class="nav-right">
+      <a href="/pages/confession-booth-setup.html" class="nav-link">
+        📸 Setup Avatar
+      </a>
+      <a href="/pages/player-dashboard.html" class="nav-link">
+        🏠 Dashboard
+      </a>
+    </div>
+  </nav>
 
   <div class="container">
     <div class="page-header">

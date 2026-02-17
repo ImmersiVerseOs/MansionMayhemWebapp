@@ -627,6 +627,14 @@
         document.getElementById('step2').classList.add('active');
         progressBar.style.width = '66%';
 
+        // Check auth session first
+        const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
+        console.log('📝 Session check:', session ? 'Valid' : 'Invalid', sessionError);
+
+        if (!session) {
+          throw new Error('Not logged in. Please refresh and log in again.');
+        }
+
         // Call Supabase Edge Function to generate video using invoke()
         const { data: result, error: invokeError } = await window.supabaseClient.functions.invoke(
           'generate-confession-video',

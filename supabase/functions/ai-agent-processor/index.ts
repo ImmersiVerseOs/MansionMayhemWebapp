@@ -392,6 +392,18 @@ async function processAllianceDecision(action: any) {
   // Build personality prompt
   const personality = ARCHETYPE_PERSONALITIES[castMember.archetype] || ARCHETYPE_PERSONALITIES.wildcard
 
+  // Get recent tea room context to understand who's talking, drama, etc.
+  const { data: recentTea } = await supabase
+    .from('mm_tea_room_posts')
+    .select('*, cast_members(display_name, archetype)')
+    .eq('game_id', game_id)
+    .order('created_at', { ascending: false })
+    .limit(15)
+
+  const teaContext = recentTea
+    ?.map((t: any) => `${t.cast_members.display_name}: ${t.post_text}`)
+    .join('\n') || 'No drama yet - be strategic'
+
   const castList = gameCast
     .map((gc: any) => `- ${gc.cast_members.display_name} (${gc.cast_members.archetype})`)
     .join('\n')
@@ -401,12 +413,21 @@ async function processAllianceDecision(action: any) {
 PERSONALITY: ${personality.traits}
 STRATEGY: ${personality.strategy}
 
-Decide who you want to form an alliance with. You can pick 1-2 people for a duo/trio alliance.`
+CRITICAL: READ the context below before deciding. Understand who you vibe with, who's a threat, who's strategic.
+
+Decide who you want to form an alliance with. You can pick 1-2 people for a duo/trio alliance. Base your decision on:
+- Who you'd work well with strategically
+- Who has similar energy or complements yours
+- Who seems trustworthy vs messy based on their posts
+- Your archetype compatibility`
 
   const userPrompt = `Available cast members:
 ${castList}
 
-Based on your archetype and strategy, who would you want to ally with? Respond in JSON format:
+RECENT TEA ROOM ACTIVITY (understand the vibe):
+${teaContext}
+
+Based on personalities, recent drama, and strategic value - who should you ally with? Respond in JSON format:
 {
   "targets": ["Display Name 1", "Display Name 2"],
   "reasoning": "brief explanation"

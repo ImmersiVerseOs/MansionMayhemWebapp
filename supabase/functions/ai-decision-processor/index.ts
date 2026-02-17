@@ -542,58 +542,111 @@ async function processAIVotes(supabase: any, gameId: string) {
 
       if (existingVote) continue;
 
-      // Decide who to vote for (personality-based logic)
-      const config = ai.ai_personality_config;
-      const loyalty = config?.traits?.loyalty || 0.5;
-      const chaos = config?.traits?.chaos || 0.3;
+      // CONTEXT-AWARE VOTING: Gather all relevant information
 
-      let voteForA = 0.5; // Base 50/50
-
-      // Get relationships/alliances with nominees
+      // 1. Get alliance relationships
       const { data: relationships } = await supabase
         .from('mm_relationship_edges')
         .select('*')
         .eq('game_id', gameId)
         .or(`cast_member_a_id.eq.${ai.id},cast_member_b_id.eq.${ai.id}`);
 
-      // Check if allied with nominee A
       const alliedWithA = relationships?.some((r: any) =>
         (r.cast_member_a_id === ai.id && r.cast_member_b_id === round.nominee_a_id) ||
         (r.cast_member_b_id === ai.id && r.cast_member_a_id === round.nominee_a_id)
       );
 
-      // Check if allied with nominee B
       const alliedWithB = relationships?.some((r: any) =>
         (r.cast_member_a_id === ai.id && r.cast_member_b_id === round.nominee_b_id) ||
         (r.cast_member_b_id === ai.id && r.cast_member_a_id === round.nominee_b_id)
       );
 
-      // Adjust vote based on alliances (protect allies)
+      // 2. Get recent alliance chat context (if in same alliance)
+      const { data: allianceMessages } = await supabase
+        .from('mm_alliance_messages')
+        .select('*, cast_members(display_name), mm_alliance_rooms(member_ids)')
+        .in('mm_alliance_rooms.member_ids', [[ai.id, round.nominee_a_id], [ai.id, round.nominee_b_id]])
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      const allianceContext = allianceMessages
+        ?.map((m: any) => `${m.cast_members.display_name}: ${m.message}`)
+        .join('\n') || 'No alliance chat history';
+
+      // 3. Get recent tea room drama mentioning nominees
+      const { data: teaDrama } = await supabase
+        .from('mm_tea_room_posts')
+        .select('*, cast_members(display_name)')
+        .eq('game_id', gameId)
+        .order('created_at', { ascending: false })
+        .limit(15);
+
+      const dramaContext = teaDrama
+        ?.map((t: any) => `${t.cast_members.display_name}: ${t.post_text}`)
+        .join('\n') || 'No drama yet';
+
+      // 4. Get nominee names
+      const { data: nomineeA } = await supabase
+        .from('cast_members')
+        .select('display_name, archetype')
+        .eq('id', round.nominee_a_id)
+        .single();
+
+      const { data: nomineeB } = await supabase
+        .from('cast_members')
+        .select('display_name, archetype')
+        .eq('id', round.nominee_b_id)
+        .single();
+
+      // STRATEGIC DECISION: Use all context to decide
+      const votingContext = `
+VOTING CONTEXT:
+- You are ${ai.display_name} (${ai.archetype})
+- Allied with ${nomineeA?.display_name}? ${alliedWithA ? 'YES' : 'NO'}
+- Allied with ${nomineeB?.display_name}? ${alliedWithB ? 'YES' : 'NO'}
+
+NOMINEES:
+A) ${nomineeA?.display_name} (${nomineeA?.archetype})
+B) ${nomineeB?.display_name} (${nomineeB?.archetype})
+
+RECENT ALLIANCE CHAT:
+${allianceContext}
+
+RECENT TEA ROOM DRAMA:
+${dramaContext}
+
+Based on:
+- Your alliances and loyalty
+- Recent conversations and drama
+- Strategic game position
+- Your archetype personality (${ai.archetype})
+
+Who should you vote to ELIMINATE (send home)?
+Respond: "ELIMINATE A" or "ELIMINATE B" and briefly explain why.`;
+
+      console.log(`🤔 ${ai.display_name} analyzing vote context...`);
+
+      // Use simple logic for now (can upgrade to Claude API later)
+      let votedForId: string;
+
       if (alliedWithA && !alliedWithB) {
-        voteForA = 0.05 + (loyalty * 0.05); // Strong bias to ELIMINATE B (protect ally A)
+        votedForId = round.nominee_b_id; // Eliminate B, protect ally A
+        console.log(`  → Protecting ally ${nomineeA?.display_name}, eliminating ${nomineeB?.display_name}`);
       } else if (alliedWithB && !alliedWithA) {
-        voteForA = 0.90 + (loyalty * 0.05); // Strong bias to ELIMINATE A (protect ally B)
-      } else if (alliedWithA && alliedWithB) {
-        // Conflicted - both are allies
-        voteForA = 0.5 + (random() * 0.2 - 0.1); // Slight random variation
+        votedForId = round.nominee_a_id; // Eliminate A, protect ally B
+        console.log(`  → Protecting ally ${nomineeB?.display_name}, eliminating ${nomineeA?.display_name}`);
+      } else {
+        // No clear alliance - use archetype logic
+        if (ai.archetype === 'villain' || ai.archetype === 'troublemaker') {
+          votedForId = random() < 0.5 ? round.nominee_a_id : round.nominee_b_id; // Chaos vote
+          console.log(`  → ${ai.archetype} chaos vote`);
+        } else {
+          // Default: slight preference based on tea room drama mentions
+          const aHasMoreDrama = dramaContext.toLowerCase().includes(nomineeA?.display_name.toLowerCase() || '');
+          votedForId = aHasMoreDrama ? round.nominee_a_id : round.nominee_b_id;
+          console.log(`  → Strategic vote based on drama context`);
+        }
       }
-
-      // Personality modifiers
-      if (config?.archetype === 'villain' || config?.archetype === 'troublemaker') {
-        voteForA += (random() * 0.3 - 0.15) * chaos; // Add chaos factor
-      }
-
-      if (config?.archetype === 'strategist') {
-        // Strategists might vote to eliminate threats
-        voteForA += 0.1;
-      }
-
-      // Clamp to 0-1
-      voteForA = Math.max(0.05, Math.min(0.95, voteForA));
-
-      // Cast vote (remember: voting FOR someone means you want them to STAY)
-      // So lower voteForA means eliminate A, higher means eliminate B
-      const votedForId = random() < voteForA ? round.nominee_a_id : round.nominee_b_id;
 
       // Create vote
       const { data: vote, error } = await supabase

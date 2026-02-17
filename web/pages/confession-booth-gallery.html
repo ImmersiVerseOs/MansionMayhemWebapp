@@ -567,7 +567,9 @@
           `)
           .eq('game_id', gameId)
           .eq('is_approved', true)
-          .eq('moderation_status', 'approved');
+          .eq('moderation_status', 'approved')
+          .eq('heygen_status', 'completed')
+          .not('video_url', 'is', null);
 
         // Apply filter
         if (filter === 'recent') {

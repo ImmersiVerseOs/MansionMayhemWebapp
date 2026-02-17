@@ -640,19 +640,33 @@
           return;
         }
 
-        // Update cast_members table
-        const { error: updateError } = await window.supabaseClient
-          .from('cast_members')
-          .update({
-            confession_booth_avatar_url: avatarUrl,
-            confession_avatar_source: selectedSource,
-            confession_avatar_set_at: new Date().toISOString()
+        // Composite avatar into confession booth background using Stability AI
+        console.log('🎨 Compositing avatar into confession booth...');
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
+
+        const compositeResponse = await fetch('https://fpxbhqibimekjhlumnmc.supabase.co/functions/v1/composite-confession-avatar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            cast_member_id: castMemberId,
+            uploaded_photo_url: avatarUrl
           })
-          .eq('id', castMemberId);
+        });
 
-        if (updateError) throw updateError;
+        if (!compositeResponse.ok) {
+          const errorText = await compositeResponse.text();
+          throw new Error(`Composition failed: ${errorText}`);
+        }
 
-        // Redirect to confession creation page
+        const compositeResult = await compositeResponse.json();
+        console.log('✅ Avatar composited:', compositeResult);
+
+        // The function already updates cast_members with composite URL
+        // So we can redirect directly
         window.location.href = '/pages/confession-booth-create.html';
 
       } catch (error) {

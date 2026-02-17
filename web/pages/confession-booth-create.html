@@ -671,8 +671,26 @@
       }
     });
 
-    // Load avatar on page load
-    loadAvatar();
+    // Load avatar on page load (wait for gameContext to be ready)
+    (async function() {
+      // Wait for gameContext to be initialized
+      let attempts = 0;
+      while (!window.gameContext && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (!window.gameContext) {
+        console.error('❌ GameContext failed to initialize');
+        alert('Failed to initialize. Please refresh the page.');
+        return;
+      }
+
+      // Wait a bit more for gameContext async initialization
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      loadAvatar();
+    })();
   </script>
 </body>
 </html>

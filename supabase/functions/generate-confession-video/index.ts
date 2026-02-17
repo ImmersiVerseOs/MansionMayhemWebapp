@@ -104,44 +104,43 @@ async function generateAudio(text: string, voiceId: string): Promise<ElevenLabsR
 }
 
 // ============================================================================
-// Helper: Upload Avatar to HeyGen and Get ID
+// Helper: Create Talking Photo with HeyGen
 // ============================================================================
 
-async function uploadAvatarToHeyGen(avatarUrl: string): Promise<string> {
-  console.log('📤 Uploading avatar to HeyGen...');
+async function createTalkingPhoto(avatarUrl: string): Promise<string> {
+  console.log('📤 Creating talking photo with HeyGen...');
 
-  const response = await fetch('https://api.heygen.com/v2/photo_avatar', {
+  const response = await fetch('https://api.heygen.com/v1/talking_photo.create', {
     method: 'POST',
     headers: {
       'X-API-KEY': HEYGEN_API_KEY,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      photo_url: avatarUrl,
+      image_url: avatarUrl,
     }),
   });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`HeyGen avatar upload error: ${error}`);
+    throw new Error(`HeyGen talking photo error: ${error}`);
   }
 
   const result = await response.json();
 
   if (result.error) {
-    throw new Error(`HeyGen avatar upload error: ${result.error}`);
+    throw new Error(`HeyGen talking photo error: ${JSON.stringify(result.error)}`);
   }
 
-  // HeyGen v2 API returns photo_id or avatar_id
-  const photoId = result.data?.photo_id || result.data?.avatar_id || result.data?.id;
+  const talkingPhotoId = result.data?.talking_photo_id;
 
-  if (!photoId) {
+  if (!talkingPhotoId) {
     console.error('HeyGen response:', JSON.stringify(result));
-    throw new Error('HeyGen did not return a photo_id');
+    throw new Error('HeyGen did not return a talking_photo_id');
   }
 
-  console.log('✅ Avatar uploaded to HeyGen:', photoId);
-  return photoId;
+  console.log('✅ Talking photo created:', talkingPhotoId);
+  return talkingPhotoId;
 }
 
 // ============================================================================
@@ -343,8 +342,8 @@ serve(async (req) => {
 
     console.log('💾 Video record created:', videoRecord.id);
 
-    // 7. Upload avatar to HeyGen and get talking_photo_id
-    const talkingPhotoId = await uploadAvatarToHeyGen(castMember.confession_booth_avatar_url);
+    // 7. Create talking photo with HeyGen and get talking_photo_id
+    const talkingPhotoId = await createTalkingPhoto(castMember.confession_booth_avatar_url);
 
     // 8. Generate video with HeyGen
     const heygenVideoId = await generateVideo(

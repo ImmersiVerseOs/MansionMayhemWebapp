@@ -86,18 +86,19 @@ async function overlayPersonOnBoothBackground(
 
   console.log('📐 Person size:', personImage.width, 'x', personImage.height);
 
-  // Resize person to fit nicely in the booth (about 50% of background height)
-  const targetHeight = Math.floor(bgImage.height * 0.5);
+  // Resize person to fit sitting on the couch (about 55% of background height)
+  const targetHeight = Math.floor(bgImage.height * 0.55);
   const scaleFactor = targetHeight / personImage.height;
   const targetWidth = Math.floor(personImage.width * scaleFactor);
 
   const personResized = personImage.resize(targetWidth, targetHeight);
   console.log('📐 Person resized to:', targetWidth, 'x', targetHeight);
 
-  // Calculate position to center person horizontally and position at bottom
-  // Position person so their bottom aligns with the bottom 20% of the image (where couch is)
+  // Calculate position to center person horizontally
+  // Position person so they appear to be sitting on the couch
+  // The couch is at ~60-65% from top, so position person's bottom to align with couch surface
   const x = Math.floor((bgImage.width - targetWidth) / 2);
-  const y = Math.floor(bgImage.height * 0.5); // Position in middle-to-lower area where couch is
+  const y = Math.floor(bgImage.height * 0.35); // Position so person sits on couch (top of person at 35%)
 
   console.log('📍 Overlay position:', x, ',', y);
 

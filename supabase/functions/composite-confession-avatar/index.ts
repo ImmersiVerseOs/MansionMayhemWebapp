@@ -64,14 +64,43 @@ async function removeBackground(imageUrl: string): Promise<Blob> {
 }
 
 // ============================================================================
-// Helper: Simple Image Overlay - Person on Booth Background
+// Helper: Find Person Boundaries (non-transparent pixels)
+// ============================================================================
+
+function findPersonBoundaries(image: any): { top: number; bottom: number; left: number; right: number } {
+  let top = image.height;
+  let bottom = 0;
+  let left = image.width;
+  let right = 0;
+
+  // Scan image to find non-transparent pixels
+  for (let y = 0; y < image.height; y++) {
+    for (let x = 0; x < image.width; x++) {
+      const pixelIndex = (y * image.width + x) * 4;
+      const alpha = image.bitmap[pixelIndex + 3];
+
+      // If pixel is not transparent
+      if (alpha > 10) {
+        if (y < top) top = y;
+        if (y > bottom) bottom = y;
+        if (x < left) left = x;
+        if (x > right) right = x;
+      }
+    }
+  }
+
+  return { top, bottom, left, right };
+}
+
+// ============================================================================
+// Helper: Smart Upper Body Crop + Overlay
 // ============================================================================
 
 async function overlayPersonOnBoothBackground(
   personNoBackgroundBlob: Blob,
   boothBackgroundUrl: string
 ): Promise<Blob> {
-  console.log('🎬 Overlaying person onto confession booth background...');
+  console.log('🎬 Smart cropping and overlaying person...');
 
   // Download booth background
   const bgResponse = await fetch(boothBackgroundUrl);
@@ -82,25 +111,42 @@ async function overlayPersonOnBoothBackground(
 
   // Get person PNG
   const personArrayBuffer = await personNoBackgroundBlob.arrayBuffer();
-  const personImage = await Image.decode(new Uint8Array(personArrayBuffer));
+  let personImage = await Image.decode(new Uint8Array(personArrayBuffer));
 
-  console.log('📐 Person size:', personImage.width, 'x', personImage.height);
+  console.log('📐 Original person size:', personImage.width, 'x', personImage.height);
 
-  // Resize person to fit sitting on the couch (about 55% of background height)
+  // Find person boundaries (non-transparent area)
+  const bounds = findPersonBoundaries(personImage);
+  const personHeight = bounds.bottom - bounds.top;
+  const personWidth = bounds.right - bounds.left;
+
+  console.log('👤 Person boundaries:', bounds);
+  console.log('👤 Person dimensions:', personWidth, 'x', personHeight);
+
+  // Crop to upper 65% of person (head to waist) for consistent "sitting" look
+  const cropHeight = Math.floor(personHeight * 0.65);
+  const cropWidth = personWidth;
+
+  console.log('✂️ Cropping to upper body:', cropWidth, 'x', cropHeight);
+
+  // Crop the person image to upper body
+  personImage = personImage.crop(bounds.left, bounds.top, cropWidth, cropHeight);
+
+  console.log('✅ Cropped to upper body');
+
+  // Now resize to fit on couch (55% of background height)
   const targetHeight = Math.floor(bgImage.height * 0.55);
-  const scaleFactor = targetHeight / personImage.height;
-  const targetWidth = Math.floor(personImage.width * scaleFactor);
+  const scaleFactor = targetHeight / cropHeight;
+  const targetWidth = Math.floor(cropWidth * scaleFactor);
 
   const personResized = personImage.resize(targetWidth, targetHeight);
-  console.log('📐 Person resized to:', targetWidth, 'x', targetHeight);
+  console.log('📐 Resized to:', targetWidth, 'x', targetHeight);
 
-  // Calculate position to center person horizontally
-  // Position person so they appear to be sitting on the couch
-  // The couch is at ~60-65% from top, so position person's bottom to align with couch surface
+  // Position centered on couch
   const x = Math.floor((bgImage.width - targetWidth) / 2);
-  const y = Math.floor(bgImage.height * 0.35); // Position so person sits on couch (top of person at 35%)
+  const y = Math.floor(bgImage.height * 0.35);
 
-  console.log('📍 Overlay position:', x, ',', y);
+  console.log('📍 Position:', x, ',', y);
 
   // Composite person onto background
   bgImage.composite(personResized, x, y);
@@ -109,7 +155,7 @@ async function overlayPersonOnBoothBackground(
   const compositeBytes = await bgImage.encodeJPEG(95);
   const compositeBlob = new Blob([compositeBytes], { type: 'image/jpeg' });
 
-  console.log('✅ Person overlaid onto booth background');
+  console.log('✅ Person composited onto booth background');
 
   return compositeBlob;
 }

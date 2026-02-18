@@ -50,8 +50,8 @@ serve(async (req) => {
       .select(`
         id,
         title,
-        context,
         description,
+        context_notes,
         scenario_type,
         created_at,
         game_id,
@@ -158,8 +158,11 @@ async function analyzeScenarioStructure(
 
 SCENARIO TITLE: ${scenario.title}
 
-SCENARIO CONTEXT:
-${scenario.context || scenario.description || 'No context provided'}
+SCENARIO DESCRIPTION:
+${scenario.description}
+
+CONTEXT NOTES:
+${scenario.context_notes || 'None'}
 
 CAST MEMBERS INVOLVED:
 ${castMembers.join(', ')}

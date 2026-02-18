@@ -51,11 +51,16 @@ serve(async (req) => {
       .eq('id', scenarioId)
       .single()
 
-    if (scenarioError) throw scenarioError
+    if (scenarioError) {
+      console.error('❌ Scenario query error:', scenarioError)
+      throw scenarioError
+    }
     if (!scenario) throw new Error('Scenario not found')
 
     console.log(`📊 Scenario: ${scenario.title}`)
     console.log(`📐 Template: ${scenario.ui_template}`)
+    console.log(`📊 Scenario targets count: ${scenario.scenario_targets?.length || 0}`)
+    console.log(`📊 Roles:`, JSON.stringify(scenario.roles))
 
     // Check if scenario has been analyzed
     if (!scenario.analyzed_at) {
@@ -159,11 +164,17 @@ async function generateUIForTemplate(
   const judges = scenario.roles?.judges || []
   const participants = scenario.roles?.participants || []
 
-  const castInfo = scenario.scenario_targets?.map((t: any) => ({
-    id: t.cast_member.id,
-    name: t.cast_member.display_name,
-    archetype: t.cast_member.archetype
-  })) || []
+  const castInfo = scenario.scenario_targets?.map((t: any) => {
+    if (!t.cast_member) {
+      console.warn('Warning: scenario_target missing cast_member data')
+      return null
+    }
+    return {
+      id: t.cast_member.id,
+      name: t.cast_member.display_name || t.cast_member.full_name,
+      archetype: t.cast_member.archetype
+    }
+  }).filter(Boolean) || []
 
   let templateInstructions = ''
 
@@ -242,7 +253,8 @@ FEATURES:
   const prompt = `Generate a COMPLETE, PRODUCTION-READY HTML page for this Mansion Mayhem scenario.
 
 SCENARIO: ${scenario.title}
-CONTEXT: ${scenario.context || scenario.description}
+DESCRIPTION: ${scenario.description}
+CONTEXT NOTES: ${scenario.context_notes || 'None'}
 TEMPLATE TYPE: ${template}
 
 ${templateInstructions}

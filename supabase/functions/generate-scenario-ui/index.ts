@@ -259,6 +259,65 @@ TEMPLATE TYPE: ${template}
 
 ${templateInstructions}
 
+REALITY TV GAME CONTEXT & MECHANICS:
+
+🎭 SHOW CONCEPT: Mansion Mayhem
+A high-stakes reality competition where AI-powered cast members compete, form alliances, betray each other, and fight for supremacy in a luxury mansion. Think Big Brother meets The Bachelor meets Survivor - maximum drama, strategy, and entertainment.
+
+🎮 CORE GAME MECHANICS:
+1. **Alliances & Betrayals**: Cast members form secret alliances, make deals, then backstab each other
+2. **Strategic Voting**: Every vote matters - elimination votes, popularity votes, reward votes
+3. **Receipts Culture**: Cast members collect "receipts" (evidence) of others' actions to expose them
+4. **Drama Index**: Each cast member has a drama score that affects their screen time and storylines
+5. **Archetypes**: Queen, Villain, Wildcard, Peacemaker, etc. - each plays differently
+6. **Challenges**: Mental, physical, social challenges that test different skills
+7. **Confessionals**: Private moments where cast members reveal their true thoughts
+8. **Live Voting**: Real-time audience participation in key decisions
+
+🎯 JUDGE MODE MECHANICS (when generating judge-panel):
+- Judges are cast members with special authority (not producers)
+- They evaluate other cast members' performances, receipts, or actions
+- Voting should feel HIGH STAKES - dramatic reveals, suspenseful UI
+- Include:
+  * Dramatic presentation of each submission
+  * Star ratings or numeric scores
+  * Written feedback/commentary from judges
+  * Live vote tallying with animations
+  * Winner reveal with confetti/celebration
+  * "Receipts" section showing evidence
+  * Social proof (show what other judges think)
+
+📺 REALITY TV BEST PRACTICES:
+- Make it DRAMATIC: Big fonts, bold colors, suspenseful reveals
+- Add TENSION: Countdowns, progress bars, "X judges have voted"
+- Create ENGAGEMENT: Reactions, comments, live updates
+- Show SOCIAL PROOF: "3 of 5 judges voted for X"
+- Use REALITY TV LANGUAGE: "The tribe has spoken", "You are safe", "Pack your bags"
+- Add PERSONALITY: Each judge/participant should feel unique
+- Include RECEIPTS: Evidence, screenshots, timestamps of drama
+
+🏆 WINNING UI PATTERNS:
+- Dramatic reveals with animations
+- Suspenseful countdowns before results
+- Social voting indicators ("2/5 judges voted")
+- Real-time reactions and comments
+- Confetti/celebration for winners
+- Dramatic music cues (describe when to play)
+- "Stay tuned" teasers for next events
+- Leaderboards with rankings
+- Achievement badges and trophies
+
+💥 DRAMA ELEMENTS TO INCLUDE:
+- Shade meter (how shady is this vote?)
+- Alliance indicators (who's aligned with who?)
+- Betrayal tracker (who backstabbed who?)
+- Popularity rankings
+- "Most controversial" moments
+- Real-time chat/reactions
+- Cast member feuds visualization
+
+Make this UI feel like you're watching a REAL reality TV show with high production value!
+
 DESIGN SYSTEM (MATCH EXACTLY):
 - Background: linear-gradient(135deg, #1a0033, #0a0012)
 - Cards: background: rgba(255,255,255,0.05), border: 1px solid rgba(255,255,255,0.1)

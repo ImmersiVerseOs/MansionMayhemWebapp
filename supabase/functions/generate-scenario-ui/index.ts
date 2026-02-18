@@ -272,7 +272,8 @@ DESIGN SYSTEM (MATCH EXACTLY):
 
 TECHNICAL REQUIREMENTS:
 1. Include Supabase CDN: <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-2. Initialize Supabase client with: const supabaseClient = window.supabase.createClient('SUPABASE_URL', 'SUPABASE_ANON_KEY')
+2. Initialize Supabase client with: const supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+   (The server will inject window.SUPABASE_URL and window.SUPABASE_ANON_KEY automatically)
 3. Load data from database (scenario_responses, cast_members, etc.)
 4. Save votes/responses to database
 5. Mobile responsive (grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)))

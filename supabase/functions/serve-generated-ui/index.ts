@@ -41,21 +41,20 @@ serve(async (req) => {
     // Inject Supabase credentials into HTML
     let html = data.generated_html
 
-    // Replace placeholder with actual Supabase config
-    html = html.replace(
-      /const supabaseClient = window\.supabase\.createClient\([^)]+\)/g,
-      `const supabaseClient = window.supabase.createClient('${SUPABASE_URL}', '${SUPABASE_ANON_KEY}')`
-    )
+    // Inject config script right after <head> tag
+    const configScript = `
+  <script>
+    // Supabase configuration injected by server
+    window.SUPABASE_URL = '${SUPABASE_URL}';
+    window.SUPABASE_ANON_KEY = '${SUPABASE_ANON_KEY}';
+  </script>`
 
-    // Also handle if it's using variable declarations
-    html = html.replace(
-      /SUPABASE_URL\s*=\s*['"][^'"]*['"]/g,
-      `SUPABASE_URL = '${SUPABASE_URL}'`
-    )
-    html = html.replace(
-      /SUPABASE_ANON_KEY\s*=\s*['"][^'"]*['"]/g,
-      `SUPABASE_ANON_KEY = '${SUPABASE_ANON_KEY}'`
-    )
+    // Insert after <head> tag
+    html = html.replace(/<head>/i, `<head>${configScript}`)
+
+    // Also replace any placeholder strings
+    html = html.replace(/['"]SUPABASE_URL['"]/g, `'${SUPABASE_URL}'`)
+    html = html.replace(/['"]SUPABASE_ANON_KEY['"]/g, `'${SUPABASE_ANON_KEY}'`)
 
     // Serve the generated HTML with credentials injected
     return new Response(html, {

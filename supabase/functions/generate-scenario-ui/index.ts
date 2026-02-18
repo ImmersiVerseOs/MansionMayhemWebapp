@@ -194,13 +194,22 @@ LAYOUT:
    - Star rating (1-5)
    - Vote button
 4. Submit Verdict button (disabled until vote cast)
+5. Results reveal with "THE MANSION HAS SPOKEN" animation
 
 FEATURES:
 - Load all participant responses from scenario_responses table
 - Allow judge to rate and vote
 - Save vote to scenario_votes table
-- Show real-time voting if multiple judges
-- Highlight winner after all judges vote
+- Show real-time voting if multiple judges ("2 of 3 judges have voted")
+- Dramatic countdown before revealing winner
+- Winner reveal with confetti + "THE MANSION HAS SPOKEN" message
+- Show final vote breakdown (who voted for who)
+
+DRAMATIC MOMENTS:
+- Use "The Mansion Has Spoken" for final results
+- Add suspenseful countdown (3...2...1...)
+- Animate the winner reveal with celebration effects
+- Show "receipts" section with evidence that influenced votes
 
 JUDGES: ${judges.join(', ')}
 PARTICIPANTS: ${participants.join(', ')}
@@ -292,7 +301,8 @@ A high-stakes reality competition where AI-powered cast members compete, form al
 - Add TENSION: Countdowns, progress bars, "X judges have voted"
 - Create ENGAGEMENT: Reactions, comments, live updates
 - Show SOCIAL PROOF: "3 of 5 judges voted for X"
-- Use REALITY TV LANGUAGE: "The tribe has spoken", "You are safe", "Pack your bags"
+- Use SIGNATURE PHRASE: "The Mansion Has Spoken" (for final results/eliminations)
+- Other dramatic language: "You are safe", "Pack your bags", "Time to reveal the receipts"
 - Add PERSONALITY: Each judge/participant should feel unique
 - Include RECEIPTS: Evidence, screenshots, timestamps of drama
 

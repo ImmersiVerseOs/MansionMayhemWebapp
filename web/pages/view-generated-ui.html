@@ -47,14 +47,20 @@
 
     async function loadUI() {
       try {
+        console.log('🚀 Starting UI load...')
+
         // Get scenario ID from URL
         const urlParams = new URLSearchParams(window.location.search)
         const scenarioId = urlParams.get('scenario_id')
+
+        console.log('📋 Scenario ID:', scenarioId)
 
         if (!scenarioId) {
           document.body.innerHTML = '<div class="loading"><p>Error: No scenario_id provided</p></div>'
           return
         }
+
+        console.log('🔍 Querying database...')
 
         // Load generated HTML directly from database
         const { data, error } = await supabaseClient
@@ -66,25 +72,54 @@
           .limit(1)
           .single()
 
-        if (error) throw error
+        console.log('📊 Query result:', { data: !!data, error })
+
+        if (error) {
+          console.error('❌ Database error:', error)
+          throw error
+        }
+
         if (!data || !data.generated_html) {
+          console.error('❌ No HTML found')
           throw new Error('No generated UI found for this scenario')
         }
 
+        console.log('✅ HTML loaded, length:', data.generated_html.length)
+        console.log('📄 HTML preview:', data.generated_html.substring(0, 200))
+
         // Inject Supabase config into HTML
         let html = data.generated_html
+
+        // Inject config script right after <head> tag
+        const configScript = `
+  <script>
+    window.SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';
+    window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
+  </script>`
+
+        html = html.replace(/<head>/i, `<head>${configScript}`)
+
+        console.log('🎨 Rendering HTML...')
 
         // Replace entire page with generated HTML
         document.open()
         document.write(html)
         document.close()
 
+        console.log('✅ Page rendered!')
+
       } catch (error) {
-        console.error('Error loading UI:', error)
+        console.error('❌ Error loading UI:', error)
         document.body.innerHTML = `
           <div class="loading">
             <p style="color: #ef4444;">Error loading UI: ${error.message}</p>
-            <p style="color: #a1a1aa; margin-top: 10px;">Scenario might not have a generated UI yet.</p>
+            <p style="color: #a1a1aa; margin-top: 10px; font-size: 0.9rem;">
+              Check browser console (F12) for details.<br>
+              Scenario might not have a generated UI yet.
+            </p>
+            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer;">
+              Retry
+            </button>
           </div>
         `
       }

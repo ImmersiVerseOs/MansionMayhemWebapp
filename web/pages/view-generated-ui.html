@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading UI...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a0033, #0a0012);
+      color: #fafafa;
+    }
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(139, 92, 246, 0.3);
+      border-top-color: #8b5cf6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Loading generated UI...</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseClient = window.supabase.createClient(
+      'https://fpxbhqibimekjhlumnmc.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
+    )
+
+    async function loadUI() {
+      try {
+        // Get scenario ID from URL
+        const urlParams = new URLSearchParams(window.location.search)
+        const scenarioId = urlParams.get('scenario_id')
+
+        if (!scenarioId) {
+          document.body.innerHTML = '<div class="loading"><p>Error: No scenario_id provided</p></div>'
+          return
+        }
+
+        // Load generated HTML directly from database
+        const { data, error } = await supabaseClient
+          .from('generated_uis')
+          .select('generated_html')
+          .eq('scenario_id', scenarioId)
+          .eq('generation_status', 'completed')
+          .order('generated_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (error) throw error
+        if (!data || !data.generated_html) {
+          throw new Error('No generated UI found for this scenario')
+        }
+
+        // Inject Supabase config into HTML
+        let html = data.generated_html
+
+        // Replace entire page with generated HTML
+        document.open()
+        document.write(html)
+        document.close()
+
+      } catch (error) {
+        console.error('Error loading UI:', error)
+        document.body.innerHTML = `
+          <div class="loading">
+            <p style="color: #ef4444;">Error loading UI: ${error.message}</p>
+            <p style="color: #a1a1aa; margin-top: 10px;">Scenario might not have a generated UI yet.</p>
+          </div>
+        `
+      }
+    }
+
+    // Load UI when page loads
+    loadUI()
+  </script>
+</body>
+</html>

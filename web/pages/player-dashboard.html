@@ -767,7 +767,7 @@
           <button onclick="startNewGame()" class="btn btn-primary" style="border: none; cursor: pointer;">
             🎮 Start New Game
           </button>
-          <a href="/pages/scenarios.html" class="btn btn-secondary">
+          <a href="/pages/scenario-response.html" class="btn btn-secondary">
             📝 View Scenarios
           </a>
           <a href="/pages/tea-room.html" class="btn btn-secondary">
@@ -841,7 +841,7 @@
               <span>📝</span>
               Active Scenarios
             </h3>
-            <a href="/pages/scenarios.html" class="card-link">View All →</a>
+            <a href="/pages/scenario-response.html" class="card-link">View All →</a>
           </div>
           <div id="scenarioList">
             <div class="empty-state">
@@ -1041,7 +1041,7 @@
         const hoursLeft = Math.floor((deadline - new Date()) / (1000 * 60 * 60))
 
         return `
-          <div class="scenario-item" onclick="window.location.href='/pages/scenarios.html'">
+          <div class="scenario-item" onclick="window.location.href='/pages/scenario-response.html'">
             <div class="scenario-header">
               <div class="scenario-title">${s.scenarios.title}</div>
               <div class="scenario-type">${s.scenarios.scenario_type}</div>

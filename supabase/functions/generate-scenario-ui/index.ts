@@ -57,6 +57,15 @@ serve(async (req) => {
     console.log(`📊 Scenario: ${scenario.title}`)
     console.log(`📐 Template: ${scenario.ui_template}`)
 
+    // Check if scenario has been analyzed
+    if (!scenario.analyzed_at) {
+      throw new Error('Scenario has not been analyzed yet. Run analyze-scenario first.')
+    }
+
+    if (!scenario.ui_template || scenario.ui_template === 'standard') {
+      throw new Error('Scenario does not need custom UI (template: standard)')
+    }
+
     // Create generation record
     const { data: genRecord, error: genError } = await supabase
       .from('generated_uis')

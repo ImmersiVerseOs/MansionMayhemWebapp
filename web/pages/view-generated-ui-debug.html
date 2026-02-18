@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI Viewer - Debug</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1a0033, #0a0012);
+      color: #fafafa;
+      padding: 20px;
+    }
+    .debug {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    iframe {
+      width: 100%;
+      height: 800px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="debug">
+    <h1>🔍 Generated UI Debug Viewer</h1>
+    <div id="status">⏳ Loading...</div>
+    <div id="info" style="margin-top: 10px; font-family: monospace; font-size: 0.9rem;"></div>
+  </div>
+
+  <iframe id="ui-frame" style="display: none;"></iframe>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const statusDiv = document.getElementById('status')
+    const infoDiv = document.getElementById('info')
+    const iframe = document.getElementById('ui-frame')
+
+    function log(msg) {
+      console.log(msg)
+      infoDiv.innerHTML += msg + '<br>'
+    }
+
+    async function loadUI() {
+      try {
+        log('✅ Page loaded')
+        log('✅ Supabase library loaded')
+
+        const supabaseClient = window.supabase.createClient(
+          'https://fpxbhqibimekjhlumnmc.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
+        )
+
+        log('✅ Supabase client created')
+
+        const urlParams = new URLSearchParams(window.location.search)
+        const scenarioId = urlParams.get('scenario_id')
+
+        log(`📋 Scenario ID: ${scenarioId}`)
+
+        if (!scenarioId) {
+          statusDiv.textContent = '❌ No scenario_id in URL'
+          return
+        }
+
+        statusDiv.textContent = '⏳ Querying database...'
+        log('🔍 Querying generated_uis table...')
+
+        const { data, error } = await supabaseClient
+          .from('generated_uis')
+          .select('generated_html, template_used, generated_at')
+          .eq('scenario_id', scenarioId)
+          .eq('generation_status', 'completed')
+          .order('generated_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (error) {
+          log(`❌ Query error: ${error.message}`)
+          statusDiv.textContent = `❌ Database error: ${error.message}`
+          return
+        }
+
+        if (!data || !data.generated_html) {
+          log('❌ No HTML found')
+          statusDiv.textContent = '❌ No generated UI found'
+          return
+        }
+
+        log(`✅ HTML loaded: ${data.generated_html.length} characters`)
+        log(`📐 Template: ${data.template_used}`)
+        log(`📅 Generated: ${data.generated_at}`)
+
+        // Inject Supabase config
+        let html = data.generated_html
+        const configScript = `
+  <script>
+    window.SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';
+    window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
+  </script>`
+
+        html = html.replace(/<head>/i, `<head>${configScript}`)
+
+        log('✅ Injected Supabase config')
+        log('🎨 Rendering in iframe...')
+
+        // Display in iframe
+        iframe.style.display = 'block'
+        iframe.srcdoc = html
+
+        statusDiv.textContent = '✅ UI Loaded Successfully!'
+        log('✅ Done!')
+
+      } catch (error) {
+        log(`❌ Error: ${error.message}`)
+        statusDiv.textContent = `❌ Error: ${error.message}`
+        console.error(error)
+      }
+    }
+
+    loadUI()
+  </script>
+</body>
+</html>

@@ -1916,7 +1916,7 @@
 
         // Clear draft on successful submission
         const urlParams = new URLSearchParams(window.location.search)
-        const scenarioId = urlParams.get('id')
+        const scenarioId = urlParams.get('scenario_id') || urlParams.get('id')
         if (scenarioId) {
           clearDraft(scenarioId)
         }

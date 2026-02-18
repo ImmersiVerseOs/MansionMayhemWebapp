@@ -12,14 +12,27 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 // Anon key is public - safe to hardcode
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
     // Extract scenario ID from URL
     const url = new URL(req.url)
     const scenarioId = url.searchParams.get('scenario_id')
 
     if (!scenarioId) {
-      return new Response('Missing scenario_id parameter', { status: 400 })
+      return new Response('Missing scenario_id parameter', {
+        status: 400,
+        headers: corsHeaders
+      })
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
@@ -60,6 +73,7 @@ serve(async (req) => {
     // Serve the generated HTML with credentials injected
     return new Response(html, {
       headers: {
+        ...corsHeaders,
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
       }

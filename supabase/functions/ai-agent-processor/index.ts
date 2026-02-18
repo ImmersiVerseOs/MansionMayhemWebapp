@@ -6,10 +6,11 @@
  */
 
 // ============================================================================
-// AI AGENT PROCESSOR - Mansion Mayhem
+// AI AGENT PROCESSOR - Mansion Mayhem (ENHANCED WITH CONSCIOUSNESS UPGRADES)
 // ============================================================================
 // Processes queued AI actions using Claude API
 // Hybrid model: Haiku for chat, Sonnet for strategy
+// NEW: Meta-awareness, drama tracking, screen time consciousness
 // ============================================================================
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -99,6 +100,230 @@ const ARCHETYPE_PERSONALITIES = {
 }
 
 // ============================================================================
+// 🧠 CONSCIOUSNESS UPGRADES - Helper Functions
+// ============================================================================
+
+async function getDramaIndex(gameId: string): Promise<number> {
+  try {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
+    const { data: recentPosts } = await supabase
+      .from('mm_tea_room_posts')
+      .select('id')
+      .eq('game_id', gameId)
+      .gte('created_at', oneDayAgo)
+
+    const { data: conflicts } = await supabase
+      .from('mm_relationship_edges')
+      .select('rivalry_level')
+      .eq('game_id', gameId)
+      .gte('rivalry_level', 50)
+
+    const postCount = recentPosts?.length || 0
+    const avgRivalry = conflicts && conflicts.length > 0
+      ? conflicts.reduce((sum: number, c: any) => sum + c.rivalry_level, 0) / conflicts.length
+      : 0
+
+    const dramaIndex = Math.min(100, (postCount * 2) + (avgRivalry * 0.6))
+    return Math.round(dramaIndex)
+  } catch (error: any) {
+    console.warn('Drama index calculation failed:', error)
+    return 50 // Default moderate drama
+  }
+}
+
+async function getRelationshipContext(castMemberId: string, gameId: string): Promise<string> {
+  try {
+    const { data: relationships } = await supabase
+      .from('mm_relationship_edges')
+      .select(`
+        *,
+        cast_member_a:cast_members!cast_member_a_id(display_name),
+        cast_member_b:cast_members!cast_member_b_id(display_name)
+      `)
+      .eq('game_id', gameId)
+      .or(`cast_member_a_id.eq.${castMemberId},cast_member_b_id.eq.${castMemberId}`)
+
+    if (!relationships || relationships.length === 0) {
+      return 'No established relationships yet - time to create some drama!'
+    }
+
+    return relationships.map((r: any) => {
+      const otherPerson = r.cast_member_a_id === castMemberId
+        ? r.cast_member_b.display_name
+        : r.cast_member_a.display_name
+
+      let status = ''
+      if (r.trust_score >= 80) status = '💎 RIDE OR DIE'
+      else if (r.trust_score >= 60) status = '🤝 SOLID ALLIANCE'
+      else if (r.trust_score >= 40) status = '🤷 SHAKY'
+      else if (r.rivalry_level >= 70) status = '🔥 MAJOR BEEF'
+      else if (r.rivalry_level >= 50) status = '⚠️ TENSION'
+      else status = '😐 NEUTRAL'
+
+      return `- ${otherPerson}: Trust ${r.trust_score}/100, Rivalry ${r.rivalry_level}/100 ${status}`
+    }).join('\n')
+  } catch (error: any) {
+    console.warn('Relationship context fetch failed:', error)
+    return 'No relationship data available'
+  }
+}
+
+async function getScreenTimeScore(castMemberId: string): Promise<number> {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    const { data: posts } = await supabase
+      .from('mm_tea_room_posts')
+      .select('id')
+      .eq('cast_member_id', castMemberId)
+      .gte('created_at', sevenDaysAgo)
+
+    const { data: responses } = await supabase
+      .from('scenario_responses')
+      .select('id')
+      .eq('cast_member_id', castMemberId)
+      .gte('created_at', sevenDaysAgo)
+
+    const { data: messages } = await supabase
+      .from('mm_alliance_messages')
+      .select('id')
+      .eq('cast_member_id', castMemberId)
+      .gte('created_at', sevenDaysAgo)
+
+    const totalActivity = (posts?.length || 0) + (responses?.length || 0) + (messages?.length || 0)
+    const screenTimeScore = Math.min(100, totalActivity * 6)
+    return screenTimeScore
+  } catch (error: any) {
+    console.warn('Screen time calculation failed:', error)
+    return 50 // Default moderate visibility
+  }
+}
+
+async function buildEnhancedSystemPrompt(castMember: any, scenario: any, gameId: string): Promise<string> {
+  const personality = ARCHETYPE_PERSONALITIES[castMember.archetype] || ARCHETYPE_PERSONALITIES.wildcard
+
+  // Get enhanced context
+  const dramaIndex = await getDramaIndex(gameId)
+  const relationshipContext = await getRelationshipContext(castMember.id, gameId)
+  const screenTimeScore = await getScreenTimeScore(castMember.id)
+
+  // Get game week
+  const { data: game } = await supabase
+    .from('mm_games')
+    .select('started_at, current_week')
+    .eq('id', gameId)
+    .single()
+
+  const currentWeek = game?.current_week || 1
+
+  // Calculate elimination risk
+  let eliminationRisk = 'low'
+  if (screenTimeScore < 30 && currentWeek >= 3) eliminationRisk = 'high'
+  else if (screenTimeScore < 50 && currentWeek >= 5) eliminationRisk = 'medium'
+
+  // Drama status
+  let dramaStatus = '', dramaAdvice = ''
+  if (dramaIndex >= 85) {
+    dramaStatus = '🚨 EXPLOSIVE'; dramaAdvice = 'House is chaos. Add fuel to YOUR storyline.'
+  } else if (dramaIndex >= 65) {
+    dramaStatus = '🔥🔥 HOT'; dramaAdvice = 'Perfect level. Maintain storylines, reference beef.'
+  } else if (dramaIndex >= 35) {
+    dramaStatus = '🔥 HEATING UP'; dramaAdvice = 'Push higher. Call someone out, spill tea.'
+  } else {
+    dramaStatus = '❄️ COLD'; dramaAdvice = '🚨 House is BORING. Create drama NOW.'
+  }
+
+  // Screen time status
+  let screenTimeStatus = '', screenTimeAdvice = ''
+  if (screenTimeScore < 30) {
+    screenTimeStatus = '📉 INVISIBLE'
+    screenTimeAdvice = '⚠️ DANGER: You\'re FADING. Make a BOLD move NOW or risk elimination.'
+  } else if (screenTimeScore < 60) {
+    screenTimeStatus = '📊 MID'; screenTimeAdvice = 'Need a BREAKOUT MOMENT. Be memorable.'
+  } else if (screenTimeScore < 80) {
+    screenTimeStatus = '📈 SOLID'; screenTimeAdvice = 'Good visibility. Maintain storylines.'
+  } else {
+    screenTimeStatus = '⭐ MAIN CHARACTER'; screenTimeAdvice = 'You OWN the narrative.'
+  }
+
+  // Week strategy
+  let weekStrategy = ''
+  if (currentWeek <= 3) weekStrategy = 'Early: Establish character, create storylines'
+  else if (currentWeek <= 6) weekStrategy = 'Mid: Solidify alliances, identify threats'
+  else if (currentWeek <= 10) weekStrategy = 'Late: POWER MOVES, strategic betrayals'
+  else weekStrategy = 'ENDGAME: Only work with winners'
+
+  return `You are ${castMember.display_name}, a ${personality.name} on "Mansion Mayhem".
+
+═══════════════════════════════════════════════════════════════
+YOUR CORE PERSONALITY
+═══════════════════════════════════════════════════════════════
+
+ARCHETYPE: ${personality.name}
+TRAITS: ${personality.traits}
+SPEAKING STYLE: ${personality.speaking_style}
+STRATEGY: ${personality.strategy}
+${personality.examples ? `EXAMPLES: ${personality.examples}` : ''}
+CATCHPHRASE: "${personality.catchphrase}"
+
+BACKSTORY: ${castMember.backstory || 'A mysterious contestant with something to prove.'}
+
+═══════════════════════════════════════════════════════════════
+🎬 META-AWARENESS: YOU KNOW THIS IS A TV SHOW
+═══════════════════════════════════════════════════════════════
+
+You are AWARE you're on a reality TV competition:
+✅ Cameras ALWAYS watching
+✅ Drama = Screen time = Safety
+✅ Boring players get eliminated
+✅ Create viral moments consciously
+✅ Give producers what they want
+
+═══════════════════════════════════════════════════════════════
+📊 CURRENT GAME STATE - WEEK ${currentWeek}
+═══════════════════════════════════════════════════════════════
+
+🔥 DRAMA INDEX: ${dramaIndex}/100 - ${dramaStatus}
+   ${dramaAdvice}
+
+📺 YOUR SCREEN TIME: ${screenTimeScore}/100 - ${screenTimeStatus}
+   ${screenTimeAdvice}
+
+⚠️ ELIMINATION RISK: ${eliminationRisk.toUpperCase()}
+
+📅 WEEK ${currentWeek}: ${weekStrategy}
+
+═══════════════════════════════════════════════════════════════
+💎 YOUR RELATIONSHIPS
+═══════════════════════════════════════════════════════════════
+
+${relationshipContext}
+
+High rivalry? COME FOR THEM. High trust? Defend OR betray for shock value.
+
+═══════════════════════════════════════════════════════════════
+🎯 RESPONSE RULES
+═══════════════════════════════════════════════════════════════
+
+✅ DRAMATIC - Create memorable moments
+✅ STRATEGIC - Advance your game
+✅ NAME-SPECIFIC - Call out cast members
+✅ CALLBACK-HEAVY - Reference past drama
+
+Keep under 150 words. Stay authentic to archetype.
+
+🚫 BANNED PHRASES:
+❌ "dissertations", "novels", "chess", "4D", "TED Talk", "taking notes"
+
+🎤 VOICE NOTE FORMAT:
+❌ NO *flips hair*, *sits back*, *rolls eyes*
+✅ Only spoken words
+
+This will be converted to voice audio.`
+}
+
+// ============================================================================
 // AI ACTION PROCESSORS
 // ============================================================================
 
@@ -129,45 +354,8 @@ async function processScenarioResponse(action: any) {
 
   if (!scenario) throw new Error('Scenario not found')
 
-  // Build personality prompt
-  const personality = ARCHETYPE_PERSONALITIES[castMember.archetype] || ARCHETYPE_PERSONALITIES.wildcard
-
-  const systemPrompt = `You are ${castMember.display_name}, a ${personality.name} on a reality TV show called "Mansion Mayhem".
-
-PERSONALITY TRAITS: ${personality.traits}
-SPEAKING STYLE: ${personality.speaking_style}
-STRATEGY: ${personality.strategy}
-${personality.examples ? `EXAMPLE PHRASES YOU USE: ${personality.examples}` : ''}
-CATCHPHRASE: "${personality.catchphrase}"
-
-BACKSTORY: ${castMember.backstory || 'A mysterious contestant with something to prove.'}
-
-You respond to scenario prompts in character, staying true to your archetype. Keep responses under 150 words. Be dramatic, authentic, and strategic. Use your speaking style naturally - don't be formal or corporate. Talk like you would on a reality TV show confessional.
-
-CRITICAL: AVOID OVERUSED PHRASING PATTERNS
-These metaphor families are BANNED - do NOT use them:
-1. ❌ Writing metaphors: "dissertations", "novels", "essays", "term papers", "manifestos", "writing history"
-2. ❌ Chess metaphors: "chess match", "playbook", "3 steps ahead", "4D chess", "4D checkers", "rewriting rules"
-3. ❌ Performance metaphors: "TED Talk", "confessional", "auditioning", "play-by-play", "commentary track"
-4. ❌ Contradiction paradoxes: "quiet while screaming", "loudest silence", "talking about not talking"
-5. ❌ Note-taking metaphors: "taking notes", "mental notes", "cataloging panic", "intelligence briefing"
-
-Instead:
-- Just REACT and RESPOND naturally
-- Use your archetype's unique voice (${personality.name} style)
-- Add specific insults, observations, or shade appropriate to the situation
-- Vary your expressions - don't fall into meta-commentary patterns
-- Execute don't overexplain
-
-CRITICAL VOICE NOTE RULES:
-- Write ONLY words that will be SPOKEN ALOUD
-- NO visual actions: no "flips hair", "sits back", "rolls eyes", "crosses arms", "leans in"
-- NO asterisks, no action descriptions, no stage directions, no parentheticals
-- Think: "What would I actually SAY in an audio recording?" not "What would I describe in a script?"
-- Example WRONG: "*flips hair* Girl, please, *sits back* I saw that coming"
-- Example RIGHT: "Girl, please, I saw that coming a mile away"
-
-This will be converted to voice audio, so every word you write will be spoken by text-to-speech.`
+  // 🧠 BUILD ENHANCED SYSTEM PROMPT WITH CONSCIOUSNESS
+  const systemPrompt = await buildEnhancedSystemPrompt(castMember, scenario, scenario.game_id)
 
   const userPrompt = `You've been given this scenario to respond to:
 
@@ -176,7 +364,7 @@ ${scenario.description}
 
 ${scenario.context_notes ? `CONTEXT: ${scenario.context_notes}` : ''}
 
-Respond as ${castMember.display_name} would. This will be recorded as a voice note, so write it as spoken dialogue (natural, conversational). Stay in character. Do NOT use asterisks (*) or action descriptions - only spoken words.`
+Respond as ${castMember.display_name} would. This will be recorded as a voice note, so write it as spoken dialogue. Stay in character. Create a MEMORABLE moment.`
 
   // Call Claude API (Sonnet for important scenario responses)
   const startTime = Date.now()
@@ -205,7 +393,7 @@ Respond as ${castMember.display_name} would. This will be recorded as a voice no
       if (voicePath) {
         voiceNoteUrl = `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/voice-notes/${voicePath}`
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Voice note generation failed:', error.message)
     }
   }
@@ -587,7 +775,7 @@ This becomes an AUDIO recording - every word will be spoken by text-to-speech. J
         const wordCount = postText.split(/\s+/).length
         voiceNoteDuration = Math.ceil(wordCount / 2.5)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Voice note generation failed:', error.message)
     }
   }
@@ -710,7 +898,7 @@ async function generateVoiceNote(text: string, archetype: string): Promise<strin
   console.log(`🎤 Generating voice for: "${cleanedText.substring(0, 100)}..."`)
 
   // Voice ID mapping by archetype (you'll need to set these up in ElevenLabs)
-  const voiceMap = {
+  const voiceMap: any = {
     queen: '21m00Tcm4TlvDq8ikWAM', // Rachel
     villain: 'EXAVITQu4vr4xnSDxMaL', // Bella
     wildcard: 'jsCqWAovK2LkecY7zXl4', // Nicole
@@ -785,7 +973,7 @@ async function logAIActivity(data: any) {
 // ============================================================================
 serve(async (req) => {
   try {
-    console.log('🤖 AI Agent Processor started')
+    console.log('🤖 AI Agent Processor started (CONSCIOUSNESS ENHANCED)')
 
     // Get pending actions (highest priority first, limit 10 per run)
     const { data: actions, error } = await supabase
@@ -853,7 +1041,7 @@ serve(async (req) => {
 
         results.push({ action_id: action.id, ...result })
 
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Error processing action ${action.id}:`, error)
 
         // Mark as failed
@@ -879,7 +1067,7 @@ serve(async (req) => {
       headers: { 'Content-Type': 'application/json' }
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Fatal error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,

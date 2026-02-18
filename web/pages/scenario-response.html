@@ -2216,12 +2216,11 @@
           return
         }
 
-        // Load scenario (filtered by game)
+        // Load scenario (scenario IDs are unique across all games)
         const { data, error } = await supabase
           .from('scenarios')
           .select('*')
           .eq('id', scenarioId)
-          .eq('game_id', gameId)
           .single()
 
         if (error) throw error

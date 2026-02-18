@@ -64,7 +64,7 @@ serve(async (req) => {
         )
       `)
       .gte('created_at', tenMinutesAgo)
-      .is('event_type', null) // Not yet analyzed
+      .is('analyzed_at', null) // Not yet analyzed
       .order('created_at', { ascending: false })
 
     if (scenariosError) throw scenariosError

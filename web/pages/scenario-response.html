@@ -2167,7 +2167,7 @@
 
       // Get scenario ID from URL
       const urlParams = new URLSearchParams(window.location.search)
-      const scenarioId = urlParams.get('id')
+      const scenarioId = urlParams.get('scenario_id') || urlParams.get('id') // Support both parameter names
 
       if (!scenarioId) {
         // Show preview mode when no scenario is provided

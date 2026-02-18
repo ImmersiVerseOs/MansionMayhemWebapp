@@ -271,13 +271,14 @@ DESIGN SYSTEM (MATCH EXACTLY):
 - Padding: 20px cards, 40px page
 
 TECHNICAL REQUIREMENTS:
-1. Include Supabase client initialization
-2. Load data from database (scenario_responses, cast_members, etc.)
-3. Save votes/responses to database
-4. Mobile responsive (grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)))
-5. Loading states
-6. Error handling
-7. Back button to dashboard
+1. Include Supabase CDN: <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+2. Initialize Supabase client with: const supabaseClient = window.supabase.createClient('SUPABASE_URL', 'SUPABASE_ANON_KEY')
+3. Load data from database (scenario_responses, cast_members, etc.)
+4. Save votes/responses to database
+5. Mobile responsive (grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)))
+6. Loading states
+7. Error handling
+8. Back button to dashboard
 
 CAST MEMBERS:
 ${JSON.stringify(castInfo, null, 2)}

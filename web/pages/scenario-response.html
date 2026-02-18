@@ -1623,34 +1623,76 @@
       // Show loading
       document.getElementById('aiLoading').style.display = 'block'
       document.getElementById('aiResponsesList').style.display = 'none'
-      
-      // Simulate API call (replace with actual API)
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Generate 3 response options
-      const responses = [
-        {
-          id: 'option-1',
-          label: 'Diplomatic',
-          dramaLevel: 30,
-          text: "Look, I think there's been a misunderstanding. I value our friendship and I'd never intentionally talk behind your back. Can we talk about this privately and clear the air?"
-        },
-        {
-          id: 'option-2',
-          label: 'Assertive',
-          dramaLevel: 65,
-          text: "I'm not going to apologize for something I didn't do. If someone told you I was talking about you, maybe you should question their motives instead of attacking me in front of everyone."
-        },
-        {
-          id: 'option-3',
-          label: 'Confrontational',
-          dramaLevel: 95,
-          text: "Are you serious right now? YOU'RE accusing ME? That's rich coming from someone who literally gossips about everyone in this house. At least I'm honest about it!"
-        }
-      ]
-      
-      // Display options
-      displayAIResponses(responses)
+
+      try {
+        // Get current cast member data
+        const { data: castMember, error: castError } = await supabase
+          .from('cast_members')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .single()
+
+        if (castError) throw castError
+
+        // Generate context-aware responses based on scenario
+        const scenarioContext = scenario.context || scenario.description
+        const scenarioType = scenario.scenario_type || 'general'
+
+        // Build responses that actually address the scenario
+        const responses = [
+          {
+            id: 'option-1',
+            label: 'Diplomatic',
+            dramaLevel: 30,
+            text: generateDiplomaticResponse(scenarioContext, castMember)
+          },
+          {
+            id: 'option-2',
+            label: 'Assertive',
+            dramaLevel: 65,
+            text: generateAssertiveResponse(scenarioContext, castMember)
+          },
+          {
+            id: 'option-3',
+            label: 'Confrontational',
+            dramaLevel: 95,
+            text: generateConfrontationalResponse(scenarioContext, castMember)
+          }
+        ]
+
+        // Display options
+        displayAIResponses(responses)
+      } catch (error) {
+        console.error('Error generating AI responses:', error)
+        alert('Failed to generate AI responses. Please write your response manually.')
+      }
+    }
+
+    function generateDiplomaticResponse(context, castMember) {
+      // For "Scoreboard Summit" - diplomatic approach
+      if (context.includes('watching closely') || context.includes('receipts')) {
+        return `I've been observing everyone's gameplay respectfully. If I had to name someone I'm watching, it would be based on strategy, not personal issues. I think we can all learn from each other's approaches to this game.`
+      }
+      // Generic diplomatic
+      return `I want to approach this situation thoughtfully. I believe in honest communication and maintaining positive relationships while still playing strategically.`
+    }
+
+    function generateAssertiveResponse(context, castMember) {
+      // For "Scoreboard Summit" - assertive approach
+      if (context.includes('watching closely') || context.includes('receipts')) {
+        return `I'm watching the players who are tracking everyone else's moves. My receipts? The constant scorekeeping, the alliance-building, the strategic positioning. I see the patterns, and I'm not afraid to name them when asked directly.`
+      }
+      // Generic assertive
+      return `I've been paying attention to the dynamics in this house. I have my observations, and I'm confident in my read of the situation. I'll share my perspective honestly.`
+    }
+
+    function generateConfrontationalResponse(context, castMember) {
+      // For "Scoreboard Summit" - confrontational approach
+      if (context.includes('watching closely') || context.includes('receipts')) {
+        return `You want names? I'm watching the ones who think they're running this house. The scoreboard keepers, the alliance architects, the puppet masters. My receipts? Every whispered conversation, every calculated move, every 'strategic' Tea Spot post. I see EVERYTHING, and I'm not here to play nice about it.`
+      }
+      // Generic confrontational
+      return `Let's be real - everyone's watching everyone, and I'm done pretending otherwise. I have receipts, I have observations, and I'm ready to put it all on the table. No more games.`
     }
 
     function displayAIResponses(responses) {

@@ -339,16 +339,49 @@ DESIGN SYSTEM (MATCH EXACTLY):
 - Border radius: 12px for cards
 - Padding: 20px cards, 40px page
 
-TECHNICAL REQUIREMENTS:
-1. Include Supabase CDN: <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-2. Initialize Supabase client with: const supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
-   (The server will inject window.SUPABASE_URL and window.SUPABASE_ANON_KEY automatically)
-3. Load data from database (scenario_responses, cast_members, etc.)
-4. Save votes/responses to database
-5. Mobile responsive (grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)))
-6. Loading states
-7. Error handling
-8. Back button to dashboard
+CRITICAL TECHNICAL REQUIREMENTS (UI MUST BE FULLY FUNCTIONAL):
+
+1. **Supabase Integration (REQUIRED)**:
+   - MUST include: <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   - MUST initialize: const supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+   - The server injects window.SUPABASE_URL and window.SUPABASE_ANON_KEY automatically
+   - Test connection on page load and show error if Supabase fails
+
+2. **Database Operations (MUST WORK)**:
+   - Load data: Query scenario_responses, cast_members, scenarios tables
+   - Save data: INSERT votes into scenario_votes table
+   - Handle errors: Show user-friendly error messages if queries fail
+   - Loading states: Show spinners while loading data
+   - Empty states: Show message if no data found
+
+3. **Error Handling (REQUIRED)**:
+   - Try-catch ALL async operations
+   - Show error messages to user (don't just console.log)
+   - Fallback UI if data fails to load
+   - Network error handling
+   - Validation errors (check if user already voted, etc.)
+
+4. **User Experience (MUST HAVE)**:
+   - Loading spinners while fetching data
+   - Success messages after actions ("Vote submitted!")
+   - Error messages that are helpful ("You already voted")
+   - Disable buttons while processing
+   - Confirmation dialogs for important actions
+   - Back button to dashboard: window.location.href = '/pages/player-dashboard.html'
+
+5. **Code Quality (REQUIRED)**:
+   - ALL variables must be declared
+   - ALL functions must be defined before use
+   - NO undefined references
+   - NO missing semicolons
+   - Clean, readable code with comments
+   - Console logs for debugging (but don't expose sensitive data)
+
+6. **Responsive Design (REQUIRED)**:
+   - Mobile responsive: grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))
+   - Works on phone, tablet, desktop
+   - Touch-friendly buttons (min 44px height)
+   - Readable text on all screen sizes
 
 CAST MEMBERS:
 ${JSON.stringify(castInfo, null, 2)}
@@ -386,10 +419,25 @@ Return ONLY the HTML code, no explanation.`
     html = codeBlockMatch[1]
   }
 
-  // Validate HTML
-  if (!html.includes('<!DOCTYPE html>') && !html.includes('<html')) {
-    throw new Error('Generated content is not valid HTML')
+  // Validate HTML has required elements
+  const validations = [
+    { check: html.includes('<!DOCTYPE html>') || html.includes('<html'), error: 'Missing HTML structure' },
+    { check: html.includes('supabase'), error: 'Missing Supabase integration' },
+    { check: html.includes('window.SUPABASE_URL') || html.includes('createClient'), error: 'Missing Supabase client initialization' },
+    { check: html.includes('<script'), error: 'Missing JavaScript' },
+    { check: html.includes('<style'), error: 'Missing CSS' },
+    { check: html.length > 1000, error: 'Generated HTML too short (less than 1000 chars)' }
+  ]
+
+  for (const validation of validations) {
+    if (!validation.check) {
+      console.warn(`⚠️ Validation warning: ${validation.error}`)
+      console.warn(`HTML preview: ${html.substring(0, 500)}`)
+      throw new Error(`Generated UI validation failed: ${validation.error}`)
+    }
   }
+
+  console.log('✅ HTML validation passed')
 
   return html.trim()
 }

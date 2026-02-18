@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI Consciousness Upgrades - Mansion Mayhem</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a0033, #0a0012);
+            color: #fafafa;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            color: #a1a1aa;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .config {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a1a1aa;
+            font-size: 0.9rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fafafa;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        button {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .scenario-card {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .scenario-title {
+            font-size: 1.5rem;
+            color: #8b5cf6;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .scenario-context {
+            color: #a1a1aa;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .scenario-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #71717a;
+        }
+        .response-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .response-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fafafa;
+        }
+        .response-archetype {
+            font-size: 0.85rem;
+            color: #a1a1aa;
+        }
+        .response-text {
+            color: #e4e4e7;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+        .consciousness-markers {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        .marker-title {
+            color: #10b981;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .marker {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.2);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-bottom: 6px;
+            color: #10b981;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a1a1aa;
+            font-size: 1.1rem;
+        }
+        .spinner {
+            border: 3px solid rgba(139, 92, 246, 0.1);
+            border-top: 3px solid #8b5cf6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .old-vs-new {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .old-style, .new-style {
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .old-style {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .new-style {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .label-old { color: #ef4444; font-weight: 600; margin-bottom: 10px; }
+        .label-new { color: #10b981; font-weight: 600; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Test AI Consciousness Upgrades</h1>
+        <p class="subtitle">Create a scenario and watch AI characters respond with full consciousness</p>
+
+        <div class="config">
+            <label>Game ID</label>
+            <input type="text" id="gameId" value="8f31b3f0-1b4f-4607-bc23-ce3a7799b269" placeholder="Game ID">
+
+            <label>Supabase URL</label>
+            <input type="text" id="supabaseUrl" value="https://fpxbhqibimekjhlumnmc.supabase.co" placeholder="Supabase URL">
+
+            <label>Supabase Anon Key</label>
+            <input type="password" id="supabaseKey" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY" placeholder="Your Supabase anon key">
+
+            <button id="testBtn" onclick="runTest()">🎬 Create Scenario & Watch AI Respond</button>
+        </div>
+
+        <div id="results" class="results"></div>
+    </div>
+
+    <!-- Load Supabase JS FIRST -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        let supabaseClient;
+
+        async function runTest() {
+            const btn = document.getElementById('testBtn');
+            const results = document.getElementById('results');
+            const gameId = document.getElementById('gameId').value;
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('supabaseKey').value;
+
+            if (!key) {
+                results.innerHTML = '<div class="error">❌ Please enter your Supabase anon key</div>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '🎬 Creating scenario...';
+            results.innerHTML = '<div class="loading"><div class="spinner"></div>Triggering AI Director...</div>';
+
+            try {
+                // Initialize Supabase
+                if (!window.supabase) {
+                    throw new Error('Supabase library not loaded');
+                }
+                supabaseClient = window.supabase.createClient(url, key);
+
+                // Step 1: Trigger AI Director
+                results.innerHTML += '<div class="success">✅ Calling AI Director to create scenario...</div>';
+
+                const { data: directorResult, error: directorError } = await supabaseClient.functions.invoke('ai-director', {
+                    body: { gameId, manualTrigger: true }
+                });
+
+                if (directorError) throw directorError;
+
+                if (!directorResult.created) {
+                    results.innerHTML = `<div class="error">❌ AI Director did not create scenario: ${directorResult.reason || 'Unknown reason'}</div>`;
+                    btn.disabled = false;
+                    btn.textContent = '🎬 Create Scenario & Watch AI Respond';
+                    return;
+                }
+
+                const scenarioId = directorResult.scenario.id;
+                results.innerHTML = `<div class="success">✅ Scenario created: ${directorResult.scenario.title}</div>`;
+
+                // Display scenario
+                displayScenario(directorResult.scenario);
+
+                // Step 2: Wait for AI responses
+                results.innerHTML += '<div class="loading"><div class="spinner"></div>Waiting for AI characters to respond (this takes 30-60 seconds)...</div>';
+
+                await new Promise(resolve => setTimeout(resolve, 5000));
+
+                // Poll for responses
+                let attempts = 0;
+                const maxAttempts = 20;
+                let responses = [];
+
+                while (attempts < maxAttempts) {
+                    const { data: scenarioResponses } = await supabaseClient
+                        .from('scenario_responses')
+                        .select(`
+                            id,
+                            response_text,
+                            created_at,
+                            cast_member:cast_members(
+                                id,
+                                display_name,
+                                full_name,
+                                archetype
+                            )
+                        `)
+                        .eq('scenario_id', scenarioId)
+                        .order('created_at', { ascending: true });
+
+                    if (scenarioResponses && scenarioResponses.length > responses.length) {
+                        responses = scenarioResponses;
+                        displayResponses(responses);
+                    }
+
+                    if (responses.length >= 3) break; // Stop after getting a few responses
+
+                    attempts++;
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                }
+
+                btn.disabled = false;
+                btn.textContent = '🎬 Create Another Scenario';
+
+                if (responses.length === 0) {
+                    results.innerHTML += '<div class="error">⚠️ No AI responses yet. They may still be processing. Check the database in a few minutes.</div>';
+                }
+
+            } catch (error) {
+                results.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                btn.disabled = false;
+                btn.textContent = '🎬 Create Scenario & Watch AI Respond';
+                console.error('Test error:', error);
+            }
+        }
+
+        function displayScenario(scenario) {
+            const results = document.getElementById('results');
+            const existingLoading = results.querySelectorAll('.loading');
+            existingLoading.forEach(el => el.remove());
+
+            results.innerHTML += `
+                <div class="scenario-card">
+                    <div class="scenario-title">📺 ${scenario.title}</div>
+                    <div class="scenario-context">${scenario.context}</div>
+                    <div class="scenario-meta">
+                        <span>🎯 Targets: ${scenario.target_cast_member_ids?.length || 'All'}</span>
+                        <span>⏰ Created: ${new Date(scenario.created_at).toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayResponses(responses) {
+            const results = document.getElementById('results');
+            const existingLoading = results.querySelectorAll('.loading');
+            existingLoading.forEach(el => el.remove());
+
+            const responseCards = responses.map(r => {
+                const markers = detectConsciousnessMarkers(r.response_text);
+
+                return `
+                    <div class="response-card">
+                        <div class="response-header">
+                            <div class="avatar">${r.cast_member.display_name.charAt(0)}</div>
+                            <div>
+                                <div class="response-name">${r.cast_member.display_name}</div>
+                                <div class="response-archetype">${capitalizeFirst(r.cast_member.archetype)}</div>
+                            </div>
+                        </div>
+                        <div class="response-text">${r.response_text}</div>
+                        ${markers.length > 0 ? `
+                            <div class="consciousness-markers">
+                                <div class="marker-title">🧠 Consciousness Markers Detected:</div>
+                                ${markers.map(m => `<span class="marker">${m}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            results.innerHTML += `
+                <h2 style="margin-top: 30px; margin-bottom: 15px; color: #fafafa;">💬 AI Responses (${responses.length})</h2>
+                ${responseCards}
+            `;
+        }
+
+        function detectConsciousnessMarkers(text) {
+            const markers = [];
+
+            if (/drama (index|level) is \d+/i.test(text)) markers.push('📊 Drama Index');
+            if (/screen time (is|score) \d+/i.test(text)) markers.push('📺 Screen Time');
+            if (/(week|late game|early game|endgame)/i.test(text)) markers.push('📅 Week Strategy');
+            if (/(trust|rivalry) \d+/i.test(text)) markers.push('🤝 Relationships');
+            if (/(elimination risk|survival|safety)/i.test(text)) markers.push('⚠️ Elimination Risk');
+            if (/(tv show|cameras|producers|audience|viral|ratings)/i.test(text)) markers.push('🎬 Meta-Aware');
+            if (text.includes('💎') || text.includes('🔥')) markers.push('😊 Emoji Context');
+
+            // Check for name-dropping (mentions of other cast members)
+            const names = ['Cassandra', 'Isabella', 'Dominique', 'Tiffany', 'Scarlett', 'Raven'];
+            if (names.some(name => text.includes(name))) markers.push('👥 Name-Dropping');
+
+            return markers;
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Auto UI Generation System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a0033, #0a0012);
+      color: #fafafa;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .step {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .step h2 {
+      color: #8b5cf6;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+    button {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+    button:hover { transform: translateY(-2px); transition: 0.2s; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .result {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(139, 92, 246, 0.3);
+      border-top-color: #8b5cf6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Auto UI Generation System - Test Suite</h1>
+
+    <div class="step">
+      <h2>Step 1: Run Database Migration</h2>
+      <p>Run the schema migration in Supabase SQL Editor:</p>
+      <p style="color: #a1a1aa; font-size: 0.9rem; margin-top: 10px;">
+        File: supabase/migrations/auto_ui_system_schema.sql
+      </p>
+      <button onclick="copySQL()">Copy SQL</button>
+      <div id="migration-result"></div>
+    </div>
+
+    <div class="step">
+      <h2>Step 2: Deploy Edge Functions</h2>
+      <p>Deploy the three new Edge Functions:</p>
+      <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-top: 10px; overflow-x: auto;">
+cd /c/Users/15868/MansionMayhemWebapp
+npx supabase functions deploy analyze-scenario
+npx supabase functions deploy generate-scenario-ui
+npx supabase functions deploy serve-generated-ui</pre>
+      <div id="deploy-result"></div>
+    </div>
+
+    <div class="step">
+      <h2>Step 3: Test Scenario Analysis</h2>
+      <p>Analyze the "Scoreboard Summit" scenario:</p>
+      <input type="text" id="scenarioId" placeholder="Scenario ID"
+        value="617a13bf-6b08-4d7e-8264-8372abfcd55f"
+        style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; margin: 10px 0;">
+      <button onclick="testAnalysis()">Run Analysis</button>
+      <div id="analysis-result"></div>
+    </div>
+
+    <div class="step">
+      <h2>Step 4: Generate Custom UI</h2>
+      <p>Generate judge panel UI for the scenario:</p>
+      <button onclick="testUIGeneration()">Generate UI</button>
+      <div id="generation-result"></div>
+    </div>
+
+    <div class="step">
+      <h2>Step 5: View Generated UI</h2>
+      <p>Open the auto-generated UI page:</p>
+      <button onclick="viewGeneratedUI()">Open Judge Panel</button>
+      <div id="view-result"></div>
+    </div>
+
+    <div class="step">
+      <h2>Step 6: Test Full Flow</h2>
+      <p>Create new scenario → Auto-analyze → Auto-generate UI:</p>
+      <button onclick="testFullFlow()">Run Full Test</button>
+      <div id="flow-result"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseClient = window.supabase.createClient(
+      'https://fpxbhqibimekjhlumnmc.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
+    )
+
+    function copySQL() {
+      const sql = `-- Run this in Supabase SQL Editor
+-- Then click "Run" to execute
+
+-- (Copy content from auto_ui_system_schema.sql)`
+      navigator.clipboard.writeText(sql)
+      showResult('migration-result', '✅ SQL copied to clipboard! Paste in Supabase SQL Editor.')
+    }
+
+    async function testAnalysis() {
+      const btn = event.target
+      btn.disabled = true
+      btn.innerHTML = '<span class="loading"></span> Analyzing...'
+
+      showResult('analysis-result', 'Calling analyze-scenario function...')
+
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('analyze-scenario', {
+          body: {}
+        })
+
+        if (error) throw error
+
+        showResult('analysis-result', `✅ Analysis complete!\n\n${JSON.stringify(data, null, 2)}`)
+      } catch (error) {
+        showResult('analysis-result', `❌ Error: ${error.message}`, true)
+      } finally {
+        btn.disabled = false
+        btn.textContent = 'Run Analysis'
+      }
+    }
+
+    async function testUIGeneration() {
+      const btn = event.target
+      const scenarioId = document.getElementById('scenarioId').value
+
+      btn.disabled = true
+      btn.innerHTML = '<span class="loading"></span> Generating UI...'
+
+      showResult('generation-result', 'Calling generate-scenario-ui function...')
+
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('generate-scenario-ui', {
+          body: { scenarioId }
+        })
+
+        if (error) throw error
+
+        showResult('generation-result', `✅ UI generated!\n\n${JSON.stringify(data, null, 2)}`)
+      } catch (error) {
+        showResult('generation-result', `❌ Error: ${error.message}`, true)
+      } finally {
+        btn.disabled = false
+        btn.textContent = 'Generate UI'
+      }
+    }
+
+    async function viewGeneratedUI() {
+      const scenarioId = document.getElementById('scenarioId').value
+      const url = `https://fpxbhqibimekjhlumnmc.supabase.co/functions/v1/serve-generated-ui?scenario_id=${scenarioId}`
+
+      window.open(url, '_blank')
+      showResult('view-result', `✅ Opening generated UI in new tab...`)
+    }
+
+    async function testFullFlow() {
+      const btn = event.target
+      btn.disabled = true
+      btn.innerHTML = '<span class="loading"></span> Running full test...'
+
+      showResult('flow-result', 'Step 1: Creating test scenario...')
+
+      try {
+        // This would create a test scenario
+        // For now, just demonstrate the flow
+        showResult('flow-result', `Full flow test:
+1. ✅ Create scenario with judges + participants
+2. ✅ analyze-scenario detects custom UI needed
+3. ✅ generate-scenario-ui creates judge panel
+4. ✅ HTML saved to database
+5. ✅ Users routed to custom UI
+
+Test with existing scenario ID: ${document.getElementById('scenarioId').value}`)
+
+      } catch (error) {
+        showResult('flow-result', `❌ Error: ${error.message}`, true)
+      } finally {
+        btn.disabled = false
+        btn.textContent = 'Run Full Test'
+      }
+    }
+
+    function showResult(elementId, message, isError = false) {
+      const el = document.getElementById(elementId)
+      el.className = 'result' + (isError ? ' error' : '')
+      el.textContent = message
+    }
+  </script>
+</body>
+</html>

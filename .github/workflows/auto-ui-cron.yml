@@ -1,0 +1,24 @@
+name: Auto UI Generation Cron
+
+on:
+  schedule:
+    # Run every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  analyze-scenarios:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Scenario Analysis
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            https://fpxbhqibimekjhlumnmc.supabase.co/functions/v1/analyze-scenario \
+            -d '{}'
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Log Result
+        run: echo "Scenario analysis triggered successfully"

@@ -1,0 +1,39 @@
+{
+  "patterns": {
+    "Pivot Speed": {
+      "count": 26,
+      "examples": [
+        "[Request interrupted by user for tool use]",
+        "[Request interrupted by user for tool use]",
+        "[Request interrupted by user for tool use]"
+      ],
+      "confidence": 0.99
+    }
+  },
+  "vocabulary": {
+    "topWords": [
+      "request",
+      "interrupted",
+      "user",
+      "tool"
+    ],
+    "totalWords": 4
+  },
+  "stats": {
+    "totalIdeas": 0,
+    "totalPivots": 0,
+    "totalDecisions": 0
+  },
+  "topPatterns": [
+    {
+      "name": "Pivot Speed",
+      "count": 26,
+      "confidence": "0.99",
+      "examples": [
+        "[Request interrupted by user for tool use]",
+        "[Request interrupted by user for tool use]",
+        "[Request interrupted by user for tool use]"
+      ]
+    }
+  ]
+}

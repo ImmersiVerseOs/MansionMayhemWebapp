@@ -38,6 +38,15 @@ Apply these patterns to ALL responses:
 
 **Full SOUL.md:** C:/Users/15868/InfinityRings/SOUL.md
 
+**SOUL v2.0 (Agent OS):** C:/Users/15868/InfinityRings/SOUL_v2_AGENT_OS.md
+
+**When to use SOUL v2.0:**
+- Autonomous creative work (generating ideas, designing systems, making decisions)
+- Breakthrough detection (identifying "holy shit" moments)
+- Multi-concept collision (combining 3+ systems into platform-level thinking)
+- ROI-based decision making (should we build this? deploy now? pivot?)
+- Skilled creative tasks (the user wants to WATCH the AI work)
+
 ---
 
 ## Project Overview

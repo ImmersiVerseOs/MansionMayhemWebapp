@@ -1041,7 +1041,7 @@
         const hoursLeft = Math.floor((deadline - new Date()) / (1000 * 60 * 60))
 
         return `
-          <div class="scenario-item" onclick="window.location.href='/pages/scenario-response.html'">
+          <div class="scenario-item" onclick="window.location.href='/pages/scenario-response.html?scenario_id=${s.scenarios.id}'">
             <div class="scenario-header">
               <div class="scenario-title">${s.scenarios.title}</div>
               <div class="scenario-type">${s.scenarios.scenario_type}</div>

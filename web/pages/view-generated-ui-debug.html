@@ -99,13 +99,16 @@
 
         // Inject Supabase config
         let html = data.generated_html
-        const configScript = `
-  <script>
-    window.SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';
-    window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
-  </script>`
+        const configScript = '<script>' +
+          "window.SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';" +
+          "window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';" +
+          '<' + '/script>'
 
-        html = html.replace(/<head>/i, `<head>${configScript}`)
+        // Find <head> tag and inject config after it
+        const headMatch = html.match(/(<head[^>]*>)/i)
+        if (headMatch) {
+          html = html.replace(headMatch[0], headMatch[0] + configScript)
+        }
 
         log('✅ Injected Supabase config')
         log('🎨 Rendering in iframe...')

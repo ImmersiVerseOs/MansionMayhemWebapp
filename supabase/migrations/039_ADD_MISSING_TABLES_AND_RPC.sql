@@ -133,7 +133,7 @@ BEGIN
   -- Get active voting round for this game
   SELECT jsonb_agg(
     jsonb_build_object(
-      'target_cast_member_id', ev.voted_for_cast_member_id,
+      'target_cast_member_id', ev.voted_for_id,
       'display_name', cm.display_name,
       'vote_count', ev.cnt,
       'percentage', ROUND((ev.cnt::NUMERIC / NULLIF(ev.total, 0)) * 100, 1)
@@ -142,7 +142,7 @@ BEGIN
   INTO result
   FROM (
     SELECT
-      voted_for_cast_member_id,
+      voted_for_id,
       COUNT(*) AS cnt,
       SUM(COUNT(*)) OVER () AS total
     FROM mm_elimination_votes
@@ -151,9 +151,9 @@ BEGIN
       WHERE game_id = p_game_id
         AND status = 'active'
     )
-    GROUP BY voted_for_cast_member_id
+    GROUP BY voted_for_id
   ) ev
-  JOIN cast_members cm ON cm.id = ev.voted_for_cast_member_id;
+  JOIN cast_members cm ON cm.id = ev.voted_for_id;
 
   RETURN COALESCE(result, '[]'::JSONB);
 END;

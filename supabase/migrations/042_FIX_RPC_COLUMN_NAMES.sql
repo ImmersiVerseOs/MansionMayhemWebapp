@@ -1,8 +1,50 @@
 -- ============================================================================
--- 041: FIX get_character_dashboard() RPC
--- Fixes column name mismatches and references to non-existent columns
+-- 042: FIX RPC COLUMN NAMES
+-- Fixes voted_for_cast_member_id → voted_for_id in update_vote_counts
+-- Fixes GROUP BY issue in get_character_dashboard
 -- ============================================================================
 
+-- ─── Fix update_vote_counts ─────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.update_vote_counts(
+  p_game_id UUID,
+  p_vote_type TEXT DEFAULT 'elimination'
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  result JSONB;
+BEGIN
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'target_cast_member_id', ev.voted_for_id,
+      'display_name', cm.display_name,
+      'vote_count', ev.cnt,
+      'percentage', ROUND((ev.cnt::NUMERIC / NULLIF(ev.total, 0)) * 100, 1)
+    )
+  )
+  INTO result
+  FROM (
+    SELECT
+      voted_for_id,
+      COUNT(*) AS cnt,
+      SUM(COUNT(*)) OVER () AS total
+    FROM mm_elimination_votes
+    WHERE round_id IN (
+      SELECT id FROM mm_voting_rounds
+      WHERE game_id = p_game_id
+        AND status = 'active'
+    )
+    GROUP BY voted_for_id
+  ) ev
+  JOIN cast_members cm ON cm.id = ev.voted_for_id;
+
+  RETURN COALESCE(result, '[]'::JSONB);
+END;
+$$;
+
+-- ─── Fix get_character_dashboard ────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION public.get_character_dashboard(p_user_id UUID)
 RETURNS JSON AS $$
 DECLARE
@@ -37,7 +79,7 @@ BEGIN
       LIMIT 1
     ),
 
-    -- Recent alliances (use array_length instead of member_count)
+    -- Recent alliances
     'recent_alliances', (
       SELECT COALESCE(json_agg(sub), '[]'::json)
       FROM (
@@ -64,5 +106,3 @@ BEGIN
   RETURN v_result;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
-GRANT EXECUTE ON FUNCTION public.get_character_dashboard(UUID) TO authenticated;

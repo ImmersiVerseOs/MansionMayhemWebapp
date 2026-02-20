@@ -1,9 +1,10 @@
 // Supabase Edge Function: AI Scenario Generation
+// Rewritten from OpenAI to Anthropic Claude (2026-02-20)
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import OpenAI from 'https://esm.sh/openai@4.20.1'
+import Anthropic from 'https://esm.sh/@anthropic-ai/sdk@0.24.0'
 
-const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')!
+const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
@@ -23,7 +24,7 @@ serve(async (req) => {
     const { gameId, queueId, scenarioType, targetCastCount }: ScenarioRequest = await req.json()
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-    const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
+    const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY })
 
     // Update queue status to processing
     if (queueId) {
@@ -70,7 +71,7 @@ serve(async (req) => {
     // Get recent scenarios for context
     const { data: recentScenarios } = await supabase
       .from('scenarios')
-      .select('title, scenario_type, created_at')
+      .select('id, title, scenario_type, created_at')
       .eq('game_id', gameId)
       .order('created_at', { ascending: false })
       .limit(5)
@@ -94,27 +95,28 @@ serve(async (req) => {
       scenarioType
     })
 
-    console.log('Generating scenario with OpenAI...')
+    console.log('Generating scenario with Claude...')
 
-    // Generate scenario with OpenAI
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      temperature: 0.8,
+    // Generate scenario with Claude
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
-      messages: [
-        {
-          role: 'system',
-          content: getSystemPrompt(game.theme)
-        },
-        {
-          role: 'user',
-          content: context
-        }
-      ],
-      response_format: { type: 'json_object' }
+      system: getSystemPrompt(game.theme),
+      messages: [{
+        role: 'user',
+        content: context
+      }]
     })
 
-    const aiResponse = JSON.parse(completion.choices[0].message.content!)
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+
+    // Extract JSON from response (handle markdown code blocks)
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      throw new Error('AI did not return valid JSON')
+    }
+
+    const aiResponse = JSON.parse(jsonMatch[0])
 
     console.log('AI generated scenario:', aiResponse)
 
@@ -142,11 +144,10 @@ serve(async (req) => {
         launched_at: new Date().toISOString(),
         is_ai_generated: true,
         ai_generation_metadata: {
-          model: 'gpt-4-turbo-preview',
-          temperature: 0.8,
+          model: 'claude-sonnet-4-20250514',
           generated_at: new Date().toISOString(),
-          prompt_tokens: completion.usage?.prompt_tokens,
-          completion_tokens: completion.usage?.completion_tokens
+          input_tokens: message.usage?.input_tokens,
+          output_tokens: message.usage?.output_tokens
         }
       })
       .select()
@@ -207,8 +208,8 @@ serve(async (req) => {
           generated_prompt: scenario.prompt_text,
           processed_at: new Date().toISOString(),
           generation_metadata: {
-            model: 'gpt-4-turbo-preview',
-            tokens_used: completion.usage?.total_tokens
+            model: 'claude-sonnet-4-20250514',
+            tokens_used: (message.usage?.input_tokens || 0) + (message.usage?.output_tokens || 0)
           }
         })
         .eq('id', queueId)
@@ -237,17 +238,21 @@ serve(async (req) => {
     console.error('Error generating scenario:', error)
 
     // Update queue with error if applicable
-    const { queueId } = await req.json().catch(() => ({}))
-    if (queueId) {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-      await supabase
-        .from('ai_scenario_queue')
-        .update({
-          status: 'failed',
-          error_message: error.message,
-          retry_count: supabase.rpc('increment', { row_id: queueId, column_name: 'retry_count' })
-        })
-        .eq('id', queueId)
+    try {
+      const body = await req.clone().json()
+      if (body.queueId) {
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+        await supabase
+          .from('ai_scenario_queue')
+          .update({
+            status: 'failed',
+            error_message: error.message,
+            processed_at: new Date().toISOString()
+          })
+          .eq('id', body.queueId)
+      }
+    } catch (_) {
+      // Ignore errors in error handler
     }
 
     return new Response(
@@ -342,6 +347,5 @@ Create a scenario that builds on existing tensions, introduces new drama, or dee
 
 function selectCastForScenario(castMembers: any[], aiResponse: any, targetCount: number): any[] {
   // Simple selection: take first N cast members
-  // In production, you could make this smarter based on AI response
   return castMembers.slice(0, targetCount)
 }

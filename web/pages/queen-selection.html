@@ -756,7 +756,7 @@ async function init() {
     // Load cast members from database
     const { data: castMembers, error: castError } = await supabase
       .from('mm_game_cast')
-      .select('cast_members(id, display_name, archetype)')
+      .select('cast_members(id, display_name, archetype, drama_score, influence_score, catchphrase)')
       .eq('game_id', gameId)
       .eq('status', 'active')
 
@@ -767,7 +767,11 @@ async function init() {
         id: m.cast_members.id,
         name: m.cast_members.display_name,
         archetype: m.cast_members.archetype,
-        initials: m.cast_members.display_name.substring(0, 2).toUpperCase()
+        initials: m.cast_members.display_name.substring(0, 2).toUpperCase(),
+        confidence: m.cast_members.influence_score || Math.floor(Math.random() * 30 + 70),
+        drama: m.cast_members.drama_score || Math.floor(Math.random() * 30 + 70),
+        charm: Math.floor((m.cast_members.influence_score || 80) * 0.9 + Math.random() * 10),
+        catchphrase: m.cast_members.catchphrase || `${m.cast_members.display_name} runs this mansion.`
       }))
     }
 

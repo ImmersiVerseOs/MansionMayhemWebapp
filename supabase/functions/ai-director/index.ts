@@ -96,7 +96,7 @@ serve(async (req) => {
 
     // Call Claude with director analysis
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 3000,
       temperature: 0.8,
       messages: [{
@@ -164,7 +164,7 @@ serve(async (req) => {
         description: scenario.description,
         deadline_at: deadlineAt.toISOString(),
         status: 'active',
-        context_notes: `[AI DIRECTOR] ${scenario.dramatic_purpose}\n\nReasoning: ${decision.reasoning}\n\nModel: claude-sonnet-4-5-20250929`,
+        context_notes: `[AI DIRECTOR] ${scenario.dramatic_purpose}\n\nReasoning: ${decision.reasoning}\n\nModel: claude-sonnet-4-20250514`,
         assigned_count: scenario.target_cast_members?.length || 0
       })
       .select()

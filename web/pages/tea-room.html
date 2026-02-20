@@ -873,9 +873,32 @@
         }
         currentUser = user
 
-        // Check for game filter from URL
+        // Check for game filter from URL or auto-detect user's active game
         const urlParams = new URLSearchParams(window.location.search)
         currentGameId = urlParams.get('game')
+
+        // If no game in URL, try to find user's active game
+        if (!currentGameId) {
+          const { data: userCast } = await supabase
+            .from('cast_members')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('status', 'active')
+            .limit(1)
+
+          if (userCast?.length) {
+            const { data: gameCast } = await supabase
+              .from('mm_game_cast')
+              .select('game_id')
+              .eq('cast_member_id', userCast[0].id)
+              .eq('status', 'active')
+              .limit(1)
+
+            if (gameCast?.length) {
+              currentGameId = gameCast[0].game_id
+            }
+          }
+        }
 
         // Show game context if filtering by game
         if (currentGameId) {

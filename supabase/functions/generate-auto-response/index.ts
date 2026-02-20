@@ -1,9 +1,10 @@
 // Supabase Edge Function: AI Auto-Response for Inactive Cast
+// Rewritten from OpenAI to Anthropic Claude (2026-02-20)
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import OpenAI from 'https://esm.sh/openai@4.20.1'
+import Anthropic from 'https://esm.sh/@anthropic-ai/sdk@0.24.0'
 
-const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')!
+const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
@@ -21,13 +22,12 @@ serve(async (req) => {
     const { scenarioId, checkAll }: AutoResponseRequest = await req.json()
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-    const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
+    const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY })
 
     let scenariosToProcess = []
 
     if (checkAll) {
       // Find scenarios expiring in next 30 minutes with missing responses
-      // Creates urgency and last-minute drama for real-time experience
       const thirtyMinutesFromNow = new Date(Date.now() + 30 * 60 * 1000).toISOString()
 
       const { data: expiringScenarios } = await supabase
@@ -106,24 +106,18 @@ serve(async (req) => {
         console.log(`Generating auto-response for ${cast.full_name}...`)
 
         try {
-          // Generate character-aware response
-          const completion = await openai.chat.completions.create({
-            model: 'gpt-4-turbo-preview',
-            temperature: 0.9,
+          // Generate character-aware response using Claude
+          const message = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
             max_tokens: 500,
-            messages: [
-              {
-                role: 'system',
-                content: getCharacterSystemPrompt(cast)
-              },
-              {
-                role: 'user',
-                content: `You're in this situation:\n\n${scenario.prompt_text}\n\nYour options are:\n${options?.map(o => `${o.option_number}. ${o.option_text}`).join('\n')}\n\nRespond in character with which option you choose and why (1-2 paragraphs).`
-              }
-            ]
+            system: getCharacterSystemPrompt(cast),
+            messages: [{
+              role: 'user',
+              content: `You're in this situation:\n\n${scenario.prompt_text}\n\nYour options are:\n${options?.map(o => `${o.option_number}. ${o.option_text}`).join('\n')}\n\nRespond in character with which option you choose and why (1-2 paragraphs).`
+            }]
           })
 
-          const aiResponse = completion.choices[0].message.content!
+          const aiResponse = message.content[0].type === 'text' ? message.content[0].text : ''
 
           // Extract chosen option number from response
           const chosenOption = extractChosenOption(aiResponse, options?.length || 4)
@@ -138,11 +132,12 @@ serve(async (req) => {
               chosen_option: chosenOption,
               is_ai_generated: true,
               ai_generation_metadata: {
-                model: 'gpt-4-turbo-preview',
-                temperature: 0.9,
+                model: 'claude-sonnet-4-20250514',
                 generated_at: new Date().toISOString(),
                 character: cast.full_name,
-                archetype: cast.archetype
+                archetype: cast.archetype,
+                input_tokens: message.usage?.input_tokens,
+                output_tokens: message.usage?.output_tokens
               },
               created_at: new Date().toISOString()
             })

@@ -369,7 +369,7 @@ Respond as ${castMember.display_name} would. This will be recorded as a voice no
   // Call Claude API (Sonnet for important scenario responses)
   const startTime = Date.now()
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
+    model: 'claude-sonnet-4-20250514',
     max_tokens: 300,
     system: systemPrompt,
     messages: [{
@@ -499,7 +499,7 @@ Read the conversation carefully. Understand what's being discussed. Then respond
   // Call Claude API (Haiku for quick chat)
   const startTime = Date.now()
   const response = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+    model: 'claude-3-haiku-20240307',
     max_tokens: 100,
     system: systemPrompt,
     messages: [{
@@ -631,7 +631,7 @@ Based on personalities, recent drama, and strategic value - who should you ally 
   // Call Claude API (Sonnet for strategic decisions)
   const startTime = Date.now()
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
+    model: 'claude-sonnet-4-20250514',
     max_tokens: 200,
     system: systemPrompt,
     messages: [{
@@ -743,7 +743,7 @@ This becomes an AUDIO recording - every word will be spoken by text-to-speech. J
 
   const startTime = Date.now()
   const response = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001', // Use Haiku 4.5 for quick social posts
+    model: 'claude-3-haiku-20240307', // Use Haiku 4.5 for quick social posts
     max_tokens: 150,
     system: systemPrompt,
     messages: [{

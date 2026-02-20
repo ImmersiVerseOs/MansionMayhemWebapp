@@ -213,7 +213,7 @@ Return ONLY valid JSON with this exact structure:
   console.log('🤖 Calling Claude for scenario analysis...')
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
+    model: 'claude-sonnet-4-20250514',
     max_tokens: 2000,
     messages: [{
       role: 'user',

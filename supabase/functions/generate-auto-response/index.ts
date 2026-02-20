@@ -1,5 +1,6 @@
 // Supabase Edge Function: AI Auto-Response for Inactive Cast
 // Rewritten from OpenAI to Anthropic Claude (2026-02-20)
+// Fixed to match actual DB schema (scenario_responses has: scenario_id, cast_member_id, response_text, voice_note_url)
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Anthropic from 'https://esm.sh/@anthropic-ai/sdk@0.24.0'
@@ -10,7 +11,9 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 interface AutoResponseRequest {
   scenarioId?: string
-  checkAll?: boolean // Check all expiring scenarios
+  scenario_id?: string  // Support both naming conventions
+  cast_member_id?: string
+  checkAll?: boolean
 }
 
 serve(async (req) => {
@@ -19,7 +22,10 @@ serve(async (req) => {
   }
 
   try {
-    const { scenarioId, checkAll }: AutoResponseRequest = await req.json()
+    const body: AutoResponseRequest = await req.json()
+    const scenarioId = body.scenarioId || body.scenario_id
+    const specificCastMemberId = body.cast_member_id
+    const checkAll = body.checkAll
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY })
@@ -32,7 +38,7 @@ serve(async (req) => {
 
       const { data: expiringScenarios } = await supabase
         .from('scenarios')
-        .select('id, title, prompt_text, deadline_at, game_id')
+        .select('id, title, description, context_notes, deadline_at, game_id')
         .eq('status', 'active')
         .lt('deadline_at', thirtyMinutesFromNow)
         .gt('deadline_at', new Date().toISOString())
@@ -43,7 +49,7 @@ serve(async (req) => {
     } else if (scenarioId) {
       const { data: scenario } = await supabase
         .from('scenarios')
-        .select('id, title, prompt_text, deadline_at, game_id')
+        .select('id, title, description, context_notes, deadline_at, game_id')
         .eq('id', scenarioId)
         .single()
 
@@ -58,14 +64,13 @@ serve(async (req) => {
     for (const scenario of scenariosToProcess) {
       console.log(`Processing scenario: ${scenario.title}`)
 
-      // Get all targets for this scenario
+      // Get targets for this scenario
       const { data: targets } = await supabase
         .from('scenario_targets')
         .select(`
           cast_member_id,
           cast_members (
             id,
-            user_id,
             full_name,
             display_name,
             archetype,
@@ -77,33 +82,31 @@ serve(async (req) => {
 
       if (!targets || targets.length === 0) continue
 
-      // Get existing responses
+      // If a specific cast member was requested, filter to just them
+      const filteredTargets = specificCastMemberId
+        ? targets.filter(t => t.cast_member_id === specificCastMemberId)
+        : targets
+
+      // Get existing responses (scenario_responses uses cast_member_id, not user_id)
       const { data: existingResponses } = await supabase
         .from('scenario_responses')
-        .select('user_id')
+        .select('cast_member_id')
         .eq('scenario_id', scenario.id)
 
-      const respondedUserIds = new Set(
-        existingResponses?.map(r => r.user_id) || []
+      const respondedCastIds = new Set(
+        existingResponses?.map(r => r.cast_member_id) || []
       )
 
-      // Get response options
-      const { data: options } = await supabase
-        .from('response_options')
-        .select('option_number, option_text, option_tag')
-        .eq('scenario_id', scenario.id)
-        .order('option_number')
-
       // Generate responses for non-responders
-      for (const target of targets) {
+      for (const target of filteredTargets) {
         const cast = target.cast_members
 
-        if (respondedUserIds.has(cast.user_id)) {
-          console.log(`${cast.full_name} already responded, skipping`)
+        if (respondedCastIds.has(target.cast_member_id)) {
+          console.log(`${cast.display_name} already responded, skipping`)
           continue
         }
 
-        console.log(`Generating auto-response for ${cast.full_name}...`)
+        console.log(`Generating auto-response for ${cast.display_name}...`)
 
         try {
           // Generate character-aware response using Claude
@@ -113,64 +116,63 @@ serve(async (req) => {
             system: getCharacterSystemPrompt(cast),
             messages: [{
               role: 'user',
-              content: `You're in this situation:\n\n${scenario.prompt_text}\n\nYour options are:\n${options?.map(o => `${o.option_number}. ${o.option_text}`).join('\n')}\n\nRespond in character with which option you choose and why (1-2 paragraphs).`
+              content: `You're in this situation:\n\n**${scenario.title}**\n\n${scenario.description}\n\n${scenario.context_notes ? 'Context: ' + scenario.context_notes + '\n\n' : ''}Respond in character (1-2 paragraphs). Be dramatic, authentic, and true to your archetype.`
             }]
           })
 
           const aiResponse = message.content[0].type === 'text' ? message.content[0].text : ''
 
-          // Extract chosen option number from response
-          const chosenOption = extractChosenOption(aiResponse, options?.length || 4)
-
-          // Create response in database
+          // Create response in database (matches actual scenario_responses schema)
           const { data: response, error: responseError } = await supabase
             .from('scenario_responses')
             .insert({
               scenario_id: scenario.id,
-              user_id: cast.user_id,
-              response_text: aiResponse,
-              chosen_option: chosenOption,
-              is_ai_generated: true,
-              ai_generation_metadata: {
-                model: 'claude-sonnet-4-20250514',
-                generated_at: new Date().toISOString(),
-                character: cast.full_name,
-                archetype: cast.archetype,
-                input_tokens: message.usage?.input_tokens,
-                output_tokens: message.usage?.output_tokens
-              },
-              created_at: new Date().toISOString()
+              cast_member_id: target.cast_member_id,
+              response_text: aiResponse
             })
             .select()
             .single()
 
           if (responseError) {
-            console.error(`Error creating response for ${cast.full_name}:`, responseError)
+            console.error(`Error creating response for ${cast.display_name}:`, responseError)
             continue
           }
 
           responsesGenerated++
           results.push({
-            cast_member: cast.full_name,
+            cast_member: cast.display_name,
             scenario: scenario.title,
             response_id: response.id,
             success: true
           })
 
-          console.log(`✓ Generated response for ${cast.full_name}`)
+          console.log(`Generated response for ${cast.display_name}`)
 
           // Small delay to avoid rate limits
           await new Promise(resolve => setTimeout(resolve, 1000))
 
         } catch (error) {
-          console.error(`Error generating response for ${cast.full_name}:`, error)
+          console.error(`Error generating response for ${cast.display_name}:`, error)
           results.push({
-            cast_member: cast.full_name,
+            cast_member: cast.display_name,
             scenario: scenario.title,
             error: error.message,
             success: false
           })
         }
+      }
+
+      // Update responses_received count on the scenario
+      if (responsesGenerated > 0) {
+        const { data: totalResponses } = await supabase
+          .from('scenario_responses')
+          .select('id', { count: 'exact', head: true })
+          .eq('scenario_id', scenario.id)
+
+        await supabase
+          .from('scenarios')
+          .update({ responses_received: totalResponses?.length || responsesGenerated })
+          .eq('id', scenario.id)
       }
     }
 
@@ -211,7 +213,7 @@ const corsHeaders = {
 function getCharacterSystemPrompt(cast: any): string {
   const traitsList = cast.personality_traits?.join(', ') || 'no specific traits'
 
-  return `You are ${cast.full_name}, a cast member on a reality TV show.
+  return `You are ${cast.display_name}, a cast member on a reality TV show called Mansion Mayhem.
 
 ARCHETYPE: ${cast.archetype || 'wildcard'}
 PERSONALITY: ${traitsList}
@@ -223,21 +225,5 @@ You must respond authentically to scenarios as this character would. Consider:
 - Your backstory and motivations
 - The dramatic potential of your choice
 
-Stay in character and make decisions that are true to who ${cast.full_name} is. Be specific, emotional, and authentic. This is reality TV - don't hold back!
-
-Choose one of the provided options and explain your reasoning in 1-2 paragraphs. Start with "I choose option [number]:" and then explain why in character.`
-}
-
-function extractChosenOption(response: string, maxOptions: number): number {
-  // Try to extract option number from response
-  const match = response.match(/option\s+(\d+)/i)
-  if (match) {
-    const num = parseInt(match[1])
-    if (num >= 1 && num <= maxOptions) {
-      return num
-    }
-  }
-
-  // Default to option 1 if can't determine
-  return 1
+Stay in character and make decisions that are true to who ${cast.display_name} is. Be specific, emotional, and authentic. This is reality TV - don't hold back!`
 }

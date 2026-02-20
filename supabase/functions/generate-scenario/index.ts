@@ -37,7 +37,7 @@ serve(async (req) => {
     // Get game details
     const { data: game, error: gameError } = await supabase
       .from('mm_games')
-      .select('*, profiles:creator_id(full_name)')
+      .select('*')
       .eq('id', gameId)
       .single()
 
@@ -129,48 +129,34 @@ serve(async (req) => {
     const deadlineHours = aiResponse.deadline_hours || 24
     const deadlineAt = new Date(Date.now() + deadlineHours * 60 * 60 * 1000)
 
-    // Create scenario in database
+    // Map AI scenario_type to valid DB enum values
+    const validTypes = ['alliance', 'conflict', 'strategy', 'personal', 'wildcard']
+    let mappedType = (aiResponse.scenario_type || scenarioType || 'conflict').toLowerCase()
+    if (!validTypes.includes(mappedType)) {
+      // Map common AI types to valid enum
+      const typeMap: Record<string, string> = { drama: 'conflict', social: 'alliance', challenge: 'strategy', twist: 'wildcard' }
+      mappedType = typeMap[mappedType] || 'conflict'
+    }
+
+    // Create scenario in database (matches actual scenarios table schema)
     const { data: scenario, error: scenarioError } = await supabase
       .from('scenarios')
       .insert({
         game_id: gameId,
         title: aiResponse.title,
-        scenario_type: aiResponse.scenario_type || scenarioType || 'drama',
-        prompt_text: aiResponse.prompt,
-        deadline_hours: deadlineHours,
-        deadline_at: deadlineAt.toISOString(),
-        voice_note_setting: 'encouraged',
+        description: aiResponse.prompt || aiResponse.description,
+        context_notes: `AI-generated (claude-sonnet-4-20250514). Options: ${(aiResponse.options || []).map((o: any) => o.text || o).join(' | ')}`,
+        scenario_type: mappedType,
+        target_archetype: aiResponse.target_archetype || null,
         status: 'active',
-        launched_at: new Date().toISOString(),
-        is_ai_generated: true,
-        ai_generation_metadata: {
-          model: 'claude-sonnet-4-20250514',
-          generated_at: new Date().toISOString(),
-          input_tokens: message.usage?.input_tokens,
-          output_tokens: message.usage?.output_tokens
-        }
+        deadline_at: deadlineAt.toISOString(),
+        assigned_count: 0
       })
       .select()
       .single()
 
     if (scenarioError) {
       throw scenarioError
-    }
-
-    // Create response options
-    const options = aiResponse.options.slice(0, 4).map((opt: any, index: number) => ({
-      scenario_id: scenario.id,
-      option_number: index + 1,
-      option_text: opt.text,
-      option_tag: opt.tag || 'custom'
-    }))
-
-    const { error: optionsError } = await supabase
-      .from('response_options')
-      .insert(options)
-
-    if (optionsError) {
-      throw optionsError
     }
 
     // Target cast members
@@ -191,10 +177,10 @@ serve(async (req) => {
       throw targetsError
     }
 
-    // Update total targets count
+    // Update assigned count
     await supabase
       .from('scenarios')
-      .update({ total_targets: targets.length })
+      .update({ assigned_count: targets.length })
       .eq('id', scenario.id)
 
     // Update queue status
@@ -204,13 +190,7 @@ serve(async (req) => {
         .update({
           status: 'generated',
           generated_scenario_id: scenario.id,
-          generated_title: scenario.title,
-          generated_prompt: scenario.prompt_text,
-          processed_at: new Date().toISOString(),
-          generation_metadata: {
-            model: 'claude-sonnet-4-20250514',
-            tokens_used: (message.usage?.input_tokens || 0) + (message.usage?.output_tokens || 0)
-          }
+          processed_at: new Date().toISOString()
         })
         .eq('id', queueId)
     }

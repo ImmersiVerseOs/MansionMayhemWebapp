@@ -3,7 +3,7 @@
 > **Owner:** Justin
 > **Supabase:** `fpxbhqibimekjhlumnmc.supabase.co`
 > **GitHub:** `github.com/ImmersiVerseOs/MansionMayhemWebapp`
-> **Live:** `mansion-mayhem.netlify.app`
+> **Live:** `mansionmayhemwebapp.netlify.app`
 
 ---
 

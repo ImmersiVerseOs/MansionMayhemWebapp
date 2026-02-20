@@ -18,9 +18,9 @@ CREATE TABLE IF NOT EXISTS public.voice_notes (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_voice_notes_user_id ON public.voice_notes(user_id);
-CREATE INDEX idx_voice_notes_game_id ON public.voice_notes(game_id);
-CREATE INDEX idx_voice_notes_status ON public.voice_notes(status);
+CREATE INDEX IF NOT EXISTS idx_voice_notes_user_id ON public.voice_notes(user_id);
+CREATE INDEX IF NOT EXISTS idx_voice_notes_game_id ON public.voice_notes(game_id);
+CREATE INDEX IF NOT EXISTS idx_voice_notes_status ON public.voice_notes(status);
 
 ALTER TABLE public.voice_notes ENABLE ROW LEVEL SECURITY;
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS public.voice_note_reactions (
   UNIQUE(voice_note_id, user_id)
 );
 
-CREATE INDEX idx_voice_note_reactions_note ON public.voice_note_reactions(voice_note_id);
+CREATE INDEX IF NOT EXISTS idx_voice_note_reactions_note ON public.voice_note_reactions(voice_note_id);
 
 ALTER TABLE public.voice_note_reactions ENABLE ROW LEVEL SECURITY;
 
@@ -85,8 +85,8 @@ CREATE TABLE IF NOT EXISTS public.content_reports (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_content_reports_status ON public.content_reports(status);
-CREATE INDEX idx_content_reports_reporter ON public.content_reports(reporter_id);
+CREATE INDEX IF NOT EXISTS idx_content_reports_status ON public.content_reports(status);
+CREATE INDEX IF NOT EXISTS idx_content_reports_reporter ON public.content_reports(reporter_id);
 
 ALTER TABLE public.content_reports ENABLE ROW LEVEL SECURITY;
 
@@ -182,6 +182,7 @@ CREATE INDEX IF NOT EXISTS idx_scenarios_status
   ON public.scenarios(status);
 
 -- ─── 7. Auto-update triggers for new tables ────────────────────────────────────
+DROP TRIGGER IF EXISTS update_voice_notes_updated_at ON public.voice_notes;
 CREATE TRIGGER update_voice_notes_updated_at
   BEFORE UPDATE ON public.voice_notes
   FOR EACH ROW

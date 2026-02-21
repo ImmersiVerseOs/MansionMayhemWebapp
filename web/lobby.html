@@ -1184,34 +1184,24 @@
           if (timerDisplay) timerDisplay.innerHTML = `<div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎬 Game Starting!</div><div>Preparing the mansion...</div>`
           if (timerInterval) clearInterval(timerInterval)
 
-          // Transition game to active status
-          try {
-            // First try to fill remaining spots with AI
-            try { await supabase.rpc('fill_lobbies_to_20') } catch(e) {}
-
-            // Then launch the game
-            const { error: launchError } = await supabase
-              .from('mm_games')
-              .update({
-                status: 'active',
-                started_at: new Date().toISOString()
-              })
-              .eq('id', currentGameId)
-              .in('status', ['waiting_lobby', 'active_lobby', 'recruiting'])
-
-            if (launchError) {
-              console.error('Failed to start game:', launchError)
-            } else {
-              console.log('✅ Game transitioned to active!')
+          // Transition game to active (async IIFE since updateTimer isn't async)
+          ;(async () => {
+            try {
+              try { await supabase.rpc('fill_lobbies_to_20') } catch(e) {}
+              const { error } = await supabase
+                .from('mm_games')
+                .update({ status: 'active', started_at: new Date().toISOString() })
+                .eq('id', currentGameId)
+                .in('status', ['waiting_lobby', 'active_lobby', 'recruiting'])
+              if (error) console.error('Failed to start game:', error)
+              else console.log('✅ Game transitioned to active!')
+            } catch (e) {
+              console.error('Error during game transition:', e)
             }
-          } catch (e) {
-            console.error('Error during game transition:', e)
-          }
-
-          // Redirect to player dashboard after 3 seconds
-          setTimeout(() => {
-            window.location.href = `/pages/player-dashboard.html?game=${currentGameId}`
-          }, 3000)
+            setTimeout(() => {
+              window.location.href = `/pages/player-dashboard.html?game=${currentGameId}`
+            }, 3000)
+          })()
           return
         }
 

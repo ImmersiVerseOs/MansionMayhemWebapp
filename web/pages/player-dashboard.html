@@ -1352,10 +1352,15 @@
           .maybeSingle()
 
         if (currentGameCast && currentGameCast.mm_games) {
-          // Already in a lobby - just go there!
           console.log('✅ Already in lobby:', currentGameCast.mm_games.title)
-          alert(`You're already in a lobby!\n\nTaking you there now...`)
-          window.location.href = `/lobby.html?game=${currentGameCast.game_id}`
+          const goToExisting = confirm(
+            `You're already in "${currentGameCast.mm_games.title}".\n\n` +
+            'OK = Go to that lobby\n' +
+            'Cancel = Stay here and browse'
+          )
+          if (goToExisting) {
+            window.location.href = `/lobby.html?game=${currentGameCast.game_id}`
+          }
           return
         }
 

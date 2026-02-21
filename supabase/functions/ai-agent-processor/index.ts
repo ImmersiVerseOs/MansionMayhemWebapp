@@ -975,25 +975,55 @@ serve(async (req) => {
   try {
     console.log('🤖 AI Agent Processor started (CONSCIOUSNESS ENHANCED)')
 
-    // Get pending actions (highest priority first, limit 10 per run)
-    const { data: actions, error } = await supabase
+    // Check for game_mode in request body (passed by event system)
+    let requestGameMode: string | null = null
+    let requestGameId: string | null = null
+    try {
+      const body = await req.json()
+      requestGameMode = body?.game_mode || null
+      requestGameId = body?.game_id || null
+    } catch { /* no body or invalid JSON, that's fine */ }
+
+    // Blitz mode: boost priority and increase batch size
+    const isBlitz = requestGameMode === 'blitz'
+    const isSprint = requestGameMode === 'sprint'
+    const batchSize = isBlitz ? 20 : (isSprint ? 15 : 10)
+
+    // Build query - optionally filter by game_id if provided
+    let query = supabase
       .from('ai_action_queue')
       .select('*')
       .eq('status', 'pending')
       .order('priority', { ascending: false })
       .order('created_at', { ascending: true })
-      .limit(10)
+      .limit(batchSize)
+
+    if (requestGameId) {
+      query = query.eq('game_id', requestGameId)
+    }
+
+    const { data: actions, error } = await query
 
     if (error) throw error
 
     if (!actions || actions.length === 0) {
       console.log('No pending AI actions')
-      return new Response(JSON.stringify({ processed: 0 }), {
+      return new Response(JSON.stringify({ processed: 0, game_mode: requestGameMode }), {
         headers: { 'Content-Type': 'application/json' }
       })
     }
 
-    console.log(`📋 Processing ${actions.length} AI actions`)
+    // For blitz games, boost priority of all actions by +3
+    if (isBlitz && actions.length > 0) {
+      console.log(`⚡ BLITZ MODE: Boosting priority +3, batch size ${batchSize}`)
+      for (const action of actions) {
+        action.priority = Math.min(10, action.priority + 3)
+      }
+      // Re-sort by boosted priority
+      actions.sort((a: any, b: any) => b.priority - a.priority)
+    }
+
+    console.log(`📋 Processing ${actions.length} AI actions (mode: ${requestGameMode || 'default'}, batch: ${batchSize})`)
 
     const results = []
 
@@ -1058,10 +1088,12 @@ serve(async (req) => {
       }
     }
 
-    console.log(`✅ Processed ${results.length} actions`)
+    console.log(`✅ Processed ${results.length} actions (mode: ${requestGameMode || 'default'})`)
 
     return new Response(JSON.stringify({
       processed: results.length,
+      game_mode: requestGameMode,
+      batch_size: batchSize,
       results
     }), {
       headers: { 'Content-Type': 'application/json' }

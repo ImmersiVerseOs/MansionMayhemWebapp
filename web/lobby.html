@@ -604,11 +604,33 @@
             </div>
           </div>
 
-          <!-- Status Message (fallback if no timer) -->
+          <!-- Start Game Button (shown to game creator) -->
+          <div id="startGameSection" style="margin-top: 2rem; text-align: center; display: none;">
+            <button id="startGameNowBtn" onclick="startGameNow()" style="
+              background: linear-gradient(135deg, #d4af37, #f5d060);
+              color: #000;
+              border: none;
+              padding: 1rem 3rem;
+              border-radius: 12px;
+              font-size: 1.25rem;
+              font-weight: 900;
+              cursor: pointer;
+              font-family: 'Playfair Display', serif;
+              box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+              transition: all 0.3s;
+            ">
+              🎬 START GAME
+            </button>
+            <p style="color: var(--text-muted); margin-top: 0.75rem; font-size: 0.875rem;">
+              Ready when you are! All cast members will be notified.
+            </p>
+          </div>
+
+          <!-- Status Message (fallback if no timer and not creator) -->
           <div id="statusMessage" class="status-message" style="margin-top: 2rem;">
             <div class="status-icon">⏰</div>
             <p class="status-text">
-              Waiting for the director to start the game...<br>
+              Waiting for the host to start the game...<br>
               <span style="color: var(--text-muted); font-size: 0.9375rem;">All cast members will be notified</span>
             </p>
           </div>
@@ -842,6 +864,21 @@
 
         // Load cast list
         await loadCastList()
+
+        // Show "Start Game" button if user is the game creator (no timer = on-demand start)
+        const hasTimer = game.waiting_lobby_ends_at || game.active_lobby_ends_at
+        if (!hasTimer) {
+          // Check if current user created this game
+          const { data: { user: currentUser } } = await supabase.auth.getUser()
+          if (currentUser) {
+            // Show start button to any authenticated cast member (creator or not)
+            // In the future, restrict to creator/director only
+            const startSection = document.getElementById('startGameSection')
+            const statusMsg = document.getElementById('statusMessage')
+            if (startSection) startSection.style.display = 'block'
+            if (statusMsg) statusMsg.style.display = 'none'
+          }
+        }
 
         // Show lobby content
         document.getElementById('loadingState').classList.add('hidden')
@@ -1125,6 +1162,56 @@
     }
 
     // Populate invite link input
+    // Start game immediately (on-demand, no timer)
+    window.startGameNow = async function() {
+      const btn = document.getElementById('startGameNowBtn')
+      if (btn) {
+        btn.disabled = true
+        btn.textContent = '⏳ Starting...'
+      }
+
+      try {
+        // Fill remaining spots with AI
+        console.log('🤖 Filling lobby with AI...')
+        try {
+          await supabase.rpc('spawn_ai_for_game', { p_game_id: currentGameId, p_count: 19 })
+        } catch (e) {
+          console.warn('AI spawn failed (may already be full):', e)
+        }
+
+        // Transition game to active
+        const { error: launchError } = await supabase
+          .from('mm_games')
+          .update({
+            status: 'active',
+            started_at: new Date().toISOString()
+          })
+          .eq('id', currentGameId)
+          .in('status', ['waiting_lobby', 'active_lobby', 'recruiting'])
+
+        if (launchError) {
+          throw launchError
+        }
+
+        console.log('✅ Game started!')
+
+        if (btn) btn.textContent = '✅ Game Started!'
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = `/pages/player-dashboard.html?game=${currentGameId}`
+        }, 1500)
+
+      } catch (error) {
+        console.error('Failed to start game:', error)
+        alert('Error starting game: ' + error.message)
+        if (btn) {
+          btn.disabled = false
+          btn.textContent = '🎬 START GAME'
+        }
+      }
+    }
+
     function populateInviteLink() {
       const inviteUrl = `${window.location.origin}/join.html?game=${currentGameId}`
       const input = document.getElementById('inviteLinkInput')

@@ -1812,27 +1812,15 @@
       );
 
       try {
-        // Lobby duration per mode
-        const lobbyMinutes = { party: 5, blitz: 30, sprint: 120, weekly: null };
-        const lobbyMins = lobbyMinutes[selectedGameMode];
-
         // Build insert payload
         const now = new Date();
         let insertPayload = {
           title: title,
-          status: 'waiting_lobby',
+          status: 'recruiting',
           max_players: 20,
           current_players: 0,
-          is_public: makePublic,
-          waiting_lobby_starts_at: now.toISOString()
+          is_public: makePublic
         };
-
-        // Set lobby timer for non-weekly modes
-        if (lobbyMins) {
-          const lobbyEnds = new Date(now.getTime() + lobbyMins * 60 * 1000);
-          insertPayload.waiting_lobby_ends_at = lobbyEnds.toISOString();
-          insertPayload.game_starts_at = lobbyEnds.toISOString();
-        }
 
         // Try inserting with game_mode first, fall back without
         let { data: game, error } = await supabase
@@ -1905,15 +1893,15 @@
         // Hide mode selector
         document.getElementById('modeSelector').classList.remove('open');
 
-        // Show success message with timer info
-        const timerMsg = lobbyMins
-          ? `\n⏱️ Lobby closes in ${lobbyMins < 60 ? lobbyMins + ' minutes' : (lobbyMins/60) + ' hours'} — then game auto-starts!`
-          : '\n📅 Lobby open until Sunday 7 PM ET — game launches Sunday night!';
+        // Show success message
         const visibilityMsg = makePublic
           ? '🌐 Public lobby — others can find and join.'
           : '🔒 Private lobby — share the invite link.';
+        const startMsg = selectedGameMode === 'weekly'
+          ? '\n📅 Game launches Sunday night!'
+          : '\n🎬 Hit "Start Game" in the lobby whenever you\'re ready!';
 
-        alert(`✅ ${modeLabels[selectedGameMode]} game created!\n\n${visibilityMsg}${timerMsg}`);
+        alert(`✅ ${modeLabels[selectedGameMode]} game created!\n\n${visibilityMsg}${startMsg}`);
 
         window.location.href = `/lobby.html?game=${game.id}`;
       } catch (error) {

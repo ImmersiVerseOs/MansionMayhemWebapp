@@ -25,6 +25,11 @@ const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY')
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY })
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 // ============================================================================
 // PERSONALITY PROMPTS BY ARCHETYPE
 // ============================================================================
@@ -972,6 +977,11 @@ async function logAIActivity(data: any) {
 // MAIN HANDLER
 // ============================================================================
 serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
     console.log('🤖 AI Agent Processor started (CONSCIOUSNESS ENHANCED)')
 
@@ -1009,7 +1019,7 @@ serve(async (req) => {
     if (!actions || actions.length === 0) {
       console.log('No pending AI actions')
       return new Response(JSON.stringify({ processed: 0, game_mode: requestGameMode }), {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
@@ -1096,14 +1106,14 @@ serve(async (req) => {
       batch_size: batchSize,
       results
     }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
 
   } catch (error: any) {
     console.error('Fatal error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   }
 })

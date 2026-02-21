@@ -1120,6 +1120,23 @@
 
       if (gameCast) {
         currentGame = gameCast.mm_games
+
+        // Auto-clear expired fast-mode games
+        if (currentGame && currentGame.started_at) {
+          const gm = currentGame.game_mode || localStorage.getItem('current_game_mode') || 'weekly'
+          const durations = { party: 35, blitz: 1440, sprint: 4320 }
+          const dur = durations[gm]
+          if (dur) {
+            const elapsed = (Date.now() - new Date(currentGame.started_at).getTime()) / 60000
+            if (elapsed > dur + 5) { // 5 min grace period
+              console.log(`⏰ ${gm} game expired (${Math.round(elapsed)}m > ${dur}m). Auto-clearing.`)
+              localStorage.removeItem('current_game_id')
+              localStorage.removeItem('currentGameId')
+              localStorage.removeItem('current_game_mode')
+              currentGame = null
+            }
+          }
+        }
       }
 
       document.getElementById('welcomeTitle').textContent = `Welcome, ${castMember.display_name}`
@@ -1466,7 +1483,7 @@
         .from('mm_tea_room_posts')
         .select('*, cast_members(display_name, avatar_url)')
         .eq('game_id', currentGame.id)
-        .eq('moderation_status', 'approved')
+        .eq('is_flagged', false)
         .order('created_at', { ascending: false })
         .limit(3)
 
@@ -1480,7 +1497,7 @@
               <div class="tea-author">${t.is_anonymous ? '☕ Anonymous' : t.cast_members?.display_name || 'Someone'}</div>
               <div class="tea-time">${timeAgo}</div>
             </div>
-            <div class="tea-content">"${t.text_content || 'Listen to the voice note...'}"</div>
+            <div class="tea-content">"${t.post_text || 'Listen to the voice note...'}"</div>
           </div>
         `
       }).join('')

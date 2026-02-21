@@ -1083,6 +1083,7 @@
       currentCastMemberId = castMember.id
 
       // Prefer game from localStorage/URL, otherwise get most recent
+      // Only load game if explicitly set in localStorage (no fallback that resurrects old games)
       const preferredGameId = localStorage.getItem('current_game_id')
       let gameCast = null
 
@@ -1095,24 +1096,16 @@
           .eq('status', 'active')
           .maybeSingle()
         gameCast = data
-      }
 
-      // Fallback: get most recently joined game
-      if (!gameCast) {
-        const { data } = await supabase
-          .from('mm_game_cast')
-          .select('*, mm_games(*)')
-          .eq('cast_member_id', castMember.id)
-          .eq('status', 'active')
-          .order('joined_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-        gameCast = data
+        // If the game doesn't exist or user isn't in it, clear stale localStorage
+        if (!gameCast) {
+          localStorage.removeItem('current_game_id')
+          localStorage.removeItem('currentGameId')
+        }
       }
 
       if (gameCast) {
         currentGame = gameCast.mm_games
-        localStorage.setItem('current_game_id', currentGame.id)
       }
 
       document.getElementById('welcomeTitle').textContent = `Welcome, ${castMember.display_name}`
@@ -1742,12 +1735,14 @@
           .eq('cast_member_id', currentCastMember.id);
 
         localStorage.removeItem('current_game_id');
+        localStorage.removeItem('current_game_id');
+        localStorage.removeItem('currentGameId');
         localStorage.removeItem('current_cast_member_id');
         localStorage.removeItem('current_game_mode');
         currentGame = null;
 
-        alert('You left the game. Refreshing...');
-        window.location.reload();
+        // Redirect clean (not reload — reload can race with the delete)
+        window.location.href = '/pages/player-dashboard.html';
       } catch (err) {
         alert('Error leaving game: ' + err.message);
       }
@@ -1823,6 +1818,15 @@
           is_public: makePublic,
           started_at: isFastMode ? now.toISOString() : null
         };
+
+        // Remove user from ALL old games first (clean slate)
+        if (currentCastMember) {
+          await supabase
+            .from('mm_game_cast')
+            .delete()
+            .eq('cast_member_id', currentCastMember.id);
+          console.log('🧹 Cleared old game memberships');
+        }
 
         // Try inserting with game_mode first, fall back without
         let { data: game, error } = await supabase

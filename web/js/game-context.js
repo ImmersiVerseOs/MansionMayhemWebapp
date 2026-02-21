@@ -242,6 +242,14 @@ class GameContext {
    * Show warning banner if game context is missing
    */
   showWarningBanner() {
+    // Don't auto-redirect — let the page handle no-game state gracefully
+    // Dashboard can work without a game (user can create/join from there)
+    const isDashboard = window.location.pathname.includes('player-dashboard')
+    if (isDashboard) {
+      console.log('📋 No active game — dashboard will show create/join options')
+      return
+    }
+
     const banner = document.createElement('div')
     banner.style.cssText = `
       position: fixed;
@@ -257,12 +265,12 @@ class GameContext {
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     `
     banner.innerHTML = `
-      ⚠️ No game selected! <a href="/pages/lobby-browser.html" style="color: white; text-decoration: underline; margin-left: 1rem;">Browse Lobbies</a>
+      ⚠️ No game selected! <a href="/pages/player-dashboard.html" style="color: white; text-decoration: underline; margin-left: 1rem;">Go to Dashboard</a>
     `
     document.body.prepend(banner)
 
     setTimeout(() => {
-      window.location.href = '/pages/lobby-browser.html'
+      window.location.href = '/pages/player-dashboard.html'
     }, 3000)
   }
 }

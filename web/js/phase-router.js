@@ -30,7 +30,7 @@ export async function routeToGamePhase(gameId, redirect = true) {
       .from('mm_games')
       .select('*, mm_game_stages(*)')
       .eq('id', gameId)
-      .single()
+      .maybeSingle()
 
     if (gameError) {
       console.error('Error loading game:', gameError)

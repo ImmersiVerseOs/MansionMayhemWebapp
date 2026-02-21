@@ -190,7 +190,7 @@ class GameContext {
       .from('mm_games')
       .select('*')
       .eq('id', this.gameId)
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('Error loading game:', error)

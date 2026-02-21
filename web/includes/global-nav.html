@@ -384,7 +384,7 @@
         .from('cast_members')
         .select('id')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (!castMember) {
         alert('Cast member profile not found')
@@ -411,7 +411,7 @@
           .select('*')
           .eq('game_id', foundGameId)
           .eq('current_stage', 'lobby')
-          .single()
+          .maybeSingle()
 
         if (gameStage) {
           const timerEnd = new Date(gameStage.stage_ends_at)
@@ -446,7 +446,7 @@
         .select('*')
         .eq('status', 'lobby')
         .limit(1)
-        .single()
+        .maybeSingle()
 
       let gameId
 
@@ -459,7 +459,7 @@
           .select('*')
           .eq('game_id', openLobby.id)
           .eq('current_stage', 'lobby')
-          .single()
+          .maybeSingle()
 
         if (gameStage) {
           const timerEnd = new Date(gameStage.stage_ends_at)
@@ -528,7 +528,7 @@
         .select('*')
         .eq('game_id', gameId)
         .eq('cast_member_id', castMember.id)
-        .single()
+        .maybeSingle()
 
       if (!existingCast) {
         // Not in game yet - add them
@@ -636,7 +636,7 @@
         .from('profiles')
         .select('display_name, role')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       if (profile) {
         const displayName = profile.display_name || user.email?.split('@')[0] || 'User'

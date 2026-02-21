@@ -772,7 +772,7 @@
           .from('mm_games')
           .select('*')
           .eq('id', currentGameId)
-          .single()
+          .maybeSingle()
 
         console.log('🎮 Game query result:', { game, error: gameError })
 
@@ -833,7 +833,7 @@
             .select('stage_ends_at')
             .eq('game_id', currentGameId)
             .eq('status', 'active')
-            .single()
+            .maybeSingle()
 
           if (gameStage && gameStage.stage_ends_at) {
             startLobbyTimer(new Date(gameStage.stage_ends_at), '⏱️ Lobby Closes In')
@@ -1263,7 +1263,7 @@
             .from('mm_games')
             .select('status')
             .eq('id', currentGameId)
-            .single()
+            .maybeSingle()
 
           if (game && ['recruiting', 'waiting_lobby', 'lobby'].includes(game.status)) {
             console.log('🗑️ Deleting abandoned game...')

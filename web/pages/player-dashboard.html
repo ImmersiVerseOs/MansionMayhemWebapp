@@ -982,7 +982,7 @@
         .from('cast_members')
         .select('*')
         .eq('user_id', currentUser.id)
-        .single()
+        .maybeSingle()
 
       if (!castMember) return
       currentCastMember = castMember
@@ -993,7 +993,8 @@
         .select('*, mm_games(*)')
         .eq('cast_member_id', castMember.id)
         .eq('status', 'active')
-        .single()
+        .limit(1)
+        .maybeSingle()
 
       if (gameCast) {
         currentGame = gameCast.mm_games
@@ -1103,7 +1104,7 @@
         .eq('game_id', currentGame.id)
         .order('selected_at', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
       if (queen) {
         document.getElementById('queenInfo').innerHTML = `
@@ -1123,7 +1124,7 @@
         .eq('game_id', currentGame.id)
         .order('selected_at', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
       if (queen && queen.nominee_a && queen.nominee_b) {
         document.getElementById('hotSeatList').innerHTML = `
@@ -1252,7 +1253,8 @@
           .select('game_id, mm_games(*)')
           .eq('cast_member_id', castMember.id)
           .in('mm_games.status', ['recruiting', 'waiting_lobby'])
-          .single()
+          .limit(1)
+          .maybeSingle()
 
         if (currentGameCast && currentGameCast.mm_games) {
           // Already in a lobby - just go there!

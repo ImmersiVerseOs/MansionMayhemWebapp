@@ -1118,6 +1118,11 @@
           lobbyLink.style.display = 'flex'
         }
 
+        // Update welcome subtitle to show current game
+        document.getElementById('welcomeSubtitle').innerHTML =
+          `Playing: <strong>${currentGame.title || 'Mansion Mayhem'}</strong> &nbsp;` +
+          `<a href="#" onclick="leaveCurrentGame(); return false;" style="color: var(--danger); font-size: 0.8rem;">Leave Game</a>`
+
       }
     }
 
@@ -1699,6 +1704,31 @@
     // ========================================================================
     // GAME ONBOARDING - Global functions
     // ========================================================================
+
+    // Leave current game
+    window.leaveCurrentGame = async function() {
+      if (!currentGame || !currentCastMember) return;
+      const sure = confirm(`Leave "${currentGame.title}"?\n\nYou can rejoin later if the lobby is still open.`);
+      if (!sure) return;
+
+      try {
+        await supabase
+          .from('mm_game_cast')
+          .delete()
+          .eq('game_id', currentGame.id)
+          .eq('cast_member_id', currentCastMember.id);
+
+        localStorage.removeItem('current_game_id');
+        localStorage.removeItem('current_cast_member_id');
+        localStorage.removeItem('current_game_mode');
+        currentGame = null;
+
+        alert('You left the game. Refreshing...');
+        window.location.reload();
+      } catch (err) {
+        alert('Error leaving game: ' + err.message);
+      }
+    }
 
     // Track selected game mode
     let selectedGameMode = 'weekly';

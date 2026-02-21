@@ -1082,16 +1082,37 @@
       currentCastMember = castMember
       currentCastMemberId = castMember.id
 
-      const { data: gameCast } = await supabase
-        .from('mm_game_cast')
-        .select('*, mm_games(*)')
-        .eq('cast_member_id', castMember.id)
-        .eq('status', 'active')
-        .limit(1)
-        .maybeSingle()
+      // Prefer game from localStorage/URL, otherwise get most recent
+      const preferredGameId = localStorage.getItem('current_game_id')
+      let gameCast = null
+
+      if (preferredGameId) {
+        const { data } = await supabase
+          .from('mm_game_cast')
+          .select('*, mm_games(*)')
+          .eq('cast_member_id', castMember.id)
+          .eq('game_id', preferredGameId)
+          .eq('status', 'active')
+          .maybeSingle()
+        gameCast = data
+      }
+
+      // Fallback: get most recently joined game
+      if (!gameCast) {
+        const { data } = await supabase
+          .from('mm_game_cast')
+          .select('*, mm_games(*)')
+          .eq('cast_member_id', castMember.id)
+          .eq('status', 'active')
+          .order('joined_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        gameCast = data
+      }
 
       if (gameCast) {
         currentGame = gameCast.mm_games
+        localStorage.setItem('current_game_id', currentGame.id)
       }
 
       document.getElementById('welcomeTitle').textContent = `Welcome, ${castMember.display_name}`

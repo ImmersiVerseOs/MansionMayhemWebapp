@@ -871,6 +871,13 @@
       </div>
     </header>
 
+    <!-- GAME TIMER (shown for active games) -->
+    <div id="gameTimer" style="display: none; background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(233,30,99,0.1)); border: 2px solid rgba(212,175,55,0.3); border-radius: 16px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; text-align: center;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem;" id="timerLabel">Game Time Remaining</div>
+      <div style="font-size: 2rem; font-weight: 900; color: var(--accent-gold);" id="timerDisplay">--:--</div>
+      <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;" id="timerMode"></div>
+    </div>
+
     <!-- PLAYER BANNER -->
     <div class="player-banner" id="playerBanner">
       <div style="position: relative; cursor: pointer;" onclick="openAvatarModal()">
@@ -1137,7 +1144,51 @@
           `Playing: <strong>${currentGame.title || 'Mansion Mayhem'}</strong> &nbsp;` +
           `<a href="#" onclick="leaveCurrentGame(); return false;" style="color: var(--danger); font-size: 0.8rem;">Leave Game</a>`
 
+        // Start game timer if active
+        if (currentGame.status === 'active' && currentGame.started_at) {
+          startGameTimer(currentGame)
+        }
       }
+    }
+
+    // Game countdown timer
+    function startGameTimer(game) {
+      const gameMode = game.game_mode || localStorage.getItem('current_game_mode') || 'weekly'
+      const durations = { party: 35, blitz: 1440, sprint: 4320, weekly: 0 }
+      const durationMin = durations[gameMode]
+      if (!durationMin) return // weekly has no fixed timer
+
+      const startedAt = new Date(game.started_at)
+      const endsAt = new Date(startedAt.getTime() + durationMin * 60 * 1000)
+      const modeLabels = { party: 'Party Mode', blitz: 'Blitz Mode', sprint: 'Sprint Mode' }
+
+      const timerEl = document.getElementById('gameTimer')
+      const timerDisplay = document.getElementById('timerDisplay')
+      const timerMode = document.getElementById('timerMode')
+      if (!timerEl) return
+
+      timerEl.style.display = 'block'
+      if (timerMode) timerMode.textContent = `${modeLabels[gameMode]} • ${durationMin < 60 ? durationMin + ' min' : Math.round(durationMin/60) + ' hr'} game`
+
+      function update() {
+        const now = new Date()
+        const diff = endsAt - now
+        if (diff <= 0) {
+          timerDisplay.textContent = 'GAME OVER'
+          timerDisplay.style.color = 'var(--danger)'
+          return
+        }
+        const hrs = Math.floor(diff / 3600000)
+        const mins = Math.floor((diff % 3600000) / 60000)
+        const secs = Math.floor((diff % 60000) / 1000)
+        if (hrs > 0) {
+          timerDisplay.textContent = `${hrs}h ${mins}m ${secs}s`
+        } else {
+          timerDisplay.textContent = `${mins}:${secs.toString().padStart(2, '0')}`
+        }
+      }
+      update()
+      setInterval(update, 1000)
     }
 
     async function loadScenarios() {
@@ -1883,12 +1934,13 @@
 
         if (spawnCount > 0) {
           console.log(`🤖 Spawning ${spawnCount} AI players for ${selectedGameMode} mode...`);
-          try {
-            const { data: spawnResult } = await supabase
-              .rpc('spawn_ai_for_game', { p_game_id: game.id, p_count: spawnCount });
+          const { data: spawnResult, error: spawnErr } = await supabase
+            .rpc('spawn_ai_for_game', { p_game_id: game.id, p_count: spawnCount });
+          if (spawnErr) {
+            console.error('❌ AI spawn RPC failed:', spawnErr.message);
+            alert('⚠️ AI spawn failed: ' + spawnErr.message + '\n\nGame created but AI may not be present.');
+          } else {
             console.log('✅ AI spawned:', spawnResult);
-          } catch (aiErr) {
-            console.warn('AI spawn RPC failed, AI will join via cron:', aiErr);
           }
         }
 

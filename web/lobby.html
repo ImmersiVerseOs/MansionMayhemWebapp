@@ -1134,31 +1134,7 @@
     }
 
     // Leave game
-    window.leaveGame = async function() {
-      if (!confirm('⚠️ Leave this lobby?\n\nYou will be removed from the game and can join a different one.')) {
-        return
-      }
-
-      try {
-        console.log('Leaving game:', currentGameId)
-
-        // Remove from mm_game_cast (permanently quit)
-        const { error } = await supabase
-          .from('mm_game_cast')
-          .delete()
-          .eq('game_id', currentGameId)
-          .eq('cast_member_id', currentCastMemberId)
-
-        if (error) throw error
-
-        console.log('✅ Successfully left the game')
-        alert('✅ You left the lobby.\n\nYou can now join a different game!')
-        window.location.href = '/pages/browse-games.html'
-      } catch (error) {
-        console.error('Error leaving game:', error)
-        alert('Failed to leave game')
-      }
-    }
+    // Leave game is defined once below (line ~1238)
 
     // Lobby countdown timer
     let timerInterval = null
@@ -1235,7 +1211,7 @@
     }
 
     // Leave game function
-    async function leaveGame() {
+    window.leaveGame = async function() {
       if (!currentGameId || !currentCastMemberId) {
         alert('Cannot leave game - missing game or player information')
         return
@@ -1301,9 +1277,12 @@
             .eq('id', currentGameId)
         }
 
-        // Clear localStorage and redirect
+        // Clear all game state from localStorage
         localStorage.removeItem('currentGameId')
-        alert('✅ You have left the game')
+        localStorage.removeItem('current_game_id')
+        localStorage.removeItem('current_cast_member_id')
+        localStorage.removeItem('current_game_mode')
+        alert('✅ You left the game')
         window.location.href = '/pages/player-dashboard.html'
 
       } catch (error) {

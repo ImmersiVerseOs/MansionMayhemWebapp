@@ -1764,22 +1764,36 @@
       );
 
       try {
-        const { data: game, error } = await supabase
+        // Build insert payload - try with game_mode, fall back without if column doesn't exist yet
+        let insertPayload = {
+          title: title,
+          status: 'recruiting',
+          max_players: 20,
+          current_players: 0,
+          is_public: makePublic
+        };
+
+        // Try inserting with game_mode first
+        let { data: game, error } = await supabase
           .from('mm_games')
-          .insert({
-            title: title,
-            status: 'recruiting',
-            max_players: 20,
-            current_players: 0,
-            is_public: makePublic,
-            game_mode: selectedGameMode
-          })
+          .insert({ ...insertPayload, game_mode: selectedGameMode })
           .select()
           .maybeSingle();
+
+        // If game_mode column doesn't exist yet, retry without it
+        if (error && error.message.includes('game_mode')) {
+          console.warn('game_mode column not found, creating without it');
+          ({ data: game, error } = await supabase
+            .from('mm_games')
+            .insert(insertPayload)
+            .select()
+            .maybeSingle());
+        }
 
         if (error) throw error;
 
         localStorage.setItem('current_game_id', game.id);
+        localStorage.setItem('current_game_mode', selectedGameMode);
 
         // Hide mode selector
         document.getElementById('modeSelector').classList.remove('open');

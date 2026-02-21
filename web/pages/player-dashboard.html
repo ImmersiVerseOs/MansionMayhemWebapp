@@ -1812,23 +1812,35 @@
       );
 
       try {
-        // Build insert payload - try with game_mode, fall back without if column doesn't exist yet
+        // Lobby duration per mode
+        const lobbyMinutes = { party: 5, blitz: 30, sprint: 120, weekly: null };
+        const lobbyMins = lobbyMinutes[selectedGameMode];
+
+        // Build insert payload
+        const now = new Date();
         let insertPayload = {
           title: title,
-          status: 'recruiting',
+          status: 'waiting_lobby',
           max_players: 20,
           current_players: 0,
-          is_public: makePublic
+          is_public: makePublic,
+          waiting_lobby_starts_at: now.toISOString()
         };
 
-        // Try inserting with game_mode first
+        // Set lobby timer for non-weekly modes
+        if (lobbyMins) {
+          const lobbyEnds = new Date(now.getTime() + lobbyMins * 60 * 1000);
+          insertPayload.waiting_lobby_ends_at = lobbyEnds.toISOString();
+          insertPayload.game_starts_at = lobbyEnds.toISOString();
+        }
+
+        // Try inserting with game_mode first, fall back without
         let { data: game, error } = await supabase
           .from('mm_games')
           .insert({ ...insertPayload, game_mode: selectedGameMode })
           .select()
           .maybeSingle();
 
-        // If game_mode column doesn't exist yet, retry without it
         if (error && error.message.includes('game_mode')) {
           console.warn('game_mode column not found, creating without it');
           ({ data: game, error } = await supabase
@@ -1839,6 +1851,18 @@
         }
 
         if (error) throw error;
+        console.log('✅ Game created:', game.id, selectedGameMode);
+
+        // For weekly mode, call the Sunday schedule RPC
+        if (selectedGameMode === 'weekly') {
+          try {
+            const { data: lobbyInfo } = await supabase
+              .rpc('initialize_week_long_lobby', { p_game_id: game.id });
+            console.log('✅ Weekly lobby initialized:', lobbyInfo);
+          } catch (rpcErr) {
+            console.warn('Weekly lobby RPC failed, using defaults:', rpcErr);
+          }
+        }
 
         // Add creator to mm_game_cast immediately
         if (currentCastMember) {
@@ -1852,11 +1876,25 @@
           if (joinError) {
             console.error('Failed to auto-join game:', joinError);
           } else {
-            // Update player count
             await supabase
               .from('mm_games')
               .update({ current_players: 1 })
               .eq('id', game.id);
+          }
+        }
+
+        // Spawn AI players based on mode
+        const aiToSpawn = { party: 19, blitz: 15, sprint: 10, weekly: 0 };
+        const spawnCount = aiToSpawn[selectedGameMode] || 0;
+
+        if (spawnCount > 0) {
+          console.log(`🤖 Spawning ${spawnCount} AI players for ${selectedGameMode} mode...`);
+          try {
+            const { data: spawnResult } = await supabase
+              .rpc('spawn_ai_for_game', { p_game_id: game.id, p_count: spawnCount });
+            console.log('✅ AI spawned:', spawnResult);
+          } catch (aiErr) {
+            console.warn('AI spawn RPC failed, AI will join via cron:', aiErr);
           }
         }
 
@@ -1867,12 +1905,15 @@
         // Hide mode selector
         document.getElementById('modeSelector').classList.remove('open');
 
-        // Show success message
+        // Show success message with timer info
+        const timerMsg = lobbyMins
+          ? `\n⏱️ Lobby closes in ${lobbyMins < 60 ? lobbyMins + ' minutes' : (lobbyMins/60) + ' hours'} — then game auto-starts!`
+          : '\n📅 Lobby open until Sunday 7 PM ET — game launches Sunday night!';
         const visibilityMsg = makePublic
-          ? '🌐 Public lobby created! Others can find it in lobby browser.'
-          : '🔒 Private lobby created! Share the invite link with friends.';
+          ? '🌐 Public lobby — others can find and join.'
+          : '🔒 Private lobby — share the invite link.';
 
-        alert(`✅ ${modeLabels[selectedGameMode]} game created!\n\n${visibilityMsg}`);
+        alert(`✅ ${modeLabels[selectedGameMode]} game created!\n\n${visibilityMsg}${timerMsg}`);
 
         window.location.href = `/lobby.html?game=${game.id}`;
       } catch (error) {

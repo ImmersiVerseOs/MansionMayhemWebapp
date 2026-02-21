@@ -1179,15 +1179,39 @@
         const diff = end - now
 
         if (diff <= 0) {
-          // Timer expired - reload page to show next phase
-          console.log('⏰ TIMER EXPIRED - Reloading to show next phase')
-          if (timerDisplay) timerDisplay.innerHTML = `<div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${phaseLabel.replace('Closes In', 'Complete!')}</div><div>Loading next phase...</div>`
+          // Timer expired - transition game to active
+          console.log('⏰ TIMER EXPIRED - Starting game...')
+          if (timerDisplay) timerDisplay.innerHTML = `<div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎬 Game Starting!</div><div>Preparing the mansion...</div>`
           if (timerInterval) clearInterval(timerInterval)
 
-          // Reload page after 2 seconds to show next phase
+          // Transition game to active status
+          try {
+            // First try to fill remaining spots with AI
+            await supabase.rpc('fill_lobbies_to_20').catch(() => {})
+
+            // Then launch the game
+            const { error: launchError } = await supabase
+              .from('mm_games')
+              .update({
+                status: 'active',
+                started_at: new Date().toISOString()
+              })
+              .eq('id', currentGameId)
+              .in('status', ['waiting_lobby', 'active_lobby', 'recruiting'])
+
+            if (launchError) {
+              console.error('Failed to start game:', launchError)
+            } else {
+              console.log('✅ Game transitioned to active!')
+            }
+          } catch (e) {
+            console.error('Error during game transition:', e)
+          }
+
+          // Redirect to player dashboard after 3 seconds
           setTimeout(() => {
-            location.reload()
-          }, 2000)
+            window.location.href = `/pages/player-dashboard.html?game=${currentGameId}`
+          }, 3000)
           return
         }
 

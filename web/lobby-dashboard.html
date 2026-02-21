@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobby Dashboard | Mansion Mayhem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/navigation.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #111;
+      --bg-elevated: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #fff;
+      --text-dim: #888;
+      --gold: #d4af37;
+      --rose: #e91e63;
+      --success: #4caf50;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .section {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 20px;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .nav-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .nav-card {
+      background: var(--bg-elevated);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .nav-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-4px);
+    }
+    .nav-card-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    .nav-card-title {
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .nav-card-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+    .badge {
+      display: inline-block;
+      background: var(--rose);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+    .stat-card {
+      background: var(--bg-elevated);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+    .micro-scenario-card {
+      background: var(--bg-elevated);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .micro-scenario-card:hover {
+      border-color: var(--gold);
+    }
+    .cast-selector {
+      background: var(--bg-card);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation (loaded from include) -->
+  <div id="globalNavPlaceholder"></div>
+  <script>
+    fetch('/includes/global-nav.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('globalNavPlaceholder').innerHTML = data;
+      });
+  </script>
+
+  <div class="container">
+    <h1 class="page-title">🏰 Lobby Dashboard</h1>
+    <p style="color: var(--text-dim); margin-bottom: 32px;">Form alliances and build relationships before the game begins</p>
+
+    <!-- Cast Member Selection -->
+    <div id="cast-selector" class="cast-selector">
+      <h3 style="color: var(--gold); margin-bottom: 16px;">👤 Who are you?</h3>
+      <select id="cast-member-select" style="width: 100%; max-width: 400px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-elevated); color: var(--text); font-size: 16px;">
+        <option value="">Select your cast member...</option>
+      </select>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="section">
+      <h2 class="section-title">📊 Your Lobby Stats</h2>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="connections-count">0</div>
+          <div class="stat-label">Connections</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="alliances-count">0</div>
+          <div class="stat-label">Alliances</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="scenarios-count">0</div>
+          <div class="stat-label">Scenarios Done</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="voice-notes-count">0</div>
+          <div class="stat-label">Voice Notes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Cards -->
+    <div class="nav-cards">
+      <a href="/link-up-requests.html" class="nav-card">
+        <div class="nav-card-icon">🤝</div>
+        <div class="nav-card-title">Link-Up Requests</div>
+        <div class="nav-card-desc">Connect with other cast members</div>
+        <span id="linkup-badge" class="badge" style="display: none;">0</span>
+      </a>
+
+      <a href="/alliance-rooms.html" class="nav-card">
+        <div class="nav-card-icon">💬</div>
+        <div class="nav-card-title">Alliance Rooms</div>
+        <div class="nav-card-desc">Private group chats</div>
+        <span id="rooms-badge" class="badge" style="display: none;">0</span>
+      </a>
+
+      <a href="/voice-introduction.html" class="nav-card">
+        <div class="nav-card-icon">🎤</div>
+        <div class="nav-card-title">Voice Introduction</div>
+        <div class="nav-card-desc">Record your intro (30-60s)</div>
+      </a>
+    </div>
+
+    <!-- Active Micro-Scenarios -->
+    <div class="section">
+      <h2 class="section-title">🎯 Active Micro-Scenarios</h2>
+      <div id="scenarios-list">
+        <p style="color: var(--text-dim); text-align: center; padding: 20px;">Loading scenarios...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="/js/supabase-client.js"></script>
+  <script src="/js/navigation.js"></script>
+
+  <script>
+    const gameId = new URLSearchParams(window.location.search).get('gameId') ||
+                   localStorage.getItem('currentGameId') ||
+                   '7ca5f4eb-4443-4167-b6e0-a9fe1be00ac1';
+
+    let currentCastMemberId = localStorage.getItem('currentCastMemberId');
+
+    // Auto-detect logged-in user's cast member
+    async function loadCastMembers() {
+      try {
+        // Get authenticated user
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+
+        if (!user) {
+          alert('Please sign in to access the lobby');
+          window.location.href = '/landing.html';
+          return;
+        }
+
+        // Get user's cast member profile
+        const { data: castMember, error } = await window.supabaseClient
+          .from('cast_members')
+          .select('id, full_name, display_name')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error || !castMember) {
+          console.error('Cast member not found:', error);
+          alert('Cast member profile not found. Please contact support.');
+          return;
+        }
+
+        // Auto-set cast member
+        currentCastMemberId = castMember.id;
+        localStorage.setItem('currentCastMemberId', castMember.id);
+
+        // Hide selector, show who you are
+        const selector = document.getElementById('cast-selector');
+        selector.innerHTML = `
+          <div style="text-align: center; padding: 16px; background: rgba(212, 175, 55, 0.1); border-radius: 12px; border: 2px solid var(--gold);">
+            <h3 style="color: var(--gold); margin: 0 0 8px 0;">Welcome, ${castMember.display_name}!</h3>
+            <p style="color: var(--text-dim); margin: 0; font-size: 14px;">${castMember.full_name}</p>
+          </div>
+        `;
+
+        console.log('✅ Auto-detected cast member:', castMember.display_name);
+
+      } catch (error) {
+        console.error('Error loading cast members:', error);
+        alert('Error loading your profile. Please try again.');
+      }
+    }
+
+    // Load dashboard data
+    async function loadDashboard() {
+      if (!currentCastMemberId) return;
+
+      try {
+        // Load stats in parallel
+        const [connections, alliances, scenarios, voiceNotes, microScenarios, linkupRequests] = await Promise.all([
+          getConnectionsCount(),
+          getAlliancesCount(),
+          getScenariosCount(),
+          getVoiceNotesCount(),
+          getActiveMicroScenarios(),
+          getPendingLinkupRequests()
+        ]);
+
+        // Update stats
+        document.getElementById('connections-count').textContent = connections;
+        document.getElementById('alliances-count').textContent = alliances;
+        document.getElementById('scenarios-count').textContent = scenarios;
+        document.getElementById('voice-notes-count').textContent = voiceNotes;
+
+        // Update badges
+        if (linkupRequests > 0) {
+          const badge = document.getElementById('linkup-badge');
+          badge.textContent = linkupRequests;
+          badge.style.display = 'inline-block';
+        }
+
+        // Render micro-scenarios
+        renderMicroScenarios(microScenarios);
+
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+      }
+    }
+
+    async function getConnectionsCount() {
+      // Count accepted link-up responses
+      const { count, error } = await window.supabaseClient
+        .from('mm_link_up_responses')
+        .select('*', { count: 'exact', head: true })
+        .eq('cast_member_id', currentCastMemberId)
+        .eq('response', 'accept');
+      return count || 0;
+    }
+
+    async function getAlliancesCount() {
+      const { data, error } = await window.supabaseClient
+        .from('mm_alliance_rooms')
+        .select('id')
+        .contains('member_cast_ids', [currentCastMemberId])
+        .eq('is_active', true);
+      return data ? data.length : 0;
+    }
+
+    async function getScenariosCount() {
+      const { count, error } = await window.supabaseClient
+        .from('mm_micro_scenario_responses')
+        .select('*', { count: 'exact', head: true })
+        .eq('responder_cast_id', currentCastMemberId);
+      return count || 0;
+    }
+
+    async function getVoiceNotesCount() {
+      const { count, error } = await window.supabaseClient
+        .from('mm_micro_scenario_responses')
+        .select('*', { count: 'exact', head: true })
+        .eq('responder_cast_id', currentCastMemberId)
+        .eq('response_type', 'voice');
+      return count || 0;
+    }
+
+    async function getActiveMicroScenarios() {
+      const { data, error } = await window.supabaseClient
+        .from('mm_micro_scenarios')
+        .select('*')
+        .eq('game_id', gameId)
+        .eq('status', 'active')
+        .gte('expires_at', new Date().toISOString())
+        .order('launched_at', { ascending: false });
+
+      return data || [];
+    }
+
+    async function getPendingLinkupRequests() {
+      const { data, error } = await window.supabaseClient
+        .from('mm_link_up_requests')
+        .select('*')
+        .contains('invited_cast_ids', [currentCastMemberId])
+        .eq('status', 'pending');
+      return data ? data.length : 0;
+    }
+
+    function renderMicroScenarios(scenarios) {
+      const container = document.getElementById('scenarios-list');
+
+      if (scenarios.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-dim); text-align: center; padding: 20px;">No active scenarios right now. Check back soon!</p>';
+        return;
+      }
+
+      container.innerHTML = scenarios.map(scenario => {
+        const timeLeft = getTimeRemaining(scenario.expires_at);
+        return `
+          <div class="micro-scenario-card" onclick="respondToScenario('${scenario.id}')">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+              <div style="font-weight: 700; font-size: 18px;">${scenario.prompt_text}</div>
+              <div style="background: var(--rose); padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">
+                ${timeLeft}
+              </div>
+            </div>
+            <div style="color: var(--text-dim); font-size: 14px; margin-bottom: 12px;">
+              Type: ${scenario.scenario_type} • Duration: ${scenario.duration_seconds}s
+            </div>
+            <div style="color: var(--gold); font-size: 14px;">
+              ${scenario.received_response_count}/${scenario.expected_response_count || '?'} responses
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getTimeRemaining(expiresAt) {
+      const now = new Date();
+      const expires = new Date(expiresAt);
+      const diff = expires - now;
+
+      if (diff < 0) return 'EXPIRED';
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (hours > 0) return `${hours}h ${minutes}m`;
+      return `${minutes}m`;
+    }
+
+    function respondToScenario(scenarioId) {
+      alert('Micro-scenario response page coming soon!');
+      // TODO: Navigate to response page
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadCastMembers();
+      await loadDashboard();
+
+      // Refresh every 30s
+      setInterval(loadDashboard, 30000);
+    });
+  </script>
+</body>
+</html>

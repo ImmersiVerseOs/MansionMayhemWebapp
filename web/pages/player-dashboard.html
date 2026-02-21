@@ -876,7 +876,14 @@
       <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem;" id="timerLabel">Game Time Remaining</div>
       <div style="font-size: 2rem; font-weight: 900; color: var(--accent-gold);" id="timerDisplay">--:--</div>
       <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;" id="timerMode"></div>
+      <div id="aiLoopStatus" style="display: none; margin-top: 0.5rem; font-size: 0.7rem; color: #10b981;">
+        <span style="display: inline-block; width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-right: 4px; animation: pulse 1.5s infinite;"></span>
+        AI Game Loop Active — Scenarios, alliances & drama generating live
+      </div>
     </div>
+    <style>
+      @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    </style>
 
     <!-- PLAYER BANNER -->
     <div class="player-banner" id="playerBanner">
@@ -1147,8 +1154,144 @@
         // Start game timer if active
         if (currentGame.status === 'active' && currentGame.started_at) {
           startGameTimer(currentGame)
+
+          // Start AI Game Loop for fast-mode games
+          const gameMode = currentGame.game_mode || localStorage.getItem('current_game_mode') || 'weekly'
+          if (['party', 'blitz', 'sprint'].includes(gameMode)) {
+            startPartyModeAI(currentGame.id, gameMode)
+          }
         }
       }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // PARTY MODE AI GAME LOOP — Keeps AI alive during fast-mode games
+    // ═══════════════════════════════════════════════════════════════════
+    let partyLoopIntervals = [];
+
+    async function fireAIDirector(gameId) {
+      try {
+        console.log('🎬 AI Director: Generating scenario...');
+        const { data, error } = await supabase.functions.invoke('ai-director', {
+          body: { gameId, manualTrigger: true }
+        });
+        if (error) {
+          console.warn('⚠️ AI Director error:', error.message);
+        } else {
+          console.log('🎬 AI Director result:', data?.created ? `Created: ${data?.scenario?.title}` : 'Skipped');
+        }
+        return data;
+      } catch (e) {
+        console.warn('⚠️ AI Director invoke failed:', e.message);
+      }
+    }
+
+    async function fireAIDecisionProcessor(gameId, decisionType) {
+      try {
+        const body = { gameId };
+        if (decisionType) body.decisionType = decisionType;
+        console.log(`🧠 AI Decisions: Processing ${decisionType || 'all'}...`);
+        const { data, error } = await supabase.functions.invoke('ai-decision-processor', {
+          body
+        });
+        if (error) {
+          console.warn('⚠️ AI Decision error:', error.message);
+        } else {
+          console.log('🧠 AI Decision result:', JSON.stringify(data?.results || {}).substring(0, 200));
+        }
+        return data;
+      } catch (e) {
+        console.warn('⚠️ AI Decision invoke failed:', e.message);
+      }
+    }
+
+    async function fireAIAgentProcessor(gameId, gameMode) {
+      try {
+        console.log('⚡ AI Agent Processor: Processing queued actions...');
+        const { data, error } = await supabase.functions.invoke('ai-agent-processor', {
+          body: { game_id: gameId, game_mode: gameMode === 'party' ? 'blitz' : gameMode }
+        });
+        if (error) {
+          console.warn('⚠️ AI Agent Processor error:', error.message);
+        } else {
+          console.log(`⚡ AI Agent Processor: ${data?.processed || 0} actions processed`);
+        }
+        return data;
+      } catch (e) {
+        console.warn('⚠️ AI Agent Processor invoke failed:', e.message);
+      }
+    }
+
+    function startPartyModeAI(gameId, gameMode) {
+      // Clear any existing intervals
+      partyLoopIntervals.forEach(id => clearInterval(id));
+      partyLoopIntervals = [];
+
+      // Timing configs per mode (in milliseconds)
+      const configs = {
+        party: {
+          director: 3 * 60 * 1000,       // New scenario every 3 min
+          decisions: 2 * 60 * 1000,       // Alliance/social every 2 min
+          agentProcessor: 90 * 1000,      // Process queued actions every 90 sec
+          teaPosts: 2.5 * 60 * 1000,      // Tea room activity every 2.5 min
+        },
+        blitz: {
+          director: 30 * 60 * 1000,       // Every 30 min
+          decisions: 10 * 60 * 1000,      // Every 10 min
+          agentProcessor: 5 * 60 * 1000,  // Every 5 min
+          teaPosts: 15 * 60 * 1000,       // Every 15 min
+        },
+        sprint: {
+          director: 2 * 60 * 60 * 1000,   // Every 2 hr
+          decisions: 30 * 60 * 1000,       // Every 30 min
+          agentProcessor: 15 * 60 * 1000,  // Every 15 min
+          teaPosts: 60 * 60 * 1000,        // Every 1 hr
+        }
+      };
+
+      const cfg = configs[gameMode];
+      if (!cfg) return;
+
+      console.log(`🔥 Starting ${gameMode.toUpperCase()} AI Game Loop for game ${gameId}`);
+      console.log(`   📋 Director: every ${cfg.director / 1000}s | Decisions: every ${cfg.decisions / 1000}s | Processor: every ${cfg.agentProcessor / 1000}s`);
+
+      // Show AI loop status indicator
+      const loopStatus = document.getElementById('aiLoopStatus');
+      if (loopStatus) loopStatus.style.display = 'block';
+
+      // Initial burst — fire everything immediately
+      console.log('🚀 INITIAL BURST: Firing all AI systems...');
+      fireAIDirector(gameId);
+      setTimeout(() => fireAIDecisionProcessor(gameId, 'alliance_requests'), 3000);
+      setTimeout(() => fireAIDecisionProcessor(gameId, 'tea_room_posts'), 6000);
+      setTimeout(() => fireAIAgentProcessor(gameId, gameMode), 10000);
+      setTimeout(() => fireAIDecisionProcessor(gameId, 'chat_messages'), 15000);
+
+      // Recurring intervals
+      partyLoopIntervals.push(
+        setInterval(() => fireAIDirector(gameId), cfg.director)
+      );
+      partyLoopIntervals.push(
+        setInterval(() => fireAIDecisionProcessor(gameId), cfg.decisions)
+      );
+      partyLoopIntervals.push(
+        setInterval(() => fireAIAgentProcessor(gameId, gameMode), cfg.agentProcessor)
+      );
+      partyLoopIntervals.push(
+        setInterval(() => fireAIDecisionProcessor(gameId, 'tea_room_posts'), cfg.teaPosts)
+      );
+
+      // Auto-refresh dashboard data every 30 seconds to show new content
+      partyLoopIntervals.push(
+        setInterval(async () => {
+          console.log('🔄 Refreshing dashboard data...');
+          await loadScenarios();
+          await loadAlliances();
+          await loadTeaFeed();
+          await loadQueen();
+          await loadHotSeat();
+        }, 30000)
+      );
     }
 
     // Game countdown timer
@@ -1974,13 +2117,28 @@
         localStorage.setItem('currentGameId', game.id);
         localStorage.setItem('current_game_mode', selectedGameMode);
 
+        // 🔥 IMMEDIATE AI KICKOFF — Fire AI systems before redirect (fire-and-forget)
+        if (isFastMode) {
+          console.log('🚀 Kicking off AI systems immediately...');
+          // Fire AI Director to generate first scenario
+          fireAIDirector(game.id).then(() => console.log('🎬 Initial AI Director done'));
+          // Fire AI Decision Processor for alliances + tea posts (staggered)
+          setTimeout(() => {
+            fireAIDecisionProcessor(game.id, 'alliance_requests');
+            fireAIDecisionProcessor(game.id, 'tea_room_posts');
+          }, 2000);
+        }
+
         // Hide mode selector
         document.getElementById('modeSelector').classList.remove('open');
 
         // Redirect — no alerts blocking the flow
         if (isFastMode) {
           console.log(`🎮 ${modeLabels[selectedGameMode]} game LIVE! AI: ${aiSpawned}/${targetCount}`);
-          window.location.href = `/pages/player-dashboard.html?game=${game.id}`;
+          // Small delay to let AI kickoff fire before navigation
+          setTimeout(() => {
+            window.location.href = `/pages/player-dashboard.html?game=${game.id}`;
+          }, 1500);
         } else {
           window.location.href = `/lobby.html?game=${game.id}`;
         }

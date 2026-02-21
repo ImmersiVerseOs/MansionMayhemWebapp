@@ -1979,7 +1979,7 @@
 
         // Redirect — no alerts blocking the flow
         if (isFastMode) {
-          console.log(`🎮 ${modeLabels[selectedGameMode]} game LIVE! AI: ${aiSpawned}/${spawnCount}`);
+          console.log(`🎮 ${modeLabels[selectedGameMode]} game LIVE! AI: ${aiSpawned}/${targetCount}`);
           window.location.href = `/pages/player-dashboard.html?game=${game.id}`;
         } else {
           window.location.href = `/lobby.html?game=${game.id}`;

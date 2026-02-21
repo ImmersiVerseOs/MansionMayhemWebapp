@@ -680,7 +680,7 @@
     async function init() {
       // Get game ID from URL or localStorage
       const urlParams = new URLSearchParams(window.location.search)
-      currentGameId = urlParams.get('game') || localStorage.getItem('currentGameId')
+      currentGameId = urlParams.get('game') || localStorage.getItem('current_game_id') || localStorage.getItem('currentGameId')
       window.currentGameId = currentGameId // Make globally accessible
 
       if (!currentGameId) {
@@ -690,7 +690,8 @@
         return
       }
 
-      // Save to localStorage for future use
+      // Save to localStorage (unified key)
+      localStorage.setItem('current_game_id', currentGameId)
       localStorage.setItem('currentGameId', currentGameId)
 
       // Auto-detect current user's cast member from auth
@@ -749,7 +750,42 @@
         }
 
         currentCastMemberId = castMember.id
+        localStorage.setItem('current_cast_member_id', currentCastMemberId)
         console.log('✅ Auto-detected cast member:', castMember.display_name)
+
+        // Auto-join mm_game_cast if not already in this game
+        const { data: existingMembership } = await supabase
+          .from('mm_game_cast')
+          .select('id')
+          .eq('game_id', currentGameId)
+          .eq('cast_member_id', castMember.id)
+          .maybeSingle()
+
+        if (!existingMembership) {
+          console.log('📥 Adding you to this game...')
+          const { error: joinError } = await supabase
+            .from('mm_game_cast')
+            .insert({
+              game_id: currentGameId,
+              cast_member_id: castMember.id,
+              status: 'active'
+            })
+
+          if (joinError) {
+            console.error('Failed to join game:', joinError)
+          } else {
+            console.log('✅ Joined game successfully')
+
+            // Update player count
+            await supabase.rpc('increment_player_count', { game_id_input: currentGameId }).catch(() => {
+              // RPC might not exist, that's ok
+              console.log('increment_player_count RPC not available, skipping')
+            })
+          }
+        } else {
+          console.log('✅ Already a member of this game')
+        }
+
       } catch (error) {
         console.error('Error detecting cast member:', error)
         alert('Error loading your profile. Please try again.')
@@ -1289,6 +1325,8 @@
 
         // Clear localStorage and redirect
         localStorage.removeItem('currentGameId')
+        localStorage.removeItem('current_game_id')
+        localStorage.removeItem('current_cast_member_id')
         alert('✅ You have left the game')
         window.location.href = '/pages/player-dashboard.html'
 

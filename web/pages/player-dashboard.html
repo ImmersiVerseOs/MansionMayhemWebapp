@@ -1532,7 +1532,9 @@
         console.log('Game ID:', newGame.id)
         console.log('Current user still authenticated:', !!currentUser)
 
-        // Store game ID in localStorage in case of redirect issues
+        // Store game ID in localStorage (both keys for compatibility)
+        localStorage.setItem('current_game_id', newGame.id)
+        localStorage.setItem('currentGameId', newGame.id)
         localStorage.setItem('lastCreatedGameId', newGame.id)
 
         // Show alert and redirect
@@ -1838,7 +1840,28 @@
 
         if (error) throw error;
 
+        // Add creator to mm_game_cast immediately
+        if (currentCastMember) {
+          const { error: joinError } = await supabase
+            .from('mm_game_cast')
+            .insert({
+              game_id: game.id,
+              cast_member_id: currentCastMember.id,
+              status: 'active'
+            });
+          if (joinError) {
+            console.error('Failed to auto-join game:', joinError);
+          } else {
+            // Update player count
+            await supabase
+              .from('mm_games')
+              .update({ current_players: 1 })
+              .eq('id', game.id);
+          }
+        }
+
         localStorage.setItem('current_game_id', game.id);
+        localStorage.setItem('currentGameId', game.id);
         localStorage.setItem('current_game_mode', selectedGameMode);
 
         // Hide mode selector

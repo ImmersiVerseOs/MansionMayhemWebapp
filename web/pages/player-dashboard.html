@@ -180,6 +180,49 @@
       font-size: 1.5rem;
     }
 
+    /* GAME MODE SELECTOR */
+    .mode-selector {
+      display: none;
+      padding: 0 1rem;
+      margin-bottom: 1rem;
+    }
+    .mode-selector.open { display: block; }
+    .mode-selector-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      font-weight: 700;
+      padding: 0 0.25rem 0.5rem;
+    }
+    .mode-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      margin-bottom: 0.35rem;
+      transition: all 0.2s;
+    }
+    .mode-card:hover { background: rgba(255,255,255,0.07); }
+    .mode-card.selected {
+      border-color: var(--accent-gold);
+      background: rgba(255,193,7,0.1);
+    }
+    .mode-card .mode-icon { font-size: 1.25rem; }
+    .mode-card .mode-info { flex: 1; }
+    .mode-card .mode-name { font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
+    .mode-card .mode-desc { font-size: 0.65rem; color: var(--text-secondary); }
+    .mode-card .mode-time {
+      font-size: 0.6rem;
+      color: var(--accent-gold);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
     /* MAIN CONTENT */
     .main-content {
       margin-left: 280px;
@@ -664,6 +707,49 @@
       </button>
     </div>
 
+    <!-- Game Mode Selector (shown when creating a new game) -->
+    <div id="modeSelector" class="mode-selector">
+      <div class="mode-selector-title">Choose Game Mode</div>
+      <div class="mode-card selected" data-mode="weekly" onclick="selectMode(this)">
+        <div class="mode-icon">📅</div>
+        <div class="mode-info">
+          <div class="mode-name">Weekly</div>
+          <div class="mode-desc">Classic 10-week season</div>
+        </div>
+        <div class="mode-time">70 days</div>
+      </div>
+      <div class="mode-card" data-mode="blitz" onclick="selectMode(this)">
+        <div class="mode-icon">⚡</div>
+        <div class="mode-info">
+          <div class="mode-name">Blitz</div>
+          <div class="mode-desc">One intense game night</div>
+        </div>
+        <div class="mode-time">24 hrs</div>
+      </div>
+      <div class="mode-card" data-mode="sprint" onclick="selectMode(this)">
+        <div class="mode-icon">🏃</div>
+        <div class="mode-info">
+          <div class="mode-name">Sprint</div>
+          <div class="mode-desc">Weekend showdown</div>
+        </div>
+        <div class="mode-time">3 days</div>
+      </div>
+      <div class="mode-card" data-mode="party" onclick="selectMode(this)">
+        <div class="mode-icon">🎉</div>
+        <div class="mode-info">
+          <div class="mode-name">Party</div>
+          <div class="mode-desc">Quick party game</div>
+        </div>
+        <div class="mode-time">35 min</div>
+      </div>
+      <button onclick="confirmCreateGame()" style="width: 100%; margin-top: 0.5rem; padding: 0.6rem; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent-gold), #FF6D00); color: #000; font-weight: 700; cursor: pointer; font-size: 0.85rem;">
+        Create Game →
+      </button>
+      <button onclick="cancelCreateGame()" style="width: 100%; margin-top: 0.25rem; padding: 0.5rem; border: none; border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-secondary); cursor: pointer; font-size: 0.75rem;">
+        Cancel
+      </button>
+    </div>
+
     <nav class="nav-section">
       <div class="nav-title">Main</div>
       <a href="/pages/player-dashboard.html" class="nav-item active">
@@ -678,6 +764,10 @@
         <span class="nav-icon">🏠</span>
         My Lobby
       </a>
+      <a href="/lobby-dashboard.html" class="nav-item" id="lobbyDashLink" style="display: none;">
+        <span class="nav-icon">🏰</span>
+        Lobby Dashboard
+      </a>
       <a href="/pages/cast-roster.html" class="nav-item">
         <span class="nav-icon">👥</span>
         Cast Roster
@@ -685,6 +775,14 @@
       <a href="/pages/scenario-response.html" class="nav-item">
         <span class="nav-icon">📝</span>
         Scenarios
+      </a>
+      <a href="/scenario-preview.html" class="nav-item">
+        <span class="nav-icon">🎬</span>
+        Scenario Preview
+      </a>
+      <a href="/listen-to-intros.html" class="nav-item">
+        <span class="nav-icon">🎤</span>
+        Voice Intros
       </a>
       <a href="/pages/queen-selection.html" class="nav-item">
         <span class="nav-icon">👑</span>
@@ -1022,6 +1120,13 @@
         if (lobbyLink) {
           lobbyLink.href = `/lobby.html?game=${gameId}`
           lobbyLink.style.display = 'flex'
+        }
+
+        // Show lobby dashboard link
+        const lobbyDashLink = document.getElementById('lobbyDashLink')
+        if (lobbyDashLink) {
+          lobbyDashLink.href = `/lobby-dashboard.html?game=${gameId}`
+          lobbyDashLink.style.display = 'flex'
         }
       }
     }
@@ -1600,7 +1705,20 @@
     // GAME ONBOARDING - Global functions
     // ========================================================================
 
-    window.createNewGame = async function() {
+    // Track selected game mode
+    let selectedGameMode = 'weekly';
+
+    window.selectMode = function(card) {
+      document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedGameMode = card.dataset.mode;
+    }
+
+    window.cancelCreateGame = function() {
+      document.getElementById('modeSelector').classList.remove('open');
+    }
+
+    window.createNewGame = function() {
       // Check if already in a game
       const currentGameId = localStorage.getItem('current_game_id');
       if (currentGameId) {
@@ -1611,8 +1729,15 @@
         }
       }
 
+      // Toggle mode selector panel open
+      const selector = document.getElementById('modeSelector');
+      selector.classList.toggle('open');
+    };
+
+    window.confirmCreateGame = async function() {
       // Get game name
-      const title = prompt('Enter your game name:', 'Mansion Mayhem - ' + new Date().toLocaleDateString());
+      const modeLabels = { weekly: 'Weekly', blitz: 'Blitz', sprint: 'Sprint', party: 'Party' };
+      const title = prompt('Enter your game name:', `Mansion Mayhem ${modeLabels[selectedGameMode]} - ${new Date().toLocaleDateString()}`);
       if (!title) return;
 
       // Ask if public or private
@@ -1630,7 +1755,8 @@
             status: 'recruiting',
             max_players: 20,
             current_players: 0,
-            is_public: makePublic
+            is_public: makePublic,
+            game_mode: selectedGameMode
           })
           .select()
           .maybeSingle();
@@ -1639,12 +1765,15 @@
 
         localStorage.setItem('current_game_id', game.id);
 
-        // Show success message with visibility info
+        // Hide mode selector
+        document.getElementById('modeSelector').classList.remove('open');
+
+        // Show success message
         const visibilityMsg = makePublic
           ? '🌐 Public lobby created! Others can find it in lobby browser.'
           : '🔒 Private lobby created! Share the invite link with friends.';
 
-        alert(`✅ Game created!\n\n${visibilityMsg}`);
+        alert(`✅ ${modeLabels[selectedGameMode]} game created!\n\n${visibilityMsg}`);
 
         window.location.href = `/lobby.html?game=${game.id}`;
       } catch (error) {

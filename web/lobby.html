@@ -777,10 +777,11 @@
             console.log('✅ Joined game successfully')
 
             // Update player count
-            await supabase.rpc('increment_player_count', { game_id_input: currentGameId }).catch(() => {
-              // RPC might not exist, that's ok
+            try {
+              await supabase.rpc('increment_player_count', { game_id_input: currentGameId })
+            } catch (e) {
               console.log('increment_player_count RPC not available, skipping')
-            })
+            }
           }
         } else {
           console.log('✅ Already a member of this game')

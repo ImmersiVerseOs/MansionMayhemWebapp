@@ -764,10 +764,6 @@
         <span class="nav-icon">🏠</span>
         My Lobby
       </a>
-      <a href="/lobby-dashboard.html" class="nav-item" id="lobbyDashLink" style="display: none;">
-        <span class="nav-icon">🏰</span>
-        Lobby Dashboard
-      </a>
       <a href="/pages/cast-roster.html" class="nav-item">
         <span class="nav-icon">👥</span>
         Cast Roster
@@ -1122,12 +1118,6 @@
           lobbyLink.style.display = 'flex'
         }
 
-        // Show lobby dashboard link
-        const lobbyDashLink = document.getElementById('lobbyDashLink')
-        if (lobbyDashLink) {
-          lobbyDashLink.href = `/lobby-dashboard.html?game=${gameId}`
-          lobbyDashLink.style.display = 'flex'
-        }
       }
     }
 

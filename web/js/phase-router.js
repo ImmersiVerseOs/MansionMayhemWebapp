@@ -124,7 +124,7 @@ function getUrlForStage(stage, gameId, gameStatus) {
   switch (stage) {
     case 'lobby':
     case 'pre_game':
-      return `/lobby-dashboard.html?game=${gameId}`
+      return `/lobby.html?game=${gameId}`
 
     case 'introductions':
       return `/voice-introduction.html?game=${gameId}`

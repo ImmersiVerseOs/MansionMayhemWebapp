@@ -1187,7 +1187,7 @@
           // Transition game to active status
           try {
             // First try to fill remaining spots with AI
-            await supabase.rpc('fill_lobbies_to_20').catch(() => {})
+            try { await supabase.rpc('fill_lobbies_to_20') } catch(e) {}
 
             // Then launch the game
             const { error: launchError } = await supabase

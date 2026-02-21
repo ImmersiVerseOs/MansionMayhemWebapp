@@ -1812,14 +1812,16 @@
       );
 
       try {
-        // Build insert payload
+        // Build insert payload - game goes straight to active for fast modes
         const now = new Date();
+        const isFastMode = ['party', 'blitz', 'sprint'].includes(selectedGameMode);
         let insertPayload = {
           title: title,
-          status: 'recruiting',
+          status: isFastMode ? 'active' : 'recruiting',
           max_players: 20,
           current_players: 0,
-          is_public: makePublic
+          is_public: makePublic,
+          started_at: isFastMode ? now.toISOString() : null
         };
 
         // Try inserting with game_mode first, fall back without
@@ -1894,16 +1896,16 @@
         document.getElementById('modeSelector').classList.remove('open');
 
         // Show success message
-        const visibilityMsg = makePublic
-          ? '🌐 Public lobby — others can find and join.'
-          : '🔒 Private lobby — share the invite link.';
-        const startMsg = selectedGameMode === 'weekly'
-          ? '\n📅 Game launches Sunday night!'
-          : '\n🎬 Hit "Start Game" in the lobby whenever you\'re ready!';
-
-        alert(`✅ ${modeLabels[selectedGameMode]} game created!\n\n${visibilityMsg}${startMsg}`);
-
-        window.location.href = `/lobby.html?game=${game.id}`;
+        if (isFastMode) {
+          alert(`✅ ${modeLabels[selectedGameMode]} game is LIVE!\n\n🤖 AI Director is running the show.\n🎭 ${aiToSpawn[selectedGameMode]} AI cast members joined.`);
+          window.location.href = `/pages/player-dashboard.html?game=${game.id}`;
+        } else {
+          const visibilityMsg = makePublic
+            ? '🌐 Public lobby — others can find and join.'
+            : '🔒 Private lobby — share the invite link.';
+          alert(`✅ ${modeLabels[selectedGameMode]} game created!\n\n${visibilityMsg}\n📅 Game launches Sunday night!`);
+          window.location.href = `/lobby.html?game=${game.id}`;
+        }
       } catch (error) {
         alert('Error creating game: ' + error.message);
         console.error(error);

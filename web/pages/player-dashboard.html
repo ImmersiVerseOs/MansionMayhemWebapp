@@ -1836,7 +1836,9 @@
 
         // Game doesn't exist, is completed, or user chose to start fresh - clear it
         localStorage.removeItem('current_game_id');
+        localStorage.removeItem('currentGameId');
         localStorage.removeItem('current_cast_member_id');
+        localStorage.removeItem('current_game_mode');
       }
 
       // Toggle mode selector panel open
@@ -1931,16 +1933,18 @@
         // Spawn AI players based on mode
         const aiToSpawn = { party: 19, blitz: 15, sprint: 10, weekly: 0 };
         const spawnCount = aiToSpawn[selectedGameMode] || 0;
+        let aiSpawned = 0;
 
         if (spawnCount > 0) {
           console.log(`🤖 Spawning ${spawnCount} AI players for ${selectedGameMode} mode...`);
           const { data: spawnResult, error: spawnErr } = await supabase
             .rpc('spawn_ai_for_game', { p_game_id: game.id, p_count: spawnCount });
           if (spawnErr) {
-            console.error('❌ AI spawn RPC failed:', spawnErr.message);
-            alert('⚠️ AI spawn failed: ' + spawnErr.message + '\n\nGame created but AI may not be present.');
+            console.error('❌ AI spawn failed:', JSON.stringify(spawnErr));
+            // Don't block game creation — AI can be added later
           } else {
-            console.log('✅ AI spawned:', spawnResult);
+            aiSpawned = spawnResult?.spawned_count || 0;
+            console.log('✅ AI spawned:', aiSpawned, spawnResult);
           }
         }
 
@@ -1951,15 +1955,11 @@
         // Hide mode selector
         document.getElementById('modeSelector').classList.remove('open');
 
-        // Show success message
+        // Redirect — no alerts blocking the flow
         if (isFastMode) {
-          alert(`✅ ${modeLabels[selectedGameMode]} game is LIVE!\n\n🤖 AI Director is running the show.\n🎭 ${aiToSpawn[selectedGameMode]} AI cast members joined.`);
+          console.log(`🎮 ${modeLabels[selectedGameMode]} game LIVE! AI: ${aiSpawned}/${spawnCount}`);
           window.location.href = `/pages/player-dashboard.html?game=${game.id}`;
         } else {
-          const visibilityMsg = makePublic
-            ? '🌐 Public lobby — others can find and join.'
-            : '🔒 Private lobby — share the invite link.';
-          alert(`✅ ${modeLabels[selectedGameMode]} game created!\n\n${visibilityMsg}\n📅 Game launches Sunday night!`);
           window.location.href = `/lobby.html?game=${game.id}`;
         }
       } catch (error) {

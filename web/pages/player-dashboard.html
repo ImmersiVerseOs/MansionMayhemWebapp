@@ -1002,7 +1002,7 @@
 
       document.getElementById('welcomeTitle').textContent = `Welcome, ${castMember.display_name}`
       document.getElementById('playerName').textContent = castMember.display_name
-      document.getElementById('playerArchetype').textContent = `🎭 ${castMember.archetype.toUpperCase()}`
+      document.getElementById('playerArchetype').textContent = `🎭 ${(castMember.archetype || 'unknown').toUpperCase()}`
       document.getElementById('playerAvatar').src = castMember.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${castMember.display_name}`
 
       if (currentGame) {
@@ -1233,7 +1233,7 @@
               is_ai_player: false
             })
             .select()
-            .single()
+            .maybeSingle()
 
           if (createError) {
             console.error('❌ Error creating cast member:', createError)
@@ -1312,7 +1312,7 @@
               created_at: new Date().toISOString()
             })
             .select()
-            .single()
+            .maybeSingle()
 
           if (gameError) {
             console.error('❌ Game creation error:', gameError)
@@ -1633,7 +1633,7 @@
             is_public: makePublic
           })
           .select()
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
 

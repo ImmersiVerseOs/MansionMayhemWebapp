@@ -912,7 +912,7 @@
               status: 'active'
             })
             .select()
-            .single()
+            .maybeSingle()
 
           if (createError) throw createError
           castMemberId = newCastMember.id
@@ -981,7 +981,7 @@
             created_at: new Date().toISOString()
           })
           .select()
-          .single()
+          .maybeSingle()
 
         if (gameError) {
           console.error('❌ Game creation error:', gameError)

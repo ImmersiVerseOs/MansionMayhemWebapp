@@ -507,7 +507,7 @@
           .from('cast_members')
           .select('id')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (!userCastMemberData) {
           showToast('No cast member profile found', 'error');
@@ -718,7 +718,7 @@
           .from('mm_link_up_requests')
           .select('*')
           .eq('id', requestId)
-          .single();
+          .maybeSingle();
 
         if (requestError) throw requestError;
 

@@ -137,7 +137,7 @@ export async function updateProfile(updates) {
     .update(updates)
     .eq('id', user.id)
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) throw error
   return data
@@ -155,7 +155,7 @@ export async function hasCompletedOnboarding() {
     .from('profiles')
     .select('onboarding_completed')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   if (error) return false
   return data?.onboarding_completed || false

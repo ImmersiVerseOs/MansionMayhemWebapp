@@ -606,7 +606,7 @@
           .from('episodes')
           .select('*, mm_games(game_name, status)')
           .eq('id', episodeId)
-          .single()
+          .maybeSingle()
 
         if (episodeError) throw episodeError
 
@@ -659,7 +659,7 @@
           .eq('status', 'active')
           .order('drama_score', { ascending: false })
           .limit(1)
-          .single()
+          .maybeSingle()
 
         if (error) throw error
 
@@ -688,7 +688,7 @@
           .from('cast_members')
           .select('*')
           .eq('id', episode.eliminated_cast_id)
-          .single()
+          .maybeSingle()
 
         if (error) throw error
 

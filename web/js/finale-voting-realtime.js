@@ -71,7 +71,7 @@ export async function getCurrentFinaleRound(gameId) {
       .select('*')
       .eq('game_id', gameId)
       .eq('status', 'voting_open')
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('Error fetching finale round:', error)
@@ -98,7 +98,7 @@ export async function getFinalistData(castMemberId, gameId) {
       .from('cast_members')
       .select('*')
       .eq('id', castMemberId)
-      .single()
+      .maybeSingle()
 
     if (cmError) throw cmError
 
@@ -178,7 +178,7 @@ export async function hasUserVoted(finaleRoundId) {
       .select('id')
       .eq('finale_round_id', finaleRoundId)
       .eq('voter_user_id', user.id)
-      .single()
+      .maybeSingle()
 
     return !!data
   } catch (err) {

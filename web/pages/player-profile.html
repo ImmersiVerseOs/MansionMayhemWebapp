@@ -619,7 +619,7 @@
           .from('cast_members')
           .select('*')
           .eq('id', castId)
-          .single()
+          .maybeSingle()
 
         if (error) throw error
         castMember = data

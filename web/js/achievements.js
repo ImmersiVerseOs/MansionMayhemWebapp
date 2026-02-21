@@ -165,7 +165,7 @@ async function showAchievementUnlock(achievementKey) {
       .from('achievements')
       .select('*')
       .eq('achievement_key', achievementKey)
-      .single()
+      .maybeSingle()
 
     if (error) throw error
 

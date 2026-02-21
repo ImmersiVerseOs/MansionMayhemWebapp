@@ -70,7 +70,7 @@
           .eq('generation_status', 'completed')
           .order('generated_at', { ascending: false })
           .limit(1)
-          .single()
+          .maybeSingle()
 
         console.log('📊 Query result:', { data: !!data, error })
 

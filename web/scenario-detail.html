@@ -201,7 +201,7 @@
           .from('scenarios')
           .select('*')
           .eq('id', scenarioId)
-          .single();
+          .maybeSingle();
 
         if (error || !scenario) {
           toast.error('Scenario not found');
@@ -215,7 +215,7 @@
           .select('id')
           .eq('scenario_id', scenarioId)
           .eq('cast_member_id', currentCastMember.id)
-          .single();
+          .maybeSingle();
 
         if (existingResponse) {
           toast.warning('You have already responded to this scenario');

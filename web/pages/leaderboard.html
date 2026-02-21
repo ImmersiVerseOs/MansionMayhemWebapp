@@ -510,7 +510,7 @@
           .select('*')
           .eq('user_id', currentUser.id)
           .eq('game_id', gameId)
-          .single()
+          .maybeSingle()
 
         if (!error && data) {
           currentCastMember = data

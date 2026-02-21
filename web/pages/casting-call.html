@@ -945,7 +945,7 @@
               is_ai_player: false
             })
             .select()
-            .single();
+            .maybeSingle();
 
           if (castMemberError) {
             console.error('❌ Error creating cast member:', castMemberError);
@@ -973,7 +973,7 @@
             .from('profiles')
             .select('id, full_name, display_name')
             .eq('id', signUpData.user.id)
-            .single();
+            .maybeSingle();
 
           if (verifyError || !verifyProfile) {
             console.error('❌ Profile verification failed:', verifyError);

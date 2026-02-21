@@ -174,7 +174,7 @@
               is_ai_player: false
             })
             .select()
-            .single();
+            .maybeSingle();
 
           if (createError) {
             console.error('Error creating cast member:', createError);

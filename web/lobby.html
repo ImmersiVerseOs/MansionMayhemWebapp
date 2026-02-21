@@ -735,7 +735,7 @@
               is_ai_player: false
             })
             .select()
-            .single()
+            .maybeSingle()
 
           if (createError) {
             console.error('Failed to create cast member:', createError)

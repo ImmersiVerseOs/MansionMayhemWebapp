@@ -506,7 +506,7 @@ async function submitPost() {
         is_anonymous: isAnonymous
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
 
@@ -829,7 +829,7 @@ async function submitComment(postId, commentText = null, voiceNote = null, paren
         is_anonymous: isAnonymous
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
 
@@ -900,7 +900,7 @@ async function toggleReaction(postId = null, commentId = null) {
         .from('mm_tea_spot_comments')
         .select('post_id')
         .eq('id', commentId)
-        .single();
+        .maybeSingle();
 
       if (comment.data) {
         await loadComments(comment.data.post_id);
@@ -1031,7 +1031,7 @@ function setupRealtimeSubscriptions() {
           )
         `)
         .eq('id', payload.new.id)
-        .single();
+        .maybeSingle();
 
       if (data) {
         allPosts.unshift(data);

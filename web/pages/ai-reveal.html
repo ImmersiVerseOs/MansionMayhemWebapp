@@ -342,7 +342,7 @@
           .eq('status', 'completed')
           .order('completed_at', { ascending: false })
           .limit(1)
-          .single()
+          .maybeSingle()
 
         if (!game) {
           content.innerHTML = '<div class="error">No completed game found. The reveal will happen after the game ends!</div>'

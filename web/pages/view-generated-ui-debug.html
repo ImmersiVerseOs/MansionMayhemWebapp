@@ -79,7 +79,7 @@
           .eq('generation_status', 'completed')
           .order('generated_at', { ascending: false })
           .limit(1)
-          .single()
+          .maybeSingle()
 
         if (error) {
           log(`❌ Query error: ${error.message}`)

@@ -1630,7 +1630,7 @@
           .from('cast_members')
           .select('*')
           .eq('user_id', currentUser.id)
-          .single()
+          .maybeSingle()
 
         if (castError) throw castError
 
@@ -1927,7 +1927,7 @@
             submitted_at: new Date().toISOString()
           })
           .select()
-          .single()
+          .maybeSingle()
 
         if (error) throw error
 
@@ -2263,7 +2263,7 @@
           .from('scenarios')
           .select('*')
           .eq('id', scenarioId)
-          .single()
+          .maybeSingle()
 
         if (error) throw error
 

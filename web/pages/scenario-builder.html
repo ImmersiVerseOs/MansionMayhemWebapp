@@ -162,7 +162,7 @@
         .from('profiles')
         .select('role')
         .eq('id', currentUser.id)
-        .single()
+        .maybeSingle()
 
       if (profile?.role !== 'admin') {
         alert('Access denied. Admin only.')
@@ -245,7 +245,7 @@
             status: 'active'
           })
           .select()
-          .single()
+          .maybeSingle()
 
         if (createError) throw createError
 

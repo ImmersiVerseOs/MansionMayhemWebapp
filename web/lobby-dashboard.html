@@ -220,7 +220,7 @@
   <script>
     const gameId = new URLSearchParams(window.location.search).get('gameId') ||
                    localStorage.getItem('currentGameId') ||
-                   '7ca5f4eb-4443-4167-b6e0-a9fe1be00ac1';
+                   localStorage.getItem('current_game_id');
 
     let currentCastMemberId = localStorage.getItem('currentCastMemberId');
 
@@ -241,7 +241,7 @@
           .from('cast_members')
           .select('id, full_name, display_name')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (error || !castMember) {
           console.error('Cast member not found:', error);

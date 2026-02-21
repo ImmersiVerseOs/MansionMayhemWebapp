@@ -523,7 +523,7 @@
           .from('mm_games')
           .select('game_name')
           .eq('id', gameId)
-          .single()
+          .maybeSingle()
 
         if (game) {
           document.getElementById('gameTitle').textContent = `Cast of ${game.game_name}`

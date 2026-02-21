@@ -213,7 +213,7 @@
             .from('profiles')
             .select('cast_member_id')
             .eq('id', user.id)
-            .single()
+            .maybeSingle()
 
           if (profile && profile.cast_member_id) {
             const { data: vote } = await supabase
@@ -221,7 +221,7 @@
               .select('voted_for_id')
               .eq('round_id', currentRound.id)
               .eq('cast_member_id', profile.cast_member_id)
-              .single()
+              .maybeSingle()
 
             if (vote) {
               hasVoted = true
@@ -329,7 +329,7 @@
           .from('profiles')
           .select('cast_member_id')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
 
         if (!profile || !profile.cast_member_id) {
           alert('You need to create your character first!')

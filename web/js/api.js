@@ -229,7 +229,7 @@ export async function getEpisode(episodeId) {
       )
     `)
     .eq('id', episodeId)
-    .single()
+    .maybeSingle()
 
   if (error) throw error
   return data

@@ -57,7 +57,7 @@ async function initNavigation() {
       .from('profiles')
       .select('display_name, role, avatar_url')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError) {
       console.error('Error loading profile:', profileError);

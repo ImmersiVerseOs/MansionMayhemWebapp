@@ -488,7 +488,7 @@
                     .select('*')
                     .eq('game_id', gameId)
                     .eq('status', 'voting_open')
-                    .single();
+                    .maybeSingle();
 
                 if (error || !finale) {
                     console.error('No active finale:', error);
@@ -594,7 +594,7 @@
                 .select('*')
                 .eq('finale_round_id', finaleRound.id)
                 .eq('voter_user_id', user.id)
-                .single();
+                .maybeSingle();
 
             if (vote) {
                 alert('You have already voted!');

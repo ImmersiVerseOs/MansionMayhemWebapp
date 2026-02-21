@@ -123,7 +123,7 @@ class QueenEliminationSystem {
           status: 'nominations'
         }])
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -148,7 +148,7 @@ class QueenEliminationSystem {
         .update(updateData)
         .eq('id', roundId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -244,7 +244,7 @@ class QueenEliminationSystem {
           vote_weight: voteWeight
         }])
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return { success: true, voteWeight, data };
@@ -323,7 +323,7 @@ class QueenEliminationSystem {
           )
         `)
         .eq('id', roundId)
-        .single();
+        .maybeSingle();
 
       if (roundError) throw roundError;
 
@@ -353,7 +353,7 @@ class QueenEliminationSystem {
             id, full_name, display_name, archetype, avatar_url
           )
         `)
-        .single();
+        .maybeSingle();
 
       if (elimError) throw elimError;
 

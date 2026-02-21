@@ -395,7 +395,7 @@
           .from('cast_members')
           .select('id')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (!userCastMember) {
           alert('No cast member profile found. Please create a character first.');

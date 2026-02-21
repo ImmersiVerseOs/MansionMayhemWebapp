@@ -524,7 +524,7 @@
         .from('mm_games')
         .select('id, title')
         .eq('id', currentGameId)
-        .single()
+        .maybeSingle()
 
       if (!error && game) {
         document.getElementById('currentLobbyBanner').style.display = 'flex'
@@ -695,7 +695,7 @@
           current_players: 0
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) {
         alert('Error creating lobby: ' + error.message)

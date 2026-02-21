@@ -805,7 +805,7 @@
           .select('id')
           .eq('video_id', currentVideo.id)
           .eq('cast_member_id', castMemberId)
-          .single();
+          .maybeSingle();
 
         if (existing) {
           // Unlike

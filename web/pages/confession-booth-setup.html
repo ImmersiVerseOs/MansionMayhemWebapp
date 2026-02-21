@@ -724,7 +724,7 @@
             .from('cast_members')
             .select('avatar_url')
             .eq('id', castMemberId)
-            .single();
+            .maybeSingle();
 
           avatarUrl = data.avatar_url;
 
@@ -734,7 +734,7 @@
             .from('cast_members')
             .select('avatar_url')
             .eq('id', castMemberId)
-            .single();
+            .maybeSingle();
 
           avatarUrl = data.avatar_url;
 

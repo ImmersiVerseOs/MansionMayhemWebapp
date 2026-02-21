@@ -76,7 +76,7 @@ export async function getUserRole(gameId, userId) {
       .from('admin_users')
       .select('user_id')
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
     if (adminCheck) return 'admin'
 
@@ -85,7 +85,7 @@ export async function getUserRole(gameId, userId) {
       .from('mm_games')
       .select('director_user_id')
       .eq('id', gameId)
-      .single()
+      .maybeSingle()
 
     if (game && game.director_user_id === userId) return 'director'
 
@@ -95,7 +95,7 @@ export async function getUserRole(gameId, userId) {
       .select('id')
       .eq('game_id', gameId)
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
     if (castMember) return 'cast'
 
@@ -183,7 +183,7 @@ export async function hasAccessToPage(pageType, gameId) {
         .from('mm_games')
         .select('*, mm_game_stages(*)')
         .eq('id', gameId)
-        .single()
+        .maybeSingle()
 
       if (!game) return false
 
@@ -254,7 +254,7 @@ export async function getCurrentPhaseInfo(gameId) {
       .from('mm_games')
       .select('*, mm_game_stages(*)')
       .eq('id', gameId)
-      .single()
+      .maybeSingle()
 
     if (error) throw error
 

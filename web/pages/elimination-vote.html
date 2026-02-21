@@ -568,7 +568,7 @@
             .from('profiles')
             .select('cast_member_id')
             .eq('id', session.user.id)
-            .single()
+            .maybeSingle()
 
           if (profile?.cast_member_id) {
             const { data: vote } = await sb
@@ -576,7 +576,7 @@
               .select('voted_for_id')
               .eq('round_id', currentRound.id)
               .eq('cast_member_id', profile.cast_member_id)
-              .single()
+              .maybeSingle()
 
             if (vote) {
               hasVoted = true
@@ -718,7 +718,7 @@
           .from('profiles')
           .select('cast_member_id')
           .eq('id', session.user.id)
-          .single()
+          .maybeSingle()
 
         if (!profile?.cast_member_id) {
           alert('Create your character first!')

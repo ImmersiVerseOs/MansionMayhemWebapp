@@ -906,7 +906,7 @@
             .from('mm_games')
             .select('title')
             .eq('id', currentGameId)
-            .single()
+            .maybeSingle()
 
           if (game) {
             const tagline = document.querySelector('.tea-room-tagline')
@@ -1188,7 +1188,7 @@
           .from('cast_members')
           .select('id')
           .eq('user_id', currentUser.id)
-          .single()
+          .maybeSingle()
 
         // Upload to storage
         const { data: uploadData, error: uploadError } = await supabase.storage

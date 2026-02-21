@@ -656,7 +656,7 @@
           .from('cast_members')
           .select('confession_booth_avatar_url')
           .eq('id', castMemberId)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
 

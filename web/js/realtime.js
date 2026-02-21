@@ -336,7 +336,7 @@ class RealtimeManager {
         *,
         cast_member:cast_members(id, display_name, full_name)
       `)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('❌ Error sending message:', error);

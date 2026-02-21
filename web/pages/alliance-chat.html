@@ -504,7 +504,7 @@
           .from('mm_alliance_rooms')
           .select('*')
           .eq('id', roomId)
-          .single();
+          .maybeSingle();
 
         if (error || !data) throw new Error('Room not found');
 
@@ -769,7 +769,7 @@
             moderation_status: 'pending'
           })
           .select()
-          .single();
+          .maybeSingle();
 
         if (messageError) throw messageError;
 

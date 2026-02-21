@@ -1718,15 +1718,31 @@
       document.getElementById('modeSelector').classList.remove('open');
     }
 
-    window.createNewGame = function() {
-      // Check if already in a game
+    window.createNewGame = async function() {
+      // Check if already in a game - but verify it's actually active
       const currentGameId = localStorage.getItem('current_game_id');
       if (currentGameId) {
-        const goToCurrent = confirm('You\'re already in a game! Go to your current lobby?');
-        if (goToCurrent) {
-          window.location.href = `/lobby.html?game=${currentGameId}`;
-          return;
+        const { data: existingGame } = await supabase
+          .from('mm_games')
+          .select('id, status, title')
+          .eq('id', currentGameId)
+          .maybeSingle();
+
+        if (existingGame && (existingGame.status === 'recruiting' || existingGame.status === 'active')) {
+          const choice = confirm(
+            `You're in "${existingGame.title}" (${existingGame.status}).\n\n` +
+            'OK = Go to that lobby\n' +
+            'Cancel = Leave it and start a new game'
+          );
+          if (choice) {
+            window.location.href = `/lobby.html?game=${currentGameId}`;
+            return;
+          }
         }
+
+        // Game doesn't exist, is completed, or user chose to start fresh - clear it
+        localStorage.removeItem('current_game_id');
+        localStorage.removeItem('current_cast_member_id');
       }
 
       // Toggle mode selector panel open

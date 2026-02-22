@@ -1,31 +1,28 @@
-# Netlify configuration for Mansion Mayhem
-
-[build]
-  publish = "web"
-  command = ""
-
 [[redirects]]
-  from = "/"
-  to = "/intro.html"
+  from = "/js/*"
+  to = "/js/:splat"
   status = 200
 
-# Only redirect actual 404s to landing page (not all routes!)
-# This allows /pages/player-dashboard.html and other pages to work
 [[redirects]]
-  from = "/*"
-  to = "/landing.html"
-  status = 404
+  from = "/css/*"
+  to = "/css/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/pages/*"
+  to = "/pages/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 200
+
+[build]
+  publish = "."
 
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-# Enable CORS for Supabase
-[[headers]]
-  for = "/js/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"

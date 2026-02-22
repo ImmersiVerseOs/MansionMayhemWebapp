@@ -3,606 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How to Play - Mansion Mayhem</title>
-  <link rel="icon" type="image/png" href="/assets/logo/favicon.png">
-  <link rel="icon" type="image/x-icon" href="/assets/logo/favicon.ico">
-  
+  <title>How to Play — Mansion Mayhem</title>
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    :root {
-      --color-dark: #0a0a0a;
-      --color-gold: #D4AF37;
-      --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--color-dark);
-      color: white;
-      min-height: 100vh;
-    }
-    
-    .animated-bg {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
-      animation: bgShift 20s ease-in-out infinite;
-    }
-    
-    @keyframes bgShift {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
-    }
-    
-    .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      padding: 1rem 2rem;
-      backdrop-filter: blur(10px);
-      background: rgba(10, 10, 10, 0.8);
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    }
-    
-    .nav-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .nav-logo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      text-decoration: none;
-    }
-    
-    .nav-logo-icon {
-      font-size: 2rem;
-      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
-    }
-    
-    .nav-logo-text {
-      background: var(--gradient-gold);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .nav-link {
-      color: rgba(255, 255, 255, 0.7);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    
-    .nav-link:hover {
-      color: var(--color-gold);
-    }
-    
-    .hero {
-      padding: 8rem 2rem 4rem;
-      text-align: center;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .hero-icon {
-      font-size: 5rem;
-      margin-bottom: 1.5rem;
-      animation: float 3s ease-in-out infinite;
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
-    }
-    
-    .hero-title {
-      font-size: 3rem;
-      font-weight: 900;
-      margin-bottom: 1rem;
-      background: var(--gradient-gold);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .hero-subtitle {
-      font-size: 1.125rem;
-      color: rgba(255, 255, 255, 0.7);
-      line-height: 1.6;
-    }
-    
-    .content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem 4rem;
-    }
-    
-    .section {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 3rem;
-      margin-bottom: 2rem;
-    }
-    
-    .section-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--color-gold);
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    
-    .steps-grid {
-      display: grid;
-      gap: 2rem;
-    }
-    
-    .step {
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 2rem;
-      padding: 2rem;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.3s;
-    }
-    
-    .step:hover {
-      border-color: var(--color-gold);
-      transform: translateX(10px);
-    }
-    
-    .step-number {
-      width: 80px;
-      height: 80px;
-      background: var(--gradient-gold);
-      color: var(--color-dark);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: 900;
-      flex-shrink: 0;
-    }
-    
-    .step-content h3 {
-      font-size: 1.5rem;
-      margin-bottom: 0.75rem;
-      color: rgba(255, 255, 255, 0.9);
-    }
-    
-    .step-content p {
-      color: rgba(255, 255, 255, 0.7);
-      line-height: 1.6;
-      margin-bottom: 1rem;
-    }
-    
-    .step-example {
-      background: rgba(139, 92, 246, 0.1);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      font-style: italic;
-      color: rgba(255, 255, 255, 0.8);
-    }
-    
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 2rem;
-    }
-    
-    .video-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      overflow: hidden;
-      transition: all 0.3s;
-    }
-    
-    .video-card:hover {
-      border-color: var(--color-gold);
-      transform: translateY(-5px);
-    }
-    
-    .video-thumbnail {
-      aspect-ratio: 16/9;
-      background: rgba(255, 255, 255, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      cursor: pointer;
-      position: relative;
-    }
-    
-    .play-button {
-      position: absolute;
-      width: 60px;
-      height: 60px;
-      background: var(--gradient-gold);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-dark);
-      font-size: 1.5rem;
-    }
-    
-    .video-info {
-      padding: 1.5rem;
-    }
-    
-    .video-title {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: rgba(255, 255, 255, 0.9);
-    }
-    
-    .video-duration {
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.875rem;
-    }
-    
-    .faq-list {
-      display: grid;
-      gap: 1rem;
-    }
-    
-    .faq-item {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 1.5rem;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .faq-item:hover {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: var(--color-gold);
-    }
-    
-    .faq-question {
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.9);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-    
-    .faq-answer {
-      color: rgba(255, 255, 255, 0.7);
-      line-height: 1.6;
-    }
-    
-    .cta-section {
-      text-align: center;
-      padding: 4rem 2rem;
-      background: rgba(212, 175, 55, 0.05);
-      border-radius: 24px;
-      border: 1px solid rgba(212, 175, 55, 0.2);
-    }
-    
-    .cta-title {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: var(--color-gold);
-    }
-    
-    .cta-text {
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 2rem;
-    }
-    
-    .btn {
-      padding: 1rem 2.5rem;
-      background: var(--gradient-gold);
-      color: var(--color-dark);
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
-    }
-    
-    @media (max-width: 968px) {
-      .hero-title { font-size: 2rem; }
-      .section { padding: 2rem 1.5rem; }
-      .step { grid-template-columns: 1fr; }
-      .video-grid { grid-template-columns: 1fr; }
-    }
+    .rules-hero { text-align: center; padding: 1.5rem 0; }
+    .section { margin-bottom: 1.5rem; }
+    .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .section-icon { font-size: 1.25rem; }
+    .phase-flow { display: flex; flex-direction: column; gap: 0; }
+    .phase-item { display: flex; gap: 0.75rem; padding: 0.75rem 0; position: relative; }
+    .phase-item:not(:last-child)::after { content: ''; position: absolute; left: 15px; top: 2.75rem; bottom: 0; width: 2px; background: var(--border); }
+    .phase-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; z-index: 1; }
+    .phase-content { flex: 1; }
+    .phase-name { font-weight: 700; font-size: 0.9rem; }
+    .phase-desc { font-size: 0.8rem; color: var(--text-2); margin-top: 0.15rem; }
+    .phase-time { font-size: 0.7rem; color: var(--text-3); font-family: var(--font-mono); }
+
+    .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .role-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem; text-align: center; }
+    .role-emoji { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .role-title { font-weight: 700; font-size: 0.8rem; }
+    .role-power { font-size: 0.7rem; color: var(--text-3); margin-top: 0.2rem; }
+
+    .tip-card { background: var(--gradient-glass); border: 1px solid var(--border-accent); border-radius: var(--radius-md); padding: 0.75rem; margin-bottom: 0.5rem; display: flex; gap: 0.5rem; align-items: flex-start; }
+    .tip-num { background: var(--gradient-brand); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+    .tip-text { font-size: 0.8rem; color: var(--text-2); }
   </style>
-  <link rel="stylesheet" href="css/modern-theme.css">
 </head>
 <body>
-  <div class="animated-bg"></div>
-  
-  <nav class="nav">
-    <div class="nav-content">
-      <a href="../index.html" class="nav-logo">
-        <img src="/assets/logo/mansion-mayhem-logo-256.png" alt="Mansion Mayhem" class="nav-logo-image">
-        <span class="nav-logo-text">MANSION MAYHEM</span>
-      </a>
-      <a href="player-dashboard.html" class="nav-link">← Back to Dashboard</a>
-    </div>
-  </nav>
-  
-  <div class="hero">
-    <div class="hero-icon">📚</div>
-    <h1 class="hero-title">How to Play</h1>
-    <p class="hero-subtitle">
-      Learn everything you need to know about becoming a Mansion Mayhem cast member and earning money from AI-generated reality TV.
-    </p>
-  </div>
-  
-  <div class="content">
-    <!-- Getting Started -->
-    <div class="section">
-      <h2 class="section-title">
-        <span>🚀</span>
-        <span>Getting Started</span>
-      </h2>
-      
-      <div class="steps-grid">
-        <div class="step">
-          <div class="step-number">1</div>
-          <div class="step-content">
-            <h3>Respond to Scenarios</h3>
-            <p>
-              You'll receive scenarios throughout the week—think of them as prompts for your character. 
-              These could be conversations, confrontations, confessions, or group events. You choose how your character responds.
-            </p>
-            <div class="step-example">
-              💬 Example: "At the pool party, Sarah makes a comment about your alliance. How do you respond?"
-            </div>
-          </div>
+  <div class="page">
+    <nav class="nav">
+      <button class="nav-back" onclick="history.back()">←</button>
+      <span class="nav-title">How to Play</span>
+    </nav>
+
+    <div class="container page-padded">
+      <div class="rules-hero animate-in">
+        <div style="font-size:3rem;margin-bottom:0.5rem">🏰</div>
+        <h1 class="title-lg">Mansion Mayhem</h1>
+        <p class="body-sm" style="margin-top:0.25rem">Reality TV drama meets social deduction</p>
+      </div>
+
+      <!-- THE CONCEPT -->
+      <div class="section animate-in animate-delay-1">
+        <div class="card card-accent">
+          <p style="font-size:0.9rem;line-height:1.6;color:var(--text-2)">
+            Players enter a virtual mansion as reality TV cast members. An AI Director assigns <strong style="color:var(--text)">secret roles</strong> and <strong style="color:var(--text)">private missions</strong>. Form alliances, start drama, confront rivals, and vote to eliminate each other. <strong style="color:var(--gold)">Last player standing wins the crown.</strong>
+          </p>
         </div>
-        
-        <div class="step">
-          <div class="step-number">2</div>
-          <div class="step-content">
-            <h3>AI Generates Episodes</h3>
-            <p>
-              Based on everyone's responses, our AI generates video episodes showing all the drama, alliances, 
-              and conflicts. Your FaceCast appears in scenes where your character is involved.
-            </p>
-            <div class="step-example">
-              🎬 Episodes publish weekly and feature the best moments from all scenarios.
-            </div>
-          </div>
+      </div>
+
+      <!-- 7 PHASES -->
+      <div class="section animate-in animate-delay-2">
+        <div class="section-header">
+          <span class="section-icon">⏱️</span>
+          <span class="title-sm">Episode Phases</span>
         </div>
-        
-        <div class="step">
-          <div class="step-number">3</div>
-          <div class="step-content">
-            <h3>Earn Money</h3>
-            <p>
-              Get paid based on screen time, viewer engagement, tips, and ad revenue. 
-              The more interesting and authentic your responses, the more you earn!
-            </p>
-            <div class="step-example">
-              💰 Average cast members earn $500-$2,000/month depending on activity level.
-            </div>
+        <div class="phase-flow">
+          <div class="phase-item">
+            <div class="phase-dot" style="background:var(--purple)">🏰</div>
+            <div class="phase-content"><div class="phase-name">Arrival</div><div class="phase-desc">Get your secret role card. The Director introduces the episode.</div><div class="phase-time">3 min</div></div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-dot" style="background:var(--cyan)">💬</div>
+            <div class="phase-content"><div class="phase-name">Social Hour</div><div class="phase-desc">Mingle, form alliances, complete secret missions. The Director drops hints.</div><div class="phase-time">8 min</div></div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-dot" style="background:var(--rose)">⚔️</div>
+            <div class="phase-content"><div class="phase-name">The Challenge</div><div class="phase-desc">Group competition. Winner earns immunity or a power.</div><div class="phase-time">7 min</div></div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-dot" style="background:rgba(100,100,150,0.4)">🤫</div>
+            <div class="phase-content"><div class="phase-name">Whisper Hour</div><div class="phase-desc">Lights dim. Private conversations. Betrayal missions activate.</div><div class="phase-time">5 min</div></div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-dot" style="background:var(--orange)">💥</div>
+            <div class="phase-content"><div class="phase-name">Confrontation</div><div class="phase-desc">The Director reveals a secret. Everyone reacts. Drama explodes.</div><div class="phase-time">5 min</div></div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-dot" style="background:var(--gold)">🗳️</div>
+            <div class="phase-content"><div class="phase-name">Deliberation</div><div class="phase-desc">Voting opens. Campaign to survive. Use your powers.</div><div class="phase-time">4 min</div></div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-dot" style="background:var(--red)">🚪</div>
+            <div class="phase-content"><div class="phase-name">Elimination</div><div class="phase-desc">Votes revealed. One player leaves the Mansion.</div><div class="phase-time">3 min</div></div>
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Gameplay Modes -->
-    <div class="section">
-      <h2 class="section-title">
-        <span>🎮</span>
-        <span>Understanding Gameplay Modes</span>
-      </h2>
-      
-      <div class="steps-grid">
-        <div class="step">
-          <div class="step-number">🎯</div>
-          <div class="step-content">
-            <h3>Manual Control</h3>
-            <p>
-              You respond to every single scenario yourself. Full control, high involvement. 
-              Great if you have lots of time and want complete creative control.
-            </p>
-          </div>
+
+      <!-- SECRET ROLES -->
+      <div class="section animate-in animate-delay-3">
+        <div class="section-header">
+          <span class="section-icon">🎭</span>
+          <span class="title-sm">Secret Roles</span>
         </div>
-        
-        <div class="step">
-          <div class="step-number">⚡</div>
-          <div class="step-content">
-            <h3>Hybrid Mode (Recommended)</h3>
-            <p>
-              AI responds when you're unavailable, using your personality profile. You take over whenever 
-              you're active. Perfect balance of involvement and passive income.
-            </p>
-          </div>
-        </div>
-        
-        <div class="step">
-          <div class="step-number">🤖</div>
-          <div class="step-content">
-            <h3>Full Control (AI)</h3>
-            <p>
-              AI handles all responses 24/7 based on your personality. You just watch episodes and collect 
-              earnings. Lowest time commitment, passive income.
-            </p>
-          </div>
+        <p class="body-sm" style="margin-bottom:0.75rem">Each episode you get a secret role with a unique power. Nobody knows your role unless it's revealed.</p>
+        <div class="role-grid">
+          <div class="role-item"><div class="role-emoji">🔥</div><div class="role-title">Instigator</div><div class="role-power">Send anonymous rumors</div></div>
+          <div class="role-item"><div class="role-emoji">🛡️</div><div class="role-title">Protector</div><div class="role-power">Veto one elimination</div></div>
+          <div class="role-item"><div class="role-emoji">👁️</div><div class="role-title">Spy</div><div class="role-power">See all votes early</div></div>
+          <div class="role-item"><div class="role-emoji">💣</div><div class="role-title">Saboteur</div><div class="role-power">Hijack missions</div></div>
+          <div class="role-item"><div class="role-emoji">🤝</div><div class="role-title">Diplomat</div><div class="role-power">Shield alliances</div></div>
+          <div class="role-item"><div class="role-emoji">🃏</div><div class="role-title">Wildcard</div><div class="role-power">Double vote (risky)</div></div>
+          <div class="role-item"><div class="role-emoji">👻</div><div class="role-title">Ghost</div><div class="role-power">Change vote last second</div></div>
+          <div class="role-item"><div class="role-emoji">💎</div><div class="role-title">Socialite</div><div class="role-power">See social connections</div></div>
         </div>
       </div>
-    </div>
-    
-    <!-- Video Tutorials -->
-    <div class="section">
-      <h2 class="section-title">
-        <span>🎥</span>
-        <span>Video Tutorials</span>
-      </h2>
-      
-      <div class="video-grid">
-        <div class="video-card">
-          <div class="video-thumbnail">
-            <span>🎬</span>
-            <div class="play-button">▶</div>
-          </div>
-          <div class="video-info">
-            <div class="video-title">Platform Overview (3:45)</div>
-            <div class="video-duration">Introduction to Mansion Mayhem</div>
-          </div>
+
+      <!-- FIGHTS -->
+      <div class="section animate-in animate-delay-4">
+        <div class="section-header">
+          <span class="section-icon">💥</span>
+          <span class="title-sm">Confrontations & Strikes</span>
         </div>
-        
-        <div class="video-card">
-          <div class="video-thumbnail">
-            <span>💬</span>
-            <div class="play-button">▶</div>
-          </div>
-          <div class="video-info">
-            <div class="video-title">Responding to Scenarios (5:12)</div>
-            <div class="video-duration">How to craft great responses</div>
-          </div>
-        </div>
-        
-        <div class="video-card">
-          <div class="video-thumbnail">
-            <span>💰</span>
-            <div class="play-button">▶</div>
-          </div>
-          <div class="video-info">
-            <div class="video-title">Maximizing Earnings (4:30)</div>
-            <div class="video-duration">Tips for more screen time & money</div>
-          </div>
-        </div>
-        
-        <div class="video-card">
-          <div class="video-thumbnail">
-            <span>🎭</span>
-            <div class="play-button">▶</div>
-          </div>
-          <div class="video-info">
-            <div class="video-title">Personality & Strategy (6:18)</div>
-            <div class="video-duration">Building your character arc</div>
-          </div>
+        <div class="card">
+          <p style="font-size:0.85rem;color:var(--text-2);line-height:1.5">
+            You can <strong style="color:var(--text)">confront</strong> another player during Social, Whisper, or Confrontation phases. Both fighters receive a <strong style="color:var(--red)">strike</strong>. <strong style="color:var(--red)">2 strikes = auto-eliminated.</strong> No vote needed. Fights generate massive drama but carry real risk.
+          </p>
         </div>
       </div>
-    </div>
-    
-    <!-- FAQ -->
-    <div class="section">
-      <h2 class="section-title">
-        <span>❓</span>
-        <span>Frequently Asked Questions</span>
-      </h2>
-      
-      <div class="faq-list">
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>💵</span>
-            <span>How much money can I make?</span>
-          </div>
-          <div class="faq-answer">
-            It varies based on activity level and engagement. Most cast members earn $500-$2,000/month. 
-            Top performers with high drama and screen time can earn $3,000-$5,000+. You're paid monthly via Stripe.
-          </div>
+
+      <!-- GAME MODES -->
+      <div class="section animate-in animate-delay-5">
+        <div class="section-header">
+          <span class="section-icon">🎮</span>
+          <span class="title-sm">Game Modes</span>
         </div>
-        
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>⏱️</span>
-            <span>How much time do I need to commit?</span>
-          </div>
-          <div class="faq-answer">
-            Depends on your gameplay mode! Manual: 5-10 hours/week. Hybrid: 2-5 hours/week. Full Control: 
-            30 minutes/week just to watch episodes. You can always adjust your mode in settings.
-          </div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>📅</span>
-            <span>How often are scenarios posted?</span>
-          </div>
-          <div class="faq-answer">
-            Typically 3-5 scenarios per week. Some are urgent (2-4 hour deadline), others give you 12-24 hours 
-            to respond. In Hybrid/Full Control mode, AI can handle urgent ones while you're offline.
-          </div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>🎬</span>
-            <span>When do episodes come out?</span>
-          </div>
-          <div class="faq-answer">
-            New episodes publish every week, usually on Fridays. Each episode is 15-30 minutes and features 
-            the best drama from that week's scenarios. You'll get notified when you're featured.
-          </div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>👥</span>
-            <span>Can I form alliances with other cast members?</span>
-          </div>
-          <div class="faq-answer">
-            Absolutely! Alliances, friendships, and rivalries make the show interesting. You can coordinate 
-            responses with allies, though keep in mind that betrayals make for great TV (and more screen time!).
-          </div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>🚪</span>
-            <span>Can I quit anytime?</span>
-          </div>
-          <div class="faq-answer">
-            Yes! There's no long-term commitment. You can pause or leave at any time. If you leave, you'll 
-            continue earning from episodes you're already in, but won't receive new scenarios.
-          </div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem">
+          <div class="list-item"><span style="font-size:1.25rem">🎉</span><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">Party — 35 min</div><div style="font-size:0.7rem;color:var(--text-3)">8-20 players. Full drama arc. The signature experience.</div></div></div>
+          <div class="list-item"><span style="font-size:1.25rem">⚡</span><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">Blitz — 15 min</div><div style="font-size:0.7rem;color:var(--text-3)">6-12 players. Fast phases. Maximum pressure.</div></div></div>
+          <div class="list-item"><span style="font-size:1.25rem">🏃</span><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">Sprint — 5 min</div><div style="font-size:0.7rem;color:var(--text-3)">4-8 players. Lightning rounds. Pure chaos.</div></div></div>
+          <div class="list-item"><span style="font-size:1.25rem">📅</span><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">Season — 10 weeks</div><div style="font-size:0.7rem;color:var(--text-3)">10-20 players. Weekly eliminations. Deep strategy.</div></div></div>
         </div>
       </div>
+
+      <!-- TIPS -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-icon">💡</span>
+          <span class="title-sm">Pro Tips</span>
+        </div>
+        <div class="tip-card"><div class="tip-num">1</div><div class="tip-text">Your role changes every episode. Adapt your strategy.</div></div>
+        <div class="tip-card"><div class="tip-num">2</div><div class="tip-text">Alliances are powerful but betrayal missions reward breaking them.</div></div>
+        <div class="tip-card"><div class="tip-num">3</div><div class="tip-text">The drama meter affects the whole game. High drama = more secrets revealed.</div></div>
+        <div class="tip-card"><div class="tip-num">4</div><div class="tip-text">AI agents are mixed in. Can you tell who's real?</div></div>
+        <div class="tip-card"><div class="tip-num">5</div><div class="tip-text">Don't fight unless you can afford a strike. Two = you're out.</div></div>
+      </div>
+
+      <button class="btn btn-primary btn-block btn-lg" style="margin-bottom:2rem" onclick="window.location.href='/pages/lobby.html'">Enter the Mansion</button>
     </div>
-    
-    <!-- CTA -->
-    <div class="cta-section">
-      <h2 class="cta-title">Ready to Start Playing?</h2>
-      <p class="cta-text">Jump into your dashboard and respond to your first scenario!</p>
-      <a href="player-dashboard.html" class="btn">
-        <span>Go to Dashboard</span>
-        <span>→</span>
-      </a>
+
+    <div class="tab-bar">
+      <a href="/pages/lobby.html" class="tab-item"><span class="tab-icon">🏠</span>Lobby</a>
+      <a href="/pages/profile.html" class="tab-item"><span class="tab-icon">👤</span>Profile</a>
+      <a href="/pages/leaderboard.html" class="tab-item"><span class="tab-icon">🏆</span>Ranks</a>
+      <button class="tab-item active"><span class="tab-icon">📖</span>Rules</button>
     </div>
   </div>
-  <script type="module" src="../js/invite-gate.js"></script>
 </body>
 </html>

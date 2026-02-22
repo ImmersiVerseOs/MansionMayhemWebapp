@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — Mansion Mayhem</title>
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <button class="nav-back" onclick="history.back()">←</button>
+      <span class="nav-title">Profile</span>
+      <button class="btn btn-ghost btn-sm" onclick="handleSignOut()">Sign Out</button>
+    </nav>
+
+    <div class="container page-padded">
+      <div id="profileContent" style="display:flex;flex-direction:column;gap:1rem;align-items:center;padding-top:1rem;">
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <a href="/pages/lobby.html" class="tab-item"><span class="tab-icon">🏠</span>Lobby</a>
+      <button class="tab-item active"><span class="tab-icon">👤</span>Profile</button>
+      <a href="/pages/leaderboard.html" class="tab-item"><span class="tab-icon">🏆</span>Ranks</a>
+      <a href="/pages/how-to-play.html" class="tab-item"><span class="tab-icon">📖</span>Rules</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { waitForSupabase, requireAuth, getProfile, signOut, getSupabase } from '/js/supabase.js';
+
+    async function init() {
+      const sb = await waitForSupabase();
+      const user = await requireAuth();
+      if (!user) return;
+
+      const profile = await getProfile(user.id);
+
+      const el = document.getElementById('profileContent');
+      const p = profile || {};
+      const gamesPlayed = p.games_played || 0;
+      const gamesWon = p.games_won || 0;
+      const winRate = gamesPlayed > 0 ? Math.round((gamesWon / gamesPlayed) * 100) : 0;
+
+      el.innerHTML = `
+        <div class="avatar avatar-lg avatar-ring-rose" style="font-size:2.5rem;width:80px;height:80px;">
+          ${p.display_name ? p.display_name[0].toUpperCase() : '?'}
+        </div>
+        <h2 class="title-lg">${p.display_name || 'Player'}</h2>
+        <span class="badge badge-purple">${p.role || 'Player'}</span>
+
+        <div class="stat-row" style="width:100%;margin-top:1rem;">
+          <div class="stat-item">
+            <div class="stat-value" style="color:var(--gold)">${gamesPlayed}</div>
+            <div class="stat-label">Games</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" style="color:var(--green)">${gamesWon}</div>
+            <div class="stat-label">Wins</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" style="color:var(--rose)">${winRate}%</div>
+            <div class="stat-label">Win Rate</div>
+          </div>
+        </div>
+
+        <div class="card card-accent" style="width:100%;margin-top:0.5rem;">
+          <div class="caption" style="margin-bottom:0.75rem">Account</div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            <div style="display:flex;justify-content:space-between;font-size:0.85rem;">
+              <span style="color:var(--text-2)">Email</span>
+              <span>${user.email || '—'}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.85rem;">
+              <span style="color:var(--text-2)">Joined</span>
+              <span>${p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="width:100%;">
+          <div class="caption" style="margin-bottom:0.75rem">Recent Games</div>
+          <div id="recentGames" style="color:var(--text-3);font-size:0.85rem;">Loading...</div>
+        </div>
+      `;
+
+      // Load recent games
+      const { data: casts } = await sb.from('cast_members').select('id').eq('user_id', user.id);
+      if (casts && casts.length > 0) {
+        const castIds = casts.map(c => c.id);
+        const { data: games } = await sb.from('mm_game_cast')
+          .select('status, placement, mm_games(game_mode, status, created_at)')
+          .in('cast_member_id', castIds)
+          .order('joined_at', { ascending: false })
+          .limit(5);
+
+        const recentEl = document.getElementById('recentGames');
+        if (!games || games.length === 0) {
+          recentEl.textContent = 'No games yet. Go play!';
+        } else {
+          recentEl.innerHTML = games.map(g => {
+            const gm = g.mm_games;
+            const modeIcons = { party: '🎉', blitz: '⚡', sprint: '🏃', weekly: '📅' };
+            return `<div class="list-item" style="margin-bottom:0.5rem">
+              <span style="font-size:1.25rem">${modeIcons[gm?.game_mode] || '🎮'}</span>
+              <div style="flex:1"><div style="font-weight:600;font-size:0.85rem">${(gm?.game_mode || 'Game').charAt(0).toUpperCase() + (gm?.game_mode || '').slice(1)}</div>
+              <div style="font-size:0.7rem;color:var(--text-3)">${gm?.created_at ? new Date(gm.created_at).toLocaleDateString() : ''}</div></div>
+              <span class="badge ${g.status === 'eliminated' ? 'badge-red' : g.placement === 1 ? 'badge-gold' : 'badge-ghost'}">${g.placement === 1 ? '👑 Won' : g.status === 'eliminated' ? 'Eliminated' : g.status}</span>
+            </div>`;
+          }).join('');
+        }
+      }
+    }
+
+    window.handleSignOut = async () => { await signOut(); };
+    init();
+  </script>
+</body>
+</html>

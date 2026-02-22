@@ -3,864 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Episode Results | Mansion Mayhem</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Results — Mansion Mayhem</title>
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #0a0a0a;
-      --bg-card: #111;
-      --bg-elevated: #1a1a1a;
-      --border: #2a2a2a;
-      --text: #fff;
-      --text-dim: #888;
-      --gold: #d4af37;
-      --purple: #8b5cf6;
-      --danger: #e74c3c;
-      --success: #4caf50;
-    }
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    .results-hero { text-align: center; padding: 2.5rem 0 1.5rem; position: relative; }
+    .results-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 100% 60% at 50% 30%, rgba(255,184,0,0.1) 0%, transparent 60%); pointer-events: none; }
+    .crown-float { font-size: 4rem; animation: float 3s ease-in-out infinite; display: inline-block; }
+    .winner-name { font-size: 2rem; font-weight: 900; margin-top: 0.75rem; }
+    .winner-label { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-top: 0.25rem; }
 
-    .fireworks {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
+    .cast-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .cast-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .cast-row.winner { border-color: rgba(255,184,0,0.3); box-shadow: var(--glow-gold); }
+    .cast-rank { width: 24px; font-weight: 800; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-3); text-align: center; }
+    .cast-row.winner .cast-rank { color: var(--gold); }
+    .cast-name-col { flex: 1; }
+    .cast-name { font-weight: 600; font-size: 0.85rem; }
+    .cast-role { font-size: 0.7rem; color: var(--text-3); }
+    .cast-drama { font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; color: var(--rose); }
+    .cast-badge { font-size: 0.7rem; }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 40px 20px;
-      position: relative;
-      z-index: 1;
-    }
+    .highlight-card { background: var(--gradient-glass); border: 1px solid var(--border-accent); border-radius: var(--radius-lg); padding: 1rem; }
+    .highlight-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .highlight-label { font-size: 0.7rem; text-transform: uppercase; color: var(--rose); font-weight: 700; letter-spacing: 0.06em; }
+    .highlight-text { font-size: 0.9rem; font-weight: 600; margin-top: 0.25rem; }
 
-    .episode-header {
-      text-align: center;
-      margin-bottom: 60px;
-      animation: fadeInDown 0.8s ease;
-    }
-
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .episode-number {
-      font-size: 18px;
-      color: var(--gold);
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      margin-bottom: 12px;
-    }
-
-    .episode-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 64px;
-      color: var(--gold);
-      margin-bottom: 16px;
-      text-shadow: 0 0 60px rgba(212, 175, 55, 0.8);
-      animation: glow 3s ease-in-out infinite;
-    }
-
-    @keyframes glow {
-      0%, 100% { text-shadow: 0 0 60px rgba(212, 175, 55, 0.8); }
-      50% { text-shadow: 0 0 80px rgba(212, 175, 55, 1); }
-    }
-
-    .episode-subtitle {
-      font-size: 20px;
-      color: var(--text-dim);
-    }
-
-    .results-section {
-      margin-bottom: 60px;
-    }
-
-    .section-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 36px;
-      color: var(--gold);
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    .elimination-reveal {
-      background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(192, 57, 43, 0.2));
-      border: 3px solid var(--danger);
-      border-radius: 24px;
-      padding: 48px;
-      text-align: center;
-      margin-bottom: 40px;
-      animation: slideUp 0.8s ease 0.5s both;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(50px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .eliminated-icon {
-      font-size: 100px;
-      margin-bottom: 24px;
-      animation: shake 0.8s ease;
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(-10deg); }
-      75% { transform: rotate(10deg); }
-    }
-
-    .eliminated-label {
-      font-size: 18px;
-      color: var(--danger);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 16px;
-      font-weight: 700;
-    }
-
-    .eliminated-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 56px;
-      color: var(--danger);
-      margin-bottom: 16px;
-      font-weight: 900;
-    }
-
-    .eliminated-quote {
-      font-size: 18px;
-      color: var(--text-dim);
-      font-style: italic;
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-
-    .winner-reveal {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(255, 215, 0, 0.2));
-      border: 3px solid var(--gold);
-      border-radius: 24px;
-      padding: 60px;
-      text-align: center;
-      margin-bottom: 40px;
-      animation: slideUp 0.8s ease 0.5s both;
-    }
-
-    .winner-icon {
-      font-size: 120px;
-      margin-bottom: 24px;
-      animation: bounce 1.5s ease infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-
-    .winner-label {
-      font-size: 24px;
-      color: var(--gold);
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      margin-bottom: 16px;
-      font-weight: 700;
-    }
-
-    .winner-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 72px;
-      color: var(--gold);
-      margin-bottom: 24px;
-      font-weight: 900;
-      text-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
-    }
-
-    .winner-stats {
-      display: flex;
-      justify-content: center;
-      gap: 48px;
-      margin-top: 32px;
-    }
-
-    .winner-stat {
-      text-align: center;
-    }
-
-    .winner-stat-value {
-      font-size: 48px;
-      font-weight: 900;
-      color: var(--gold);
-    }
-
-    .winner-stat-label {
-      font-size: 14px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .vote-breakdown {
-      background: var(--bg-card);
-      border: 2px solid var(--border);
-      border-radius: 20px;
-      padding: 40px;
-      margin-bottom: 40px;
-    }
-
-    .breakdown-title {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--gold);
-      margin-bottom: 32px;
-      text-align: center;
-    }
-
-    .vote-bar {
-      margin-bottom: 24px;
-      animation: fadeIn 0.5s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .vote-bar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .vote-bar-name {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .vote-bar-count {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--danger);
-    }
-
-    .vote-bar-container {
-      height: 40px;
-      background: var(--bg-elevated);
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .vote-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--danger), #c0392b);
-      transition: width 1.5s ease;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding: 0 16px;
-      color: white;
-      font-weight: 700;
-    }
-
-    .highlights-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 24px;
-      margin-bottom: 40px;
-    }
-
-    .highlight-card {
-      background: var(--bg-card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      transition: all 0.3s;
-    }
-
-    .highlight-card:hover {
-      border-color: var(--gold);
-      transform: translateY(-4px);
-      box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3);
-    }
-
-    .highlight-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-
-    .highlight-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--gold);
-      margin-bottom: 12px;
-    }
-
-    .highlight-text {
-      font-size: 16px;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-
-    .leaderboard-snapshot {
-      background: var(--bg-card);
-      border: 2px solid var(--border);
-      border-radius: 20px;
-      padding: 40px;
-      margin-bottom: 40px;
-    }
-
-    .leaderboard-title {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--gold);
-      margin-bottom: 24px;
-      text-align: center;
-    }
-
-    .leaderboard-item {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      padding: 16px;
-      background: var(--bg-elevated);
-      border-radius: 12px;
-      margin-bottom: 12px;
-      transition: all 0.3s;
-    }
-
-    .leaderboard-item:hover {
-      background: rgba(212, 175, 55, 0.1);
-    }
-
-    .leaderboard-rank {
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--gold);
-      min-width: 50px;
-    }
-
-    .leaderboard-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--purple), var(--gold));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      border: 2px solid var(--border);
-    }
-
-    .leaderboard-info {
-      flex: 1;
-    }
-
-    .leaderboard-name {
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .leaderboard-status {
-      font-size: 13px;
-      color: var(--text-dim);
-    }
-
-    .leaderboard-score {
-      font-size: 28px;
-      font-weight: 900;
-      color: var(--gold);
-    }
-
-    .social-share {
-      text-align: center;
-      margin: 60px 0;
-    }
-
-    .share-title {
-      font-size: 24px;
-      color: var(--text-dim);
-      margin-bottom: 24px;
-    }
-
-    .share-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .share-btn {
-      padding: 16px 32px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .share-btn-twitter {
-      background: #1da1f2;
-      color: white;
-    }
-
-    .share-btn-facebook {
-      background: #4267b2;
-      color: white;
-    }
-
-    .share-btn-copy {
-      background: var(--bg-elevated);
-      color: var(--text);
-      border: 2px solid var(--border);
-    }
-
-    .share-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
-
-    .cta-section {
-      text-align: center;
-      margin-top: 60px;
-    }
-
-    .cta-btn {
-      display: inline-block;
-      padding: 20px 48px;
-      background: linear-gradient(135deg, var(--gold), #ffd700);
-      color: var(--bg);
-      border-radius: 50px;
-      font-size: 20px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.3s;
-      box-shadow: 0 8px 32px rgba(212, 175, 55, 0.4);
-    }
-
-    .cta-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 48px rgba(212, 175, 55, 0.6);
-    }
-
-    @media (max-width: 768px) {
-      .episode-title { font-size: 40px; }
-      .eliminated-name, .winner-name { font-size: 36px; }
-      .highlights-grid { grid-template-columns: 1fr; }
-      .winner-stats { flex-direction: column; gap: 24px; }
-    }
+    .highlights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
   </style>
 </head>
 <body>
-  <canvas class="fireworks" id="fireworks"></canvas>
+  <div class="page">
+    <nav class="nav">
+      <button class="nav-back" onclick="window.location.href='/pages/lobby.html'">←</button>
+      <span class="nav-title">Game Results</span>
+    </nav>
 
-  <div class="container">
-    <!-- Episode Header -->
-    <div class="episode-header">
-      <div class="episode-number" id="episodeNumber">Episode 1</div>
-      <h1 class="episode-title">The Results Are In</h1>
-      <p class="episode-subtitle" id="episodeDate">December 2025</p>
+    <div class="container page-padded">
+      <div id="resultsContent"><div class="spinner" style="margin:4rem auto"></div></div>
     </div>
 
-    <!-- Winner Reveal (for final episode) -->
-    <div id="winnerSection" style="display: none;">
-      <div class="winner-reveal">
-        <div class="winner-icon">👑</div>
-        <div class="winner-label">Winner of Mansion Mayhem</div>
-        <div class="winner-name" id="winnerName">Loading...</div>
-        <p class="eliminated-quote" id="winnerQuote">"I came, I saw, I conquered."</p>
-        <div class="winner-stats">
-          <div class="winner-stat">
-            <div class="winner-stat-value" id="winnerDrama">0</div>
-            <div class="winner-stat-label">Drama Score</div>
-          </div>
-          <div class="winner-stat">
-            <div class="winner-stat-value" id="winnerInfluence">0</div>
-            <div class="winner-stat-label">Influence</div>
-          </div>
-          <div class="winner-stat">
-            <div class="winner-stat-value" id="winnerAlliances">0</div>
-            <div class="winner-stat-label">Alliances</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Elimination Reveal (for regular episodes) -->
-    <div id="eliminationSection">
-      <div class="elimination-reveal">
-        <div class="eliminated-icon">😢</div>
-        <div class="eliminated-label">Has Been Eliminated</div>
-        <div class="eliminated-name" id="eliminatedName">Loading...</div>
-        <p class="eliminated-quote" id="eliminatedQuote">"The drama was too much for me..."</p>
-      </div>
-    </div>
-
-    <!-- Vote Breakdown -->
-    <div class="results-section">
-      <h2 class="section-title">📊 Vote Breakdown</h2>
-      <div class="vote-breakdown" id="voteBreakdown">
-        <div class="breakdown-title">Anonymized Vote Count</div>
-        <!-- Vote bars will be dynamically generated -->
-      </div>
-    </div>
-
-    <!-- Episode Highlights -->
-    <div class="results-section">
-      <h2 class="section-title">✨ Episode Highlights</h2>
-      <div class="highlights-grid" id="highlightsGrid">
-        <div class="highlight-card">
-          <div class="highlight-icon">🔥</div>
-          <div class="highlight-title">Most Dramatic Moment</div>
-          <div class="highlight-text">The alliance betrayal that shocked everyone!</div>
-        </div>
-        <div class="highlight-card">
-          <div class="highlight-icon">💬</div>
-          <div class="highlight-title">Most Voice Notes</div>
-          <div class="highlight-text">Player X submitted 15 voice notes this episode.</div>
-        </div>
-        <div class="highlight-card">
-          <div class="highlight-icon">🤝</div>
-          <div class="highlight-title">New Alliance Formed</div>
-          <div class="highlight-text">"The Gold Standard" alliance was created.</div>
-        </div>
-        <div class="highlight-card">
-          <div class="highlight-icon">⚡</div>
-          <div class="highlight-title">Drama Score Leader</div>
-          <div class="highlight-text">Player Y reached a drama score of 850!</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Current Leaderboard -->
-    <div class="results-section">
-      <h2 class="section-title">🏆 Current Standings</h2>
-      <div class="leaderboard-snapshot" id="leaderboardSnapshot">
-        <div class="leaderboard-title">Top Players</div>
-        <!-- Leaderboard items will be dynamically generated -->
-      </div>
-    </div>
-
-    <!-- Social Share -->
-    <div class="social-share">
-      <h3 class="share-title">Share Your Experience</h3>
-      <div class="share-buttons">
-        <button class="share-btn share-btn-twitter" onclick="shareTwitter()">
-          <span>🐦</span>
-          Share on Twitter
-        </button>
-        <button class="share-btn share-btn-facebook" onclick="shareFacebook()">
-          <span>📘</span>
-          Share on Facebook
-        </button>
-        <button class="share-btn share-btn-copy" onclick="copyLink()">
-          <span>🔗</span>
-          Copy Link
-        </button>
-      </div>
-    </div>
-
-    <!-- CTA -->
-    <div class="cta-section">
-      <a href="cast-portal.html" class="cta-btn">
-        🏰 Back to the Mansion
-      </a>
+    <div class="tab-bar">
+      <a href="/pages/lobby.html" class="tab-item"><span class="tab-icon">🏠</span>Lobby</a>
+      <a href="/pages/profile.html" class="tab-item"><span class="tab-icon">👤</span>Profile</a>
+      <a href="/pages/leaderboard.html" class="tab-item"><span class="tab-icon">🏆</span>Ranks</a>
+      <a href="/pages/how-to-play.html" class="tab-item"><span class="tab-icon">📖</span>Rules</a>
     </div>
   </div>
 
   <script type="module">
-    import { supabaseClient as supabase } from '../js/supabase-module.js'
-    import { requireAuth } from '../js/auth.js'
+    import { waitForSupabase } from '/js/supabase.js';
 
-    // Get episode ID from URL
-    const urlParams = new URLSearchParams(window.location.search)
-    const episodeId = urlParams.get('episode')
-    const gameId = urlParams.get('game')
-
-    let currentUser = null
-
-    // Initialize
     async function init() {
-      currentUser = await requireAuth()
-      if (!currentUser) return
+      const sb = await waitForSupabase();
+      const params = new URLSearchParams(window.location.search);
+      const gameId = params.get('game');
+      if (!gameId) { window.location.href = '/pages/lobby.html'; return; }
 
-      try {
-        // Load episode data
-        const { data: episode, error: episodeError } = await supabase
-          .from('episodes')
-          .select('*, mm_games(game_name, status)')
-          .eq('id', episodeId)
-          .maybeSingle()
+      // Load game
+      const { data: game } = await sb.from('mm_games').select('*').eq('id', gameId).single();
+      if (!game) { document.getElementById('resultsContent').innerHTML = '<p style="text-align:center;color:var(--text-3)">Game not found.</p>'; return; }
 
-        if (episodeError) throw episodeError
+      // Load all cast with details
+      const { data: cast } = await sb.from('mm_game_cast')
+        .select('*, cast_members(display_name, archetype, is_ai_player)')
+        .eq('game_id', gameId)
+        .order('drama_points', { ascending: false });
 
-        // Update header
-        document.getElementById('episodeNumber').textContent = `Episode ${episode.episode_number}`
-        document.getElementById('episodeDate').textContent = new Date(episode.air_date || episode.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      // Load fights
+      const { data: fights } = await sb.from('episode_fights')
+        .select('*, initiator:cast_members!episode_fights_initiator_id_fkey(display_name), target:cast_members!episode_fights_target_id_fkey(display_name)')
+        .eq('game_id', gameId);
 
-        // Check if final episode (game completed)
-        const isFinal = episode.mm_games?.status === 'completed'
+      // Load director log
+      const { data: directorLog } = await sb.from('episode_director_log')
+        .select('*').eq('game_id', gameId).order('created_at', { ascending: false }).limit(5);
 
-        if (isFinal) {
-          // Show winner
-          await loadWinner(gameId)
-          document.getElementById('winnerSection').style.display = 'block'
-          document.getElementById('eliminationSection').style.display = 'none'
-        } else {
-          // Show elimination
-          await loadElimination(episode)
-          document.getElementById('winnerSection').style.display = 'none'
-          document.getElementById('eliminationSection').style.display = 'block'
-        }
+      const el = document.getElementById('resultsContent');
+      const winner = cast?.find(c => c.status === 'active') || cast?.[0];
+      const winnerName = winner?.cast_members?.display_name || 'Unknown';
+      const modeIcons = { party: '🎉', blitz: '⚡', sprint: '🏃', weekly: '📅' };
+      const modeLabels = { party: 'Party Mode', blitz: 'Blitz Night', sprint: 'Weekend Sprint', weekly: 'Season' };
+      const totalEpisodes = game.episode_number || 1;
+      const totalFights = fights?.length || 0;
+      const maxDrama = Math.max(...(cast || []).map(c => c.drama_points || 0), 0);
 
-        // Load vote breakdown
-        await loadVoteBreakdown(episode)
+      let html = `
+        <div class="results-hero animate-in">
+          <div class="badge badge-purple" style="margin-bottom:0.75rem">${modeLabels[game.game_mode] || 'Game'} Complete</div>
+          <div class="crown-float">👑</div>
+          <div class="winner-name gradient-text">${winnerName}</div>
+          <div class="winner-label">Queen of the Mansion</div>
+        </div>
 
-        // Load leaderboard
-        await loadLeaderboard(gameId)
+        <!-- Stats summary -->
+        <div class="stat-row animate-in animate-delay-1" style="margin-bottom:1.25rem">
+          <div class="stat-item">
+            <div class="stat-value" style="color:var(--purple)">${totalEpisodes}</div>
+            <div class="stat-label">Episodes</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" style="color:var(--rose)">${totalFights}</div>
+            <div class="stat-label">Fights</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" style="color:var(--gold)">${maxDrama}</div>
+            <div class="stat-label">Peak Drama</div>
+          </div>
+        </div>
 
-        // Load highlights (if available)
-        await loadHighlights(episode)
+        <!-- Highlights -->
+        <div class="highlights-grid animate-in animate-delay-2" style="margin-bottom:1.25rem">
+          <div class="highlight-card">
+            <div class="highlight-icon">💥</div>
+            <div class="highlight-label">Most Dramatic</div>
+            <div class="highlight-text">${cast?.[0]?.cast_members?.display_name || '—'}</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-icon">🤫</div>
+            <div class="highlight-label">Best Spy</div>
+            <div class="highlight-text">${(cast || []).sort((a,b) => (b.missions_completed||0) - (a.missions_completed||0))[0]?.cast_members?.display_name || '—'}</div>
+          </div>
+        </div>
 
-        // Add fireworks for final episode
-        if (isFinal) {
-          startFireworks()
-        }
+        <!-- Full cast ranking -->
+        <div class="caption" style="margin-bottom:0.5rem">Final Rankings</div>
+        <div class="cast-list animate-in animate-delay-3">
+      `;
 
-      } catch (error) {
-        console.error('Error loading results:', error)
-        alert('Failed to load results: ' + error.message)
-      }
-    }
+      (cast || []).forEach((c, i) => {
+        const name = c.cast_members?.display_name || 'Player';
+        const isWinner = c.status === 'active' && i === 0;
+        const archIcons = { wildcard: '🃏', strategist: '🧠', sweetheart: '💖', villain: '😈', comedian: '😂', troublemaker: '💣', diva: '👑', hothead: '🔥' };
+        html += `<div class="cast-row ${isWinner ? 'winner' : ''}">
+          <div class="cast-rank">${isWinner ? '👑' : i + 1}</div>
+          <div class="avatar avatar-sm">${archIcons[c.cast_members?.archetype] || '🎭'}</div>
+          <div class="cast-name-col">
+            <div class="cast-name">${name}${c.cast_members?.is_ai_player ? ' 🤖' : ''}</div>
+            <div class="cast-role">${c.secret_role || c.cast_members?.archetype || '?'} · ${c.strike_count || 0} strikes</div>
+          </div>
+          <div class="cast-drama">${c.drama_points || 0}</div>
+          <span class="cast-badge">${c.status === 'eliminated' ? (c.eliminated_by === 'fight' ? '💥' : '🗳️') : '✅'}</span>
+        </div>`;
+      });
 
-    // Load winner (for final episode)
-    async function loadWinner(gameId) {
-      try {
-        const { data: winner, error } = await supabase
-          .from('cast_members')
-          .select('*')
-          .eq('game_id', gameId)
-          .eq('status', 'active')
-          .order('drama_score', { ascending: false })
-          .limit(1)
-          .maybeSingle()
+      html += `</div>`;
 
-        if (error) throw error
-
-        document.getElementById('winnerName').textContent = winner.display_name
-        document.getElementById('winnerQuote').textContent = `"${winner.bio || 'I came, I saw, I conquered.'}"`
-        document.getElementById('winnerDrama').textContent = winner.drama_score || 0
-        document.getElementById('winnerInfluence').textContent = winner.influence_score || 0
-
-        // Count alliances
-        const { count } = await supabase
-          .from('mm_alliance_members')
-          .select('*', { count: 'exact', head: true })
-          .eq('cast_member_id', winner.id)
-
-        document.getElementById('winnerAlliances').textContent = count || 0
-
-      } catch (error) {
-        console.error('Error loading winner:', error)
-      }
-    }
-
-    // Load elimination
-    async function loadElimination(episode) {
-      try {
-        const { data: eliminated, error } = await supabase
-          .from('cast_members')
-          .select('*')
-          .eq('id', episode.eliminated_cast_id)
-          .maybeSingle()
-
-        if (error) throw error
-
-        document.getElementById('eliminatedName').textContent = eliminated.display_name
-        document.getElementById('eliminatedQuote').textContent = `"${eliminated.bio || 'The drama was too much for me...'}."`
-
-      } catch (error) {
-        console.error('Error loading eliminated cast member:', error)
-      }
-    }
-
-    // Load vote breakdown
-    async function loadVoteBreakdown(episode) {
-      try {
-        const { data: votes, error } = await supabase
-          .from('votes')
-          .select('voted_for_cast_id, cast_members(display_name)')
-          .eq('voting_session_id', episode.voting_session_id)
-
-        if (error) throw error
-
-        // Count votes
-        const voteCounts = {}
-        votes.forEach(vote => {
-          const name = vote.cast_members?.display_name || 'Unknown'
-          voteCounts[name] = (voteCounts[name] || 0) + 1
-        })
-
-        // Sort by count
-        const sorted = Object.entries(voteCounts).sort((a, b) => b[1] - a[1])
-        const totalVotes = votes.length
-
-        // Render bars
-        const container = document.getElementById('voteBreakdown')
-        container.innerHTML = `
-          <div class="breakdown-title">Anonymized Vote Count (${totalVotes} total votes)</div>
-          ${sorted.map(([name, count]) => {
-            const percentage = (count / totalVotes) * 100
-            return `
-              <div class="vote-bar">
-                <div class="vote-bar-header">
-                  <span class="vote-bar-name">${name}</span>
-                  <span class="vote-bar-count">${count} vote${count !== 1 ? 's' : ''}</span>
-                </div>
-                <div class="vote-bar-container">
-                  <div class="vote-bar-fill" style="width: ${percentage}%">
-                    ${percentage.toFixed(0)}%
-                  </div>
-                </div>
-              </div>
-            `
-          }).join('')}
-        `
-
-      } catch (error) {
-        console.error('Error loading vote breakdown:', error)
-      }
-    }
-
-    // Load leaderboard
-    async function loadLeaderboard(gameId) {
-      try {
-        const { data: players, error } = await supabase
-          .from('cast_members')
-          .select('*')
-          .eq('game_id', gameId)
-          .order('drama_score', { ascending: false })
-          .limit(5)
-
-        if (error) throw error
-
-        const container = document.getElementById('leaderboardSnapshot')
-        container.innerHTML = `
-          <div class="leaderboard-title">Top 5 Players</div>
-          ${players.map((player, index) => `
-            <div class="leaderboard-item">
-              <div class="leaderboard-rank">#${index + 1}</div>
-              <div class="leaderboard-avatar">${player.display_name.charAt(0)}</div>
-              <div class="leaderboard-info">
-                <div class="leaderboard-name">${player.display_name}</div>
-                <div class="leaderboard-status">${player.status === 'active' ? '🟢 Active' : '🔴 Eliminated'}</div>
-              </div>
-              <div class="leaderboard-score">${player.drama_score || 0}</div>
-            </div>
-          `).join('')}
-        `
-
-      } catch (error) {
-        console.error('Error loading leaderboard:', error)
-      }
-    }
-
-    // Load highlights (placeholder - would need episode_highlights table)
-    async function loadHighlights(episode) {
-      // This would query an episode_highlights table if it exists
-      // For now, keeping the static placeholder content
-    }
-
-    // Share functions
-    window.shareTwitter = function() {
-      const text = `I'm competing in Mansion Mayhem! Check out the latest episode results! 🏰✨`
-      const url = window.location.href
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank')
-    }
-
-    window.shareFacebook = function() {
-      const url = window.location.href
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
-    }
-
-    window.copyLink = function() {
-      navigator.clipboard.writeText(window.location.href)
-      alert('Link copied to clipboard!')
-    }
-
-    // Fireworks animation
-    function startFireworks() {
-      const canvas = document.getElementById('fireworks')
-      const ctx = canvas.getContext('2d')
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-
-      const particles = []
-
-      function createParticle(x, y) {
-        const particle = {
-          x,
-          y,
-          vx: (Math.random() - 0.5) * 8,
-          vy: (Math.random() - 0.5) * 8,
-          life: 100,
-          color: `hsl(${Math.random() * 60 + 40}, 100%, 60%)`
-        }
-        particles.push(particle)
+      // Director's final words
+      if (directorLog && directorLog.length > 0) {
+        html += `<div class="card card-accent animate-in animate-delay-4" style="margin-top:1.25rem">
+          <div class="caption" style="margin-bottom:0.5rem">Director's Notes</div>
+          ${directorLog.slice(0, 3).map(d => `<p style="font-size:0.85rem;color:var(--gold);font-style:italic;margin-bottom:0.5rem">"${d.content}"</p>`).join('')}
+        </div>`;
       }
 
-      function animate() {
-        ctx.fillStyle = 'rgba(10, 10, 10, 0.1)'
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      html += `<button class="btn btn-primary btn-block btn-lg" style="margin-top:1.5rem" onclick="window.location.href='/pages/lobby.html'">Play Again</button>`;
 
-        particles.forEach((p, i) => {
-          p.x += p.vx
-          p.y += p.vy
-          p.vy += 0.1
-          p.life--
-
-          if (p.life <= 0) {
-            particles.splice(i, 1)
-          } else {
-            ctx.fillStyle = p.color
-            ctx.globalAlpha = p.life / 100
-            ctx.fillRect(p.x, p.y, 3, 3)
-          }
-        })
-
-        ctx.globalAlpha = 1
-
-        if (Math.random() < 0.05) {
-          const x = Math.random() * canvas.width
-          const y = Math.random() * canvas.height / 2
-          for (let i = 0; i < 30; i++) {
-            createParticle(x, y)
-          }
-        }
-
-        requestAnimationFrame(animate)
-      }
-
-      animate()
+      el.innerHTML = html;
     }
 
-    init()
+    init();
   </script>
 </body>
 </html>

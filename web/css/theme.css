@@ -1,0 +1,318 @@
+/* ============================================================
+   MANSION MAYHEM — DESIGN SYSTEM
+   Dark luxury. Neon drama. Reality TV energy.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  /* Backgrounds */
+  --bg: #060918;
+  --bg-gradient: linear-gradient(165deg, #060918 0%, #0D1033 50%, #0A0720 100%);
+  --surface: #0F1328;
+  --card: #151A36;
+  --elevated: #1C2246;
+  --glass: rgba(15, 19, 40, 0.85);
+
+  /* Brand */
+  --rose: #FF2D78;
+  --purple: #8B5CF6;
+  --gold: #FFB800;
+  --cyan: #22D3EE;
+  --green: #10B981;
+  --red: #EF4444;
+  --orange: #F97316;
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, #FF2D78 0%, #8B5CF6 100%);
+  --gradient-gold: linear-gradient(135deg, #FFB800 0%, #FF6B00 100%);
+  --gradient-drama: linear-gradient(135deg, #FF2D78 0%, #EF4444 50%, #FFB800 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,45,120,0.08) 0%, rgba(139,92,246,0.08) 100%);
+
+  /* Text */
+  --text: #F8FAFC;
+  --text-2: #94A3B8;
+  --text-3: #475569;
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-accent: rgba(255, 45, 120, 0.25);
+
+  /* Shadows */
+  --glow-rose: 0 0 40px rgba(255, 45, 120, 0.15);
+  --glow-purple: 0 0 40px rgba(139, 92, 246, 0.15);
+  --glow-gold: 0 0 40px rgba(255, 184, 0, 0.15);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+
+  /* Spacing */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--rose); text-decoration: none; }
+img { max-width: 100%; display: block; }
+button { font-family: var(--font); cursor: pointer; }
+input, textarea, select { font-family: var(--font); }
+
+/* ============================================================
+   LAYOUT UTILITIES
+   ============================================================ */
+.page { min-height: 100dvh; background: var(--bg-gradient); position: relative; }
+.page::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(139,92,246,0.08) 0%, transparent 70%),
+              radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255,45,120,0.05) 0%, transparent 60%);
+}
+.container { max-width: 480px; margin: 0 auto; padding: 0 1rem; position: relative; z-index: 1; }
+.container-wide { max-width: 720px; margin: 0 auto; padding: 0 1rem; position: relative; z-index: 1; }
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.title-xl { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; }
+.title-lg { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+.title-md { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
+.title-sm { font-size: 1rem; font-weight: 600; }
+.body-lg { font-size: 1rem; color: var(--text-2); }
+.body-sm { font-size: 0.85rem; color: var(--text-2); }
+.caption { font-size: 0.75rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+.mono { font-family: var(--font-mono); }
+.gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.75rem 1.5rem; border-radius: var(--radius-full); border: none;
+  font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease;
+  position: relative; overflow: hidden;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary {
+  background: var(--gradient-brand); color: white;
+  box-shadow: 0 4px 20px rgba(255, 45, 120, 0.3);
+}
+.btn-primary:hover { box-shadow: 0 6px 30px rgba(255, 45, 120, 0.45); transform: translateY(-1px); }
+.btn-secondary {
+  background: var(--card); color: var(--text); border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--elevated); border-color: rgba(255,255,255,0.12); }
+.btn-gold {
+  background: var(--gradient-gold); color: #000; font-weight: 700;
+  box-shadow: 0 4px 20px rgba(255, 184, 0, 0.3);
+}
+.btn-ghost {
+  background: none; color: var(--text-2); border: 1px solid var(--border);
+}
+.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+.btn-danger { background: var(--red); color: white; }
+.btn-block { width: 100%; }
+.btn-sm { padding: 0.5rem 1rem; font-size: 0.8rem; }
+.btn-lg { padding: 1rem 2rem; font-size: 1rem; }
+.btn-icon { width: 40px; height: 40px; padding: 0; border-radius: var(--radius-md); }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.25rem;
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+.card:hover { border-color: rgba(255,255,255,0.1); }
+.card-accent::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--gradient-brand);
+}
+.card-glass {
+  background: var(--glass); backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+}
+.card-glow-rose { box-shadow: var(--glow-rose); border-color: var(--border-accent); }
+.card-glow-gold { box-shadow: var(--glow-gold); border-color: rgba(255,184,0,0.25); }
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+.input {
+  width: 100%; padding: 0.75rem 1rem; border-radius: var(--radius-md);
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+}
+.input:focus { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(255,45,120,0.1); }
+.input::placeholder { color: var(--text-3); }
+.input-group { display: flex; gap: 0.5rem; }
+
+/* ============================================================
+   BADGES & CHIPS
+   ============================================================ */
+.badge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.25rem 0.65rem; border-radius: var(--radius-full);
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.badge-rose { background: rgba(255,45,120,0.15); color: var(--rose); }
+.badge-purple { background: rgba(139,92,246,0.15); color: var(--purple); }
+.badge-gold { background: rgba(255,184,0,0.15); color: var(--gold); }
+.badge-green { background: rgba(16,185,129,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-ghost { background: rgba(255,255,255,0.06); color: var(--text-2); }
+
+/* ============================================================
+   AVATAR
+   ============================================================ */
+.avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--elevated); display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0; border: 2px solid var(--border);
+}
+.avatar-sm { width: 36px; height: 36px; font-size: 1.1rem; }
+.avatar-lg { width: 64px; height: 64px; font-size: 2rem; }
+.avatar-ring-rose { border-color: var(--rose); }
+.avatar-ring-gold { border-color: var(--gold); }
+.avatar-ring-green { border-color: var(--green); }
+
+/* ============================================================
+   HEADER / NAV BAR
+   ============================================================ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(6,9,24,0.9); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border); padding: 0.75rem 1rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.nav-title { font-weight: 700; font-size: 1rem; flex: 1; }
+.nav-back { background: none; border: none; color: var(--text-2); font-size: 1.2rem; padding: 0.25rem; }
+.page-padded { padding-top: 4rem; padding-bottom: 6rem; }
+
+/* ============================================================
+   BOTTOM TAB BAR
+   ============================================================ */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(6,9,24,0.95); backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around;
+  padding: 0.4rem 0; padding-bottom: max(0.4rem, env(safe-area-inset-bottom));
+}
+.tab-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: none; color: var(--text-3); padding: 0.35rem 0.75rem;
+  font-size: 0.6rem; font-weight: 500; font-family: var(--font);
+  transition: color 0.2s;
+}
+.tab-item.active { color: var(--rose); }
+.tab-icon { font-size: 1.25rem; }
+
+/* ============================================================
+   LOADING / SPINNER
+   ============================================================ */
+.loading-screen {
+  position: fixed; inset: 0; z-index: 300; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+}
+.spinner {
+  width: 36px; height: 36px; border: 3px solid var(--border);
+  border-top-color: var(--rose); border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ============================================================
+   MODAL / OVERLAY
+   ============================================================ */
+.overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  justify-content: center; align-items: center; padding: 1.5rem;
+}
+.overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+.modal {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); padding: 2rem; max-width: 400px; width: 100%;
+  box-shadow: var(--shadow-card);
+}
+
+/* ============================================================
+   DRAMA METER
+   ============================================================ */
+.drama-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.drama-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease, background 0.5s ease; }
+
+/* ============================================================
+   STAT ROW
+   ============================================================ */
+.stat-row { display: flex; gap: 0.5rem; }
+.stat-item {
+  flex: 1; background: var(--surface); border-radius: var(--radius-md);
+  padding: 0.75rem; text-align: center; border: 1px solid var(--border);
+}
+.stat-value { font-size: 1.5rem; font-weight: 800; }
+.stat-label { font-size: 0.65rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.15rem; }
+
+/* ============================================================
+   LIST ITEMS
+   ============================================================ */
+.list-item {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem;
+  background: var(--surface); border-radius: var(--radius-md);
+  border: 1px solid var(--border); transition: background 0.15s;
+}
+.list-item:hover { background: var(--card); }
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255,45,120,0.2); }
+  50% { box-shadow: 0 0 40px rgba(255,45,120,0.4); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-in { animation: slideUp 0.4s ease both; }
+.animate-delay-1 { animation-delay: 0.05s; }
+.animate-delay-2 { animation-delay: 0.1s; }
+.animate-delay-3 { animation-delay: 0.15s; }
+.animate-delay-4 { animation-delay: 0.2s; }
+.animate-delay-5 { animation-delay: 0.25s; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (min-width: 640px) {
+  .container { max-width: 540px; }
+  .title-xl { font-size: 3rem; }
+}

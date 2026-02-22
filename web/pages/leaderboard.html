@@ -3,756 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leaderboard | Mansion Mayhem</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #0A0E27;
-      --bg-card: #111;
-      --bg-elevated: #1a1a1a;
-      --border: #2a2a2a;
-      --text: #fff;
-      --text-dim: #888;
-      --gold: #FFC107;
-      --purple: #9C27B0;
-      --success: #4caf50;
-    }
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background: linear-gradient(135deg, #0A0E27 0%, rgba(233, 30, 99, 0.1) 50%, #0A0E27 100%);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-
-    .page-header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-
-    .page-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 56px;
-      background: linear-gradient(135deg, #FFC107 0%, #E91E63 50%, #9C27B0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 16px;
-      filter: drop-shadow(0 0 30px rgba(233, 30, 99, 0.6));
-    }
-
-    .page-subtitle {
-      font-size: 18px;
-      color: var(--text-dim);
-    }
-
-    .filters-bar {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      margin-bottom: 40px;
-      flex-wrap: wrap;
-    }
-
-    .filter-btn {
-      padding: 12px 28px;
-      background: var(--bg-card);
-      border: 2px solid var(--border);
-      border-radius: 50px;
-      color: var(--text);
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .filter-btn:hover, .filter-btn.active {
-      border-color: #E91E63;
-      background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(233, 30, 99, 0.15));
-      color: #E91E63;
-      box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
-    }
-
-    .podium {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      max-width: 900px;
-      margin: 0 auto 60px;
-      align-items: flex-end;
-    }
-
-    .podium-place {
-      text-align: center;
-      order: 2;
-    }
-
-    .podium-place.first {
-      order: 2;
-    }
-
-    .podium-place.second {
-      order: 1;
-    }
-
-    .podium-place.third {
-      order: 3;
-    }
-
-    .podium-avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #FFC107 0%, #E91E63 50%, #9C27B0 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      margin: 0 auto 16px;
-      border: 4px solid rgba(233, 30, 99, 0.3);
-      position: relative;
-      box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
-    }
-
-    .podium-place.first .podium-avatar {
-      width: 150px;
-      height: 150px;
-      font-size: 60px;
-      border-color: #E91E63;
-      box-shadow: 0 0 40px rgba(233, 30, 99, 0.8), 0 0 60px rgba(255, 193, 7, 0.5);
-      animation: glow 2s ease-in-out infinite;
-    }
-
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 40px rgba(233, 30, 99, 0.8), 0 0 60px rgba(255, 193, 7, 0.5); }
-      50% { box-shadow: 0 0 60px rgba(233, 30, 99, 1), 0 0 80px rgba(255, 193, 7, 0.7); }
-    }
-
-    .podium-crown {
-      position: absolute;
-      top: -30px;
-      font-size: 48px;
-      animation: bounce 2s ease-in-out infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    .podium-rank {
-      font-size: 32px;
-      font-weight: 900;
-      background: linear-gradient(90deg, #FFC107, #E91E63);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 8px;
-    }
-
-    .podium-name {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .podium-score {
-      font-size: 28px;
-      font-weight: 900;
-      background: linear-gradient(90deg, #FFC107, #E91E63, #9C27B0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .podium-label {
-      font-size: 12px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .podium-base {
-      background: var(--bg-card);
-      border: 2px solid var(--border);
-      border-radius: 12px 12px 0 0;
-      padding: 24px;
-      margin-top: 24px;
-      min-height: 100px;
-    }
-
-    .podium-place.first .podium-base {
-      min-height: 150px;
-      border-color: #E91E63;
-      background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(233, 30, 99, 0.08));
-      box-shadow: 0 10px 30px rgba(233, 30, 99, 0.3);
-    }
-
-    .podium-place.second .podium-base {
-      min-height: 120px;
-    }
-
-    .leaderboard-list {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .leaderboard-item {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 20px;
-      align-items: center;
-      background: var(--bg-card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      transition: all 0.3s;
-    }
-
-    .leaderboard-item:hover {
-      border-color: #E91E63;
-      transform: translateX(8px);
-      box-shadow: 0 6px 30px rgba(233, 30, 99, 0.4);
-      background: linear-gradient(135deg, rgba(233, 30, 99, 0.05), rgba(156, 39, 176, 0.05));
-    }
-
-    .leaderboard-item.my-rank {
-      border-color: #E91E63;
-      background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(233, 30, 99, 0.08));
-      box-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
-    }
-
-    .item-rank {
-      font-size: 32px;
-      font-weight: 900;
-      background: linear-gradient(135deg, #FFC107, #E91E63);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      min-width: 60px;
-      text-align: center;
-    }
-
-    .item-info {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex: 1;
-    }
-
-    .item-avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--purple), var(--gold));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      border: 2px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    .item-details {
-      flex: 1;
-    }
-
-    .item-name {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .item-stats {
-      display: flex;
-      gap: 16px;
-      font-size: 13px;
-      color: var(--text-dim);
-    }
-
-    .item-stat {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .item-score {
-      text-align: right;
-    }
-
-    .item-score-value {
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--gold);
-    }
-
-    .item-score-label {
-      font-size: 12px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-    }
-
-    .my-rank-highlight {
-      background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.1), transparent);
-      padding: 4px 0;
-      margin: 8px 0;
-      border-radius: 8px;
-    }
-
-    .stats-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      max-width: 900px;
-      margin: 0 auto 40px;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      transition: all 0.3s;
-    }
-
-    .stat-card:hover {
-      border-color: var(--gold);
-      transform: translateY(-4px);
-    }
-
-    .stat-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-
-    .stat-value {
-      font-size: 36px;
-      font-weight: 900;
-      color: var(--gold);
-      margin-bottom: 8px;
-    }
-
-    .stat-label {
-      font-size: 14px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .status-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .badge-active {
-      background: rgba(76, 175, 80, 0.2);
-      color: var(--success);
-    }
-
-    .badge-eliminated {
-      background: rgba(136, 136, 136, 0.2);
-      color: var(--text-dim);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 80px 20px;
-      color: var(--text-dim);
-    }
-
-    .empty-icon {
-      font-size: 80px;
-      margin-bottom: 24px;
-      opacity: 0.3;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 60px;
-      font-size: 18px;
-      color: var(--text-dim);
-    }
-
-    @media (max-width: 968px) {
-      .podium {
-        grid-template-columns: 1fr;
-      }
-      .podium-place {
-        order: unset !important;
-      }
-      .item-stats {
-        flex-direction: column;
-        gap: 4px;
-      }
-    }
-  </style>
-  <link rel="stylesheet" href="../css/modern-theme.css">
-
-  <!-- Supabase CDN -->
+  <title>Leaderboard — Mansion Mayhem</title>
+  <link rel="stylesheet" href="/css/theme.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // Initialize Supabase client BEFORE game-context.js loads
-    (function() {
-      const SUPABASE_URL = 'https://fpxbhqibimekjhlumnmc.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY';
-      function waitForSupabase() {
-        return new Promise((resolve, reject) => {
-          let attempts = 0;
-          const checkInterval = setInterval(() => {
-            attempts++;
-            if (window.supabase?.createClient) {
-              clearInterval(checkInterval);
-              resolve();
-            } else if (attempts > 50) {
-              clearInterval(checkInterval);
-              reject(new Error('Supabase CDN timeout'));
-            }
-          }, 100);
-        });
-      }
-      waitForSupabase()
-        .then(() => {
-          window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          console.log('✅ Supabase client initialized');
-        })
-        .catch(err => console.error('❌ Failed to initialize Supabase:', err));
-    })();
-  </script>
-  <script src="/js/game-context.js"></script>
+  <style>
+    .rank-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 0.5rem; transition: all 0.15s; }
+    .rank-row.top-3 { border-color: rgba(255,184,0,0.2); }
+    .rank-num { width: 28px; text-align: center; font-weight: 800; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-3); }
+    .rank-row.top-3 .rank-num { color: var(--gold); }
+    .rank-name { flex: 1; font-weight: 600; font-size: 0.9rem; }
+    .rank-stat { text-align: right; }
+    .rank-stat-val { font-weight: 800; font-size: 1rem; color: var(--gold); }
+    .rank-stat-label { font-size: 0.65rem; color: var(--text-3); }
+    .filter-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 0.25rem; }
+    .filter-chip { padding: 0.4rem 0.75rem; border-radius: var(--radius-full); border: 1px solid var(--border); background: none; color: var(--text-3); font-size: 0.75rem; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: var(--font); }
+    .filter-chip.active { background: var(--gradient-brand); color: white; border-color: transparent; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="page-header">
-      <h1 class="page-title">🏆 Leaderboard</h1>
-      <p class="page-subtitle">See where you stand among the cast</p>
-    </div>
+  <div class="page">
+    <nav class="nav">
+      <button class="nav-back" onclick="history.back()">←</button>
+      <span class="nav-title">🏆 Leaderboard</span>
+    </nav>
 
-    <!-- Filters -->
-    <div class="filters-bar">
-      <button class="filter-btn active" onclick="filterBy('drama')" id="filter-drama">
-        🔥 Drama Score
-      </button>
-      <button class="filter-btn" onclick="filterBy('influence')" id="filter-influence">
-        👑 Influence
-      </button>
-      <button class="filter-btn" onclick="filterBy('screen_time')" id="filter-screen_time">
-        📹 Screen Time
-      </button>
-      <button class="filter-btn" onclick="filterBy('all')" id="filter-all">
-        🌟 All Active
-      </button>
-    </div>
-
-    <!-- My Stats Cards -->
-    <div class="stats-cards" id="myStatsCards" style="display: none;">
-      <div class="stat-card">
-        <div class="stat-icon">📊</div>
-        <div class="stat-value" id="myRank">-</div>
-        <div class="stat-label">My Rank</div>
+    <div class="container page-padded">
+      <div class="filter-row">
+        <button class="filter-chip active" onclick="filterBy('wins')">Most Wins</button>
+        <button class="filter-chip" onclick="filterBy('games')">Most Games</button>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon">🔥</div>
-        <div class="stat-value" id="myDrama">0</div>
-        <div class="stat-label">Drama Score</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">👑</div>
-        <div class="stat-value" id="myInfluence">0</div>
-        <div class="stat-label">Influence</div>
-      </div>
+      <div id="leaderboardList"><div class="spinner" style="margin:3rem auto"></div></div>
     </div>
 
-    <!-- Top 3 Podium -->
-    <div class="podium" id="podium" style="display: none;">
-      <!-- Will be filled dynamically -->
-    </div>
-
-    <!-- Leaderboard List -->
-    <div class="leaderboard-list" id="leaderboardList">
-      <div class="loading">⏳ Loading leaderboard...</div>
+    <div class="tab-bar">
+      <a href="/pages/lobby.html" class="tab-item"><span class="tab-icon">🏠</span>Lobby</a>
+      <a href="/pages/profile.html" class="tab-item"><span class="tab-icon">👤</span>Profile</a>
+      <button class="tab-item active"><span class="tab-icon">🏆</span>Ranks</button>
+      <a href="/pages/how-to-play.html" class="tab-item"><span class="tab-icon">📖</span>Rules</a>
     </div>
   </div>
 
   <script type="module">
-    import { supabaseClient as supabase } from '../js/supabase-module.js'
-    import { requireAuth } from '../js/auth.js'
+    import { waitForSupabase } from '/js/supabase.js';
+    let sb, currentFilter = 'wins';
 
-    let currentUser = null
-    let currentCastMember = null
-    let currentMetric = 'drama'
-    let gameId = null
-
-    // Get game ID from URL
-    const urlParams = new URLSearchParams(window.location.search)
-    gameId = urlParams.get('game')
-
-    // Initialize
     async function init() {
-      currentUser = await requireAuth()
-      if (!currentUser) return
-
-      // Load current cast member if in a game
-      if (gameId) {
-        const { data, error } = await supabase
-          .from('cast_members')
-          .select('*')
-          .eq('user_id', currentUser.id)
-          .eq('game_id', gameId)
-          .maybeSingle()
-
-        if (!error && data) {
-          currentCastMember = data
-          document.getElementById('myStatsCards').style.display = 'grid'
-        }
-      }
-
-      // Load leaderboard
-      await loadLeaderboard()
+      sb = await waitForSupabase();
+      loadLeaderboard();
     }
 
-    // Load leaderboard with live stats (uses auto-calculated scores from database)
     async function loadLeaderboard() {
-      try {
-        let players = []
+      const orderCol = currentFilter === 'wins' ? 'games_won' : 'games_played';
+      const { data } = await sb.from('profiles').select('id, display_name, games_played, games_won, avatar_url')
+        .gt(orderCol, 0).order(orderCol, { ascending: false }).limit(50);
 
-        if (gameId) {
-          // Get players from specific game with pre-calculated scores
-          const { data: gameCast, error: castError } = await supabase
-            .from('mm_game_cast')
-            .select(`
-              cast_member_id,
-              status,
-              joined_at,
-              cast_members (
-                id,
-                display_name,
-                full_name,
-                archetype,
-                screen_time_score,
-                status,
-                drama_score,
-                influence_score,
-                activity_count
-              )
-            `)
-            .eq('game_id', gameId)
-            .eq('status', 'active')
-
-          if (castError) throw castError
-
-          if (!gameCast || gameCast.length === 0) {
-            document.getElementById('leaderboardList').innerHTML = `
-              <div class="empty-state">
-                <div class="empty-icon">🏆</div>
-                <div>No players in this game yet</div>
-              </div>
-            `
-            return
-          }
-
-          // Map to players array with score data
-          players = gameCast
-            .filter(gc => gc.cast_members)
-            .map(gc => {
-              const cm = gc.cast_members
-              return {
-                ...cm,
-                drama_score: cm.drama_score || 0,
-                influence_score: cm.influence_score || 0,
-                activity_count: cm.activity_count || 0,
-                screen_time_value: cm.screen_time_score === 'high' ? 3 :
-                                 cm.screen_time_score === 'medium' ? 2 : 1
-              }
-            })
-        } else {
-          // Show all cast members (no game filter)
-          const { data: allCast, error } = await supabase
-            .from('cast_members')
-            .select('id, display_name, full_name, archetype, screen_time_score, status, drama_score, influence_score, activity_count')
-            .eq('status', 'active')
-            .order('drama_score', { ascending: false })
-            .limit(50)
-
-          if (error) throw error
-
-          players = (allCast || []).map(cm => ({
-            ...cm,
-            drama_score: cm.drama_score || 0,
-            influence_score: cm.influence_score || 0,
-            activity_count: cm.activity_count || 0,
-            screen_time_value: cm.screen_time_score === 'high' ? 3 :
-                             cm.screen_time_score === 'medium' ? 2 : 1
-          }))
-        }
-
-        if (players.length === 0) {
-          document.getElementById('leaderboardList').innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon">🏆</div>
-              <div>No players to display</div>
-            </div>
-          `
-          return
-        }
-
-        // Sort by selected metric
-        players.sort((a, b) => {
-          if (currentMetric === 'drama') return b.drama_score - a.drama_score
-          if (currentMetric === 'influence') return b.influence_score - a.influence_score
-          if (currentMetric === 'screen_time') return b.screen_time_value - a.screen_time_value
-          if (currentMetric === 'activity') return b.activity_count - a.activity_count
-          return b.drama_score - a.drama_score
-        })
-
-        // Render top 3 podium
-        renderPodium(players.slice(0, 3))
-
-        // Render full list
-        renderList(players)
-
-        // Update my stats
-        if (currentCastMember) {
-          updateMyStats(players)
-        }
-
-      } catch (error) {
-        console.error('Error loading leaderboard:', error)
-        document.getElementById('leaderboardList').innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">⚠️</div>
-            <div>Failed to load leaderboard: ${error.message}</div>
-          </div>
-        `
-      }
-    }
-
-    // Render top 3 podium
-    function renderPodium(topThree) {
-      if (topThree.length < 3) {
-        document.getElementById('podium').style.display = 'none'
-        return
+      const el = document.getElementById('leaderboardList');
+      if (!data || data.length === 0) {
+        el.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-3)"><div style="font-size:2.5rem;margin-bottom:0.5rem">🏆</div>No players yet. Be the first!</div>`;
+        return;
       }
 
-      const podium = document.getElementById('podium')
-      podium.style.display = 'grid'
-
-      const scoreKey = getScoreKey()
-
-      podium.innerHTML = topThree.map((player, index) => {
-        const rank = index + 1
-        const rankClass = rank === 1 ? 'first' : rank === 2 ? 'second' : 'third'
-        return `
-          <div class="podium-place ${rankClass}">
-            <div class="podium-avatar">
-              ${rank === 1 ? '<div class="podium-crown">👑</div>' : ''}
-              ${player.display_name.charAt(0).toUpperCase()}
-            </div>
-            <div class="podium-rank">#${rank}</div>
-            <div class="podium-name">${player.display_name}</div>
-            <div class="podium-base">
-              <div class="podium-score">${player[scoreKey] || 0}</div>
-              <div class="podium-label">${getMetricLabel()}</div>
-            </div>
-          </div>
-        `
-      }).join('')
+      const medals = ['👑', '🥈', '🥉'];
+      el.innerHTML = data.map((p, i) => `<div class="rank-row ${i < 3 ? 'top-3' : ''} animate-in animate-delay-${Math.min(i, 5)}">
+        <div class="rank-num">${i < 3 ? medals[i] : i + 1}</div>
+        <div class="avatar avatar-sm ${i < 3 ? 'avatar-ring-gold' : ''}">${p.display_name ? p.display_name[0].toUpperCase() : '?'}</div>
+        <div class="rank-name">${p.display_name || 'Player'}</div>
+        <div class="rank-stat">
+          <div class="rank-stat-val">${currentFilter === 'wins' ? p.games_won : p.games_played}</div>
+          <div class="rank-stat-label">${currentFilter === 'wins' ? 'wins' : 'games'}</div>
+        </div>
+      </div>`).join('');
     }
 
-    // Render full leaderboard list
-    function renderList(players) {
-      const list = document.getElementById('leaderboardList')
-      const scoreKey = getScoreKey()
+    window.filterBy = (f) => {
+      currentFilter = f;
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.textContent.toLowerCase().includes(f)));
+      loadLeaderboard();
+    };
 
-      list.innerHTML = players.map((player, index) => {
-        const rank = index + 1
-        const isMe = currentCastMember && player.id === currentCastMember.id
-
-        return `
-          <div class="leaderboard-item ${isMe ? 'my-rank' : ''}">
-            <div class="item-rank">#${rank}</div>
-            <div class="item-info">
-              <div class="item-avatar">
-                ${player.display_name.charAt(0).toUpperCase()}
-              </div>
-              <div class="item-details">
-                <div class="item-name">
-                  ${player.display_name}
-                  ${isMe ? ' <span style="color: var(--gold);">(You)</span>' : ''}
-                </div>
-                <div class="item-stats">
-                  <span class="badge-${player.status === 'active' ? 'active' : 'eliminated'} status-badge">
-                    ${player.status === 'active' ? '🟢 Active' : '🔴 Eliminated'}
-                  </span>
-                  <div class="item-stat">
-                    <span>🔥</span>
-                    <span>${player.drama_score || 0} Drama</span>
-                  </div>
-                  <div class="item-stat">
-                    <span>👑</span>
-                    <span>${player.influence_score || 0} Influence</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="item-score">
-              <div class="item-score-value">${player[scoreKey] || 0}</div>
-              <div class="item-score-label">${getMetricLabel()}</div>
-            </div>
-          </div>
-        `
-      }).join('')
-    }
-
-    // Update my stats cards
-    function updateMyStats(players) {
-      const myRank = players.findIndex(p => p.id === currentCastMember.id) + 1
-
-      document.getElementById('myRank').textContent = myRank > 0 ? `#${myRank}` : '-'
-      document.getElementById('myDrama').textContent = currentCastMember.drama_score || 0
-      document.getElementById('myInfluence').textContent = currentCastMember.influence_score || 0
-    }
-
-    // Filter by metric
-    window.filterBy = async function(metric) {
-      currentMetric = metric
-
-      // Update active button
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'))
-      document.getElementById(`filter-${metric}`).classList.add('active')
-
-      // Reload leaderboard
-      await loadLeaderboard()
-    }
-
-    // Get score key for current metric
-    function getScoreKey() {
-      return currentMetric === 'drama' ? 'drama_score' :
-             currentMetric === 'influence' ? 'influence_score' :
-             currentMetric === 'screen_time' ? 'screen_time_score' :
-             'drama_score'
-    }
-
-    // Get metric label
-    function getMetricLabel() {
-      return currentMetric === 'drama' ? 'Drama' :
-             currentMetric === 'influence' ? 'Influence' :
-             currentMetric === 'screen_time' ? 'Screen Time' :
-             'Drama'
-    }
-
-    init()
+    init();
   </script>
 </body>
 </html>

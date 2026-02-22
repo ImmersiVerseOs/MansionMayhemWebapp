@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Mansion Mayhem</title>
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .admin-section { margin-bottom: 1.5rem; }
+    .admin-section-title { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .game-admin-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 0.5rem; }
+    .game-admin-info { flex: 1; }
+    .game-admin-title { font-weight: 600; font-size: 0.85rem; }
+    .game-admin-sub { font-size: 0.7rem; color: var(--text-3); }
+    .admin-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .event-log-item { padding: 0.5rem 0.75rem; background: var(--surface); border-radius: var(--radius-sm); margin-bottom: 0.35rem; font-size: 0.75rem; font-family: var(--font-mono); border-left: 3px solid var(--purple); }
+    .event-log-item.completed { border-left-color: var(--green); }
+    .event-log-item.failed { border-left-color: var(--red); }
+    .quick-action { display: flex; flex-direction: column; gap: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <button class="nav-back" onclick="window.location.href='/pages/lobby.html'">←</button>
+      <span class="nav-title">🎬 Director Console</span>
+    </nav>
+
+    <div class="container page-padded">
+      <!-- Active Games -->
+      <div class="admin-section">
+        <div class="admin-section-title">
+          <span class="caption">Active Games</span>
+        </div>
+        <div id="activeGames"><div class="spinner" style="margin:1rem auto"></div></div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="admin-section">
+        <div class="admin-section-title"><span class="caption">Quick Actions</span></div>
+        <div class="quick-action">
+          <button class="btn btn-secondary btn-block" onclick="processEvents()">⚡ Process Game Events Now</button>
+          <button class="btn btn-secondary btn-block" onclick="loadEventLog()">📋 Refresh Event Log</button>
+        </div>
+      </div>
+
+      <!-- Event Log -->
+      <div class="admin-section">
+        <div class="admin-section-title"><span class="caption">Recent Event Log</span></div>
+        <div id="eventLog" style="max-height:400px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- System Stats -->
+      <div class="admin-section">
+        <div class="admin-section-title"><span class="caption">System</span></div>
+        <div id="systemStats"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { waitForSupabase, requireAuth } from '/js/supabase.js';
+    let sb;
+
+    async function init() {
+      sb = await waitForSupabase();
+      const user = await requireAuth();
+      if (!user) return;
+      loadActiveGames();
+      loadEventLog();
+      loadSystemStats();
+    }
+
+    async function loadActiveGames() {
+      const { data: games } = await sb.from('mm_games').select('*')
+        .in('status', ['waiting_lobby', 'active_lobby', 'active', 'final_three', 'finale'])
+        .order('created_at', { ascending: false });
+
+      const el = document.getElementById('activeGames');
+      if (!games || games.length === 0) {
+        el.innerHTML = '<p style="color:var(--text-3);font-size:0.85rem">No active games.</p>';
+        return;
+      }
+
+      const statusColors = { waiting_lobby: 'badge-ghost', active_lobby: 'badge-gold', active: 'badge-green', finale: 'badge-rose' };
+      el.innerHTML = games.map(g => `<div class="game-admin-row">
+        <div class="game-admin-info">
+          <div class="game-admin-title">${g.game_code || '???'} · ${(g.game_mode || 'party').toUpperCase()}</div>
+          <div class="game-admin-sub">Phase: ${g.current_phase || '?'} · Ep ${g.episode_number || 0} · ${g.current_players || 0} players · Drama: ${g.drama_level || 0}</div>
+        </div>
+        <span class="badge ${statusColors[g.status] || 'badge-ghost'}">${g.status}</span>
+        <div class="admin-actions">
+          <button class="btn btn-sm btn-ghost" onclick="viewGame('${g.id}')">View</button>
+          <button class="btn btn-sm btn-danger" onclick="endGame('${g.id}')">End</button>
+        </div>
+      </div>`).join('');
+    }
+
+    async function loadEventLog() {
+      const { data: events } = await sb.from('game_event_log').select('*')
+        .order('executed_at', { ascending: false }).limit(30);
+
+      const el = document.getElementById('eventLog');
+      if (!events || events.length === 0) {
+        el.innerHTML = '<p style="color:var(--text-3);font-size:0.85rem">No events processed yet.</p>';
+        return;
+      }
+
+      el.innerHTML = events.map(e => {
+        const time = new Date(e.executed_at).toLocaleTimeString();
+        return `<div class="event-log-item ${e.status}">
+          <span style="color:var(--text-3)">${time}</span> · 
+          <span style="color:var(--text)">${e.event_type}</span> · 
+          <span style="color:${e.status === 'completed' ? 'var(--green)' : 'var(--red)'}">${e.status}</span>
+          ${e.duration_ms ? ` · ${e.duration_ms}ms` : ''}
+          ${e.error_message ? `<br><span style="color:var(--red)">${e.error_message}</span>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    async function loadSystemStats() {
+      const { count: totalGames } = await sb.from('mm_games').select('*', { count: 'exact', head: true });
+      const { count: totalUsers } = await sb.from('profiles').select('*', { count: 'exact', head: true });
+      const { count: pendingEvents } = await sb.from('game_events').select('*', { count: 'exact', head: true }).eq('status', 'scheduled');
+
+      document.getElementById('systemStats').innerHTML = `
+        <div class="stat-row">
+          <div class="stat-item"><div class="stat-value">${totalGames || 0}</div><div class="stat-label">Total Games</div></div>
+          <div class="stat-item"><div class="stat-value">${totalUsers || 0}</div><div class="stat-label">Users</div></div>
+          <div class="stat-item"><div class="stat-value" style="color:var(--gold)">${pendingEvents || 0}</div><div class="stat-label">Pending Events</div></div>
+        </div>
+      `;
+    }
+
+    window.processEvents = async () => {
+      const { data, error } = await sb.rpc('process_game_events');
+      if (error) alert(error.message);
+      else { alert(`Processed: ${data?.processed || 0}, Failed: ${data?.failed || 0}`); loadEventLog(); loadActiveGames(); }
+    };
+
+    window.viewGame = (id) => { window.location.href = `/pages/episode-play.html?game=${id}`; };
+
+    window.endGame = async (id) => {
+      if (!confirm('End this game? This cannot be undone.')) return;
+      await sb.from('mm_games').update({ status: 'completed', completed_at: new Date().toISOString(), current_phase: 'completed' }).eq('id', id);
+      await sb.rpc('cancel_game_events', { p_game_id: id });
+      loadActiveGames();
+    };
+
+    init();
+  </script>
+</body>
+</html>

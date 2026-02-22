@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mansion Mayhem</title>
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .hero { min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 2rem 1.5rem; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 120% 80% at 50% 20%, rgba(255,45,120,0.12) 0%, transparent 60%), radial-gradient(ellipse 80% 60% at 20% 80%, rgba(139,92,246,0.08) 0%, transparent 50%); pointer-events: none; }
+    .hero-crown { font-size: 4rem; animation: float 3s ease-in-out infinite; margin-bottom: 1rem; }
+    .hero-title { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1; margin-bottom: 0.5rem; }
+    .hero-sub { font-size: 1rem; color: var(--text-2); max-width: 320px; margin-bottom: 2.5rem; line-height: 1.5; }
+    .hero-features { display: flex; gap: 1.5rem; margin-bottom: 2.5rem; flex-wrap: wrap; justify-content: center; }
+    .hero-feat { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+    .hero-feat-icon { font-size: 1.5rem; }
+    .hero-feat-label { font-size: 0.7rem; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+    .auth-section { max-width: 360px; width: 100%; }
+    .auth-tabs { display: flex; margin-bottom: 1.25rem; background: var(--surface); border-radius: var(--radius-full); padding: 3px; }
+    .auth-tab { flex: 1; padding: 0.6rem; border-radius: var(--radius-full); border: none; background: none; color: var(--text-3); font-weight: 600; font-size: 0.85rem; font-family: var(--font); transition: all 0.2s; }
+    .auth-tab.active { background: var(--card); color: var(--text); }
+    .auth-form { display: flex; flex-direction: column; gap: 0.75rem; }
+    .auth-form.hidden { display: none; }
+    .auth-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: var(--red); padding: 0.6rem 0.75rem; border-radius: var(--radius-md); font-size: 0.8rem; display: none; }
+    .auth-divider { display: flex; align-items: center; gap: 0.75rem; color: var(--text-3); font-size: 0.75rem; margin: 0.5rem 0; }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .guest-note { font-size: 0.75rem; color: var(--text-3); margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div class="hero-crown">👑</div>
+      <h1 class="hero-title">
+        <span class="gradient-text">Mansion</span><br>Mayhem
+      </h1>
+      <p class="hero-sub">Reality TV drama meets social deduction. Secret roles. Timed betrayals. Only one survives.</p>
+
+      <div class="hero-features animate-in animate-delay-2">
+        <div class="hero-feat"><span class="hero-feat-icon">🎭</span><span class="hero-feat-label">Secret Roles</span></div>
+        <div class="hero-feat"><span class="hero-feat-icon">⚔️</span><span class="hero-feat-label">Confrontations</span></div>
+        <div class="hero-feat"><span class="hero-feat-icon">🗳️</span><span class="hero-feat-label">Live Voting</span></div>
+        <div class="hero-feat"><span class="hero-feat-icon">🤖</span><span class="hero-feat-label">AI Agents</span></div>
+      </div>
+
+      <div class="auth-section animate-in animate-delay-3">
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="showTab('signin')">Sign In</button>
+          <button class="auth-tab" onclick="showTab('signup')">Sign Up</button>
+        </div>
+
+        <div id="authError" class="auth-error"></div>
+
+        <!-- SIGN IN -->
+        <form id="signinForm" class="auth-form" onsubmit="handleSignIn(event)">
+          <input class="input" type="email" name="email" placeholder="Email" required autocomplete="email">
+          <input class="input" type="password" name="password" placeholder="Password" required autocomplete="current-password">
+          <button class="btn btn-primary btn-block btn-lg" type="submit">Enter the Mansion</button>
+        </form>
+
+        <!-- SIGN UP -->
+        <form id="signupForm" class="auth-form hidden" onsubmit="handleSignUp(event)">
+          <input class="input" type="text" name="name" placeholder="Display Name" required>
+          <input class="input" type="email" name="email" placeholder="Email" required autocomplete="email">
+          <input class="input" type="password" name="password" placeholder="Password (6+ characters)" required minlength="6" autocomplete="new-password">
+          <button class="btn btn-primary btn-block btn-lg" type="submit">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { waitForSupabase, getUser, signInWithEmail, signUpWithEmail } from '/js/supabase.js';
+
+    // Check if already logged in
+    waitForSupabase().then(async () => {
+      const user = await getUser();
+      if (user) window.location.href = '/pages/lobby.html';
+    });
+
+    window.showTab = (tab) => {
+      document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'signin') || (i === 1 && tab === 'signup')));
+      document.getElementById('signinForm').classList.toggle('hidden', tab !== 'signin');
+      document.getElementById('signupForm').classList.toggle('hidden', tab !== 'signup');
+      document.getElementById('authError').style.display = 'none';
+    };
+
+    function showError(msg) {
+      const el = document.getElementById('authError');
+      el.textContent = msg; el.style.display = 'block';
+    }
+
+    window.handleSignIn = async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const email = form.email.value;
+      const password = form.password.value;
+      const btn = form.querySelector('button');
+      btn.disabled = true; btn.textContent = 'Entering...';
+      const { error } = await signInWithEmail(email, password);
+      if (error) { showError(error.message); btn.disabled = false; btn.textContent = 'Enter the Mansion'; }
+      else window.location.href = '/pages/lobby.html';
+    };
+
+    window.handleSignUp = async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const name = form.name.value;
+      const email = form.email.value;
+      const password = form.password.value;
+      const btn = form.querySelector('button');
+      btn.disabled = true; btn.textContent = 'Creating...';
+      const { error } = await signUpWithEmail(email, password, name);
+      if (error) { showError(error.message); btn.disabled = false; btn.textContent = 'Create Account'; }
+      else window.location.href = '/pages/lobby.html';
+    };
+  </script>
+</body>
+</html>

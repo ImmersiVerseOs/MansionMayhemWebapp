@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mansion Mayhem — Live</title>
+  <link rel="stylesheet" href="/css/theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* === GAME TOP BAR === */
+    .game-nav { position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(6,9,24,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0.5rem 0.75rem;display:flex;align-items:center;gap:0.6rem; }
+    .phase-pill { background:var(--gradient-brand);padding:0.25rem 0.6rem;border-radius:var(--radius-full);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap; }
+    .game-timer { font-size:1.4rem;font-weight:900;font-family:var(--font-mono);min-width:3.5rem;text-align:center; }
+    .game-timer.warning { color:var(--gold); }
+    .game-timer.critical { color:var(--red);animation:pulse 0.5s infinite alternate; }
+    .drama-track { flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden; }
+    .drama-bar-fill { height:100%;border-radius:3px;transition:width 0.5s,background 0.5s; }
+    .ep-num { font-size:0.7rem;color:var(--text-3);font-family:var(--font-mono);white-space:nowrap; }
+
+    /* === GAME LAYOUT === */
+    .game-body { padding-top:3.25rem;padding-bottom:4.5rem;min-height:100dvh;display:flex;flex-direction:column; }
+    .game-area { flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.75rem;overflow-y:auto; }
+
+    /* === DIRECTOR OVERLAY === */
+    .director-full { display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);justify-content:center;align-items:center;padding:2rem;text-align:center; }
+    .director-full.show { display:flex;animation:fadeIn 0.3s ease; }
+    .director-full-icon { font-size:3.5rem;margin-bottom:1rem;animation:float 2.5s ease-in-out infinite; }
+    .director-full-text { font-size:1.2rem;font-weight:600;line-height:1.5;color:var(--gold);font-style:italic;max-width:400px; }
+    .director-full-close { margin-top:1.5rem;background:none;border:1px solid rgba(255,255,255,0.15);color:var(--text-3);padding:0.4rem 1.25rem;border-radius:var(--radius-full);font-size:0.75rem;font-family:var(--font);cursor:pointer; }
+
+    /* === ROLE REVEAL (arrival) === */
+    .role-reveal { background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.5rem;text-align:center;position:relative;overflow:hidden; }
+    .role-reveal::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-brand); }
+    .role-reveal-icon { font-size:3.5rem;margin-bottom:0.5rem; }
+    .role-reveal-name { font-size:1.3rem;font-weight:800; }
+    .role-reveal-desc { font-size:0.85rem;color:var(--text-2);margin-top:0.5rem;line-height:1.5; }
+    .role-ability-box { background:var(--surface);border-radius:var(--radius-md);padding:0.75rem;margin-top:1rem;text-align:left; }
+    .role-ability-label { font-size:0.7rem;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:0.06em; }
+    .role-ability-text { font-size:0.8rem;color:var(--text-2);margin-top:0.2rem; }
+    .role-secret-note { font-size:0.7rem;color:var(--text-3);margin-top:0.75rem;font-style:italic; }
+
+    /* === PLAYER GRID === */
+    .p-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.5rem; }
+    .p-card { background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:0.65rem;text-align:center;position:relative;transition:all 0.15s; }
+    .p-card.immune { border-color:var(--green);box-shadow:0 0 12px rgba(16,185,129,0.15); }
+    .p-card.struck { border-color:var(--red); }
+    .p-card.eliminated { opacity:0.35;filter:grayscale(1); }
+    .p-card.me { border-color:var(--purple);box-shadow:0 0 12px rgba(139,92,246,0.15); }
+    .p-avatar { width:42px;height:42px;border-radius:50%;background:var(--elevated);margin:0 auto 0.35rem;display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:2px solid var(--border); }
+    .p-name { font-size:0.75rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .p-meta { font-size:0.6rem;color:var(--text-3);margin-top:0.1rem; }
+    .p-strikes { position:absolute;top:4px;right:4px;display:flex;gap:2px; }
+    .p-strike-dot { width:7px;height:7px;border-radius:50%;background:var(--red); }
+    .p-action { width:100%;margin-top:0.4rem;padding:0.3rem;border-radius:var(--radius-sm);font-size:0.65rem;font-weight:600;border:1px solid;cursor:pointer;background:none;font-family:var(--font); }
+    .p-action.vote { color:var(--rose);border-color:rgba(255,45,120,0.3); }
+    .p-action.vote:hover { background:rgba(255,45,120,0.1); }
+    .p-action.fight { color:var(--orange);border-color:rgba(249,115,22,0.3); }
+    .p-action.fight:hover { background:rgba(249,115,22,0.1); }
+
+    /* === INLINE DIRECTOR FEED === */
+    .d-feed { display:flex;flex-direction:column;gap:0.35rem; }
+    .d-msg { background:rgba(255,184,0,0.06);border-left:3px solid var(--gold);padding:0.4rem 0.65rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:0.78rem;font-style:italic;color:var(--gold); }
+
+    /* === CHALLENGE CARD === */
+    .challenge-box { background:var(--gradient-glass);border:1px solid var(--border-accent);border-radius:var(--radius-lg);padding:1.25rem;text-align:center; }
+    .challenge-box-icon { font-size:2.5rem;margin-bottom:0.5rem; }
+    .challenge-box-name { font-size:1.05rem;font-weight:700; }
+    .challenge-box-desc { font-size:0.8rem;color:var(--text-2);margin-top:0.35rem; }
+    .challenge-reward-pill { display:inline-block;background:var(--card);padding:0.25rem 0.65rem;border-radius:var(--radius-full);font-size:0.7rem;color:var(--gold);margin-top:0.5rem; }
+
+    /* === SECRET REVEAL === */
+    .secret-box { background:linear-gradient(135deg,rgba(249,115,22,0.1),rgba(255,45,120,0.1));border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-md);padding:0.75rem;animation:slideUp 0.4s ease; }
+    .secret-label { font-size:0.65rem;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:0.06em; }
+    .secret-content { font-size:0.9rem;font-weight:600;margin-top:0.25rem;font-style:italic; }
+
+    /* === MISSION CARD === */
+    .mission-box { background:var(--card);border:1px solid rgba(255,184,0,0.15);border-radius:var(--radius-md);padding:0.75rem; }
+    .mission-cat { font-size:0.65rem;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:0.06em; }
+    .mission-name { font-size:0.9rem;font-weight:700;margin-top:0.25rem; }
+    .mission-desc { font-size:0.78rem;color:var(--text-2);margin-top:0.15rem; }
+    .mission-btn { width:100%;margin-top:0.5rem; }
+
+    /* === POWER CARD === */
+    .power-box { background:var(--card);border:1px solid rgba(139,92,246,0.2);border-radius:var(--radius-md);padding:0.75rem;text-align:center; }
+
+    /* === GAME TAB BAR === */
+    .game-tabs { position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(6,9,24,0.95);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:0.35rem 0;padding-bottom:max(0.35rem,env(safe-area-inset-bottom)); }
+    .g-tab { display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:none;color:var(--text-3);padding:0.3rem 0.65rem;font-size:0.55rem;font-weight:500;font-family:var(--font);transition:color 0.2s;cursor:pointer; }
+    .g-tab.active { color:var(--rose); }
+    .g-tab-icon { font-size:1.15rem; }
+    .g-tab.flash { color:var(--gold);animation:pulse 0.5s ease 3; }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- LOADING -->
+    <div id="loading" class="loading-screen">
+      <div class="spinner"></div>
+      <div style="color:var(--text-2);font-size:0.85rem">Entering the Mansion...</div>
+    </div>
+
+    <!-- GAME TOP BAR -->
+    <div class="game-nav">
+      <div class="phase-pill" id="phasePill">LOBBY</div>
+      <div class="game-timer" id="gameTimer">--:--</div>
+      <div class="drama-track"><div class="drama-bar-fill" id="dramaFill" style="width:0%"></div></div>
+      <div class="ep-num" id="epNum">EP 1</div>
+    </div>
+
+    <!-- DIRECTOR OVERLAY -->
+    <div class="director-full" id="directorOverlay">
+      <div>
+        <div class="director-full-icon">🎭</div>
+        <div class="director-full-text" id="directorText"></div>
+        <button class="director-full-close" onclick="dismissDirector()">Continue</button>
+      </div>
+    </div>
+
+    <!-- GAME BODY -->
+    <div class="game-body">
+      <div class="game-area" id="gameArea"></div>
+    </div>
+
+    <!-- GAME TAB BAR -->
+    <div class="game-tabs">
+      <button class="g-tab active" id="tabPlayers" onclick="switchTab('players')"><span class="g-tab-icon">👥</span>Players</button>
+      <button class="g-tab" id="tabChat" onclick="switchTab('chat')"><span class="g-tab-icon">💬</span>Chat</button>
+      <button class="g-tab" id="tabMissions" onclick="switchTab('missions')"><span class="g-tab-icon">📋</span>Missions</button>
+      <button class="g-tab" id="tabAlliances" onclick="switchTab('alliances')"><span class="g-tab-icon">🤝</span>Alliances</button>
+      <button class="g-tab" id="tabPowers" onclick="switchTab('powers')"><span class="g-tab-icon">⚡</span>Powers</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { waitForSupabase, requireAuth, getSupabase } from '/js/supabase.js';
+
+    // We inline a simplified engine here to avoid module resolution issues across deployments.
+    // In production, import from /js/episode-engine.js
+
+    let sb, user, gameId, castMemberId;
+    let state = { phase:'lobby', episode:1, dramaLevel:0, phaseStartedAt:null, gameMode:'party', players:[], myRole:null, myMissions:[], myPowers:[], directorMessages:[], secrets:[], challenge:null, votingOpen:false, gameStatus:'active' };
+    let phaseDurations = { arrival:180, social:480, challenge:420, whisper:300, confrontation:300, deliberation:240, elimination:180 };
+    let timerIv = null, tab = 'players', subs = [];
+
+    const phaseLabels = { arrival:'Arrival', social:'Social Hour', challenge:'The Challenge', whisper:'Whisper Hour', confrontation:'Confrontation', deliberation:'Deliberation', elimination:'Elimination' };
+    const archIcons = { wildcard:'🃏', strategist:'🧠', sweetheart:'💖', villain:'😈', comedian:'😂', troublemaker:'💣', diva:'👑', hothead:'🔥' };
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      gameId = params.get('game');
+      if (!gameId) { window.location.href='/pages/lobby.html'; return; }
+
+      sb = await waitForSupabase();
+      user = await requireAuth();
+      if (!user) return;
+
+      // Get cast member
+      const { data: cm } = await sb.from('cast_members').select('id').eq('user_id', user.id).maybeSingle();
+      castMemberId = cm?.id;
+
+      await loadGame();
+      await loadPlayers();
+      await loadMyRole();
+      await loadMyMissions();
+      await loadMyPowers();
+      await loadDirector();
+      await loadChallenge();
+
+      subscribe();
+      startTimer();
+      render();
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    // --- DATA ---
+    async function loadGame() {
+      const { data: g } = await sb.from('mm_games').select('*').eq('id', gameId).single();
+      if (!g) return;
+      state.phase = g.current_phase || 'lobby';
+      state.phaseStartedAt = g.phase_started_at;
+      state.dramaLevel = g.drama_level || 0;
+      state.episode = g.episode_number || 1;
+      state.gameMode = g.game_mode || 'party';
+      state.gameStatus = g.status;
+
+      const { data: phases } = await sb.from('episode_phase_templates').select('*').eq('mode_name', state.gameMode).order('phase_order');
+      if (phases) phases.forEach(p => phaseDurations[p.phase_name] = p.duration_secs);
+    }
+    async function loadPlayers() {
+      const { data } = await sb.from('mm_game_cast').select('*, cast_members(id,display_name,archetype,avatar_url,is_ai_player)').eq('game_id', gameId);
+      state.players = (data || []).map(gc => ({ id: gc.cast_member_id, name: gc.cast_members?.display_name||'?', archetype: gc.cast_members?.archetype||'wildcard', ai: gc.cast_members?.is_ai_player, status: gc.status, strikes: gc.strike_count||0, immunity: gc.immunity, drama: gc.drama_points||0, power: gc.has_power, missions: gc.missions_completed||0 }));
+    }
+    async function loadMyRole() {
+      if (!castMemberId) return;
+      const { data } = await sb.from('episode_player_roles').select('*, episode_role_templates(*)').eq('game_id', gameId).eq('episode_number', state.episode).eq('cast_member_id', castMemberId).maybeSingle();
+      state.myRole = data ? { name: data.role_name, t: data.episode_role_templates, revealed: data.is_revealed, uses: data.ability_uses_remaining } : null;
+    }
+    async function loadMyMissions() {
+      if (!castMemberId) return;
+      const { data } = await sb.from('episode_missions').select('*, episode_mission_templates(*)').eq('game_id', gameId).eq('episode_number', state.episode).eq('cast_member_id', castMemberId).in('status', ['active']);
+      state.myMissions = data || [];
+    }
+    async function loadMyPowers() {
+      if (!castMemberId) return;
+      const { data } = await sb.from('episode_powers').select('*').eq('game_id', gameId).eq('cast_member_id', castMemberId).eq('is_used', false);
+      state.myPowers = data || [];
+    }
+    async function loadDirector() {
+      const { data } = await sb.from('episode_director_log').select('*').eq('game_id', gameId).eq('episode_number', state.episode).order('created_at', { ascending: false }).limit(8);
+      state.directorMessages = (data || []).reverse();
+    }
+    async function loadChallenge() {
+      const { data } = await sb.from('episode_challenges').select('*, episode_challenge_templates(*)').eq('game_id', gameId).eq('episode_number', state.episode).eq('status', 'active').maybeSingle();
+      state.challenge = data;
+    }
+
+    // --- REALTIME ---
+    function subscribe() {
+      const ch1 = sb.channel('g-' + gameId)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mm_games', filter: `id=eq.${gameId}` }, async (p) => {
+          const old = state.phase;
+          const g = p.new;
+          state.phase = g.current_phase || state.phase;
+          state.phaseStartedAt = g.phase_started_at;
+          state.dramaLevel = g.drama_level || 0;
+          state.episode = g.episode_number || state.episode;
+          state.gameStatus = g.status;
+          if (g.current_phase !== old) { await onPhaseChange(); startTimer(); }
+          if (g.status === 'completed') window.location.href = `/pages/results.html?game=${gameId}`;
+          render();
+        }).subscribe();
+      const ch2 = sb.channel('p-' + gameId)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'mm_game_cast', filter: `game_id=eq.${gameId}` }, async () => { await loadPlayers(); render(); }).subscribe();
+      const ch3 = sb.channel('d-' + gameId)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'episode_director_log', filter: `game_id=eq.${gameId}` }, (p) => {
+          const m = p.new;
+          state.directorMessages.push(m);
+          if (state.directorMessages.length > 15) state.directorMessages.shift();
+          if (['phase_intro','announce','coronation','challenge'].includes(m.message_type)) showDirector(m.content);
+          render();
+        }).subscribe();
+      const ch4 = sb.channel('f-' + gameId)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'episode_fights', filter: `game_id=eq.${gameId}` }, async (p) => {
+          const f = p.new;
+          const init = state.players.find(x => x.id === f.initiator_id);
+          const targ = state.players.find(x => x.id === f.target_id);
+          showDirector(`💥 ${init?.name || '???'} confronted ${targ?.name || '???'}!`);
+          await loadPlayers(); render();
+        }).subscribe();
+      const ch5 = sb.channel('m-' + gameId)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'episode_missions', filter: `game_id=eq.${gameId}` }, async (p) => {
+          if (p.new?.cast_member_id === castMemberId) { await loadMyMissions(); flashTab('tabMissions'); render(); }
+        }).subscribe();
+      const ch6 = sb.channel('pw-' + gameId)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'episode_powers', filter: `game_id=eq.${gameId}` }, async (p) => {
+          if (p.new?.cast_member_id === castMemberId) { await loadMyPowers(); flashTab('tabPowers'); render(); }
+        }).subscribe();
+      const ch7 = sb.channel('s-' + gameId)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'episode_secrets', filter: `game_id=eq.${gameId}` }, (p) => {
+          if (p.new?.is_revealed) { state.secrets.push(p.new); showDirector(`🔥 "${p.new.content}"`); render(); }
+        }).subscribe();
+      subs = [ch1, ch2, ch3, ch4, ch5, ch6, ch7];
+    }
+
+    async function onPhaseChange() {
+      if (state.phase === 'arrival') await loadMyRole();
+      if (['social','whisper'].includes(state.phase)) await loadMyMissions();
+      if (state.phase === 'challenge') await loadChallenge();
+      state.votingOpen = state.phase === 'deliberation';
+    }
+
+    // --- TIMER ---
+    function startTimer() {
+      if (timerIv) clearInterval(timerIv);
+      timerIv = setInterval(() => {
+        const dur = phaseDurations[state.phase] || 300;
+        const elapsed = state.phaseStartedAt ? (Date.now() - new Date(state.phaseStartedAt).getTime()) / 1000 : 0;
+        const rem = Math.max(0, Math.round(dur - elapsed));
+        const pct = dur > 0 ? rem / dur : 0;
+        const el = document.getElementById('gameTimer');
+        el.textContent = `${Math.floor(rem/60)}:${(rem%60).toString().padStart(2,'0')}`;
+        el.className = 'game-timer' + (pct < 0.15 ? ' critical' : pct < 0.3 ? ' warning' : '');
+        const df = document.getElementById('dramaFill');
+        df.style.width = state.dramaLevel + '%';
+        df.style.background = state.dramaLevel < 25 ? 'var(--green)' : state.dramaLevel < 50 ? 'var(--gold)' : state.dramaLevel < 75 ? 'var(--orange)' : 'var(--red)';
+      }, 1000);
+    }
+
+    // --- DIRECTOR ---
+    function showDirector(text) {
+      document.getElementById('directorText').textContent = text;
+      document.getElementById('directorOverlay').classList.add('show');
+      setTimeout(() => document.getElementById('directorOverlay').classList.remove('show'), 5500);
+    }
+    window.dismissDirector = () => document.getElementById('directorOverlay').classList.remove('show');
+
+    // --- RENDER ---
+    function render() {
+      document.getElementById('phasePill').textContent = (phaseLabels[state.phase] || state.phase).toUpperCase();
+      document.getElementById('epNum').textContent = 'EP ' + state.episode;
+
+      const area = document.getElementById('gameArea');
+      if (tab === 'players') renderPlayers(area);
+      else if (tab === 'missions') renderMissions(area);
+      else if (tab === 'powers') renderPowers(area);
+      else if (tab === 'chat') renderChat(area);
+      else if (tab === 'alliances') renderAlliances(area);
+    }
+
+    function renderPlayers(area) {
+      let html = '';
+
+      // Director feed (last 3)
+      const msgs = state.directorMessages.slice(-3);
+      if (msgs.length) html += `<div class="d-feed">${msgs.map(m => `<div class="d-msg">"${m.content}"</div>`).join('')}</div>`;
+
+      // Secret reveal (confrontation)
+      if (state.phase === 'confrontation' && state.secrets.length) {
+        const s = state.secrets[state.secrets.length - 1];
+        html += `<div class="secret-box"><div class="secret-label">🔥 Secret Revealed</div><div class="secret-content">${s.content}</div></div>`;
+      }
+
+      // Challenge (challenge phase)
+      if (state.phase === 'challenge' && state.challenge?.episode_challenge_templates) {
+        const c = state.challenge.episode_challenge_templates;
+        html += `<div class="challenge-box animate-in"><div class="challenge-box-icon">${c.icon}</div><div class="challenge-box-name">${c.display_name}</div><div class="challenge-box-desc">${c.description}</div><div class="challenge-reward-pill">🏆 ${c.reward_description}</div></div>`;
+      }
+
+      // My role (compact)
+      if (state.myRole?.t) {
+        const r = state.myRole.t;
+        html += `<div style="display:flex;align-items:center;gap:0.65rem;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:0.6rem">
+          <span style="font-size:1.75rem">${r.icon||'🎭'}</span>
+          <div style="flex:1"><div class="gradient-text" style="font-weight:700;font-size:0.85rem">${r.display_name||state.myRole.name}</div>
+          <div style="font-size:0.65rem;color:var(--text-3)">${r.ability_name} · ${state.myRole.uses} use(s)</div></div></div>`;
+      }
+
+      // Role reveal (arrival phase)
+      if (state.phase === 'arrival' && state.myRole?.t) {
+        const r = state.myRole.t;
+        html += `<div class="role-reveal animate-in"><div class="role-reveal-icon">${r.icon}</div>
+          <div class="role-reveal-name gradient-text">${r.display_name}</div>
+          <div class="role-reveal-desc">${r.description}</div>
+          <div class="role-ability-box"><div class="role-ability-label">⚡ ${r.ability_name}</div><div class="role-ability-text">${r.ability_description}</div></div>
+          <div class="role-secret-note">Only you can see this. Keep it secret.</div></div>`;
+      }
+
+      // Player grid
+      const active = state.players.filter(p => p.status === 'active');
+      const elim = state.players.filter(p => p.status === 'eliminated');
+      html += `<div class="p-grid">`;
+      active.forEach(p => {
+        const me = p.id === castMemberId;
+        html += `<div class="p-card ${p.immunity ? 'immune' : ''} ${p.strikes > 0 ? 'struck' : ''} ${me ? 'me' : ''}">
+          <div class="p-strikes">${'<span class="p-strike-dot"></span>'.repeat(p.strikes)}</div>
+          <div class="p-avatar">${archIcons[p.archetype]||'🎭'}</div>
+          <div class="p-name">${p.name}${me ? ' (You)' : ''}</div>
+          <div class="p-meta">${p.archetype} · ${p.drama}${p.immunity ? ' · 🛡️' : ''}</div>
+          ${state.phase === 'deliberation' && !me ? `<button class="p-action vote" onclick="castVote('${p.id}')">🗳️ Vote Out</button>` : ''}
+          ${['social','whisper','confrontation'].includes(state.phase) && !me ? `<button class="p-action fight" onclick="startFight('${p.id}')">💥 Confront</button>` : ''}
+        </div>`;
+      });
+      html += `</div>`;
+      if (elim.length) html += `<div style="font-size:0.75rem;color:var(--text-3);margin-top:0.25rem">Eliminated: ${elim.map(p => p.name).join(', ')}</div>`;
+      area.innerHTML = html;
+    }
+
+    function renderMissions(area) {
+      if (!state.myMissions.length) { area.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-3)"><div style="font-size:2.5rem;margin-bottom:0.5rem">📋</div>No active missions. Assigned during Social & Whisper phases.</div>`; return; }
+      area.innerHTML = state.myMissions.map(m => {
+        const t = m.episode_mission_templates;
+        return `<div class="mission-box"><div class="mission-cat">${t?.category||'mission'}${t?.is_betrayal ? ' · ⚠️ BETRAYAL' : ''}</div>
+          <div class="mission-name">${t?.name||'Mission'}</div><div class="mission-desc">${t?.description||''}</div>
+          <button class="btn btn-primary btn-sm btn-block mission-btn" onclick="completeMission('${m.id}')">✅ Complete</button></div>`;
+      }).join('');
+    }
+
+    function renderPowers(area) {
+      if (!state.myPowers.length) { area.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-3)"><div style="font-size:2.5rem;margin-bottom:0.5rem">⚡</div>No powers yet. Win challenges or complete missions.</div>`; return; }
+      const icons = { double_vote:'🗳️', spy:'👁️', veto:'🛡️', immunity_grant:'💚', secret_reveal:'🔮', alliance_shield:'🤝', steal_power:'💰' };
+      area.innerHTML = state.myPowers.map(p => `<div class="power-box">
+        <div style="font-size:2rem">${icons[p.power_type]||'⚡'}</div>
+        <div class="gradient-text" style="font-weight:700;font-size:0.9rem;margin-top:0.25rem">${p.power_type.replace(/_/g,' ').toUpperCase()}</div>
+        <div style="font-size:0.75rem;color:var(--text-3);margin-top:0.15rem">From: ${p.source}</div>
+        <button class="btn btn-primary btn-sm" style="margin-top:0.5rem" onclick="usePower('${p.id}')">Use Power</button>
+      </div>`).join('');
+    }
+
+    function renderChat(area) {
+      area.innerHTML = `<div style="flex:1;display:flex;flex-direction:column"><div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0.35rem;padding:0.25rem" id="chatMsgs">
+        <div style="text-align:center;color:var(--text-3);font-size:0.8rem;padding:2rem">Chat is live during the game</div></div>
+        <div style="display:flex;gap:0.5rem;padding:0.5rem 0"><input class="input" id="chatIn" placeholder="Say something..." style="flex:1">
+        <button class="btn btn-primary btn-sm" onclick="sendChat()">Send</button></div></div>`;
+    }
+
+    function renderAlliances(area) {
+      area.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-3)"><div style="font-size:2.5rem;margin-bottom:0.5rem">🤝</div>Alliance system coming soon. Use Chat to coordinate with allies.</div>`;
+    }
+
+    // --- ACTIONS ---
+    window.castVote = async (targetId) => {
+      const { data: round } = await sb.from('mm_voting_rounds').select('id').eq('game_id', gameId).in('status', ['open','active']).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (!round) { alert('No active voting round'); return; }
+      const { error } = await sb.from('mm_elimination_votes').upsert({ round_id: round.id, cast_member_id: castMemberId, voted_for_id: targetId }, { onConflict: 'round_id,cast_member_id' });
+      if (error) alert(error.message);
+    };
+
+    window.startFight = async (targetId) => {
+      if (!confirm('Start a confrontation? Both players receive a strike!')) return;
+      const { data, error } = await sb.from('episode_fights').insert({ game_id: gameId, episode_number: state.episode, initiator_id: castMemberId, target_id: targetId, fight_type: 'shove', phase: state.phase, outcome: 'completed', drama_generated: 15 }).select().single();
+      if (error) { alert(error.message); return; }
+      await sb.rpc('process_episode_fight', { p_fight_id: data.id });
+    };
+
+    window.completeMission = async (missionId) => {
+      await sb.from('episode_missions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', missionId).eq('cast_member_id', castMemberId);
+      await loadMyMissions(); render();
+    };
+
+    window.usePower = async (powerId) => {
+      await sb.from('episode_powers').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', powerId).eq('cast_member_id', castMemberId);
+      await loadMyPowers(); render();
+    };
+
+    window.sendChat = async () => {
+      const input = document.getElementById('chatIn');
+      if (!input?.value.trim()) return;
+      await sb.from('mm_tea_room_posts').insert({ game_id: gameId, cast_member_id: castMemberId, content: input.value.trim(), post_type: 'tea', phase: state.phase });
+      input.value = '';
+    };
+
+    window.switchTab = (t) => {
+      tab = t;
+      document.querySelectorAll('.g-tab').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
+      render();
+    };
+
+    function flashTab(id) { const el = document.getElementById(id); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2000); }
+
+    init().catch(e => { console.error(e); document.getElementById('loading').innerHTML = `<div style="color:var(--red)">Error: ${e.message}</div>`; });
+  </script>
+</body>
+</html>

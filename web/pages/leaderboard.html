@@ -4,83 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Leaderboard — Mansion Mayhem</title>
-  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/candy.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    .rank-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 0.5rem; transition: all 0.15s; }
-    .rank-row.top-3 { border-color: rgba(255,184,0,0.2); }
-    .rank-num { width: 28px; text-align: center; font-weight: 800; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-3); }
-    .rank-row.top-3 .rank-num { color: var(--gold); }
-    .rank-name { flex: 1; font-weight: 600; font-size: 0.9rem; }
-    .rank-stat { text-align: right; }
-    .rank-stat-val { font-weight: 800; font-size: 1rem; color: var(--gold); }
-    .rank-stat-label { font-size: 0.65rem; color: var(--text-3); }
-    .filter-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 0.25rem; }
-    .filter-chip { padding: 0.4rem 0.75rem; border-radius: var(--radius-full); border: 1px solid var(--border); background: none; color: var(--text-3); font-size: 0.75rem; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: var(--font); }
-    .filter-chip.active { background: var(--gradient-brand); color: white; border-color: transparent; }
+    .rank-row{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:0.5rem;transition:all 0.15s}
+    .rank-row.top{border-color:rgba(255,184,0,0.15);box-shadow:var(--glow-gold)}
+    .rank-n{width:32px;text-align:center;font-family:var(--font-display);font-weight:900;font-size:1rem;color:var(--text3)}
+    .rank-row.top .rank-n{color:var(--gold)}
+    .rank-name{flex:1;font-weight:600;font-size:0.9rem}
+    .rank-val{font-family:var(--font-display);font-weight:800;font-size:1.1rem;color:var(--gold)}
   </style>
 </head>
 <body>
   <div class="page">
-    <nav class="nav">
-      <button class="nav-back" onclick="history.back()">←</button>
-      <span class="nav-title">🏆 Leaderboard</span>
-    </nav>
-
-    <div class="container page-padded">
-      <div class="filter-row">
-        <button class="filter-chip active" onclick="filterBy('wins')">Most Wins</button>
-        <button class="filter-chip" onclick="filterBy('games')">Most Games</button>
+    <div class="orb3"></div>
+    <div class="main"><div class="container-narrow">
+      <h1 class="display-lg anim">🏆 Leaderboard</h1>
+      <div style="display:flex;gap:0.5rem;margin:1.25rem 0">
+        <button class="pill pill-pink" style="cursor:pointer" onclick="filterBy('wins',this)">Most Wins</button>
+        <button class="pill pill-ghost" style="cursor:pointer" onclick="filterBy('games',this)">Most Games</button>
       </div>
-      <div id="leaderboardList"><div class="spinner" style="margin:3rem auto"></div></div>
-    </div>
-
-    <div class="tab-bar">
-      <a href="/pages/lobby.html" class="tab-item"><span class="tab-icon">🏠</span>Lobby</a>
-      <a href="/pages/profile.html" class="tab-item"><span class="tab-icon">👤</span>Profile</a>
-      <button class="tab-item active"><span class="tab-icon">🏆</span>Ranks</button>
-      <a href="/pages/how-to-play.html" class="tab-item"><span class="tab-icon">📖</span>Rules</a>
-    </div>
+      <div id="list"><div class="spinner" style="margin:3rem auto"></div></div>
+    </div></div>
   </div>
-
   <script type="module">
-    import { waitForSupabase } from '/js/supabase.js';
-    let sb, currentFilter = 'wins';
-
-    async function init() {
-      sb = await waitForSupabase();
-      loadLeaderboard();
-    }
-
-    async function loadLeaderboard() {
-      const orderCol = currentFilter === 'wins' ? 'games_won' : 'games_played';
-      const { data } = await sb.from('profiles').select('id, display_name, games_played, games_won, avatar_url')
-        .gt(orderCol, 0).order(orderCol, { ascending: false }).limit(50);
-
-      const el = document.getElementById('leaderboardList');
-      if (!data || data.length === 0) {
-        el.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-3)"><div style="font-size:2.5rem;margin-bottom:0.5rem">🏆</div>No players yet. Be the first!</div>`;
-        return;
-      }
-
-      const medals = ['👑', '🥈', '🥉'];
-      el.innerHTML = data.map((p, i) => `<div class="rank-row ${i < 3 ? 'top-3' : ''} animate-in animate-delay-${Math.min(i, 5)}">
-        <div class="rank-num">${i < 3 ? medals[i] : i + 1}</div>
-        <div class="avatar avatar-sm ${i < 3 ? 'avatar-ring-gold' : ''}">${p.display_name ? p.display_name[0].toUpperCase() : '?'}</div>
-        <div class="rank-name">${p.display_name || 'Player'}</div>
-        <div class="rank-stat">
-          <div class="rank-stat-val">${currentFilter === 'wins' ? p.games_won : p.games_played}</div>
-          <div class="rank-stat-label">${currentFilter === 'wins' ? 'wins' : 'games'}</div>
-        </div>
-      </div>`).join('');
-    }
-
-    window.filterBy = (f) => {
-      currentFilter = f;
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.textContent.toLowerCase().includes(f)));
-      loadLeaderboard();
-    };
-
+    import{waitForSupabase}from'/js/supabase.js';
+    import{initSidebar}from'/js/sidebar.js';
+    import*as userMod from'/js/supabase.js';
+    let sb,fil='wins';
+    async function init(){sb=await waitForSupabase();await initSidebar('leaderboard',userMod);load()}
+    async function load(){const col=fil==='wins'?'games_won':'games_played';const{data}=await sb.from('profiles').select('id,display_name,games_played,games_won').gt(col,0).order(col,{ascending:false}).limit(50);const el=document.getElementById('list');if(!data?.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏆</div>No players yet.</div>';return}const medals=['👑','🥈','🥉'];el.innerHTML=data.map((p,i)=>`<div class="rank-row ${i<3?'top':''} anim" style="animation-delay:${Math.min(i*0.03,0.3)}s"><div class="rank-n">${i<3?medals[i]:i+1}</div><div class="av av-sm ${i<3?'av-gold':''}">${p.display_name?p.display_name[0].toUpperCase():'?'}</div><div class="rank-name">${p.display_name||'Player'}</div><div><div class="rank-val">${fil==='wins'?p.games_won:p.games_played}</div><div style="font-size:0.65rem;color:var(--text3);text-align:right">${fil==='wins'?'wins':'games'}</div></div></div>`).join('')}
+    window.filterBy=(f,el)=>{fil=f;document.querySelectorAll('.pill').forEach(p=>{p.className=`pill ${p.textContent.toLowerCase().includes(f)?'pill-pink':'pill-ghost'}`;p.style.cursor='pointer'});load()};
     init();
   </script>
 </body>

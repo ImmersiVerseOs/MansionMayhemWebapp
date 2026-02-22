@@ -4,285 +4,90 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lobby — Mansion Mayhem</title>
-  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/candy.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    .lobby-header { padding: 1.5rem 0 1rem; text-align: center; }
-    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
-    .mode-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-    .mode-card.selected { border-color: var(--rose); box-shadow: var(--glow-rose); }
-    .mode-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-brand); opacity: 0; transition: opacity 0.2s; }
-    .mode-card.selected::before { opacity: 1; }
-    .mode-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .mode-name { font-weight: 700; font-size: 0.95rem; }
-    .mode-time { font-size: 0.75rem; color: var(--text-3); margin-top: 0.15rem; }
-    .mode-players { font-size: 0.7rem; color: var(--purple); margin-top: 0.25rem; }
-
-    .join-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; margin-bottom: 1.5rem; }
-    .join-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
-    .join-input { flex: 1; text-align: center; font-size: 1.25rem; font-family: var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; }
-
-    .active-games { margin-top: 1rem; }
-    .game-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 0.5rem; cursor: pointer; transition: all 0.15s; }
-    .game-row:hover { border-color: rgba(255,255,255,0.12); background: var(--elevated); }
-    .game-mode-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .game-info { flex: 1; }
-    .game-info-title { font-weight: 600; font-size: 0.9rem; }
-    .game-info-sub { font-size: 0.75rem; color: var(--text-3); }
-    .game-players-count { font-family: var(--font-mono); font-size: 0.85rem; color: var(--gold); font-weight: 700; }
-
-    .waiting-room { text-align: center; padding: 2rem 0; }
-    .waiting-code { font-family: var(--font-mono); font-size: 2.5rem; font-weight: 700; letter-spacing: 0.3em; color: var(--gold); margin: 1rem 0; }
-    .waiting-players { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 1.5rem 0; }
-    .waiting-player { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-full); padding: 0.4rem 0.75rem; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem; }
-    .waiting-player .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
-    .waiting-countdown { font-size: 3rem; font-weight: 900; margin: 1rem 0; font-family: var(--font-mono); }
-
-    .empty-state { text-align: center; padding: 3rem 0; color: var(--text-3); }
-    .empty-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    .lobby-split{display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start}
+    .modes{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin:1.25rem 0 1.5rem}
+    .mode{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:1.25rem;text-align:center;cursor:pointer;transition:all 0.25s}
+    .mode:hover{border-color:var(--border-h)}
+    .mode.sel{border-color:var(--pink);background:var(--pink-s);box-shadow:var(--glow-pink)}
+    .mode-e{font-size:2rem;margin-bottom:0.35rem}
+    .mode-n{font-family:var(--font-display);font-weight:700;font-size:1rem}
+    .mode-t{font-size:0.75rem;color:var(--text3);margin-top:0.1rem}
+    .mode-p{font-size:0.7rem;color:var(--purple);margin-top:0.25rem}
+    .join-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1.5rem}
+    .join-row{display:flex;gap:0.5rem;margin-top:0.65rem}
+    .game-row{display:flex;align-items:center;gap:0.75rem;padding:0.8rem;background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:0.5rem;cursor:pointer;transition:all 0.15s}
+    .game-row:hover{border-color:var(--pink);background:var(--pink-s)}
+    .game-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .game-info{flex:1}.game-nm{font-family:var(--font-display);font-weight:700;font-size:0.85rem}.game-sub{font-size:0.7rem;color:var(--text3)}
+    .game-ct{font-family:var(--font-display);font-weight:800;font-size:0.9rem;color:var(--gold)}
+    .wait{text-align:center;padding:3rem 0;display:none}
+    .wait-code{font-family:var(--font-display);font-size:3.2rem;font-weight:900;letter-spacing:0.3em;margin:0.75rem 0}
+    .wait-players{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin:1.5rem 0}
+    .wait-p{display:flex;align-items:center;gap:0.3rem;padding:0.4rem 0.75rem;border-radius:var(--r-pill);background:var(--card);border:1px solid var(--border);font-size:0.8rem}
+    .wait-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
   </style>
 </head>
 <body>
   <div class="page">
-    <!-- NAV -->
-    <nav class="nav">
-      <span class="nav-title">👑 Mansion Mayhem</span>
-      <button class="btn btn-ghost btn-sm" onclick="goProfile()">Profile</button>
-      <button class="btn btn-ghost btn-sm" onclick="handleSignOut()">Out</button>
-    </nav>
-
-    <div class="container page-padded">
-      <!-- VIEW: CREATE/JOIN (default) -->
-      <div id="viewMain">
-        <div class="lobby-header">
-          <h1 class="title-lg">Choose Your Mode</h1>
-          <p class="body-sm" style="margin-top:0.25rem">Create a game or join with a code</p>
-        </div>
-
-        <!-- MODE SELECTION -->
-        <div class="mode-grid" id="modeGrid">
-          <div class="mode-card selected" data-mode="party" onclick="selectMode('party')">
-            <div class="mode-icon">🎉</div>
-            <div class="mode-name">Party</div>
-            <div class="mode-time">35 minutes</div>
-            <div class="mode-players">8-20 players</div>
-          </div>
-          <div class="mode-card" data-mode="blitz" onclick="selectMode('blitz')">
-            <div class="mode-icon">⚡</div>
-            <div class="mode-name">Blitz</div>
-            <div class="mode-time">15 minutes</div>
-            <div class="mode-players">6-12 players</div>
-          </div>
-          <div class="mode-card" data-mode="sprint" onclick="selectMode('sprint')">
-            <div class="mode-icon">🏃</div>
-            <div class="mode-name">Sprint</div>
-            <div class="mode-time">5 minutes</div>
-            <div class="mode-players">4-8 players</div>
-          </div>
-          <div class="mode-card" data-mode="weekly" onclick="selectMode('weekly')">
-            <div class="mode-icon">📅</div>
-            <div class="mode-name">Season</div>
-            <div class="mode-time">10 weeks</div>
-            <div class="mode-players">10-20 players</div>
+    <div class="orb3"></div>
+    <div class="main">
+      <div class="container">
+        <div id="vMain">
+          <h1 class="display-lg anim" style="margin-bottom:0.25rem">Choose Mode</h1>
+          <p class="body-lg anim anim-d1">Create a game or join with a code</p>
+          <div class="lobby-split anim anim-d2">
+            <div>
+              <div class="modes" id="modeGrid">
+                <div class="mode sel" data-m="party" onclick="selMode('party')"><div class="mode-e">🎉</div><div class="mode-n">Party</div><div class="mode-t">35 min</div><div class="mode-p">8–20 players</div></div>
+                <div class="mode" data-m="blitz" onclick="selMode('blitz')"><div class="mode-e">⚡</div><div class="mode-n">Blitz</div><div class="mode-t">15 min</div><div class="mode-p">6–12 players</div></div>
+                <div class="mode" data-m="sprint" onclick="selMode('sprint')"><div class="mode-e">🏃</div><div class="mode-n">Sprint</div><div class="mode-t">5 min</div><div class="mode-p">4–8 players</div></div>
+                <div class="mode" data-m="weekly" onclick="selMode('weekly')"><div class="mode-e">📅</div><div class="mode-n">Season</div><div class="mode-t">10 weeks</div><div class="mode-p">10–20 players</div></div>
+              </div>
+              <button class="btn btn-fire btn-block btn-lg" id="createBtn" onclick="createGame()">Create Game</button>
+            </div>
+            <div>
+              <div class="join-box">
+                <div class="label" style="color:var(--text3)">Join with Code</div>
+                <div class="join-row"><input class="input input-code" id="joinCode" placeholder="ABC123" maxlength="6"><button class="btn btn-glass" onclick="joinGame()">Join</button></div>
+              </div>
+              <div class="label" style="color:var(--text3);margin-bottom:0.5rem">Open Games</div>
+              <div id="gamesList"></div>
+            </div>
           </div>
         </div>
-
-        <button class="btn btn-primary btn-block btn-lg" onclick="createGame()" id="createBtn">Create Game</button>
-
-        <!-- JOIN -->
-        <div class="join-section">
-          <div class="caption">Join with Code</div>
-          <div class="join-row">
-            <input class="input join-input" id="joinCode" placeholder="ABCDEF" maxlength="6">
-            <button class="btn btn-secondary" onclick="joinGame()">Join</button>
-          </div>
-        </div>
-
-        <!-- ACTIVE GAMES -->
-        <div class="active-games">
-          <div class="caption" style="margin-bottom:0.5rem">Open Games</div>
-          <div id="gamesList"></div>
+        <div id="vWait" class="wait">
+          <div class="anim-float" style="font-size:3rem">🏰</div>
+          <h2 class="display-lg" style="margin-top:0.5rem">Waiting for Players</h2>
+          <div class="wait-code fire-text" id="waitCode">------</div>
+          <p class="body-lg">Share this code with friends</p>
+          <div class="wait-players" id="waitPlayers"></div>
+          <div id="waitStatus" class="body-md" style="color:var(--gold)">Waiting...</div>
+          <button class="btn btn-outline" style="margin-top:1.5rem" onclick="leaveGame()">Leave Game</button>
         </div>
       </div>
-
-      <!-- VIEW: WAITING ROOM (after join/create) -->
-      <div id="viewWaiting" style="display:none">
-        <div class="waiting-room">
-          <div style="font-size:2rem;margin-bottom:0.5rem">🏰</div>
-          <h2 class="title-lg">Waiting for Players</h2>
-          <div class="waiting-code" id="waitingCode">------</div>
-          <p class="body-sm">Share this code with friends</p>
-
-          <div class="waiting-players" id="waitingPlayers"></div>
-
-          <div id="waitingStatus" class="body-sm" style="color:var(--gold)">Waiting for players to join...</div>
-          <div id="waitingCountdown" class="waiting-countdown" style="display:none"></div>
-
-          <button class="btn btn-ghost" style="margin-top:1.5rem" onclick="leaveGame()">Leave Game</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB BAR -->
-    <div class="tab-bar">
-      <button class="tab-item active"><span class="tab-icon">🏠</span>Lobby</button>
-      <a href="/pages/profile.html" class="tab-item"><span class="tab-icon">👤</span>Profile</a>
-      <a href="/pages/leaderboard.html" class="tab-item"><span class="tab-icon">🏆</span>Ranks</a>
-      <a href="/pages/how-to-play.html" class="tab-item"><span class="tab-icon">📖</span>Rules</a>
     </div>
   </div>
-
   <script type="module">
-    import { waitForSupabase, getUser, requireAuth, signOut, getSupabase } from '/js/supabase.js';
-
-    let sb, user, selectedMode = 'party', currentGameId = null;
-
-    async function init() {
-      sb = await waitForSupabase();
-      user = await requireAuth();
-      if (!user) return;
-      loadOpenGames();
-      // Check if user is already in a game
-      checkExistingGame();
+    import{waitForSupabase,requireAuth,signOut,getSupabase,getUser}from'/js/supabase.js';
+    import{initSidebar}from'/js/sidebar.js';
+    import*as userMod from'/js/supabase.js';
+    let sb,user,mode='party',curGame=null;
+    async function init(){
+      sb=await waitForSupabase();user=await requireAuth();if(!user)return;
+      await initSidebar('lobby',userMod);loadGames();checkActive();
     }
-
-    window.selectMode = (mode) => {
-      selectedMode = mode;
-      document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('selected', c.dataset.mode === mode));
-    };
-
-    window.createGame = async () => {
-      const btn = document.getElementById('createBtn');
-      btn.disabled = true; btn.textContent = 'Creating...';
-
-      // Generate 6-char code
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let code = '';
-      for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-
-      const { data: game, error } = await sb.from('mm_games').insert({
-        game_code: code,
-        status: 'waiting_lobby',
-        game_mode: selectedMode,
-        max_players: selectedMode === 'party' ? 20 : selectedMode === 'blitz' ? 12 : selectedMode === 'sprint' ? 8 : 20,
-        current_players: 0,
-        current_phase: 'lobby',
-        phase_started_at: new Date().toISOString(),
-      }).select().single();
-
-      if (error) { alert(error.message); btn.disabled = false; btn.textContent = 'Create Game'; return; }
-
-      // Join as creator
-      await sb.rpc('join_game', { p_game_id: game.id, p_user_id: user.id });
-
-      // Schedule game events
-      await sb.rpc('schedule_game_events', { p_game_id: game.id, p_mode: selectedMode });
-
-      currentGameId = game.id;
-      showWaitingRoom(game);
-      btn.disabled = false; btn.textContent = 'Create Game';
-    };
-
-    window.joinGame = async () => {
-      const code = document.getElementById('joinCode').value.trim().toUpperCase();
-      if (code.length !== 6) { alert('Enter a 6-character code'); return; }
-
-      const { data: game } = await sb.from('mm_games').select('*').eq('game_code', code).in('status', ['waiting_lobby', 'active_lobby', 'recruiting']).maybeSingle();
-      if (!game) { alert('Game not found or already started'); return; }
-
-      const result = await sb.rpc('join_game', { p_game_id: game.id, p_user_id: user.id });
-      if (result.error) { alert(result.error.message); return; }
-
-      currentGameId = game.id;
-      showWaitingRoom(game);
-    };
-
-    window.joinExisting = async (gameId) => {
-      const result = await sb.rpc('join_game', { p_game_id: gameId, p_user_id: user.id });
-      const { data: game } = await sb.from('mm_games').select('*').eq('id', gameId).single();
-      if (game) { currentGameId = gameId; showWaitingRoom(game); }
-    };
-
-    function showWaitingRoom(game) {
-      document.getElementById('viewMain').style.display = 'none';
-      document.getElementById('viewWaiting').style.display = 'block';
-      document.getElementById('waitingCode').textContent = game.game_code || '------';
-
-      // Subscribe to game changes
-      sb.channel(`lobby-${game.id}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mm_game_cast', filter: `game_id=eq.${game.id}` }, () => loadWaitingPlayers(game.id))
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mm_games', filter: `id=eq.${game.id}` }, (payload) => {
-          if (payload.new.status === 'active') {
-            window.location.href = `/pages/episode-play.html?game=${game.id}`;
-          }
-        })
-        .subscribe();
-
-      loadWaitingPlayers(game.id);
-    }
-
-    async function loadWaitingPlayers(gameId) {
-      const { data } = await sb.from('mm_game_cast').select('*, cast_members(display_name, is_ai_player)').eq('game_id', gameId);
-      const el = document.getElementById('waitingPlayers');
-      if (!data) return;
-      el.innerHTML = data.map(gc => `<div class="waiting-player"><span class="dot"></span>${gc.cast_members?.display_name || 'Player'}${gc.cast_members?.is_ai_player ? ' 🤖' : ''}</div>`).join('');
-      document.getElementById('waitingStatus').textContent = `${data.length} player${data.length !== 1 ? 's' : ''} in lobby`;
-    }
-
-    window.leaveGame = () => {
-      currentGameId = null;
-      document.getElementById('viewMain').style.display = 'block';
-      document.getElementById('viewWaiting').style.display = 'none';
-    };
-
-    async function loadOpenGames() {
-      const { data: games } = await sb.from('mm_games').select('*').in('status', ['waiting_lobby', 'active_lobby', 'recruiting']).order('created_at', { ascending: false }).limit(10);
-      const el = document.getElementById('gamesList');
-      if (!games || games.length === 0) {
-        el.innerHTML = `<div class="empty-state"><div class="empty-icon">🏰</div><p>No open games. Create one!</p></div>`;
-        return;
-      }
-      const modeColors = { party: 'var(--rose)', blitz: 'var(--gold)', sprint: 'var(--cyan)', weekly: 'var(--purple)' };
-      const modeIcons = { party: '🎉', blitz: '⚡', sprint: '🏃', weekly: '📅' };
-      el.innerHTML = games.map(g => `<div class="game-row" onclick="joinExisting('${g.id}')">
-        <div class="game-mode-dot" style="background:${modeColors[g.game_mode] || 'var(--text-3)'}"></div>
-        <div class="game-info">
-          <div class="game-info-title">${modeIcons[g.game_mode] || '🎮'} ${(g.game_mode || 'party').charAt(0).toUpperCase() + (g.game_mode || 'party').slice(1)} Game</div>
-          <div class="game-info-sub">Code: ${g.game_code || '???'}</div>
-        </div>
-        <div class="game-players-count">${g.current_players || 0}/${g.max_players || 20}</div>
-      </div>`).join('');
-    }
-
-    async function checkExistingGame() {
-      // Check if user's cast member is in an active game
-      const { data: castMembers } = await sb.from('cast_members').select('id').eq('user_id', user.id);
-      if (!castMembers || castMembers.length === 0) return;
-
-      const castIds = castMembers.map(c => c.id);
-      const { data: activeGames } = await sb.from('mm_game_cast').select('game_id, mm_games(id, status, game_code, game_mode, current_phase)').in('cast_member_id', castIds).eq('status', 'active');
-
-      if (activeGames) {
-        for (const ag of activeGames) {
-          const game = ag.mm_games;
-          if (!game) continue;
-          if (game.status === 'active' && game.current_phase !== 'lobby') {
-            // Already in an active game — redirect
-            window.location.href = `/pages/episode-play.html?game=${game.id}`;
-            return;
-          }
-          if (['waiting_lobby', 'active_lobby'].includes(game.status)) {
-            currentGameId = game.id;
-            showWaitingRoom(game);
-            return;
-          }
-        }
-      }
-    }
-
-    window.goProfile = () => { window.location.href = '/pages/profile.html'; };
-    window.handleSignOut = async () => { await signOut(); };
-
+    window.selMode=(m)=>{mode=m;document.querySelectorAll('.mode').forEach(c=>c.classList.toggle('sel',c.dataset.m===m))};
+    window.createGame=async()=>{const btn=document.getElementById('createBtn');btn.disabled=true;btn.textContent='Creating...';const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='';for(let i=0;i<6;i++)code+=chars[Math.floor(Math.random()*chars.length)];const maxP={party:20,blitz:12,sprint:8,weekly:20};const{data:g,error}=await sb.from('mm_games').insert({game_code:code,status:'waiting_lobby',game_mode:mode,max_players:maxP[mode]||20,current_players:0,current_phase:'lobby',phase_started_at:new Date().toISOString()}).select().single();if(error){alert(error.message);btn.disabled=false;btn.textContent='Create Game';return}await sb.rpc('join_game',{p_game_id:g.id,p_user_id:user.id}).catch(()=>{});curGame=g.id;showWait(g);btn.disabled=false;btn.textContent='Create Game'};
+    window.joinGame=async()=>{const code=document.getElementById('joinCode').value.trim().toUpperCase();if(code.length!==6){alert('Enter 6-char code');return}const{data:g}=await sb.from('mm_games').select('*').eq('game_code',code).in('status',['waiting_lobby','active_lobby','recruiting']).maybeSingle();if(!g){alert('Game not found');return}await sb.rpc('join_game',{p_game_id:g.id,p_user_id:user.id}).catch(()=>{});curGame=g.id;showWait(g)};
+    window.joinOpen=async(id)=>{await sb.rpc('join_game',{p_game_id:id,p_user_id:user.id}).catch(()=>{});const{data:g}=await sb.from('mm_games').select('*').eq('id',id).single();if(g){curGame=id;showWait(g)}};
+    function showWait(g){document.getElementById('vMain').style.display='none';document.getElementById('vWait').style.display='block';document.getElementById('waitCode').textContent=g.game_code||'------';sb.channel('lob-'+g.id).on('postgres_changes',{event:'*',schema:'public',table:'mm_game_cast',filter:`game_id=eq.${g.id}`},()=>loadWaitP(g.id)).on('postgres_changes',{event:'UPDATE',schema:'public',table:'mm_games',filter:`id=eq.${g.id}`},(p)=>{if(p.new.status==='active')location.href=`/pages/episode-play.html?game=${g.id}`}).subscribe();loadWaitP(g.id)}
+    async function loadWaitP(gid){const{data}=await sb.from('mm_game_cast').select('*,cast_members(display_name,is_ai_player)').eq('game_id',gid);const el=document.getElementById('waitPlayers');if(!data)return;el.innerHTML=data.map(c=>`<div class="wait-p"><span class="wait-dot"></span>${c.cast_members?.display_name||'Player'}${c.cast_members?.is_ai_player?' 🤖':''}</div>`).join('');document.getElementById('waitStatus').textContent=`${data.length} player${data.length!==1?'s':''} in lobby`}
+    window.leaveGame=()=>{curGame=null;document.getElementById('vMain').style.display='block';document.getElementById('vWait').style.display='none'};
+    async function loadGames(){const{data}=await sb.from('mm_games').select('*').in('status',['waiting_lobby','active_lobby','recruiting']).order('created_at',{ascending:false}).limit(10);const el=document.getElementById('gamesList');if(!data?.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏰</div>No open games. Create one!</div>';return}const mc={party:'var(--pink)',blitz:'var(--gold)',sprint:'var(--cyan)',weekly:'var(--purple)'};const mi={party:'🎉',blitz:'⚡',sprint:'🏃',weekly:'📅'};el.innerHTML=data.map(g=>`<div class="game-row" onclick="joinOpen('${g.id}')"><div class="game-dot" style="background:${mc[g.game_mode]||'var(--text3)'}"></div><div class="game-info"><div class="game-nm">${mi[g.game_mode]||'🎮'} ${(g.game_mode||'party')[0].toUpperCase()+(g.game_mode||'').slice(1)}</div><div class="game-sub">Code: ${g.game_code||'???'}</div></div><div class="game-ct">${g.current_players||0}/${g.max_players||20}</div></div>`).join('')}
+    async function checkActive(){const{data:cms}=await sb.from('cast_members').select('id').eq('user_id',user.id);if(!cms?.length)return;const{data:ag}=await sb.from('mm_game_cast').select('game_id,mm_games(id,status,game_code,current_phase)').in('cast_member_id',cms.map(c=>c.id)).eq('status','active');if(!ag)return;for(const a of ag){const g=a.mm_games;if(!g)continue;if(g.status==='active'&&g.current_phase!=='lobby'){location.href=`/pages/episode-play.html?game=${g.id}`;return}if(['waiting_lobby','active_lobby'].includes(g.status)){curGame=g.id;showWait(g);return}}}
     init();
   </script>
 </body>

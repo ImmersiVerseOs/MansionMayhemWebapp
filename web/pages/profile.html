@@ -4,118 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile — Mansion Mayhem</title>
-  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/candy.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="page">
-    <nav class="nav">
-      <button class="nav-back" onclick="history.back()">←</button>
-      <span class="nav-title">Profile</span>
-      <button class="btn btn-ghost btn-sm" onclick="handleSignOut()">Sign Out</button>
-    </nav>
-
-    <div class="container page-padded">
-      <div id="profileContent" style="display:flex;flex-direction:column;gap:1rem;align-items:center;padding-top:1rem;">
-        <div class="spinner"></div>
-      </div>
-    </div>
-
-    <div class="tab-bar">
-      <a href="/pages/lobby.html" class="tab-item"><span class="tab-icon">🏠</span>Lobby</a>
-      <button class="tab-item active"><span class="tab-icon">👤</span>Profile</button>
-      <a href="/pages/leaderboard.html" class="tab-item"><span class="tab-icon">🏆</span>Ranks</a>
-      <a href="/pages/how-to-play.html" class="tab-item"><span class="tab-icon">📖</span>Rules</a>
-    </div>
+    <div class="orb3"></div>
+    <div class="main"><div class="container-narrow" id="c" style="text-align:center"><div class="spinner" style="margin:5rem auto"></div></div></div>
   </div>
-
   <script type="module">
-    import { waitForSupabase, requireAuth, getProfile, signOut, getSupabase } from '/js/supabase.js';
-
-    async function init() {
-      const sb = await waitForSupabase();
-      const user = await requireAuth();
-      if (!user) return;
-
-      const profile = await getProfile(user.id);
-
-      const el = document.getElementById('profileContent');
-      const p = profile || {};
-      const gamesPlayed = p.games_played || 0;
-      const gamesWon = p.games_won || 0;
-      const winRate = gamesPlayed > 0 ? Math.round((gamesWon / gamesPlayed) * 100) : 0;
-
-      el.innerHTML = `
-        <div class="avatar avatar-lg avatar-ring-rose" style="font-size:2.5rem;width:80px;height:80px;">
-          ${p.display_name ? p.display_name[0].toUpperCase() : '?'}
+    import{waitForSupabase,requireAuth,getProfile,signOut}from'/js/supabase.js';
+    import{initSidebar}from'/js/sidebar.js';
+    import*as userMod from'/js/supabase.js';
+    async function init(){
+      const sb=await waitForSupabase();const user=await requireAuth();if(!user)return;
+      await initSidebar('profile',userMod);
+      const p=await getProfile(user.id)||{};const gp=p.games_played||0,gw=p.games_won||0,wr=gp>0?Math.round(gw/gp*100):0;
+      document.getElementById('c').innerHTML=`
+        <div class="av av-xl av-pink anim" style="margin:0 auto">${p.display_name?p.display_name[0].toUpperCase():'?'}</div>
+        <h2 class="display-lg anim anim-d1" style="margin-top:0.75rem">${p.display_name||'Player'}</h2>
+        <span class="pill pill-purple anim anim-d2" style="margin-top:0.35rem">${p.role||'Player'}</span>
+        <div class="stats anim anim-d3" style="margin-top:1.5rem">
+          <div class="stat"><div class="stat-val fire-text">${gp}</div><div class="stat-lbl">Games</div></div>
+          <div class="stat"><div class="stat-val" style="color:var(--green)">${gw}</div><div class="stat-lbl">Wins</div></div>
+          <div class="stat"><div class="stat-val" style="color:var(--cyan)">${wr}%</div><div class="stat-lbl">Win Rate</div></div>
         </div>
-        <h2 class="title-lg">${p.display_name || 'Player'}</h2>
-        <span class="badge badge-purple">${p.role || 'Player'}</span>
-
-        <div class="stat-row" style="width:100%;margin-top:1rem;">
-          <div class="stat-item">
-            <div class="stat-value" style="color:var(--gold)">${gamesPlayed}</div>
-            <div class="stat-label">Games</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" style="color:var(--green)">${gamesWon}</div>
-            <div class="stat-label">Wins</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" style="color:var(--rose)">${winRate}%</div>
-            <div class="stat-label">Win Rate</div>
-          </div>
-        </div>
-
-        <div class="card card-accent" style="width:100%;margin-top:0.5rem;">
-          <div class="caption" style="margin-bottom:0.75rem">Account</div>
-          <div style="display:flex;flex-direction:column;gap:0.5rem;">
-            <div style="display:flex;justify-content:space-between;font-size:0.85rem;">
-              <span style="color:var(--text-2)">Email</span>
-              <span>${user.email || '—'}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:0.85rem;">
-              <span style="color:var(--text-2)">Joined</span>
-              <span>${p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="width:100%;">
-          <div class="caption" style="margin-bottom:0.75rem">Recent Games</div>
-          <div id="recentGames" style="color:var(--text-3);font-size:0.85rem;">Loading...</div>
-        </div>
-      `;
-
-      // Load recent games
-      const { data: casts } = await sb.from('cast_members').select('id').eq('user_id', user.id);
-      if (casts && casts.length > 0) {
-        const castIds = casts.map(c => c.id);
-        const { data: games } = await sb.from('mm_game_cast')
-          .select('status, placement, mm_games(game_mode, status, created_at)')
-          .in('cast_member_id', castIds)
-          .order('joined_at', { ascending: false })
-          .limit(5);
-
-        const recentEl = document.getElementById('recentGames');
-        if (!games || games.length === 0) {
-          recentEl.textContent = 'No games yet. Go play!';
-        } else {
-          recentEl.innerHTML = games.map(g => {
-            const gm = g.mm_games;
-            const modeIcons = { party: '🎉', blitz: '⚡', sprint: '🏃', weekly: '📅' };
-            return `<div class="list-item" style="margin-bottom:0.5rem">
-              <span style="font-size:1.25rem">${modeIcons[gm?.game_mode] || '🎮'}</span>
-              <div style="flex:1"><div style="font-weight:600;font-size:0.85rem">${(gm?.game_mode || 'Game').charAt(0).toUpperCase() + (gm?.game_mode || '').slice(1)}</div>
-              <div style="font-size:0.7rem;color:var(--text-3)">${gm?.created_at ? new Date(gm.created_at).toLocaleDateString() : ''}</div></div>
-              <span class="badge ${g.status === 'eliminated' ? 'badge-red' : g.placement === 1 ? 'badge-gold' : 'badge-ghost'}">${g.placement === 1 ? '👑 Won' : g.status === 'eliminated' ? 'Eliminated' : g.status}</span>
-            </div>`;
-          }).join('');
-        }
-      }
+        <div class="grid-2 anim anim-d4" style="margin-top:1.5rem;text-align:left">
+          <div class="card card-accent"><div class="label" style="color:var(--text3);margin-bottom:0.75rem">Account</div><div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:0.4rem"><span style="color:var(--text2)">Email</span><span>${user.email||'—'}</span></div><div style="display:flex;justify-content:space-between;font-size:0.88rem"><span style="color:var(--text2)">Joined</span><span>${p.created_at?new Date(p.created_at).toLocaleDateString():'—'}</span></div></div>
+          <div class="card"><div class="label" style="color:var(--text3);margin-bottom:0.75rem">Recent Games</div><div id="recent" class="body-md">Loading...</div></div>
+        </div>`;
+      const{data:cms}=await sb.from('cast_members').select('id').eq('user_id',user.id);
+      if(cms?.length){const{data:games}=await sb.from('mm_game_cast').select('status,placement,mm_games(game_mode,status,created_at)').in('cast_member_id',cms.map(c=>c.id)).order('joined_at',{ascending:false}).limit(5);const r=document.getElementById('recent');if(!games?.length){r.textContent='No games yet.';return}const mi={party:'🎉',blitz:'⚡',sprint:'🏃',weekly:'📅'};r.innerHTML=games.map(g=>{const gm=g.mm_games;return`<div class="row" style="margin-bottom:0.5rem"><span style="font-size:1.2rem">${mi[gm?.game_mode]||'🎮'}</span><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">${(gm?.game_mode||'Game')[0].toUpperCase()+(gm?.game_mode||'').slice(1)}</div><div style="font-size:0.7rem;color:var(--text3)">${gm?.created_at?new Date(gm.created_at).toLocaleDateString():''}</div></div><span class="pill ${g.placement===1?'pill-gold':g.status==='eliminated'?'pill-red':'pill-ghost'}">${g.placement===1?'👑 Won':g.status==='eliminated'?'Out':g.status}</span></div>`}).join('')}
     }
-
-    window.handleSignOut = async () => { await signOut(); };
     init();
   </script>
 </body>

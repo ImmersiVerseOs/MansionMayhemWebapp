@@ -4,164 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Results — Mansion Mayhem</title>
-  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/candy.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    .results-hero { text-align: center; padding: 2.5rem 0 1.5rem; position: relative; }
-    .results-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 100% 60% at 50% 30%, rgba(255,184,0,0.1) 0%, transparent 60%); pointer-events: none; }
-    .crown-float { font-size: 4rem; animation: float 3s ease-in-out infinite; display: inline-block; }
-    .winner-name { font-size: 2rem; font-weight: 900; margin-top: 0.75rem; }
-    .winner-label { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-top: 0.25rem; }
-
-    .cast-list { display: flex; flex-direction: column; gap: 0.5rem; }
-    .cast-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); }
-    .cast-row.winner { border-color: rgba(255,184,0,0.3); box-shadow: var(--glow-gold); }
-    .cast-rank { width: 24px; font-weight: 800; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-3); text-align: center; }
-    .cast-row.winner .cast-rank { color: var(--gold); }
-    .cast-name-col { flex: 1; }
-    .cast-name { font-weight: 600; font-size: 0.85rem; }
-    .cast-role { font-size: 0.7rem; color: var(--text-3); }
-    .cast-drama { font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; color: var(--rose); }
-    .cast-badge { font-size: 0.7rem; }
-
-    .highlight-card { background: var(--gradient-glass); border: 1px solid var(--border-accent); border-radius: var(--radius-lg); padding: 1rem; }
-    .highlight-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
-    .highlight-label { font-size: 0.7rem; text-transform: uppercase; color: var(--rose); font-weight: 700; letter-spacing: 0.06em; }
-    .highlight-text { font-size: 0.9rem; font-weight: 600; margin-top: 0.25rem; }
-
-    .highlights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .results-hero{text-align:center;padding:2.5rem 0 1.5rem}
+    .crown{font-size:4.5rem;display:inline-block;animation:float 3s ease-in-out infinite}
+    .winner-name{font-family:var(--font-display);font-size:2.5rem;font-weight:900;margin-top:0.5rem}
+    .highlights{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.5rem}
+    .hl{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center}
+    .hl-icon{font-size:1.8rem;margin-bottom:0.3rem}
+    .hl-label{font-size:0.65rem;color:var(--pink);font-weight:700;text-transform:uppercase;letter-spacing:0.06em}
+    .hl-val{font-family:var(--font-display);font-weight:700;font-size:0.9rem;margin-top:0.15rem}
+    .cast-row{display:flex;align-items:center;gap:0.7rem;padding:0.65rem 0.8rem;background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:0.4rem}
+    .cast-row.winner{border-color:rgba(255,184,0,0.2);box-shadow:var(--glow-gold)}
+    .cast-rank{width:28px;font-family:var(--font-display);font-weight:900;font-size:0.9rem;color:var(--text3);text-align:center}
+    .cast-row.winner .cast-rank{color:var(--gold)}
+    .director-quote{background:rgba(255,184,0,0.05);border-left:3px solid var(--gold);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:0.55rem 0.75rem;margin-bottom:0.4rem;font-size:0.85rem;font-style:italic;color:var(--gold)}
   </style>
 </head>
 <body>
   <div class="page">
-    <nav class="nav">
-      <button class="nav-back" onclick="window.location.href='/pages/lobby.html'">←</button>
-      <span class="nav-title">Game Results</span>
-    </nav>
-
-    <div class="container page-padded">
-      <div id="resultsContent"><div class="spinner" style="margin:4rem auto"></div></div>
-    </div>
-
-    <div class="tab-bar">
-      <a href="/pages/lobby.html" class="tab-item"><span class="tab-icon">🏠</span>Lobby</a>
-      <a href="/pages/profile.html" class="tab-item"><span class="tab-icon">👤</span>Profile</a>
-      <a href="/pages/leaderboard.html" class="tab-item"><span class="tab-icon">🏆</span>Ranks</a>
-      <a href="/pages/how-to-play.html" class="tab-item"><span class="tab-icon">📖</span>Rules</a>
-    </div>
+    <div class="orb3"></div>
+    <div class="main"><div class="container-narrow" id="c"><div class="spinner" style="margin:5rem auto"></div></div></div>
   </div>
-
   <script type="module">
-    import { waitForSupabase } from '/js/supabase.js';
-
-    async function init() {
-      const sb = await waitForSupabase();
-      const params = new URLSearchParams(window.location.search);
-      const gameId = params.get('game');
-      if (!gameId) { window.location.href = '/pages/lobby.html'; return; }
-
-      // Load game
-      const { data: game } = await sb.from('mm_games').select('*').eq('id', gameId).single();
-      if (!game) { document.getElementById('resultsContent').innerHTML = '<p style="text-align:center;color:var(--text-3)">Game not found.</p>'; return; }
-
-      // Load all cast with details
-      const { data: cast } = await sb.from('mm_game_cast')
-        .select('*, cast_members(display_name, archetype, is_ai_player)')
-        .eq('game_id', gameId)
-        .order('drama_points', { ascending: false });
-
-      // Load fights
-      const { data: fights } = await sb.from('episode_fights')
-        .select('*, initiator:cast_members!episode_fights_initiator_id_fkey(display_name), target:cast_members!episode_fights_target_id_fkey(display_name)')
-        .eq('game_id', gameId);
-
-      // Load director log
-      const { data: directorLog } = await sb.from('episode_director_log')
-        .select('*').eq('game_id', gameId).order('created_at', { ascending: false }).limit(5);
-
-      const el = document.getElementById('resultsContent');
-      const winner = cast?.find(c => c.status === 'active') || cast?.[0];
-      const winnerName = winner?.cast_members?.display_name || 'Unknown';
-      const modeIcons = { party: '🎉', blitz: '⚡', sprint: '🏃', weekly: '📅' };
-      const modeLabels = { party: 'Party Mode', blitz: 'Blitz Night', sprint: 'Weekend Sprint', weekly: 'Season' };
-      const totalEpisodes = game.episode_number || 1;
-      const totalFights = fights?.length || 0;
-      const maxDrama = Math.max(...(cast || []).map(c => c.drama_points || 0), 0);
-
-      let html = `
-        <div class="results-hero animate-in">
-          <div class="badge badge-purple" style="margin-bottom:0.75rem">${modeLabels[game.game_mode] || 'Game'} Complete</div>
-          <div class="crown-float">👑</div>
-          <div class="winner-name gradient-text">${winnerName}</div>
-          <div class="winner-label">Queen of the Mansion</div>
-        </div>
-
-        <!-- Stats summary -->
-        <div class="stat-row animate-in animate-delay-1" style="margin-bottom:1.25rem">
-          <div class="stat-item">
-            <div class="stat-value" style="color:var(--purple)">${totalEpisodes}</div>
-            <div class="stat-label">Episodes</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" style="color:var(--rose)">${totalFights}</div>
-            <div class="stat-label">Fights</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" style="color:var(--gold)">${maxDrama}</div>
-            <div class="stat-label">Peak Drama</div>
-          </div>
-        </div>
-
-        <!-- Highlights -->
-        <div class="highlights-grid animate-in animate-delay-2" style="margin-bottom:1.25rem">
-          <div class="highlight-card">
-            <div class="highlight-icon">💥</div>
-            <div class="highlight-label">Most Dramatic</div>
-            <div class="highlight-text">${cast?.[0]?.cast_members?.display_name || '—'}</div>
-          </div>
-          <div class="highlight-card">
-            <div class="highlight-icon">🤫</div>
-            <div class="highlight-label">Best Spy</div>
-            <div class="highlight-text">${(cast || []).sort((a,b) => (b.missions_completed||0) - (a.missions_completed||0))[0]?.cast_members?.display_name || '—'}</div>
-          </div>
-        </div>
-
-        <!-- Full cast ranking -->
-        <div class="caption" style="margin-bottom:0.5rem">Final Rankings</div>
-        <div class="cast-list animate-in animate-delay-3">
-      `;
-
-      (cast || []).forEach((c, i) => {
-        const name = c.cast_members?.display_name || 'Player';
-        const isWinner = c.status === 'active' && i === 0;
-        const archIcons = { wildcard: '🃏', strategist: '🧠', sweetheart: '💖', villain: '😈', comedian: '😂', troublemaker: '💣', diva: '👑', hothead: '🔥' };
-        html += `<div class="cast-row ${isWinner ? 'winner' : ''}">
-          <div class="cast-rank">${isWinner ? '👑' : i + 1}</div>
-          <div class="avatar avatar-sm">${archIcons[c.cast_members?.archetype] || '🎭'}</div>
-          <div class="cast-name-col">
-            <div class="cast-name">${name}${c.cast_members?.is_ai_player ? ' 🤖' : ''}</div>
-            <div class="cast-role">${c.secret_role || c.cast_members?.archetype || '?'} · ${c.strike_count || 0} strikes</div>
-          </div>
-          <div class="cast-drama">${c.drama_points || 0}</div>
-          <span class="cast-badge">${c.status === 'eliminated' ? (c.eliminated_by === 'fight' ? '💥' : '🗳️') : '✅'}</span>
-        </div>`;
-      });
-
-      html += `</div>`;
-
-      // Director's final words
-      if (directorLog && directorLog.length > 0) {
-        html += `<div class="card card-accent animate-in animate-delay-4" style="margin-top:1.25rem">
-          <div class="caption" style="margin-bottom:0.5rem">Director's Notes</div>
-          ${directorLog.slice(0, 3).map(d => `<p style="font-size:0.85rem;color:var(--gold);font-style:italic;margin-bottom:0.5rem">"${d.content}"</p>`).join('')}
-        </div>`;
-      }
-
-      html += `<button class="btn btn-primary btn-block btn-lg" style="margin-top:1.5rem" onclick="window.location.href='/pages/lobby.html'">Play Again</button>`;
-
-      el.innerHTML = html;
+    import{waitForSupabase}from'/js/supabase.js';
+    import{initSidebar}from'/js/sidebar.js';
+    import*as userMod from'/js/supabase.js';
+    const AI={wildcard:'🃏',strategist:'🧠',sweetheart:'💖',villain:'😈',comedian:'😂',troublemaker:'💣',diva:'👑',hothead:'🔥'};
+    async function init(){
+      const sb=await waitForSupabase();await initSidebar('lobby',userMod);
+      const gid=new URLSearchParams(location.search).get('game');if(!gid){location.href='/pages/lobby.html';return}
+      const{data:game}=await sb.from('mm_games').select('*').eq('id',gid).single();
+      const{data:cast}=await sb.from('mm_game_cast').select('*,cast_members(display_name,archetype,is_ai_player)').eq('game_id',gid).order('drama_points',{ascending:false});
+      const{data:fights}=await sb.from('episode_fights').select('*').eq('game_id',gid);
+      const{data:dir}=await sb.from('episode_director_log').select('*').eq('game_id',gid).order('created_at',{ascending:false}).limit(3);
+      const el=document.getElementById('c');const w=cast?.find(c=>c.status==='active')||cast?.[0];const wn=w?.cast_members?.display_name||'Unknown';
+      const ep=game?.episode_number||1,fc=fights?.length||0,md=Math.max(...(cast||[]).map(c=>c.drama_points||0),0);
+      let h=`<div class="results-hero anim"><span class="pill pill-purple">Game Complete</span><div class="crown">👑</div><div class="winner-name fire-text">${wn}</div><div style="font-family:var(--font-display);font-size:0.7rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.15em;margin-top:0.25rem">Queen of the Mansion</div></div>
+      <div class="stats anim anim-d1" style="margin-bottom:1.5rem"><div class="stat"><div class="stat-val" style="color:var(--purple)">${ep}</div><div class="stat-lbl">Episodes</div></div><div class="stat"><div class="stat-val" style="color:var(--red)">${fc}</div><div class="stat-lbl">Fights</div></div><div class="stat"><div class="stat-val" style="color:var(--gold)">${md}</div><div class="stat-lbl">Peak Drama</div></div></div>
+      <div class="highlights anim anim-d2"><div class="hl"><div class="hl-icon">💥</div><div class="hl-label">Most Dramatic</div><div class="hl-val">${cast?.[0]?.cast_members?.display_name||'—'}</div></div><div class="hl"><div class="hl-icon">🤫</div><div class="hl-label">Best Spy</div><div class="hl-val">${(cast||[]).sort((a,b)=>(b.missions_completed||0)-(a.missions_completed||0))[0]?.cast_members?.display_name||'—'}</div></div></div>`;
+      if(dir?.length){h+=`<div class="label anim anim-d3" style="color:var(--gold);margin-bottom:0.5rem">Director's Notes</div>${dir.map(d=>`<div class="director-quote anim">"${d.content}"</div>`).join('')}`}
+      h+=`<div class="label anim anim-d4" style="color:var(--text3);margin:1rem 0 0.5rem">Final Rankings</div>`;
+      (cast||[]).forEach((c,i)=>{const nm=c.cast_members?.display_name||'Player';const iw=c.status==='active'&&i===0;h+=`<div class="cast-row ${iw?'winner':''} anim" style="animation-delay:${0.2+i*0.03}s"><div class="cast-rank">${iw?'👑':i+1}</div><div class="av av-sm">${AI[c.cast_members?.archetype]||'🎭'}</div><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">${nm}${c.cast_members?.is_ai_player?' 🤖':''}</div><div style="font-size:0.7rem;color:var(--text3)">${c.secret_role||c.cast_members?.archetype||'?'} · ${c.strike_count||0} strikes</div></div><div style="font-family:var(--font-display);font-weight:800;font-size:0.9rem;color:var(--pink)">${c.drama_points||0}</div></div>`});
+      h+=`<button class="btn btn-fire btn-block btn-lg" style="margin-top:1.5rem" onclick="location.href='/pages/lobby.html'">Play Again</button>`;
+      el.innerHTML=h;
     }
-
     init();
   </script>
 </body>

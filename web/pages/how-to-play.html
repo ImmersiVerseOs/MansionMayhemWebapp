@@ -4,162 +4,111 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>How to Play — Mansion Mayhem</title>
-  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/candy.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    .rules-hero { text-align: center; padding: 1.5rem 0; }
-    .section { margin-bottom: 1.5rem; }
-    .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
-    .section-icon { font-size: 1.25rem; }
-    .phase-flow { display: flex; flex-direction: column; gap: 0; }
-    .phase-item { display: flex; gap: 0.75rem; padding: 0.75rem 0; position: relative; }
-    .phase-item:not(:last-child)::after { content: ''; position: absolute; left: 15px; top: 2.75rem; bottom: 0; width: 2px; background: var(--border); }
-    .phase-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; z-index: 1; }
-    .phase-content { flex: 1; }
-    .phase-name { font-weight: 700; font-size: 0.9rem; }
-    .phase-desc { font-size: 0.8rem; color: var(--text-2); margin-top: 0.15rem; }
-    .phase-time { font-size: 0.7rem; color: var(--text-3); font-family: var(--font-mono); }
-
-    .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-    .role-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem; text-align: center; }
-    .role-emoji { font-size: 1.5rem; margin-bottom: 0.25rem; }
-    .role-title { font-weight: 700; font-size: 0.8rem; }
-    .role-power { font-size: 0.7rem; color: var(--text-3); margin-top: 0.2rem; }
-
-    .tip-card { background: var(--gradient-glass); border: 1px solid var(--border-accent); border-radius: var(--radius-md); padding: 0.75rem; margin-bottom: 0.5rem; display: flex; gap: 0.5rem; align-items: flex-start; }
-    .tip-num { background: var(--gradient-brand); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
-    .tip-text { font-size: 0.8rem; color: var(--text-2); }
+    .rules-hero{text-align:center;padding:1.5rem 0 2rem}
+    .sec{margin-bottom:2rem}
+    .sec-head{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem}
+    .phase-flow{display:flex;flex-direction:column}
+    .phase-item{display:flex;gap:0.75rem;padding:0.65rem 0;position:relative}
+    .phase-item:not(:last-child)::after{content:'';position:absolute;left:15px;top:2.7rem;bottom:0;width:2px;background:var(--border)}
+    .phase-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;z-index:1}
+    .phase-nm{font-family:var(--font-display);font-weight:700;font-size:0.9rem}
+    .phase-desc{font-size:0.8rem;color:var(--text2);margin-top:0.1rem}
+    .phase-dur{font-family:var(--font-display);font-size:0.7rem;color:var(--text3)}
+    .role-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem}
+    .role-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:0.75rem;text-align:center}
+    .role-e{font-size:1.5rem;margin-bottom:0.2rem}
+    .role-n{font-family:var(--font-display);font-weight:700;font-size:0.8rem}
+    .role-p{font-size:0.7rem;color:var(--text3);margin-top:0.1rem}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .tip{display:flex;gap:0.5rem;align-items:flex-start;padding:0.65rem;background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:0.4rem}
+    .tip-n{width:24px;height:24px;border-radius:50%;background:var(--grad-fire);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.65rem;font-weight:700;flex-shrink:0}
+    .tip-t{font-size:0.82rem;color:var(--text2)}
   </style>
 </head>
 <body>
   <div class="page">
-    <nav class="nav">
-      <button class="nav-back" onclick="history.back()">←</button>
-      <span class="nav-title">How to Play</span>
-    </nav>
-
-    <div class="container page-padded">
-      <div class="rules-hero animate-in">
-        <div style="font-size:3rem;margin-bottom:0.5rem">🏰</div>
-        <h1 class="title-lg">Mansion Mayhem</h1>
-        <p class="body-sm" style="margin-top:0.25rem">Reality TV drama meets social deduction</p>
+    <div class="orb3"></div>
+    <div class="main"><div class="container">
+      <div class="rules-hero anim">
+        <div class="anim-float" style="font-size:3.5rem">🏰</div>
+        <h1 class="display-lg" style="margin-top:0.5rem"><span class="fire-text">Mansion</span> Mayhem</h1>
+        <p class="body-lg" style="margin-top:0.35rem">Reality TV drama × social deduction</p>
       </div>
-
-      <!-- THE CONCEPT -->
-      <div class="section animate-in animate-delay-1">
-        <div class="card card-accent">
-          <p style="font-size:0.9rem;line-height:1.6;color:var(--text-2)">
-            Players enter a virtual mansion as reality TV cast members. An AI Director assigns <strong style="color:var(--text)">secret roles</strong> and <strong style="color:var(--text)">private missions</strong>. Form alliances, start drama, confront rivals, and vote to eliminate each other. <strong style="color:var(--gold)">Last player standing wins the crown.</strong>
-          </p>
+      <div class="sec anim anim-d1">
+        <div class="card card-accent" style="max-width:700px;margin:0 auto">
+          <p style="font-size:1rem;line-height:1.65;color:var(--text2)">Players enter a virtual mansion as reality TV cast members. An AI Director assigns <strong style="color:var(--text)">secret roles</strong> and <strong style="color:var(--text)">private missions</strong>. Form alliances, start drama, confront rivals, and vote to eliminate. <strong class="fire-text">Last player standing wins the crown.</strong></p>
         </div>
       </div>
-
-      <!-- 7 PHASES -->
-      <div class="section animate-in animate-delay-2">
-        <div class="section-header">
-          <span class="section-icon">⏱️</span>
-          <span class="title-sm">Episode Phases</span>
+      <div class="info-grid anim anim-d2">
+        <div class="sec">
+          <div class="sec-head"><span style="font-size:1.2rem">⏱️</span><span class="display-sm">Episode Phases</span></div>
+          <div class="phase-flow">
+            <div class="phase-item"><div class="phase-dot" style="background:var(--purple-s);border:1px solid rgba(168,85,247,0.3)">🏰</div><div style="flex:1"><div class="phase-nm">Arrival</div><div class="phase-desc">Get your secret role.</div></div><div class="phase-dur">3m</div></div>
+            <div class="phase-item"><div class="phase-dot" style="background:var(--cyan-s);border:1px solid rgba(0,229,255,0.3)">💬</div><div style="flex:1"><div class="phase-nm">Social Hour</div><div class="phase-desc">Mingle, form alliances.</div></div><div class="phase-dur">8m</div></div>
+            <div class="phase-item"><div class="phase-dot" style="background:var(--pink-s);border:1px solid rgba(255,50,100,0.3)">⚔️</div><div style="flex:1"><div class="phase-nm">The Challenge</div><div class="phase-desc">Compete for immunity.</div></div><div class="phase-dur">7m</div></div>
+            <div class="phase-item"><div class="phase-dot" style="background:var(--card);border:1px solid var(--border)">🤫</div><div style="flex:1"><div class="phase-nm">Whisper Hour</div><div class="phase-desc">Secrets and betrayal.</div></div><div class="phase-dur">5m</div></div>
+            <div class="phase-item"><div class="phase-dot" style="background:var(--orange-s);border:1px solid rgba(255,107,43,0.3)">💥</div><div style="flex:1"><div class="phase-nm">Confrontation</div><div class="phase-desc">Director reveals a secret.</div></div><div class="phase-dur">5m</div></div>
+            <div class="phase-item"><div class="phase-dot" style="background:var(--gold-s);border:1px solid rgba(255,184,0,0.3)">🗳️</div><div style="flex:1"><div class="phase-nm">Deliberation</div><div class="phase-desc">Vote to eliminate.</div></div><div class="phase-dur">4m</div></div>
+            <div class="phase-item"><div class="phase-dot" style="background:var(--red-s);border:1px solid rgba(255,71,87,0.3)">🚪</div><div style="flex:1"><div class="phase-nm">Elimination</div><div class="phase-desc">One player leaves.</div></div><div class="phase-dur">3m</div></div>
+          </div>
         </div>
-        <div class="phase-flow">
-          <div class="phase-item">
-            <div class="phase-dot" style="background:var(--purple)">🏰</div>
-            <div class="phase-content"><div class="phase-name">Arrival</div><div class="phase-desc">Get your secret role card. The Director introduces the episode.</div><div class="phase-time">3 min</div></div>
+        <div>
+          <div class="sec">
+            <div class="sec-head"><span style="font-size:1.2rem">💥</span><span class="display-sm">Confrontations</span></div>
+            <div class="card"><p style="font-size:0.88rem;color:var(--text2);line-height:1.55">Confront another player. Both get a <strong style="color:var(--red)">strike</strong>. <strong style="color:var(--red)">2 strikes = auto-eliminated.</strong></p></div>
           </div>
-          <div class="phase-item">
-            <div class="phase-dot" style="background:var(--cyan)">💬</div>
-            <div class="phase-content"><div class="phase-name">Social Hour</div><div class="phase-desc">Mingle, form alliances, complete secret missions. The Director drops hints.</div><div class="phase-time">8 min</div></div>
+          <div class="sec">
+            <div class="sec-head"><span style="font-size:1.2rem">🤝</span><span class="display-sm">Alliances</span></div>
+            <div class="card"><p style="font-size:0.88rem;color:var(--text2);line-height:1.55">Form secret alliances of 2–4. Get a <strong style="color:var(--cyan)">private chat room</strong>. Betrayal missions reward breaking them.</p></div>
           </div>
-          <div class="phase-item">
-            <div class="phase-dot" style="background:var(--rose)">⚔️</div>
-            <div class="phase-content"><div class="phase-name">The Challenge</div><div class="phase-desc">Group competition. Winner earns immunity or a power.</div><div class="phase-time">7 min</div></div>
+          <div class="sec">
+            <div class="sec-head"><span style="font-size:1.2rem">🔥</span><span class="display-sm">Drama Chat</span></div>
+            <div class="card"><p style="font-size:0.88rem;color:var(--text2);line-height:1.55">The public Tea Room. Post tea ☕, shade 🌚, confessions 🤫, or go anonymous 👻. Director drops bombshells here.</p></div>
           </div>
-          <div class="phase-item">
-            <div class="phase-dot" style="background:rgba(100,100,150,0.4)">🤫</div>
-            <div class="phase-content"><div class="phase-name">Whisper Hour</div><div class="phase-desc">Lights dim. Private conversations. Betrayal missions activate.</div><div class="phase-time">5 min</div></div>
-          </div>
-          <div class="phase-item">
-            <div class="phase-dot" style="background:var(--orange)">💥</div>
-            <div class="phase-content"><div class="phase-name">Confrontation</div><div class="phase-desc">The Director reveals a secret. Everyone reacts. Drama explodes.</div><div class="phase-time">5 min</div></div>
-          </div>
-          <div class="phase-item">
-            <div class="phase-dot" style="background:var(--gold)">🗳️</div>
-            <div class="phase-content"><div class="phase-name">Deliberation</div><div class="phase-desc">Voting opens. Campaign to survive. Use your powers.</div><div class="phase-time">4 min</div></div>
-          </div>
-          <div class="phase-item">
-            <div class="phase-dot" style="background:var(--red)">🚪</div>
-            <div class="phase-content"><div class="phase-name">Elimination</div><div class="phase-desc">Votes revealed. One player leaves the Mansion.</div><div class="phase-time">3 min</div></div>
+          <div class="sec">
+            <div class="sec-head"><span style="font-size:1.2rem">🎮</span><span class="display-sm">Game Modes</span></div>
+            <div class="row" style="margin-bottom:0.4rem"><span style="font-size:1.2rem">🎉</span><div style="flex:1"><div style="font-weight:600">Party — 35 min</div><div style="font-size:0.7rem;color:var(--text3)">8–20 players</div></div></div>
+            <div class="row" style="margin-bottom:0.4rem"><span style="font-size:1.2rem">⚡</span><div style="flex:1"><div style="font-weight:600">Blitz — 15 min</div><div style="font-size:0.7rem;color:var(--text3)">6–12 players</div></div></div>
+            <div class="row" style="margin-bottom:0.4rem"><span style="font-size:1.2rem">🏃</span><div style="flex:1"><div style="font-weight:600">Sprint — 5 min</div><div style="font-size:0.7rem;color:var(--text3)">4–8 players</div></div></div>
+            <div class="row"><span style="font-size:1.2rem">📅</span><div style="flex:1"><div style="font-weight:600">Season — 10 weeks</div><div style="font-size:0.7rem;color:var(--text3)">10–20 players</div></div></div>
           </div>
         </div>
       </div>
-
-      <!-- SECRET ROLES -->
-      <div class="section animate-in animate-delay-3">
-        <div class="section-header">
-          <span class="section-icon">🎭</span>
-          <span class="title-sm">Secret Roles</span>
-        </div>
-        <p class="body-sm" style="margin-bottom:0.75rem">Each episode you get a secret role with a unique power. Nobody knows your role unless it's revealed.</p>
+      <div class="sec anim anim-d3">
+        <div class="sec-head"><span style="font-size:1.2rem">🎭</span><span class="display-sm">Secret Roles</span></div>
         <div class="role-grid">
-          <div class="role-item"><div class="role-emoji">🔥</div><div class="role-title">Instigator</div><div class="role-power">Send anonymous rumors</div></div>
-          <div class="role-item"><div class="role-emoji">🛡️</div><div class="role-title">Protector</div><div class="role-power">Veto one elimination</div></div>
-          <div class="role-item"><div class="role-emoji">👁️</div><div class="role-title">Spy</div><div class="role-power">See all votes early</div></div>
-          <div class="role-item"><div class="role-emoji">💣</div><div class="role-title">Saboteur</div><div class="role-power">Hijack missions</div></div>
-          <div class="role-item"><div class="role-emoji">🤝</div><div class="role-title">Diplomat</div><div class="role-power">Shield alliances</div></div>
-          <div class="role-item"><div class="role-emoji">🃏</div><div class="role-title">Wildcard</div><div class="role-power">Double vote (risky)</div></div>
-          <div class="role-item"><div class="role-emoji">👻</div><div class="role-title">Ghost</div><div class="role-power">Change vote last second</div></div>
-          <div class="role-item"><div class="role-emoji">💎</div><div class="role-title">Socialite</div><div class="role-power">See social connections</div></div>
+          <div class="role-item"><div class="role-e">🔥</div><div class="role-n">Instigator</div><div class="role-p">Anon rumors</div></div>
+          <div class="role-item"><div class="role-e">🛡️</div><div class="role-n">Protector</div><div class="role-p">Veto 1 vote</div></div>
+          <div class="role-item"><div class="role-e">👁️</div><div class="role-n">Spy</div><div class="role-p">See votes early</div></div>
+          <div class="role-item"><div class="role-e">💣</div><div class="role-n">Saboteur</div><div class="role-p">Hijack missions</div></div>
+          <div class="role-item"><div class="role-e">🤝</div><div class="role-n">Diplomat</div><div class="role-p">Shield allies</div></div>
+          <div class="role-item"><div class="role-e">🃏</div><div class="role-n">Wildcard</div><div class="role-p">2× vote (risky)</div></div>
+          <div class="role-item"><div class="role-e">👻</div><div class="role-n">Ghost</div><div class="role-p">Change vote</div></div>
+          <div class="role-item"><div class="role-e">💎</div><div class="role-n">Socialite</div><div class="role-p">See connections</div></div>
         </div>
       </div>
-
-      <!-- FIGHTS -->
-      <div class="section animate-in animate-delay-4">
-        <div class="section-header">
-          <span class="section-icon">💥</span>
-          <span class="title-sm">Confrontations & Strikes</span>
-        </div>
-        <div class="card">
-          <p style="font-size:0.85rem;color:var(--text-2);line-height:1.5">
-            You can <strong style="color:var(--text)">confront</strong> another player during Social, Whisper, or Confrontation phases. Both fighters receive a <strong style="color:var(--red)">strike</strong>. <strong style="color:var(--red)">2 strikes = auto-eliminated.</strong> No vote needed. Fights generate massive drama but carry real risk.
-          </p>
+      <div class="sec anim anim-d4">
+        <div class="sec-head"><span style="font-size:1.2rem">💡</span><span class="display-sm">Pro Tips</span></div>
+        <div class="grid-2">
+          <div class="tip"><div class="tip-n">1</div><div class="tip-t">Your role changes every episode. Adapt.</div></div>
+          <div class="tip"><div class="tip-n">2</div><div class="tip-t">Alliances are powerful but betrayal rewards breaking them.</div></div>
+          <div class="tip"><div class="tip-n">3</div><div class="tip-t">High drama = more secrets revealed.</div></div>
+          <div class="tip"><div class="tip-n">4</div><div class="tip-t">AI agents are mixed in. Can you tell?</div></div>
+          <div class="tip"><div class="tip-n">5</div><div class="tip-t">Don't fight unless you can afford a strike.</div></div>
+          <div class="tip"><div class="tip-n">6</div><div class="tip-t">Anonymous posts can shift the vote.</div></div>
         </div>
       </div>
-
-      <!-- GAME MODES -->
-      <div class="section animate-in animate-delay-5">
-        <div class="section-header">
-          <span class="section-icon">🎮</span>
-          <span class="title-sm">Game Modes</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:0.5rem">
-          <div class="list-item"><span style="font-size:1.25rem">🎉</span><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">Party — 35 min</div><div style="font-size:0.7rem;color:var(--text-3)">8-20 players. Full drama arc. The signature experience.</div></div></div>
-          <div class="list-item"><span style="font-size:1.25rem">⚡</span><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">Blitz — 15 min</div><div style="font-size:0.7rem;color:var(--text-3)">6-12 players. Fast phases. Maximum pressure.</div></div></div>
-          <div class="list-item"><span style="font-size:1.25rem">🏃</span><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">Sprint — 5 min</div><div style="font-size:0.7rem;color:var(--text-3)">4-8 players. Lightning rounds. Pure chaos.</div></div></div>
-          <div class="list-item"><span style="font-size:1.25rem">📅</span><div style="flex:1"><div style="font-weight:600;font-size:0.85rem">Season — 10 weeks</div><div style="font-size:0.7rem;color:var(--text-3)">10-20 players. Weekly eliminations. Deep strategy.</div></div></div>
-        </div>
-      </div>
-
-      <!-- TIPS -->
-      <div class="section">
-        <div class="section-header">
-          <span class="section-icon">💡</span>
-          <span class="title-sm">Pro Tips</span>
-        </div>
-        <div class="tip-card"><div class="tip-num">1</div><div class="tip-text">Your role changes every episode. Adapt your strategy.</div></div>
-        <div class="tip-card"><div class="tip-num">2</div><div class="tip-text">Alliances are powerful but betrayal missions reward breaking them.</div></div>
-        <div class="tip-card"><div class="tip-num">3</div><div class="tip-text">The drama meter affects the whole game. High drama = more secrets revealed.</div></div>
-        <div class="tip-card"><div class="tip-num">4</div><div class="tip-text">AI agents are mixed in. Can you tell who's real?</div></div>
-        <div class="tip-card"><div class="tip-num">5</div><div class="tip-text">Don't fight unless you can afford a strike. Two = you're out.</div></div>
-      </div>
-
-      <button class="btn btn-primary btn-block btn-lg" style="margin-bottom:2rem" onclick="window.location.href='/pages/lobby.html'">Enter the Mansion</button>
-    </div>
-
-    <div class="tab-bar">
-      <a href="/pages/lobby.html" class="tab-item"><span class="tab-icon">🏠</span>Lobby</a>
-      <a href="/pages/profile.html" class="tab-item"><span class="tab-icon">👤</span>Profile</a>
-      <a href="/pages/leaderboard.html" class="tab-item"><span class="tab-icon">🏆</span>Ranks</a>
-      <button class="tab-item active"><span class="tab-icon">📖</span>Rules</button>
-    </div>
+      <button class="btn btn-fire btn-block btn-lg" style="margin-bottom:2rem" onclick="location.href='/pages/lobby.html'">Enter the Mansion</button>
+    </div></div>
   </div>
+  <script type="module">
+    import{initSidebar}from'/js/sidebar.js';
+    import{waitForSupabase}from'/js/supabase.js';
+    import*as userMod from'/js/supabase.js';
+    waitForSupabase().then(()=>initSidebar('rules',userMod));
+  </script>
 </body>
 </html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drama Chat — Mansion Mayhem</title>
+  <link rel="stylesheet" href="/css/candy.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .chat-shell{margin-left:var(--sidebar-w);height:100vh;display:flex;flex-direction:column}
+    .chat-top{padding:0.75rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;background:rgba(12,4,24,0.6);backdrop-filter:blur(12px)}
+    .type-tabs{display:flex;gap:0.35rem;padding:0.5rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(12,4,24,0.4)}
+    .type-tab{padding:0.35rem 0.7rem;border-radius:var(--r-pill);border:1px solid var(--border);background:none;color:var(--text3);font-size:0.7rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:all 0.2s}
+    .type-tab.on{background:var(--pink-s);border-color:rgba(255,50,100,0.2);color:var(--pink)}
+    .chat-feed{flex:1;overflow-y:auto;padding:0.75rem 1.5rem;display:flex;flex-direction:column;gap:0.5rem;max-width:750px}
+    .director-drop{background:rgba(255,184,0,0.06);border:1px solid rgba(255,184,0,0.12);border-left:3px solid var(--gold);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:0.65rem 0.85rem}
+    .fight-alert{background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.15);border-radius:var(--r-sm);padding:0.65rem;text-align:center;animation:shake 0.4s ease}
+    .secret-drop{background:linear-gradient(135deg,rgba(255,107,43,0.08),rgba(255,50,100,0.08));border:1px solid rgba(255,107,43,0.15);border-radius:var(--r-sm);padding:0.65rem}
+    .reaction-row{display:flex;gap:0.35rem;margin-top:0.4rem;justify-content:center}
+    .reaction-btn{padding:0.3rem 0.5rem;border-radius:var(--r-pill);background:var(--card);border:1px solid var(--border);font-size:0.85rem;cursor:pointer;transition:all 0.15s}
+    .reaction-btn:hover{transform:scale(1.15);border-color:var(--border-h)}
+    .chat-compose{padding:0.6rem 1.5rem;display:flex;gap:0.5rem;border-top:1px solid var(--border);background:rgba(12,4,24,0.85);max-width:750px}
+    .post-type-sel{padding:0.65rem;border-radius:var(--r-sm);background:var(--card);border:1px solid var(--border);color:var(--text2);font-size:0.8rem;font-family:var(--font);cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="orb3"></div>
+    <div class="chat-shell">
+      <div class="chat-top">
+        <span style="font-size:1.3rem">🔥</span>
+        <span style="font-family:var(--font-display);font-weight:700;font-size:1rem;flex:1">Drama Chat</span>
+        <span class="pill pill-pink"><span class="live-dot"></span> Live</span>
+      </div>
+      <div class="type-tabs">
+        <button class="type-tab on" onclick="filterType('all',this)">All</button>
+        <button class="type-tab" onclick="filterType('tea',this)">☕ Tea</button>
+        <button class="type-tab" onclick="filterType('shade',this)">🌚 Shade</button>
+        <button class="type-tab" onclick="filterType('confession',this)">🤫 Confessions</button>
+        <button class="type-tab" onclick="filterType('anonymous',this)">👻 Anonymous</button>
+      </div>
+      <div class="chat-feed" id="chatFeed"><div class="spinner" style="margin:3rem auto"></div></div>
+      <div class="chat-compose">
+        <select class="post-type-sel" id="postType"><option value="tea">☕ Tea</option><option value="shade">🌚 Shade</option><option value="confession">🤫 Confession</option><option value="anonymous">👻 Anon</option></select>
+        <input class="input input-lg" id="msgInput" placeholder="Spill the tea..." style="flex:1">
+        <button class="btn btn-fire" onclick="sendPost()">Send</button>
+      </div>
+    </div>
+  </div>
+  <script type="module">
+    import{waitForSupabase,requireAuth}from'/js/supabase.js';
+    import{initSidebar}from'/js/sidebar.js';
+    import*as userMod from'/js/supabase.js';
+    let sb,user,gameId,castId,currentFilter='all',castNames={};
+    async function init(){
+      sb=await waitForSupabase();user=await requireAuth();if(!user)return;
+      await initSidebar('drama',userMod);
+      const p=new URLSearchParams(location.search);gameId=p.get('game');
+      if(!gameId){const{data:cm}=await sb.from('cast_members').select('id').eq('user_id',user.id);if(cm?.length){const{data:gc}=await sb.from('mm_game_cast').select('game_id').in('cast_member_id',cm.map(c=>c.id)).eq('status','active').limit(1).maybeSingle();if(gc)gameId=gc.game_id}}
+      const{data:cm}=await sb.from('cast_members').select('id').eq('user_id',user.id).maybeSingle();castId=cm?.id;
+      if(gameId){const{data:cast}=await sb.from('mm_game_cast').select('cast_member_id,cast_members(display_name,archetype)').eq('game_id',gameId);(cast||[]).forEach(c=>{castNames[c.cast_member_id]={name:c.cast_members?.display_name||'?',arch:c.cast_members?.archetype}})}
+      await loadPosts();subscribe();
+    }
+    async function loadPosts(){
+      if(!gameId){document.getElementById('chatFeed').innerHTML='<div class="empty"><div class="empty-icon">🔥</div>Join a game to see the drama</div>';return}
+      let q=sb.from('mm_tea_room_posts').select('*').eq('game_id',gameId).order('created_at',{ascending:true}).limit(150);
+      if(currentFilter!=='all')q=q.eq('post_type',currentFilter);
+      const{data}=await q;
+      const{data:director}=await sb.from('episode_director_log').select('*').eq('game_id',gameId).order('created_at',{ascending:true}).limit(25);
+      const{data:fights}=await sb.from('episode_fights').select('*').eq('game_id',gameId).order('created_at',{ascending:true}).limit(25);
+      const{data:secrets}=await sb.from('episode_secrets').select('*').eq('game_id',gameId).eq('is_revealed',true).order('revealed_at',{ascending:true}).limit(15);
+      renderFeed(data||[],director||[],fights||[],secrets||[]);
+    }
+    function renderFeed(posts,director,fights,secrets){
+      const feed=document.getElementById('chatFeed');let items=[];
+      posts.forEach(p=>items.push({t:'post',time:p.created_at,d:p}));director.forEach(d=>items.push({t:'director',time:d.created_at,d:d}));fights.forEach(f=>items.push({t:'fight',time:f.created_at,d:f}));secrets.forEach(s=>items.push({t:'secret',time:s.revealed_at||s.created_at,d:s}));
+      items.sort((a,b)=>new Date(a.time)-new Date(b.time));
+      if(!items.length){feed.innerHTML='<div class="empty"><div class="empty-icon">🔥</div>No drama yet. Be the first to stir the pot.</div>';return}
+      feed.innerHTML=items.map(item=>{
+        const time=new Date(item.time).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+        if(item.t==='director')return`<div class="director-drop"><div style="font-family:var(--font-display);font-size:0.6rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em">🎭 The Director</div><div style="font-size:0.88rem;color:var(--gold);font-style:italic;margin-top:0.15rem">"${item.d.content}"</div></div>`;
+        if(item.t==='fight'){const i=castNames[item.d.initiator_id]?.name||'?';const t=castNames[item.d.target_id]?.name||'?';return`<div class="fight-alert"><div style="font-family:var(--font-display);font-weight:700;font-size:0.9rem;color:var(--red)">💥 ${i} confronted ${t}!</div><div class="reaction-row"><button class="reaction-btn">😱</button><button class="reaction-btn">🍿</button><button class="reaction-btn">💀</button><button class="reaction-btn">👏</button></div></div>`}
+        if(item.t==='secret')return`<div class="secret-drop"><div style="font-family:var(--font-display);font-size:0.6rem;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.08em">🔥 Secret Revealed</div><div style="font-size:0.88rem;font-weight:600;font-style:italic;margin-top:0.2rem">${item.d.content}</div></div>`;
+        const p=item.d;const sender=castNames[p.cast_member_id];const mine=p.cast_member_id===castId;const isAnon=p.post_type==='anonymous';const te={tea:'☕',shade:'🌚',confession:'🤫',anonymous:'👻'}[p.post_type]||'💬';
+        return`<div class="bubble ${mine?'mine':''}" style="max-width:55%"><div class="bubble-name" style="color:${mine?'var(--pink)':isAnon?'var(--purple)':'var(--cyan)'}">${isAnon?'👻 Anonymous':`${te} ${sender?.name||'?'}`}</div>${p.content}<div class="bubble-time">${time}</div></div>`;
+      }).join('');feed.scrollTop=feed.scrollHeight;
+    }
+    function subscribe(){if(!gameId)return;sb.channel('drama-'+gameId).on('postgres_changes',{event:'INSERT',schema:'public',table:'mm_tea_room_posts',filter:`game_id=eq.${gameId}`},()=>loadPosts()).on('postgres_changes',{event:'INSERT',schema:'public',table:'episode_director_log',filter:`game_id=eq.${gameId}`},()=>loadPosts()).on('postgres_changes',{event:'INSERT',schema:'public',table:'episode_fights',filter:`game_id=eq.${gameId}`},()=>loadPosts()).on('postgres_changes',{event:'UPDATE',schema:'public',table:'episode_secrets',filter:`game_id=eq.${gameId}`},()=>loadPosts()).subscribe()}
+    window.filterType=(t,el)=>{currentFilter=t;document.querySelectorAll('.type-tab').forEach(b=>b.classList.remove('on'));el.classList.add('on');loadPosts()};
+    window.sendPost=async()=>{const input=document.getElementById('msgInput');const text=input.value.trim();if(!text||!gameId)return;input.value='';await sb.from('mm_tea_room_posts').insert({game_id:gameId,cast_member_id:castId,content:text,post_type:document.getElementById('postType').value,is_anonymous:document.getElementById('postType').value==='anonymous'})};
+    document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendPost()});
+    init();
+  </script>
+</body>
+</html>

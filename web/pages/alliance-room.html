@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alliance Room — Mansion Mayhem</title>
+  <link rel="stylesheet" href="/css/candy.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .alliance-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .alliance-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;position:relative;overflow:hidden;transition:all 0.2s}
+    .alliance-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad-ice)}
+    .alliance-card:hover{border-color:var(--border-h)}
+    .alliance-name{font-family:var(--font-display);font-weight:700;font-size:1rem;margin-top:0.25rem}
+    .alliance-type{font-size:0.65rem;color:var(--cyan);text-transform:uppercase;letter-spacing:0.06em;font-weight:600}
+    .alliance-members{display:flex;gap:-8px;margin:0.75rem 0}
+    .alliance-members .av{margin-left:-8px;border:2px solid var(--bg)}.alliance-members .av:first-child{margin-left:0}
+    .alliance-actions{display:flex;gap:0.5rem;margin-top:0.75rem}
+    .form-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem}
+    .pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem}
+    .pick-player{display:flex;align-items:center;gap:0.6rem;padding:0.65rem;border-radius:var(--r-sm);background:var(--card);border:2px solid var(--border);cursor:pointer;transition:all 0.2s}
+    .pick-player:hover{border-color:var(--border-h)}
+    .pick-player.picked{border-color:var(--cyan);background:var(--cyan-s)}
+    .pick-name{font-weight:600;font-size:0.85rem;flex:1}
+    .pick-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.75rem;transition:all 0.2s}
+    .pick-player.picked .pick-check{background:var(--cyan);border-color:var(--cyan);color:#000}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="orb3"></div>
+    <div class="main">
+      <div class="container">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem">
+          <h1 class="display-lg anim">🤝 Alliance Room</h1>
+          <span class="pill pill-cyan">Secret</span>
+        </div>
+        <div id="content"><div class="spinner" style="margin:4rem auto"></div></div>
+      </div>
+    </div>
+  </div>
+  <script type="module">
+    import{waitForSupabase,requireAuth,getSupabase}from'/js/supabase.js';
+    import{initSidebar}from'/js/sidebar.js';
+    import*as userMod from'/js/supabase.js';
+    let sb,user,gameId,castId,alliances=[],players=[];
+    const AI={wildcard:'🃏',strategist:'🧠',sweetheart:'💖',villain:'😈',comedian:'😂',troublemaker:'💣',diva:'👑',hothead:'🔥'};
+    async function init(){
+      sb=await waitForSupabase();user=await requireAuth();if(!user)return;
+      await initSidebar('alliances',userMod);
+      const p=new URLSearchParams(location.search);gameId=p.get('game');
+      if(!gameId){location.href='/pages/lobby.html';return}
+      const{data:cm}=await sb.from('cast_members').select('id').eq('user_id',user.id).maybeSingle();castId=cm?.id;
+      await loadPlayers();await loadAlliances();render();
+    }
+    async function loadPlayers(){const{data}=await sb.from('mm_game_cast').select('*,cast_members(id,display_name,archetype,is_ai_player)').eq('game_id',gameId).eq('status','active');players=(data||[]).map(gc=>({id:gc.cast_member_id,name:gc.cast_members?.display_name||'?',arch:gc.cast_members?.archetype||'wildcard',ai:gc.cast_members?.is_ai_player}))}
+    async function loadAlliances(){const{data}=await sb.from('mm_alliance_rooms').select('*').eq('game_id',gameId).eq('status','active');alliances=(data||[]).filter(a=>a.member_ids?.includes(castId))}
+    function render(){
+      const el=document.getElementById('content');
+      if(!alliances.length){renderCreate(el);return}
+      let h='<div class="alliance-grid">';
+      alliances.forEach(a=>{const members=players.filter(p=>a.member_ids?.includes(p.id));
+        h+=`<div class="alliance-card anim"><div class="alliance-type">${a.room_type||'duo'} alliance</div><div class="alliance-name">${a.room_name||'Unnamed Alliance'}</div><div class="alliance-members">${members.map(m=>`<div class="av av-sm av-cyan">${AI[m.arch]||'🎭'}</div>`).join('')}</div><div style="font-size:0.8rem;color:var(--text2)">${members.map(m=>m.name).join(', ')}</div><div class="alliance-actions"><a href="/pages/alliance-chat.html?game=${gameId}&alliance=${a.id}" class="btn btn-cyan btn-sm" style="flex:1">💬 Secret Chat</a><button class="btn btn-outline btn-sm" onclick="leaveAlliance('${a.id}')">Leave</button></div></div>`});
+      h+=`</div><button class="btn btn-glass btn-block" style="margin-top:1.5rem" onclick="showCreate()">+ Form New Alliance</button><div id="createArea"></div>`;
+      el.innerHTML=h;
+    }
+    function renderCreate(el){
+      const others=players.filter(p=>p.id!==castId);
+      el.innerHTML=`<div class="empty anim" style="padding:2.5rem 0"><div class="empty-icon">🤝</div><p style="margin-bottom:1.5rem;font-size:0.95rem">No alliances yet. Form one to coordinate in secret.</p></div>
+      <div class="form-section anim anim-d1" style="max-width:600px">
+        <div class="label" style="color:var(--cyan);margin-bottom:1rem">Form an Alliance</div>
+        <input class="input input-lg" id="allianceName" placeholder="Alliance name..." style="margin-bottom:1rem">
+        <div class="label" style="color:var(--text3);margin-bottom:0.5rem">Pick 1–3 members</div>
+        <div class="pick-grid">${others.map(p=>`<div class="pick-player" data-id="${p.id}" onclick="togglePick(this)"><div class="av av-sm">${AI[p.arch]||'🎭'}</div><div class="pick-name">${p.name}${p.ai?' 🤖':''}</div><div class="pick-check">✓</div></div>`).join('')}</div>
+        <button class="btn btn-cyan btn-block btn-lg" style="margin-top:1rem" onclick="formAlliance()">🤝 Form Alliance</button>
+      </div>`;
+    }
+    window.showCreate=()=>{const area=document.getElementById('createArea');const others=players.filter(p=>p.id!==castId);area.innerHTML=`<div class="form-section anim" style="margin-top:1rem;max-width:600px"><div class="label" style="color:var(--cyan);margin-bottom:1rem">Form New Alliance</div><input class="input input-lg" id="allianceName" placeholder="Alliance name..." style="margin-bottom:1rem"><div class="label" style="color:var(--text3);margin-bottom:0.5rem">Pick 1–3 members</div><div class="pick-grid">${others.map(p=>`<div class="pick-player" data-id="${p.id}" onclick="togglePick(this)"><div class="av av-sm">${AI[p.arch]||'🎭'}</div><div class="pick-name">${p.name}</div><div class="pick-check">✓</div></div>`).join('')}</div><button class="btn btn-cyan btn-block btn-lg" style="margin-top:1rem" onclick="formAlliance()">🤝 Form Alliance</button></div>`};
+    window.togglePick=(el)=>{const picked=document.querySelectorAll('.pick-player.picked');if(!el.classList.contains('picked')&&picked.length>=3)return;el.classList.toggle('picked')};
+    window.formAlliance=async()=>{const name=document.getElementById('allianceName')?.value.trim()||'Secret Alliance';const picked=[...document.querySelectorAll('.pick-player.picked')].map(e=>e.dataset.id);if(!picked.length){alert('Pick at least 1 member');return}const members=[castId,...picked];const type=members.length===2?'duo':members.length===3?'trio':'quad';const{error}=await sb.from('mm_alliance_rooms').insert({game_id:gameId,room_name:name,room_type:type,member_ids:members,status:'active'});if(error){alert(error.message);return}await loadAlliances();render()};
+    window.leaveAlliance=async(id)=>{if(!confirm('Leave this alliance?'))return;const a=alliances.find(x=>x.id===id);if(!a)return;const nm=(a.member_ids||[]).filter(m=>m!==castId);if(nm.length<=1)await sb.from('mm_alliance_rooms').update({status:'disbanded'}).eq('id',id);else await sb.from('mm_alliance_rooms').update({member_ids:nm}).eq('id',id);await loadAlliances();render()};
+    init();
+  </script>
+</body>
+</html>

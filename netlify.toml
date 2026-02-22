@@ -19,7 +19,7 @@
   status = 200
 
 [build]
-  publish = "."
+  publish = "web"
 
 [[headers]]
   for = "/*"

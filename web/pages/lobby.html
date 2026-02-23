@@ -98,11 +98,48 @@
       const{error:joinErr}=await sb.rpc('join_game',{p_game_id:g.id,p_user_id:user.id});
       if(joinErr)console.warn('join_game error:',joinErr.message);
 
-      // 3. Spawn AI cast to fill lobby
+      // 3. Ensure AI cast members exist, then spawn into game
       const aiCount={party:7,blitz:5,sprint:3,weekly:7}[mode]||5;
+      // Check if AI cast members exist in the database
+      const{data:existingAI,error:aiCheckErr}=await sb.from('cast_members').select('id').eq('is_ai_player',true).eq('status','active').limit(1);
+      if(!existingAI?.length){
+        console.log('No AI cast members found, creating them...');
+        const aiChars=[
+          {display_name:'Cassandra',archetype:'strategist',personality_traits:['strategic','intelligent','ambitious']},
+          {display_name:'Raven',archetype:'villain',personality_traits:['confrontational','aggressive','fearless']},
+          {display_name:'Zoe',archetype:'wildcard',personality_traits:['unpredictable','spontaneous','energetic']},
+          {display_name:'Emma',archetype:'sweetheart',personality_traits:['kind','loyal','emotional']},
+          {display_name:'Diamond',archetype:'troublemaker',personality_traits:['confrontational','messy','honest']},
+          {display_name:'Porsha',archetype:'diva',personality_traits:['glamorous','bougie','petty']},
+          {display_name:'Jasmine',archetype:'hothead',personality_traits:['explosive','protective','loyal']},
+          {display_name:'Ruby',archetype:'comedian',personality_traits:['funny','lighthearted','social']},
+          {display_name:'Madison',archetype:'villain',personality_traits:['deceptive','ruthless','charming']},
+          {display_name:'Victoria',archetype:'strategist',personality_traits:['diplomatic','elegant','persuasive']},
+          {display_name:'Phoenix',archetype:'wildcard',personality_traits:['rebellious','independent','creative']},
+          {display_name:'Olivia',archetype:'strategist',personality_traits:['analytical','observant','intelligent']},
+        ];
+        const aiInserts=aiChars.map(c=>({full_name:c.display_name+' (AI)',display_name:c.display_name,archetype:c.archetype,personality_traits:c.personality_traits,bio:'An AI contestant in the Mansion.',status:'active',is_ai_player:true}));
+        const{error:seedErr}=await sb.from('cast_members').insert(aiInserts);
+        if(seedErr)console.warn('AI seed error:',seedErr.message);
+        else console.log('Seeded',aiInserts.length,'AI characters');
+      }
+      // Now spawn AI into this game
       const{data:aiRes,error:aiErr}=await sb.rpc('spawn_ai_for_game',{p_game_id:g.id,p_count:aiCount});
-      if(aiErr)console.warn('AI spawn error:',aiErr.message);
-      else console.log('AI spawned:',aiRes);
+      if(aiErr){
+        console.warn('spawn_ai_for_game RPC error:',aiErr.message);
+        // Fallback: manually add AI cast members to game
+        console.log('Fallback: manually adding AI to game...');
+        const{data:aiPool}=await sb.from('cast_members').select('id').eq('is_ai_player',true).eq('status','active').limit(aiCount);
+        if(aiPool?.length){
+          const castInserts=aiPool.map(ai=>({game_id:g.id,cast_member_id:ai.id,status:'active'}));
+          const{error:castErr}=await sb.from('mm_game_cast').insert(castInserts);
+          if(castErr)console.warn('Fallback cast insert error:',castErr.message);
+          else console.log('Fallback: added',aiPool.length,'AI to game');
+          await sb.from('mm_games').update({current_players:1+aiPool.length}).eq('id',g.id);
+        }
+      } else {
+        console.log('AI spawned via RPC:',aiRes);
+      }
 
       // 4. Schedule lobby_check recurring event for the cron processor
       await sb.from('game_events').insert([

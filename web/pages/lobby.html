@@ -65,7 +65,10 @@
           <p class="body-lg">Share this code with friends</p>
           <div class="wait-players" id="waitPlayers"></div>
           <div id="waitStatus" class="body-md" style="color:var(--gold)">Waiting...</div>
-          <button class="btn btn-outline" style="margin-top:1.5rem" onclick="leaveGame()">Leave Game</button>
+          <div style="display:flex;gap:0.75rem;margin-top:1.5rem;justify-content:center">
+            <button class="btn btn-fire btn-lg" id="startBtn" onclick="startGame()">🎬 Start Game</button>
+            <button class="btn btn-outline" onclick="leaveGame()">Leave</button>
+          </div>
         </div>
       </div>
     </div>
@@ -80,11 +83,78 @@
       await initSidebar('lobby',userMod);loadGames();checkActive();
     }
     window.selMode=(m)=>{mode=m;document.querySelectorAll('.mode').forEach(c=>c.classList.toggle('sel',c.dataset.m===m))};
-    window.createGame=async()=>{const btn=document.getElementById('createBtn');btn.disabled=true;btn.textContent='Creating...';try{const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='';for(let i=0;i<6;i++)code+=chars[Math.floor(Math.random()*chars.length)];const maxP={party:20,blitz:12,sprint:8,weekly:20};const title=mode[0].toUpperCase()+mode.slice(1)+' Game '+code;const{data:g,error}=await sb.from('mm_games').insert({title:title,game_code:code,status:'waiting_lobby',game_mode:mode,max_players:maxP[mode]||20,current_players:0,current_phase:'lobby',phase_started_at:new Date().toISOString()}).select().single();if(error){alert('Create error: '+error.message);btn.disabled=false;btn.textContent='Create Game';return}if(!g){alert('Game created but could not read it back. Check RLS policies.');btn.disabled=false;btn.textContent='Create Game';return}const{error:joinErr}=await sb.rpc('join_game',{p_game_id:g.id,p_user_id:user.id});if(joinErr)console.warn('join_game error:',joinErr.message);const aiCount={party:7,blitz:5,sprint:3,weekly:7}[mode]||5;sb.rpc('spawn_ai_for_game',{p_game_id:g.id,p_count:aiCount}).then(r=>{if(r.error)console.warn('AI spawn error:',r.error.message);else console.log('AI spawned:',r.data);loadWaitP(g.id)});curGame=g.id;showWait(g)}catch(e){alert('Error: '+e.message);console.error(e)}finally{btn.disabled=false;btn.textContent='Create Game'}};
+    window.createGame=async()=>{const btn=document.getElementById('createBtn');btn.disabled=true;btn.textContent='Creating...';try{
+      const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='';for(let i=0;i<6;i++)code+=chars[Math.floor(Math.random()*chars.length)];
+      const maxP={party:20,blitz:12,sprint:8,weekly:20};
+      const title=mode[0].toUpperCase()+mode.slice(1)+' Game '+code;
+
+      // 1. Create game
+      const{data:g,error}=await sb.from('mm_games').insert({title:title,game_code:code,status:'waiting_lobby',game_mode:mode,max_players:maxP[mode]||20,current_players:0,current_phase:'lobby',phase_started_at:new Date().toISOString()}).select().single();
+      if(error){alert('Create error: '+error.message);return}
+      if(!g){alert('Game created but could not read it back.');return}
+      console.log('Game created:',g.id);
+
+      // 2. Join player
+      const{error:joinErr}=await sb.rpc('join_game',{p_game_id:g.id,p_user_id:user.id});
+      if(joinErr)console.warn('join_game error:',joinErr.message);
+
+      // 3. Spawn AI cast to fill lobby
+      const aiCount={party:7,blitz:5,sprint:3,weekly:7}[mode]||5;
+      const{data:aiRes,error:aiErr}=await sb.rpc('spawn_ai_for_game',{p_game_id:g.id,p_count:aiCount});
+      if(aiErr)console.warn('AI spawn error:',aiErr.message);
+      else console.log('AI spawned:',aiRes);
+
+      // 4. Schedule lobby_check recurring event for the cron processor
+      await sb.from('game_events').insert([
+        {game_id:g.id,event_type:'lobby_check',scheduled_for:new Date(Date.now()+10000).toISOString(),priority:7,is_recurring:true,recurring_interval:'00:01:00',payload:{mode:mode},status:'scheduled'},
+        {game_id:g.id,event_type:'lobby_fill',scheduled_for:new Date().toISOString(),priority:8,is_recurring:false,payload:{mode:mode},status:'scheduled'}
+      ]).then(r=>{if(r.error)console.warn('Event insert error:',r.error.message)});
+
+      // 5. Try direct lobby check to start game immediately (if enough players)
+      const{data:lobbyRes,error:lobbyErr}=await sb.rpc('handle_event_lobby_check',{p_game_id:g.id,p_payload:{mode:mode}});
+      console.log('Lobby check result:',lobbyRes,lobbyErr?.message);
+
+      // 6. If game started, schedule episode phases
+      if(lobbyRes?.action==='game_started'){
+        console.log('Game started! Scheduling episode...');
+        const{data:epRes,error:epErr}=await sb.rpc('schedule_episode_events',{p_game_id:g.id,p_episode_number:1,p_mode:mode});
+        if(epErr)console.warn('Episode schedule error:',epErr.message);
+        else console.log('Episode scheduled:',epRes);
+      }
+
+      curGame=g.id;showWait(g);
+    }catch(e){alert('Error: '+e.message);console.error(e)}finally{btn.disabled=false;btn.textContent='Create Game'}};
     window.joinGame=async()=>{const code=document.getElementById('joinCode').value.trim().toUpperCase();if(code.length!==6){alert('Enter 6-char code');return}const{data:g}=await sb.from('mm_games').select('*').eq('game_code',code).in('status',['waiting_lobby','active_lobby','recruiting']).maybeSingle();if(!g){alert('Game not found');return}await sb.rpc('join_game',{p_game_id:g.id,p_user_id:user.id}).catch(()=>{});curGame=g.id;showWait(g)};
     window.joinOpen=async(id)=>{await sb.rpc('join_game',{p_game_id:id,p_user_id:user.id}).catch(()=>{});const{data:g}=await sb.from('mm_games').select('*').eq('id',id).single();if(g){curGame=id;showWait(g)}};
-    function showWait(g){document.getElementById('vMain').style.display='none';document.getElementById('vWait').style.display='block';document.getElementById('waitCode').textContent=g.game_code||'------';sb.channel('lob-'+g.id).on('postgres_changes',{event:'*',schema:'public',table:'mm_game_cast',filter:`game_id=eq.${g.id}`},()=>loadWaitP(g.id)).on('postgres_changes',{event:'UPDATE',schema:'public',table:'mm_games',filter:`id=eq.${g.id}`},(p)=>{if(p.new.status==='active')location.href=`/pages/episode-play.html?game=${g.id}`}).subscribe();loadWaitP(g.id)}
+    function showWait(g){document.getElementById('vMain').style.display='none';document.getElementById('vWait').style.display='block';document.getElementById('waitCode').textContent=g.game_code||'------';
+      // Check if already active
+      if(g.status==='active'){location.href=`/pages/episode-play.html?game=${g.id}`;return}
+      // Subscribe to realtime updates
+      sb.channel('lob-'+g.id).on('postgres_changes',{event:'*',schema:'public',table:'mm_game_cast',filter:`game_id=eq.${g.id}`},()=>loadWaitP(g.id)).on('postgres_changes',{event:'UPDATE',schema:'public',table:'mm_games',filter:`id=eq.${g.id}`},(p)=>{if(p.new.status==='active')location.href=`/pages/episode-play.html?game=${g.id}`}).subscribe();
+      // Poll game status every 5s as fallback (in case realtime misses the update)
+      const pollIv=setInterval(async()=>{const{data:gm}=await sb.from('mm_games').select('status').eq('id',g.id).single();if(gm?.status==='active'){clearInterval(pollIv);location.href=`/pages/episode-play.html?game=${g.id}`}},5000);
+      loadWaitP(g.id)}
     async function loadWaitP(gid){const{data}=await sb.from('mm_game_cast').select('*,cast_members(display_name,is_ai_player)').eq('game_id',gid);const el=document.getElementById('waitPlayers');if(!data)return;el.innerHTML=data.map(c=>`<div class="wait-p"><span class="wait-dot"></span>${c.cast_members?.display_name||'Player'}${c.cast_members?.is_ai_player?' 🤖':''}</div>`).join('');document.getElementById('waitStatus').textContent=`${data.length} player${data.length!==1?'s':''} in lobby`}
+    window.startGame=async()=>{if(!curGame)return;const btn=document.getElementById('startBtn');btn.disabled=true;btn.textContent='Starting...';try{
+      // Force lobby check (transitions game to active if enough players)
+      const{data:lr,error:le}=await sb.rpc('handle_event_lobby_check',{p_game_id:curGame,p_payload:{mode:mode}});
+      console.log('Lobby check:',lr,le?.message);
+      if(lr?.action==='game_started'){
+        // Schedule episode phases
+        const{data:er,error:ee}=await sb.rpc('schedule_episode_events',{p_game_id:curGame,p_episode_number:1,p_mode:mode});
+        console.log('Episode scheduled:',er,ee?.message);
+        location.href=`/pages/episode-play.html?game=${curGame}`;return;
+      }
+      // If lobby_check didn't start it (not enough players), force-start with direct update
+      const{data:castCount}=await sb.from('mm_game_cast').select('id',{count:'exact',head:true}).eq('game_id',curGame);
+      await sb.from('mm_games').update({status:'active',started_at:new Date().toISOString(),current_phase:'arrival',phase_started_at:new Date().toISOString(),current_week:1}).eq('id',curGame);
+      // Cancel lobby events
+      await sb.from('game_events').update({status:'cancelled'}).eq('game_id',curGame).in('event_type',['lobby_check','lobby_fill']).eq('status','scheduled');
+      // Schedule episode
+      const{data:er2,error:ee2}=await sb.rpc('schedule_episode_events',{p_game_id:curGame,p_episode_number:1,p_mode:mode});
+      console.log('Episode scheduled (force):',er2,ee2?.message);
+      location.href=`/pages/episode-play.html?game=${curGame}`;
+    }catch(e){alert('Start error: '+e.message);console.error(e)}finally{btn.disabled=false;btn.textContent='🎬 Start Game'}};
     window.leaveGame=()=>{curGame=null;document.getElementById('vMain').style.display='block';document.getElementById('vWait').style.display='none'};
     async function loadGames(){const{data}=await sb.from('mm_games').select('*').in('status',['waiting_lobby','active_lobby','recruiting']).order('created_at',{ascending:false}).limit(10);const el=document.getElementById('gamesList');if(!data?.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏰</div>No open games. Create one!</div>';return}const mc={party:'var(--pink)',blitz:'var(--gold)',sprint:'var(--cyan)',weekly:'var(--purple)'};const mi={party:'🎉',blitz:'⚡',sprint:'🏃',weekly:'📅'};el.innerHTML=data.map(g=>`<div class="game-row" onclick="joinOpen('${g.id}')"><div class="game-dot" style="background:${mc[g.game_mode]||'var(--text3)'}"></div><div class="game-info"><div class="game-nm">${mi[g.game_mode]||'🎮'} ${(g.game_mode||'party')[0].toUpperCase()+(g.game_mode||'').slice(1)}</div><div class="game-sub">Code: ${g.game_code||'???'}</div></div><div class="game-ct">${g.current_players||0}/${g.max_players||20}</div></div>`).join('')}
     async function checkActive(){const{data:cms}=await sb.from('cast_members').select('id').eq('user_id',user.id);if(!cms?.length)return;const{data:ag}=await sb.from('mm_game_cast').select('game_id,mm_games(id,status,game_code,current_phase)').in('cast_member_id',cms.map(c=>c.id)).eq('status','active');if(!ag)return;for(const a of ag){const g=a.mm_games;if(!g)continue;if(g.status==='active'&&g.current_phase!=='lobby'){location.href=`/pages/episode-play.html?game=${g.id}`;return}if(['waiting_lobby','active_lobby'].includes(g.status)){curGame=g.id;showWait(g);return}}}

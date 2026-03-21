@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Season Dashboard — Mansion Mayhem</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/config.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/season-api.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0A0610;--card:#1a0e18;--border:#2D1B4E;--pink:#FF1493;--blue:#00BFFF;--purple:#9B30FF;--gold:#FFD700;--red:#E94560;--green:#22c55e;--text:#F8F4F0;--muted:rgba(255,255,255,.4)}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;padding-bottom:80px}
+.header{padding:20px;text-align:center;border-bottom:1px solid var(--border)}
+.header h1{font-family:'Playfair Display',serif;font-size:1.8rem;background:linear-gradient(135deg,var(--pink),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.meta{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.back-link{display:inline-block;margin:12px 20px;font-size:.75rem;color:var(--gold);text-decoration:none}
+.container{max-width:800px;margin:0 auto;padding:0 16px}
+
+/* Check-in */
+.checkin{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2);border-radius:12px;padding:24px;text-align:center;margin:16px 0}
+.checkin.done{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)}
+.checkin-icon{font-size:32px;margin-bottom:6px}
+.checkin-title{font-size:18px;font-weight:700}
+.checkin-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.checkin-result{font-size:14px;color:var(--gold);font-weight:600;margin-top:8px}
+.checkin-btn{margin-top:12px;padding:10px 32px;background:linear-gradient(135deg,var(--pink),var(--gold));border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase}
+.checkin-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 8px;text-align:center}
+.stat-val{font-size:22px;font-weight:700;color:var(--gold)}
+.stat-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-top:2px}
+
+/* Rooms */
+.section-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--pink);margin:24px 0 12px;padding-left:4px}
+.rooms{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.room{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px}
+.room.master{border-color:rgba(255,215,0,.3)}
+.room.exile{border-color:rgba(102,102,102,.3)}
+.room-name{font-size:13px;font-weight:700}
+.room-theme{font-size:10px;color:var(--muted);text-transform:capitalize}
+.room-occ{font-size:11px;color:var(--pink);margin-top:4px}
+
+/* Events */
+.event{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:8px;padding:10px 12px;margin-bottom:6px;border-left:3px solid var(--gold)}
+.event.active{border-left-color:var(--green)}
+.event.completed{border-left-color:var(--muted);opacity:.5}
+.event-time{font-size:11px;color:var(--gold);min-width:50px}
+.event-title{font-size:13px;font-weight:600}
+.event-type{font-size:10px;color:var(--muted)}
+.event-status{font-size:11px;margin-left:auto}
+
+/* Leaderboard */
+.lb-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;margin-bottom:4px}
+.lb-row:nth-child(-n+3){background:rgba(255,215,0,.04)}
+.lb-rank{font-size:14px;min-width:28px;text-align:center}
+.lb-name{flex:1;font-size:14px;font-weight:600}
+.lb-xp{font-size:12px;color:var(--gold);font-weight:600}
+
+/* Crew */
+.crew-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.crew-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.crew-name{font-size:12px;font-weight:700}
+.crew-role{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.crew-phrase{font-size:10px;color:var(--muted);font-style:italic;margin-top:4px}
+
+.empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+.join-section{text-align:center;padding:40px 20px}
+.join-input{padding:10px 16px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:14px;width:200px;text-align:center;margin:8px}
+.join-btn{padding:10px 32px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+</style>
+</head>
+<body>
+<a href="lobby.html" class="back-link">← Back to Lobby</a>
+<div class="header">
+  <div style="font-size:32px">👑</div>
+  <h1 id="seasonTitle">Season Dashboard</h1>
+  <div class="meta" id="seasonMeta">Loading...</div>
+</div>
+
+<div class="container">
+  <!-- Not in season -->
+  <div id="joinSection" class="join-section" style="display:none">
+    <div style="font-size:24px;margin-bottom:8px">🏠</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:4px">Join the Season</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Enter your display name to join</div>
+    <input type="text" id="joinName" class="join-input" placeholder="Your name">
+    <br>
+    <button class="join-btn" onclick="Page.join()">JOIN SEASON</button>
+  </div>
+
+  <!-- In season -->
+  <div id="seasonContent" style="display:none">
+    <!-- Check-in -->
+    <div class="checkin" id="checkinCard">
+      <div class="checkin-icon" id="checkinIcon">🔥</div>
+      <div class="checkin-title" id="checkinTitle">Daily Check-In</div>
+      <div class="checkin-sub" id="checkinSub">Earn XP and build your streak</div>
+      <div class="checkin-result" id="checkinResult" style="display:none"></div>
+      <button class="checkin-btn" id="checkinBtn" onclick="Page.checkIn()">CHECK IN NOW</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats" id="statsRow">
+      <div class="stat"><div class="stat-val" id="statXP">0</div><div class="stat-lbl">XP</div></div>
+      <div class="stat"><div class="stat-val" id="statStreak">0</div><div class="stat-lbl">Streak</div></div>
+      <div class="stat"><div class="stat-val" id="statShards">0</div><div class="stat-lbl">Shards</div></div>
+      <div class="stat"><div class="stat-val" id="statCrowns">0</div><div class="stat-lbl">Crowns</div></div>
+    </div>
+
+    <!-- Events -->
+    <div class="section-title">Today's Schedule</div>
+    <div id="eventsList"><div class="empty">Loading events...</div></div>
+
+    <!-- Bedrooms -->
+    <div class="section-title">Bedrooms</div>
+    <div class="rooms" id="roomsGrid"><div class="empty">Loading rooms...</div></div>
+
+    <!-- Leaderboard -->
+    <div class="section-title">Leaderboard</div>
+    <div id="leaderboard"><div class="empty">Loading...</div></div>
+
+    <!-- AI Crew -->
+    <div class="section-title">Mansion Crew</div>
+    <div class="crew-grid" id="crewGrid"><div class="empty">Loading...</div></div>
+  </div>
+
+  <div id="noSeason" style="display:none">
+    <div class="empty" style="padding:60px">No active season. Check back soon!</div>
+  </div>
+</div>
+
+<script>
+const Page = {
+  season: null,
+  seasonId: null,
+
+  async init() {
+    const sb = getSupabase();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { window.location.href = '../index.html'; return; }
+
+    const status = await SeasonAPI.getStatus();
+    this.season = status;
+
+    if (!status.active) {
+      document.getElementById('noSeason').style.display = 'block';
+      document.getElementById('seasonMeta').textContent = 'No active season';
+      return;
+    }
+
+    this.seasonId = status.season.id;
+    document.getElementById('seasonTitle').textContent = status.season.title;
+    const dayType = (status.day?.day_type || 'unknown').replace('_', ' ');
+    document.getElementById('seasonMeta').textContent =
+      `Week ${status.week?.week_number || '?'} · Day ${status.day?.day_number || '?'} · ${dayType.toUpperCase()}`;
+
+    // Check if in season
+    const inSeason = await SeasonAPI.isInSeason(this.seasonId);
+    if (!inSeason) {
+      document.getElementById('joinSection').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('seasonContent').style.display = 'block';
+    await this.loadAll();
+  },
+
+  async loadAll() {
+    await Promise.all([
+      this.loadStats(),
+      this.loadEvents(),
+      this.loadRooms(),
+      this.loadLeaderboard(),
+      this.loadCrew(),
+      this.checkIfCheckedIn(),
+    ]);
+  },
+
+  async loadStats() {
+    const sb = getSupabase();
+    const { data: { user } } = await sb.auth.getUser();
+    const { data: stats } = await sb.from('season_players').select('*')
+      .eq('season_id', this.seasonId).eq('player_id', user.id).single();
+    if (!stats) return;
+    document.getElementById('statXP').textContent = stats.xp;
+    document.getElementById('statStreak').textContent = stats.streak_days;
+    document.getElementById('statShards').textContent = stats.immunity_shards;
+    document.getElementById('statCrowns').textContent = stats.queen_crowns;
+  },
+
+  async checkIfCheckedIn() {
+    const sb = getSupabase();
+    const { data: { user } } = await sb.auth.getUser();
+    const { data: day } = await sb.from('season_days').select('id')
+      .eq('season_id', this.seasonId).eq('status', 'active').single();
+    if (!day) return;
+    const { data } = await sb.from('daily_checkins').select('id')
+      .eq('season_id', this.seasonId).eq('player_id', user.id).eq('day_id', day.id).maybeSingle();
+    if (data) this.showCheckedIn();
+  },
+
+  async checkIn() {
+    const btn = document.getElementById('checkinBtn');
+    btn.disabled = true; btn.textContent = 'CHECKING IN...';
+    try {
+      const result = await SeasonAPI.checkIn(this.seasonId);
+      if (result.already_checked_in) { this.showCheckedIn(); return; }
+      this.showCheckedIn();
+      const msg = result.immunity_shard_awarded
+        ? `+${result.xp_earned} XP · ${result.streak} day streak · 🛡️ IMMUNITY SHARD!`
+        : `+${result.xp_earned} XP · ${result.streak} day streak`;
+      document.getElementById('checkinResult').textContent = msg;
+      document.getElementById('checkinResult').style.display = 'block';
+      await this.loadStats();
+    } catch (e) { btn.disabled = false; btn.textContent = 'CHECK IN NOW'; alert('Error: ' + e.message); }
+  },
+
+  showCheckedIn() {
+    const card = document.getElementById('checkinCard');
+    card.classList.add('done');
+    document.getElementById('checkinIcon').textContent = '✅';
+    document.getElementById('checkinTitle').textContent = 'Checked in today!';
+    document.getElementById('checkinSub').textContent = '';
+    document.getElementById('checkinBtn').style.display = 'none';
+  },
+
+  async loadEvents() {
+    const events = await SeasonAPI.getEvents(this.seasonId);
+    const el = document.getElementById('eventsList');
+    if (!events.length) { el.innerHTML = '<div class="empty">No events today</div>'; return; }
+    el.innerHTML = events.map(e => {
+      const time = new Date(e.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `<div class="event ${e.status}">
+        <div class="event-time">${time}</div>
+        <div><div class="event-title">${e.title}</div><div class="event-type">${e.event_type.replace(/_/g,' ')} · ${e.duration_minutes}min</div></div>
+        <div class="event-status">${e.status === 'active' ? '🔴 LIVE' : e.status === 'completed' ? '✓' : '⏳'}</div>
+      </div>`;
+    }).join('');
+  },
+
+  async loadRooms() {
+    const rooms = await SeasonAPI.getRooms(this.seasonId);
+    const el = document.getElementById('roomsGrid');
+    if (!rooms.length) { el.innerHTML = '<div class="empty">No rooms</div>'; return; }
+    el.innerHTML = rooms.map(r => {
+      const names = r.occupants.map(o => o.display_name).join(' & ') || 'Empty';
+      const cls = r.is_master_suite ? 'master' : r.is_exile_room ? 'exile' : '';
+      return `<div class="room ${cls}">
+        <div class="room-name" style="color:${r.accent_color}">${r.is_master_suite?'👑 ':''}${r.is_exile_room?'🐕 ':''}${r.room_name}</div>
+        <div class="room-theme">${r.theme.replace('_',' ')} · ${r.occupants.length}/${r.capacity}</div>
+        <div class="room-occ">${names}</div>
+      </div>`;
+    }).join('');
+  },
+
+  async loadLeaderboard() {
+    const players = await SeasonAPI.getPlayers(this.seasonId);
+    const el = document.getElementById('leaderboard');
+    const top = players.filter(p => p.status === 'active').slice(0, 10);
+    if (!top.length) { el.innerHTML = '<div class="empty">No players yet</div>'; return; }
+    el.innerHTML = top.map((p, i) => `<div class="lb-row">
+      <div class="lb-rank">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1)}</div>
+      <div class="lb-name" style="color:${p.accent_color || '#fff'}">${p.display_name}</div>
+      <div class="lb-xp">${p.xp} XP · ${p.streak_days}d</div>
+    </div>`).join('');
+  },
+
+  async loadCrew() {
+    const crew = await SeasonAPI.getCrew();
+    const el = document.getElementById('crewGrid');
+    if (!crew.length) { el.innerHTML = '<div class="empty">No crew</div>'; return; }
+    el.innerHTML = crew.map(c => {
+      const phrases = JSON.parse(typeof c.catchphrases === 'string' ? c.catchphrases : JSON.stringify(c.catchphrases || []));
+      const phrase = phrases[Math.floor(Math.random() * phrases.length)] || '';
+      return `<div class="crew-card">
+        <div class="crew-name" style="color:${c.accent_color}">${c.crew_name}</div>
+        <div class="crew-role">${c.crew_role.replace('_',' ')}</div>
+        <div class="crew-phrase">"${phrase}"</div>
+      </div>`;
+    }).join('');
+  },
+
+  async join() {
+    const name = document.getElementById('joinName').value.trim();
+    if (!name) { alert('Enter your name'); return; }
+    try {
+      await SeasonAPI.joinSeason(this.seasonId, name);
+      document.getElementById('joinSection').style.display = 'none';
+      document.getElementById('seasonContent').style.display = 'block';
+      await this.loadAll();
+    } catch (e) { alert('Error: ' + e.message); }
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => Page.init());
+</script>
+</body>
+</html>

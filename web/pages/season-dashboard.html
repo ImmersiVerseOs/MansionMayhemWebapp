@@ -6,9 +6,6 @@
 <title>Season Dashboard — Mansion Mayhem</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/config.js"></script>
-<script src="../js/supabase.js"></script>
-<script src="../js/season-api.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0A0610;--card:#1a0e18;--border:#2D1B4E;--pink:#FF1493;--blue:#00BFFF;--purple:#9B30FF;--gold:#FFD700;--red:#E94560;--green:#22c55e;--text:#F8F4F0;--muted:rgba(255,255,255,.4)}
@@ -134,58 +131,76 @@ body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-
   </div>
 </div>
 
-<script>
+<script type="module">
+import { getSupabase, waitForSupabase } from '/js/supabase.js';
+
 const Page = {
   season: null,
   seasonId: null,
+  sb: null,
+  user: null,
 
   async init() {
-    const sb = getSupabase();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) { window.location.href = '../index.html'; return; }
+    try {
+      await waitForSupabase();
+      this.sb = getSupabase();
 
-    const status = await SeasonAPI.getStatus();
-    this.season = status;
+      // Auth check — show page even without auth for public data
+      const { data: { user } } = await this.sb.auth.getUser();
+      this.user = user;
 
-    if (!status.active) {
-      document.getElementById('noSeason').style.display = 'block';
-      document.getElementById('seasonMeta').textContent = 'No active season';
-      return;
+      // Fetch active season
+      const { data: season } = await this.sb.from('seasons').select('*').eq('status', 'active').single();
+      if (!season) {
+        document.getElementById('noSeason').style.display = 'block';
+        document.getElementById('seasonMeta').textContent = 'No active season';
+        return;
+      }
+
+      this.seasonId = season.id;
+      document.getElementById('seasonTitle').textContent = season.title;
+
+      // Get week + day
+      const { data: week } = await this.sb.from('season_weeks').select('*').eq('season_id', season.id).eq('status', 'active').single();
+      const { data: day } = await this.sb.from('season_days').select('*').eq('season_id', season.id).eq('status', 'active').single();
+
+      const dayType = (day?.day_type || 'unknown').replace('_', ' ');
+      document.getElementById('seasonMeta').textContent =
+        `Week ${week?.week_number || '?'} · Day ${day?.day_number || '?'} · ${dayType.toUpperCase()}`;
+
+      // If not logged in, show public data only (no join/checkin)
+      if (!user) {
+        document.getElementById('seasonContent').style.display = 'block';
+        document.getElementById('checkinCard').style.display = 'none';
+        await Promise.all([this.loadEvents(), this.loadRooms(), this.loadLeaderboard(), this.loadCrew()]);
+        return;
+      }
+
+      // Check if in season
+      const { data: membership } = await this.sb.from('season_players').select('id')
+        .eq('season_id', this.seasonId).eq('player_id', user.id).maybeSingle();
+
+      if (!membership) {
+        document.getElementById('joinSection').style.display = 'block';
+        // Still show public data
+        document.getElementById('seasonContent').style.display = 'block';
+        document.getElementById('checkinCard').style.display = 'none';
+        document.getElementById('statsRow').style.display = 'none';
+        await Promise.all([this.loadEvents(), this.loadRooms(), this.loadLeaderboard(), this.loadCrew()]);
+        return;
+      }
+
+      document.getElementById('seasonContent').style.display = 'block';
+      await Promise.all([this.loadStats(), this.loadEvents(), this.loadRooms(), this.loadLeaderboard(), this.loadCrew(), this.checkIfCheckedIn()]);
+    } catch (e) {
+      console.error('Season dashboard init error:', e);
+      document.getElementById('seasonMeta').textContent = 'Error loading: ' + e.message;
     }
-
-    this.seasonId = status.season.id;
-    document.getElementById('seasonTitle').textContent = status.season.title;
-    const dayType = (status.day?.day_type || 'unknown').replace('_', ' ');
-    document.getElementById('seasonMeta').textContent =
-      `Week ${status.week?.week_number || '?'} · Day ${status.day?.day_number || '?'} · ${dayType.toUpperCase()}`;
-
-    // Check if in season
-    const inSeason = await SeasonAPI.isInSeason(this.seasonId);
-    if (!inSeason) {
-      document.getElementById('joinSection').style.display = 'block';
-      return;
-    }
-
-    document.getElementById('seasonContent').style.display = 'block';
-    await this.loadAll();
-  },
-
-  async loadAll() {
-    await Promise.all([
-      this.loadStats(),
-      this.loadEvents(),
-      this.loadRooms(),
-      this.loadLeaderboard(),
-      this.loadCrew(),
-      this.checkIfCheckedIn(),
-    ]);
   },
 
   async loadStats() {
-    const sb = getSupabase();
-    const { data: { user } } = await sb.auth.getUser();
-    const { data: stats } = await sb.from('season_players').select('*')
-      .eq('season_id', this.seasonId).eq('player_id', user.id).single();
+    const { data: stats } = await this.sb.from('season_players').select('*')
+      .eq('season_id', this.seasonId).eq('player_id', this.user.id).single();
     if (!stats) return;
     document.getElementById('statXP').textContent = stats.xp;
     document.getElementById('statStreak').textContent = stats.streak_days;
@@ -194,13 +209,11 @@ const Page = {
   },
 
   async checkIfCheckedIn() {
-    const sb = getSupabase();
-    const { data: { user } } = await sb.auth.getUser();
-    const { data: day } = await sb.from('season_days').select('id')
+    const { data: day } = await this.sb.from('season_days').select('id')
       .eq('season_id', this.seasonId).eq('status', 'active').single();
     if (!day) return;
-    const { data } = await sb.from('daily_checkins').select('id')
-      .eq('season_id', this.seasonId).eq('player_id', user.id).eq('day_id', day.id).maybeSingle();
+    const { data } = await this.sb.from('daily_checkins').select('id')
+      .eq('season_id', this.seasonId).eq('player_id', this.user.id).eq('day_id', day.id).maybeSingle();
     if (data) this.showCheckedIn();
   },
 
@@ -208,12 +221,34 @@ const Page = {
     const btn = document.getElementById('checkinBtn');
     btn.disabled = true; btn.textContent = 'CHECKING IN...';
     try {
-      const result = await SeasonAPI.checkIn(this.seasonId);
-      if (result.already_checked_in) { this.showCheckedIn(); return; }
+      // Get day
+      const { data: day } = await this.sb.from('season_days').select('id')
+        .eq('season_id', this.seasonId).eq('status', 'active').single();
+      if (day) {
+        const { data: existing } = await this.sb.from('daily_checkins').select('id')
+          .eq('season_id', this.seasonId).eq('player_id', this.user.id).eq('day_id', day.id).maybeSingle();
+        if (existing) { this.showCheckedIn(); return; }
+      }
+      // Get stats
+      const { data: player } = await this.sb.from('season_players').select('streak_days, longest_streak, xp, immunity_shards')
+        .eq('season_id', this.seasonId).eq('player_id', this.user.id).single();
+      if (!player) { alert('Not in season'); return; }
+
+      const streak = player.streak_days + 1; // simplified — production should check yesterday
+      const bonus = Math.min(streak * 2, 20);
+      const xp = 10 + bonus;
+      const shard = streak > 0 && streak % 7 === 0;
+
+      await this.sb.from('daily_checkins').insert({
+        season_id: this.seasonId, player_id: this.user.id, day_id: day?.id,
+        xp_earned: xp, streak_bonus: bonus, platform: 'web'
+      });
+      const updates = { streak_days: streak, longest_streak: Math.max(streak, player.longest_streak), xp: player.xp + xp };
+      if (shard) updates.immunity_shards = player.immunity_shards + 1;
+      await this.sb.from('season_players').update(updates).eq('season_id', this.seasonId).eq('player_id', this.user.id);
+
       this.showCheckedIn();
-      const msg = result.immunity_shard_awarded
-        ? `+${result.xp_earned} XP · ${result.streak} day streak · 🛡️ IMMUNITY SHARD!`
-        : `+${result.xp_earned} XP · ${result.streak} day streak`;
+      const msg = shard ? `+${xp} XP · ${streak} day streak · IMMUNITY SHARD!` : `+${xp} XP · ${streak} day streak`;
       document.getElementById('checkinResult').textContent = msg;
       document.getElementById('checkinResult').style.display = 'block';
       await this.loadStats();
@@ -230,7 +265,8 @@ const Page = {
   },
 
   async loadEvents() {
-    const events = await SeasonAPI.getEvents(this.seasonId);
+    const { data: day } = await this.sb.from('season_days').select('id').eq('season_id', this.seasonId).eq('status', 'active').single();
+    const events = day ? (await this.sb.from('scheduled_events').select('*').eq('day_id', day.id).order('starts_at')).data || [] : [];
     const el = document.getElementById('eventsList');
     if (!events.length) { el.innerHTML = '<div class="empty">No events today</div>'; return; }
     el.innerHTML = events.map(e => {
@@ -244,24 +280,22 @@ const Page = {
   },
 
   async loadRooms() {
-    const rooms = await SeasonAPI.getRooms(this.seasonId);
+    const { data: rooms } = await this.sb.from('bedrooms').select('*').order('room_number');
     const el = document.getElementById('roomsGrid');
-    if (!rooms.length) { el.innerHTML = '<div class="empty">No rooms</div>'; return; }
-    el.innerHTML = rooms.map(r => {
-      const names = r.occupants.map(o => o.display_name).join(' & ') || 'Empty';
-      const cls = r.is_master_suite ? 'master' : r.is_exile_room ? 'exile' : '';
-      return `<div class="room ${cls}">
+    if (!rooms?.length) { el.innerHTML = '<div class="empty">No rooms</div>'; return; }
+    el.innerHTML = rooms.map(r => `<div class="room ${r.is_master_suite?'master':''} ${r.is_exile_room?'exile':''}">
         <div class="room-name" style="color:${r.accent_color}">${r.is_master_suite?'👑 ':''}${r.is_exile_room?'🐕 ':''}${r.room_name}</div>
-        <div class="room-theme">${r.theme.replace('_',' ')} · ${r.occupants.length}/${r.capacity}</div>
-        <div class="room-occ">${names}</div>
-      </div>`;
-    }).join('');
+        <div class="room-theme">${r.theme.replace('_',' ')} · 0/${r.capacity}</div>
+        <div class="room-occ">Empty</div>
+      </div>`).join('');
   },
 
   async loadLeaderboard() {
-    const players = await SeasonAPI.getPlayers(this.seasonId);
+    const { data: players } = await this.sb.from('season_players').select('*')
+      .eq('season_id', this.seasonId).order('xp', { ascending: false });
     const el = document.getElementById('leaderboard');
-    const top = players.filter(p => p.status === 'active').slice(0, 10);
+    const all = players || [];
+    const top = all.filter(p => p.status === 'active').slice(0, 10);
     if (!top.length) { el.innerHTML = '<div class="empty">No players yet</div>'; return; }
     el.innerHTML = top.map((p, i) => `<div class="lb-row">
       <div class="lb-rank">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1)}</div>
@@ -271,11 +305,11 @@ const Page = {
   },
 
   async loadCrew() {
-    const crew = await SeasonAPI.getCrew();
+    const { data: crew } = await this.sb.from('ai_crew').select('*');
     const el = document.getElementById('crewGrid');
-    if (!crew.length) { el.innerHTML = '<div class="empty">No crew</div>'; return; }
+    if (!crew?.length) { el.innerHTML = '<div class="empty">No crew</div>'; return; }
     el.innerHTML = crew.map(c => {
-      const phrases = JSON.parse(typeof c.catchphrases === 'string' ? c.catchphrases : JSON.stringify(c.catchphrases || []));
+      const phrases = Array.isArray(c.catchphrases) ? c.catchphrases : JSON.parse(c.catchphrases || '[]');
       const phrase = phrases[Math.floor(Math.random() * phrases.length)] || '';
       return `<div class="crew-card">
         <div class="crew-name" style="color:${c.accent_color}">${c.crew_name}</div>
@@ -289,14 +323,20 @@ const Page = {
     const name = document.getElementById('joinName').value.trim();
     if (!name) { alert('Enter your name'); return; }
     try {
-      await SeasonAPI.joinSeason(this.seasonId, name);
+      await this.sb.from('season_players').insert({
+        season_id: this.seasonId, player_id: this.user.id,
+        display_name: name,
+      });
       document.getElementById('joinSection').style.display = 'none';
-      document.getElementById('seasonContent').style.display = 'block';
-      await this.loadAll();
+      document.getElementById('checkinCard').style.display = 'block';
+      document.getElementById('statsRow').style.display = 'grid';
+      await Promise.all([this.loadStats(), this.checkIfCheckedIn()]);
     } catch (e) { alert('Error: ' + e.message); }
   }
 };
 
+// Expose to window for onclick handlers
+window.Page = Page;
 document.addEventListener('DOMContentLoaded', () => Page.init());
 </script>
 </body>

@@ -131,8 +131,9 @@ body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-
   </div>
 </div>
 
-<script type="module">
-import { getSupabase, waitForSupabase } from '/js/supabase.js';
+<script>
+// Wait for Supabase CDN then init
+function _waitSB(){return new Promise(r=>{if(window.supabase)return r();const i=setInterval(()=>{if(window.supabase){clearInterval(i);r()}},100);setTimeout(()=>{clearInterval(i);r()},5000)})}
 
 const Page = {
   season: null,
@@ -142,11 +143,16 @@ const Page = {
 
   async init() {
     try {
-      await waitForSupabase();
-      this.sb = getSupabase();
+      await _waitSB();
+      if(!window.supabase?.createClient){document.getElementById('seasonMeta').textContent='Supabase failed to load';return;}
+      this.sb = window.supabase.createClient(
+        'https://fpxbhqibimekjhlumnmc.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZweGJocWliaW1la2pobHVtbm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMjUwODYsImV4cCI6MjA4NjYwMTA4Nn0.0BmbaObOERMZ5r4znb5BQbrGpB5lE5Fq6KnEzxA0YhY'
+      );
 
       // Auth check — show page even without auth for public data
-      const { data: { user } } = await this.sb.auth.getUser();
+      let user = null;
+      try { const r = await this.sb.auth.getUser(); user = r?.data?.user; } catch(e){}
       this.user = user;
 
       // Fetch active season
